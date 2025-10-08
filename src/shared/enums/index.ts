@@ -1,0 +1,19 @@
+export enum OrderStatus {
+  RECEIVED = 'RECEIVED',
+  IN_DIAGNOSIS = 'IN_DIAGNOSIS',
+  AWAITING_APPROVAL = 'AWAITING_APPROVAL',
+  IN_EXECUTION = 'IN_EXECUTION',
+  FINISHED = 'FINISHED',
+  DELIVERED = 'DELIVERED',
+}
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  MECHANIC = 'MECHANIC',
+  ATTENDANT = 'ATTENDANT',
+}
+
+export enum CustomerType {
+  INDIVIDUAL = 'INDIVIDUAL', // CPF
+  COMPANY = 'COMPANY', // CNPJ
+}
