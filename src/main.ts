@@ -44,18 +44,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/swagger', app, document);
 
-  // Health check endpoint
-  app.getHttpAdapter().get('/health', (req: unknown, res: any) => {
-    const response = res as {
-      status: (code: number) => { json: (data: any) => void };
-    };
-    response.status(200).json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-    });
-  });
-
   const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(`🚀 Application is running on: http://localhost:${port}`);
