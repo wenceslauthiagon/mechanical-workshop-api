@@ -1,5 +1,5 @@
-export * from './create-customer.dto';
-export * from './update-customer.dto';
+export * from './customer/create-customer.dto';
+export * from './customer/update-customer.dto';
 export * from './create-vehicle.dto';
 export * from './update-vehicle.dto';
 export * from './create-service.dto';

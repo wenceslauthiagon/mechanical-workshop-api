@@ -293,6 +293,51 @@ export class ServiceOrderService {
     return this.serviceOrderRepository.getStatusHistory(id);
   }
 
+  // Métodos para API pública
+  async findByOrderNumber(
+    orderNumber: string,
+  ): Promise<ServiceOrderResponseDto> {
+    const serviceOrder =
+      await this.serviceOrderRepository.findByOrderNumber(orderNumber);
+    if (!serviceOrder) {
+      throw new NotFoundException('Ordem de serviço não encontrada');
+    }
+    return this.mapToResponseDto(serviceOrder);
+  }
+
+  async findByCustomerDocument(
+    document: string,
+  ): Promise<ServiceOrderResponseDto[]> {
+    const customer = await this.customerRepository.findByDocument(document);
+    if (!customer) {
+      throw new NotFoundException('Cliente não encontrado');
+    }
+
+    const serviceOrders = await this.serviceOrderRepository.findByCustomerId(
+      customer.id,
+    );
+    return serviceOrders.map((serviceOrder) =>
+      this.mapToResponseDto(serviceOrder),
+    );
+  }
+
+  async findByVehiclePlate(
+    licensePlate: string,
+  ): Promise<ServiceOrderResponseDto[]> {
+    const vehicle =
+      await this.vehicleRepository.findByLicensePlate(licensePlate);
+    if (!vehicle) {
+      throw new NotFoundException('Veículo não encontrado');
+    }
+
+    const serviceOrders = await this.serviceOrderRepository.findByVehicleId(
+      vehicle.id,
+    );
+    return serviceOrders.map((serviceOrder) =>
+      this.mapToResponseDto(serviceOrder),
+    );
+  }
+
   private async generateOrderNumber(): Promise<string> {
     const year = new Date().getFullYear();
     const count = await this.serviceOrderRepository.countByYear(year);

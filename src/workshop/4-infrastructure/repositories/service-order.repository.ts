@@ -217,6 +217,49 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     });
   }
 
+  async findByOrderNumber(orderNumber: string) {
+    return this.prisma.serviceOrder.findUnique({
+      where: { orderNumber },
+      include: {
+        customer: true,
+        vehicle: true,
+        services: {
+          include: {
+            service: true,
+          },
+        },
+        parts: {
+          include: {
+            part: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findByVehicleId(vehicleId: string) {
+    return this.prisma.serviceOrder.findMany({
+      where: { vehicleId },
+      include: {
+        customer: true,
+        vehicle: true,
+        services: {
+          include: {
+            service: true,
+          },
+        },
+        parts: {
+          include: {
+            part: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   async delete(id: string) {
     return this.prisma.serviceOrder.delete({
       where: { id },

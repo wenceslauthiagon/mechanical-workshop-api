@@ -132,5 +132,11 @@ export interface IServiceOrderRepository {
 
   countByYear(year: number): Promise<number>;
 
+  findByOrderNumber(
+    orderNumber: string,
+  ): Promise<ServiceOrderWithRelations | null>;
+
+  findByVehicleId(vehicleId: string): Promise<ServiceOrderWithRelations[]>;
+
   delete(id: string): Promise<ServiceOrder>;
 }

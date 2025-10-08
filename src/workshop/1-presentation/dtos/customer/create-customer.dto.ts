@@ -6,7 +6,7 @@ import {
   IsEmail,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CustomerType } from '../../../shared/enums';
+import { CustomerType } from '@prisma/client';
 
 export class CreateCustomerDto {
   @ApiProperty({ description: 'Nome do cliente' })
