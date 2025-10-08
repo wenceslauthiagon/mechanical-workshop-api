@@ -20,14 +20,11 @@ import { CreateOrderService } from '../2-application/create-order.service';
 import { CreateCustomerDto, UpdateCustomerDto } from './dtos';
 
 @ApiTags('Customers')
-@Controller('api')
-export class WorkshopController {
+@Controller('customers')
+export class CustomerController {
   constructor(private readonly customerService: CreateOrderService) {}
 
-  // ================================
-  // CUSTOMER CRUD
-  // ================================
-  @Post('customers')
+  @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Criar novo cliente',
@@ -37,11 +34,11 @@ export class WorkshopController {
   @ApiResponse({ status: 201, description: 'Cliente criado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 409, description: 'Email ou documento já cadastrado' })
-  createCustomer(@Body() createCustomerDto: CreateCustomerDto) {
+  create(@Body() createCustomerDto: CreateCustomerDto) {
     return this.customerService.create(createCustomerDto);
   }
 
-  @Get('customers')
+  @Get()
   @ApiOperation({
     summary: 'Listar todos os clientes',
     description: 'Retorna lista completa de clientes cadastrados',
@@ -50,11 +47,11 @@ export class WorkshopController {
     status: 200,
     description: 'Lista de clientes retornada com sucesso',
   })
-  findAllCustomers() {
+  findAll() {
     return this.customerService.findAll();
   }
 
-  @Get('customers/:id')
+  @Get(':id')
   @ApiOperation({
     summary: 'Buscar cliente por ID',
     description: 'Retorna um cliente específico pelo seu ID',
@@ -62,11 +59,11 @@ export class WorkshopController {
   @ApiParam({ name: 'id', description: 'ID do cliente', example: 'uuid' })
   @ApiResponse({ status: 200, description: 'Cliente encontrado com sucesso' })
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
-  findOneCustomer(@Param('id') id: string) {
+  findOne(@Param('id') id: string) {
     return this.customerService.findOne(id);
   }
 
-  @Patch('customers/:id')
+  @Patch(':id')
   @ApiOperation({
     summary: 'Atualizar cliente',
     description: 'Atualiza dados de um cliente existente',
@@ -77,14 +74,14 @@ export class WorkshopController {
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
   @ApiResponse({ status: 409, description: 'Email ou documento já cadastrado' })
-  updateCustomer(
+  update(
     @Param('id') id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
     return this.customerService.update(id, updateCustomerDto);
   }
 
-  @Delete('customers/:id')
+  @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Remover cliente',
@@ -93,7 +90,7 @@ export class WorkshopController {
   @ApiParam({ name: 'id', description: 'ID do cliente', example: 'uuid' })
   @ApiResponse({ status: 204, description: 'Cliente removido com sucesso' })
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
-  removeCustomer(@Param('id') id: string) {
+  remove(@Param('id') id: string) {
     return this.customerService.remove(id);
   }
 }

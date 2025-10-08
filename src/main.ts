@@ -39,6 +39,12 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
+    .addTag('Customers', 'Gestão de clientes (CPF/CNPJ)')
+    .addTag('Vehicles', 'Gestão de veículos')
+    .addTag('Services', 'Gestão de serviços')
+    .addTag('Parts', 'Gestão de peças e insumos')
+    .addTag('Service Orders', 'Gestão de ordens de serviço')
+    .addTag('Health Check', 'Monitoramento da API')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

@@ -15,8 +15,10 @@ interface HealthCheckOptions {
 interface HealthResponse {
   status: string;
   timestamp: string;
-  uptime: number;
-  [key: string]: any;
+  uptime?: number;
+  service?: string;
+  version?: string;
+  environment?: string;
 }
 
 class HealthChecker {
