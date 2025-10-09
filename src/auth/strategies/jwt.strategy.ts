@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService, JwtPayload } from '../services/auth.service';
 import { ConfigService } from '@nestjs/config';
+import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -21,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.authService.validateJwtPayload(payload);
 
     if (!user) {
-      throw new UnauthorizedException('Token inválido');
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
     return user;

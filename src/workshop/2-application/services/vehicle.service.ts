@@ -9,6 +9,7 @@ import { CreateVehicleDto } from '../../1-presentation/dtos/vehicle/create-vehic
 import { UpdateVehicleDto } from '../../1-presentation/dtos/vehicle/update-vehicle.dto';
 import { VehicleResponseDto } from '../../1-presentation/dtos/vehicle/vehicle-response.dto';
 import { VehicleWithCustomer } from '../../3-domain/entities/vehicle.entity';
+import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 
 @Injectable()
 export class VehicleService {
@@ -21,7 +22,7 @@ export class VehicleService {
     // Verificar se cliente existe
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     // Verificar se placa já existe
@@ -29,7 +30,7 @@ export class VehicleService {
       data.licensePlate,
     );
     if (existingVehicle) {
-      throw new ConflictException('Placa já cadastrada no sistema');
+      throw new ConflictException(ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS);
     }
 
     const vehicle = await this.vehicleRepository.create(data);
@@ -44,7 +45,7 @@ export class VehicleService {
   async findById(id: string): Promise<VehicleResponseDto> {
     const vehicle = await this.vehicleRepository.findById(id);
     if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
     return this.mapToResponseDto(vehicle);
   }
@@ -53,7 +54,7 @@ export class VehicleService {
     // Verificar se cliente existe
     const customer = await this.customerRepository.findById(customerId);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     const vehicles = await this.vehicleRepository.findByCustomerId(customerId);
@@ -64,7 +65,7 @@ export class VehicleService {
     const vehicle =
       await this.vehicleRepository.findByLicensePlate(licensePlate);
     if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
     return this.mapToResponseDto(vehicle);
   }
@@ -75,14 +76,14 @@ export class VehicleService {
   ): Promise<VehicleResponseDto> {
     const vehicle = await this.vehicleRepository.findById(id);
     if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
     // Se está mudando o cliente, verificar se o novo cliente existe
     if (data.customerId && data.customerId !== vehicle.customerId) {
       const customer = await this.customerRepository.findById(data.customerId);
       if (!customer) {
-        throw new NotFoundException('Cliente não encontrado');
+        throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
       }
     }
 
@@ -92,7 +93,9 @@ export class VehicleService {
         data.licensePlate,
       );
       if (existingVehicle) {
-        throw new ConflictException('Placa já cadastrada no sistema');
+        throw new ConflictException(
+          ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -103,15 +106,13 @@ export class VehicleService {
   async remove(id: string): Promise<void> {
     const vehicle = await this.vehicleRepository.findById(id);
     if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
     // Verificar se veículo tem ordens de serviço
     const hasServiceOrders = await this.vehicleRepository.hasServiceOrders(id);
     if (hasServiceOrders) {
-      throw new ConflictException(
-        'Não é possível remover veículo com ordens de serviço vinculadas',
-      );
+      throw new ConflictException(ERROR_MESSAGES.VEHICLE_HAS_SERVICE_ORDERS);
     }
 
     await this.vehicleRepository.delete(id);

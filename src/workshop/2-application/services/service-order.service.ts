@@ -13,6 +13,10 @@ import { VehicleRepository } from '../../4-infrastructure/repositories/vehicle.r
 import { ServiceRepository } from '../../4-infrastructure/repositories/service.repository';
 import { PartRepository } from '../../4-infrastructure/repositories/part.repository';
 import { ServiceOrderWithRelations } from '../../3-domain/repositories/service-order.repository.interface';
+import {
+  ERROR_MESSAGES,
+  NOTES_MESSAGES,
+} from '../../../shared/constants/messages.constants';
 
 @Injectable()
 export class ServiceOrderService {
@@ -25,24 +29,21 @@ export class ServiceOrderService {
   ) {}
 
   async create(data: CreateServiceOrderDto): Promise<ServiceOrderResponseDto> {
-    // Validar se cliente existe
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
-    // Validar se veículo existe e pertence ao cliente
     const vehicle = await this.vehicleRepository.findById(data.vehicleId);
     if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
     if (vehicle.customerId !== data.customerId) {
       throw new BadRequestException(
-        'Veículo não pertence ao cliente informado',
+        ERROR_MESSAGES.VEHICLE_NOT_BELONGS_TO_CLIENT,
       );
     }
 
-    // Validar serviços se informados
     if (data.services && data.services.length > 0) {
       for (const serviceItem of data.services) {
         const service = await this.serviceRepository.findById(
@@ -61,28 +62,28 @@ export class ServiceOrderService {
       }
     }
 
-    // Validar peças se informadas
     if (data.parts && data.parts.length > 0) {
       for (const partItem of data.parts) {
         const part = await this.partRepository.findById(partItem.partId);
         if (!part) {
-          throw new NotFoundException(`Peça ${partItem.partId} não encontrada`);
+          throw new NotFoundException(
+            `${ERROR_MESSAGES.PART_NOT_FOUND}: ${partItem.partId}`,
+          );
         }
         if (!part.isActive) {
-          throw new BadRequestException(`Peça ${part.name} não está ativa`);
+          throw new BadRequestException(
+            `${ERROR_MESSAGES.PART_NOT_ACTIVE}: ${part.name}`,
+          );
         }
         if (part.stock < partItem.quantity) {
           throw new BadRequestException(
-            `Estoque insuficiente para a peça ${part.name}. Disponível: ${part.stock}, Solicitado: ${partItem.quantity}`,
+            `${ERROR_MESSAGES.INSUFFICIENT_STOCK_FOR_PART} ${part.name}. Disponível: ${part.stock}, Solicitado: ${partItem.quantity}`,
           );
         }
       }
     }
 
-    // Gerar número único da OS
     const orderNumber = await this.generateOrderNumber();
-
-    // Calcular preços e tempo estimado
     let totalServicePrice = 0;
     let totalPartsPrice = 0;
     let estimatedTimeHours = 0;
@@ -100,11 +101,9 @@ export class ServiceOrderService {
       estimatedCompletionDate: new Date(),
     };
 
-    // Criar a ordem de serviço
     const serviceOrder =
       await this.serviceOrderRepository.create(serviceOrderData);
 
-    // Adicionar serviços se informados
     if (data.services && data.services.length > 0) {
       for (const serviceItem of data.services) {
         const service = await this.serviceRepository.findById(
@@ -125,7 +124,6 @@ export class ServiceOrderService {
       }
     }
 
-    // Adicionar peças se informadas
     if (data.parts && data.parts.length > 0) {
       for (const partItem of data.parts) {
         const part = await this.partRepository.findById(partItem.partId);
@@ -140,7 +138,6 @@ export class ServiceOrderService {
           totalPrice: itemTotalPrice,
         });
 
-        // Atualizar estoque da peça
         await this.partRepository.updateStock(
           partItem.partId,
           part!.stock - partItem.quantity,
@@ -148,14 +145,13 @@ export class ServiceOrderService {
       }
     }
 
-    // Calcular data estimada de conclusão (baseado nas horas estimadas + buffer de 20%)
+    // Calcular data estimada com buffer de 20%
     const estimatedCompletionDate = new Date();
-    const totalHoursWithBuffer = estimatedTimeHours * 1.2; // 20% de buffer
+    const totalHoursWithBuffer = estimatedTimeHours * 1.2;
     estimatedCompletionDate.setHours(
       estimatedCompletionDate.getHours() + totalHoursWithBuffer,
     );
 
-    // Atualizar totais da OS
     const totalPrice = totalServicePrice + totalPartsPrice;
     await this.serviceOrderRepository.updateTotals(serviceOrder.id, {
       totalServicePrice,
@@ -165,14 +161,12 @@ export class ServiceOrderService {
       estimatedCompletionDate,
     });
 
-    // Registrar histórico de status
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: serviceOrder.id,
       status: ServiceOrderStatus.RECEIVED,
-      notes: 'Ordem de serviço criada',
+      notes: NOTES_MESSAGES.SERVICE_ORDER_CREATED,
     });
 
-    // Retornar a OS completa
     return this.findById(serviceOrder.id);
   }
 
@@ -186,7 +180,7 @@ export class ServiceOrderService {
   async findById(id: string): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      throw new NotFoundException('Ordem de serviço não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
     return this.mapToResponseDto(serviceOrder);
   }
@@ -194,7 +188,7 @@ export class ServiceOrderService {
   async findByCustomer(customerId: string): Promise<ServiceOrderResponseDto[]> {
     const customer = await this.customerRepository.findById(customerId);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     const serviceOrders =
@@ -210,7 +204,7 @@ export class ServiceOrderService {
   ): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      throw new NotFoundException('Ordem de serviço não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
 
     // Validar transição de status
@@ -259,12 +253,12 @@ export class ServiceOrderService {
   async approveOrder(id: string): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      throw new NotFoundException('Ordem de serviço não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
 
     if (serviceOrder.status !== ServiceOrderStatus.AWAITING_APPROVAL) {
       throw new BadRequestException(
-        'Ordem de serviço não está aguardando aprovação',
+        ERROR_MESSAGES.SERVICE_ORDER_NOT_AWAITING_APPROVAL,
       );
     }
 
@@ -278,7 +272,7 @@ export class ServiceOrderService {
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: id,
       status: ServiceOrderStatus.IN_EXECUTION,
-      notes: 'Orçamento aprovado pelo cliente - Iniciando execução',
+      notes: NOTES_MESSAGES.BUDGET_APPROVED_EXECUTION_STARTED,
     });
 
     return this.findById(id);
@@ -287,7 +281,7 @@ export class ServiceOrderService {
   async getStatusHistory(id: string) {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      throw new NotFoundException('Ordem de serviço não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
 
     return this.serviceOrderRepository.getStatusHistory(id);
@@ -300,7 +294,7 @@ export class ServiceOrderService {
     const serviceOrder =
       await this.serviceOrderRepository.findByOrderNumber(orderNumber);
     if (!serviceOrder) {
-      throw new NotFoundException('Ordem de serviço não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
     return this.mapToResponseDto(serviceOrder);
   }
@@ -310,7 +304,7 @@ export class ServiceOrderService {
   ): Promise<ServiceOrderResponseDto[]> {
     const customer = await this.customerRepository.findByDocument(document);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     const serviceOrders = await this.serviceOrderRepository.findByCustomerId(
@@ -327,7 +321,7 @@ export class ServiceOrderService {
     const vehicle =
       await this.vehicleRepository.findByLicensePlate(licensePlate);
     if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
     const serviceOrders = await this.serviceOrderRepository.findByVehicleId(

@@ -54,11 +54,11 @@ export class AppConfigService {
     }
 
     return {
-      host: 'localhost', // Fallback - not used when DATABASE_URL is provided
-      port: 5432, // Fallback - not used when DATABASE_URL is provided
-      username: 'postgres', // Fallback - not used when DATABASE_URL is provided
-      password: 'postgres', // Fallback - not used when DATABASE_URL is provided
-      database: 'mechanical_workshop', // Fallback - not used when DATABASE_URL is provided
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'mechanical_workshop',
       url,
     };
   }
@@ -108,7 +108,7 @@ export class AppConfigService {
       ),
       password: this.configService.get<string>(
         ENV_KEYS.ADMIN_PASSWORD,
-        'ChangeMe123!', // Never used in production due to validation
+        'ChangeMe123!',
       ),
     };
   }
@@ -181,9 +181,6 @@ export class AppConfigService {
     return `postgresql://${username}:${password}@${host}:${port}/${database}?schema=public`;
   }
 
-  /**
-   * Validates that all required configuration values are present
-   */
   validateConfig(): void {
     const requiredVars = [ENV_KEYS.JWT_SECRET];
 
@@ -197,7 +194,6 @@ export class AppConfigService {
       );
     }
 
-    // Validate JWT secret strength in production
     if (this.isProduction) {
       const jwtSecret = this.jwt.secret;
       if (

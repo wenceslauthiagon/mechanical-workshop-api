@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
+import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 
 interface JwtPayload {
   sub: string;
@@ -27,14 +28,14 @@ export class JwtAuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException('Access token not found');
+      throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_TOKEN_NOT_FOUND);
     }
 
     try {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
       request.user = payload;
     } catch {
-      throw new UnauthorizedException('Invalid access token');
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
     }
 
     return true;

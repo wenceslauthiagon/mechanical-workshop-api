@@ -8,6 +8,7 @@ import { PartRepository } from '../../4-infrastructure/repositories/part.reposit
 import { CreatePartDto } from '../../1-presentation/dtos/part/create-part.dto';
 import { UpdatePartDto } from '../../1-presentation/dtos/part/update-part.dto';
 import { PartBase } from '../../3-domain/entities/part.entity';
+import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 
 @Injectable()
 export class PartService {
@@ -20,7 +21,7 @@ export class PartService {
         data.partNumber,
       );
       if (existingPart) {
-        throw new ConflictException('Número da peça já cadastrado no sistema');
+        throw new ConflictException(ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS);
       }
     }
 
@@ -47,7 +48,7 @@ export class PartService {
   async findById(id: string): Promise<PartBase> {
     const part = await this.partRepository.findById(id);
     if (!part) {
-      throw new NotFoundException('Peça não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
     }
     return part;
   }
@@ -55,7 +56,7 @@ export class PartService {
   async findByPartNumber(partNumber: string): Promise<PartBase> {
     const part = await this.partRepository.findByPartNumber(partNumber);
     if (!part) {
-      throw new NotFoundException('Peça não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
     }
     return part;
   }
@@ -71,7 +72,7 @@ export class PartService {
   async update(id: string, data: UpdatePartDto): Promise<PartBase> {
     const part = await this.partRepository.findById(id);
     if (!part) {
-      throw new NotFoundException('Peça não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
     // Se está mudando o número da peça, verificar se não existe
@@ -80,7 +81,7 @@ export class PartService {
         data.partNumber,
       );
       if (existingPart && existingPart.id !== id) {
-        throw new ConflictException('Número da peça já cadastrado no sistema');
+        throw new ConflictException(ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS);
       }
     }
 
@@ -100,12 +101,12 @@ export class PartService {
   async updateStock(id: string, quantity: number): Promise<PartBase> {
     const part = await this.partRepository.findById(id);
     if (!part) {
-      throw new NotFoundException('Peça não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
     const newStock = part.stock + quantity;
     if (newStock < 0) {
-      throw new ConflictException('Estoque insuficiente');
+      throw new ConflictException(ERROR_MESSAGES.INSUFFICIENT_STOCK);
     }
 
     return this.partRepository.update(id, { stock: newStock });
@@ -114,7 +115,7 @@ export class PartService {
   async remove(id: string): Promise<PartBase> {
     const part = await this.partRepository.findById(id);
     if (!part) {
-      throw new NotFoundException('Peça não encontrada');
+      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
     // Soft delete - marca como inativo

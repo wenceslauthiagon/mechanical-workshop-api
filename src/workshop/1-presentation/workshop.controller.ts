@@ -18,6 +18,12 @@ import {
 } from '@nestjs/swagger';
 import { CreateOrderService } from '../2-application/create-order.service';
 import { CreateCustomerDto, UpdateCustomerDto } from './dtos';
+import {
+  API_SUMMARY,
+  API_DESCRIPTIONS,
+  SUCCESS_MESSAGES,
+  ERROR_MESSAGES,
+} from '../../shared/constants/messages.constants';
 
 @ApiTags('Customers')
 @Controller('api')
@@ -30,25 +36,28 @@ export class WorkshopController {
   @Post('customers')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Criar novo cliente',
-    description: 'Cria um novo cliente no sistema com validação de CPF/CNPJ',
+    summary: API_SUMMARY.CREATE_CLIENT,
+    description: API_DESCRIPTIONS.CREATE_CLIENT,
   })
   @ApiBody({ type: CreateCustomerDto })
-  @ApiResponse({ status: 201, description: 'Cliente criado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  @ApiResponse({ status: 409, description: 'Email ou documento já cadastrado' })
+  @ApiResponse({ status: 201, description: SUCCESS_MESSAGES.CLIENT_CREATED })
+  @ApiResponse({ status: 400, description: ERROR_MESSAGES.INVALID_DATA })
+  @ApiResponse({
+    status: 409,
+    description: ERROR_MESSAGES.EMAIL_OR_DOCUMENT_ALREADY_EXISTS,
+  })
   createCustomer(@Body() createCustomerDto: CreateCustomerDto) {
     return this.customerService.create(createCustomerDto);
   }
 
   @Get('customers')
   @ApiOperation({
-    summary: 'Listar todos os clientes',
-    description: 'Retorna lista completa de clientes cadastrados',
+    summary: API_SUMMARY.LIST_CLIENTS,
+    description: API_DESCRIPTIONS.LIST_CLIENTS,
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de clientes retornada com sucesso',
+    description: SUCCESS_MESSAGES.CLIENTS_LISTED,
   })
   findAllCustomers() {
     return this.customerService.findAll();
@@ -56,27 +65,30 @@ export class WorkshopController {
 
   @Get('customers/:id')
   @ApiOperation({
-    summary: 'Buscar cliente por ID',
-    description: 'Retorna um cliente específico pelo seu ID',
+    summary: API_SUMMARY.FIND_CLIENT_BY_ID,
+    description: API_DESCRIPTIONS.FIND_CLIENT_BY_ID,
   })
   @ApiParam({ name: 'id', description: 'ID do cliente', example: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Cliente encontrado com sucesso' })
-  @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
+  @ApiResponse({ status: 200, description: SUCCESS_MESSAGES.CLIENT_FOUND })
+  @ApiResponse({ status: 404, description: ERROR_MESSAGES.CLIENT_NOT_FOUND })
   findOneCustomer(@Param('id') id: string) {
     return this.customerService.findOne(id);
   }
 
   @Patch('customers/:id')
   @ApiOperation({
-    summary: 'Atualizar cliente',
-    description: 'Atualiza dados de um cliente existente',
+    summary: API_SUMMARY.UPDATE_CLIENT,
+    description: API_DESCRIPTIONS.UPDATE_CLIENT,
   })
   @ApiParam({ name: 'id', description: 'ID do cliente', example: 'uuid' })
   @ApiBody({ type: UpdateCustomerDto })
-  @ApiResponse({ status: 200, description: 'Cliente atualizado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
-  @ApiResponse({ status: 409, description: 'Email ou documento já cadastrado' })
+  @ApiResponse({ status: 200, description: SUCCESS_MESSAGES.CLIENT_UPDATED })
+  @ApiResponse({ status: 400, description: ERROR_MESSAGES.INVALID_DATA })
+  @ApiResponse({ status: 404, description: ERROR_MESSAGES.CLIENT_NOT_FOUND })
+  @ApiResponse({
+    status: 409,
+    description: ERROR_MESSAGES.EMAIL_OR_DOCUMENT_ALREADY_EXISTS,
+  })
   updateCustomer(
     @Param('id') id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
@@ -87,12 +99,12 @@ export class WorkshopController {
   @Delete('customers/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Remover cliente',
-    description: 'Remove um cliente do sistema',
+    summary: API_SUMMARY.DELETE_CLIENT,
+    description: API_DESCRIPTIONS.DELETE_CLIENT,
   })
   @ApiParam({ name: 'id', description: 'ID do cliente', example: 'uuid' })
-  @ApiResponse({ status: 204, description: 'Cliente removido com sucesso' })
-  @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
+  @ApiResponse({ status: 204, description: SUCCESS_MESSAGES.CLIENT_DELETED })
+  @ApiResponse({ status: 404, description: ERROR_MESSAGES.CLIENT_NOT_FOUND })
   removeCustomer(@Param('id') id: string) {
     return this.customerService.remove(id);
   }

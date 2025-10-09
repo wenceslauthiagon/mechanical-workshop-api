@@ -3,11 +3,11 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { APP_CONSTANTS, ENV_KEYS } from './shared/constants/app.constants';
+import { API_TAGS } from './shared/constants/messages.constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -16,13 +16,11 @@ async function bootstrap() {
     }),
   );
 
-  // CORS configuration
   app.enableCors({
     origin: process.env.NODE_ENV === 'production' ? false : true,
     credentials: true,
   });
 
-  // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle(process.env[ENV_KEYS.SWAGGER_TITLE] || APP_CONSTANTS.APP_NAME)
     .setDescription(
@@ -38,17 +36,17 @@ async function bootstrap() {
         scheme: 'bearer',
         bearerFormat: 'JWT',
         name: 'JWT',
-        description: 'Enter JWT token',
+        description: API_TAGS.JWT_DESCRIPTION,
         in: 'header',
       },
       'JWT-auth',
     )
-    .addTag('Customers', 'Gestão de clientes (CPF/CNPJ)')
-    .addTag('Vehicles', 'Gestão de veículos')
-    .addTag('Services', 'Gestão de serviços')
-    .addTag('Parts', 'Gestão de peças e insumos')
-    .addTag('Service Orders', 'Gestão de ordens de serviço')
-    .addTag('Health Check', 'Monitoramento da API')
+    .addTag('Customers', API_TAGS.CUSTOMERS)
+    .addTag('Vehicles', API_TAGS.VEHICLES)
+    .addTag('Services', API_TAGS.SERVICES)
+    .addTag('Parts', API_TAGS.PARTS)
+    .addTag('Service Orders', API_TAGS.SERVICE_ORDERS)
+    .addTag('Health Check', API_TAGS.HEALTH_CHECK)
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

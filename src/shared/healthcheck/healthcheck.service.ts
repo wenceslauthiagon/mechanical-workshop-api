@@ -3,6 +3,7 @@
 import { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
 import { AxiosFactory } from '../../infrastructure/http/AxiosFactory';
 import { APP_CONSTANTS, ENV_KEYS } from '../constants/app.constants';
+import { HEALTH_CHECK_MESSAGES } from '../constants/messages.constants';
 
 interface HealthCheckOptions {
   url: string;
@@ -54,53 +55,19 @@ class HealthChecker {
       ...options,
     };
 
-    // Use the professional AxiosFactory instead of raw axios
     this.axiosInstance = AxiosFactory.getInstance();
   }
 
   async check(): Promise<void> {
-    const startTime = Date.now();
-    let lastError: Error | null = null;
-
-    console.log(`Starting health check for: ${this.options.url}`);
-
     for (let attempt = 1; attempt <= this.options.retries; attempt++) {
       try {
-        const response = await this.performHealthCheck();
-        const duration = Date.now() - startTime;
-
-        console.log(`Health check passed on attempt ${attempt}`);
-        console.log(`Response time: ${duration}ms`);
-        console.log(`Response: ${JSON.stringify(response.data, null, 2)}`);
-
+        await this.performHealthCheck();
         process.exit(0);
-      } catch (error) {
-        lastError = error as Error;
-        const duration = Date.now() - startTime;
-
-        console.warn(
-          `Health check failed on attempt ${attempt}/${this.options.retries} (${duration}ms)`,
-        );
-        console.warn(`Error: ${lastError.message}`);
-
+      } catch {
         if (attempt < this.options.retries) {
-          console.log(`Retrying in ${this.options.retryDelay}ms...`);
           await this.sleep(this.options.retryDelay);
         }
       }
-    }
-
-    const totalDuration = Date.now() - startTime;
-    console.error(
-      `Health check failed after ${this.options.retries} attempts (${totalDuration}ms)`,
-    );
-    console.error(`Final error: ${lastError?.message || 'Unknown error'}`);
-
-    if (lastError instanceof AxiosError) {
-      console.error(`Status: ${lastError.response?.status || 'No response'}`);
-      console.error(
-        `Response: ${JSON.stringify(lastError.response?.data || 'No data', null, 2)}`,
-      );
     }
 
     process.exit(1);
@@ -119,17 +86,17 @@ class HealthChecker {
             Connection: 'close',
           },
           validateStatus: (status) => status === this.options.expectedStatus,
-          maxRedirects: 0, // Don't follow redirects in health checks
+          maxRedirects: 0,
         },
       );
 
-      // Validate response structure if it's JSON
       if (response.data && typeof response.data === 'object') {
         const healthData = response.data;
 
-        // Basic validation of health response
         if (healthData.status && healthData.status !== 'ok') {
-          throw new Error(`Health status is not ok: ${healthData.status}`);
+          throw new Error(
+            `${HEALTH_CHECK_MESSAGES.HEALTH_STATUS_NOT_OK}: ${healthData.status}`,
+          );
         }
       }
 
@@ -139,20 +106,24 @@ class HealthChecker {
         const axiosError = error as AxiosError;
 
         if (axiosError.code === 'ECONNREFUSED') {
-          throw new Error('Connection refused - service may be down');
+          throw new Error(HEALTH_CHECK_MESSAGES.CONNECTION_REFUSED);
         }
 
         if (axiosError.code === 'ETIMEDOUT') {
-          throw new Error(`Request timeout after ${this.options.timeout}ms`);
+          throw new Error(
+            `${HEALTH_CHECK_MESSAGES.REQUEST_TIMEOUT} ${this.options.timeout}ms`,
+          );
         }
 
         if (axiosError.response) {
           throw new Error(
-            `HTTP ${axiosError.response.status}: ${axiosError.response.statusText}`,
+            `${HEALTH_CHECK_MESSAGES.HTTP_ERROR} ${axiosError.response.status}: ${axiosError.response.statusText}`,
           );
         }
 
-        throw new Error(`Network error: ${axiosError.message}`);
+        throw new Error(
+          `${HEALTH_CHECK_MESSAGES.NETWORK_ERROR}: ${axiosError.message}`,
+        );
       }
 
       throw error;
@@ -166,11 +137,9 @@ class HealthChecker {
   }
 }
 
-// Execute health check if this file is run directly
 if (require.main === module) {
   const checker = new HealthChecker();
-  checker.check().catch((error) => {
-    console.error('Unexpected error:', error);
+  checker.check().catch(() => {
     process.exit(1);
   });
 }

@@ -8,6 +8,7 @@ import { ServiceRepository } from '../../4-infrastructure/repositories/service.r
 import { CreateServiceDto } from '../../1-presentation/dtos/service/create-service.dto';
 import { UpdateServiceDto } from '../../1-presentation/dtos/service/update-service.dto';
 import { ServiceBase } from '../../3-domain/entities/service.entity';
+import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 
 @Injectable()
 export class ServiceService {
@@ -17,7 +18,7 @@ export class ServiceService {
     // Verificar se serviço com mesmo nome já existe
     const existingService = await this.serviceRepository.findByName(data.name);
     if (existingService) {
-      throw new ConflictException('Serviço com este nome já existe');
+      throw new ConflictException(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
     }
 
     return this.serviceRepository.create({
@@ -40,7 +41,7 @@ export class ServiceService {
   async findById(id: string): Promise<ServiceBase> {
     const service = await this.serviceRepository.findById(id);
     if (!service) {
-      throw new NotFoundException('Serviço não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
     return service;
   }
@@ -52,7 +53,7 @@ export class ServiceService {
   async update(id: string, data: UpdateServiceDto): Promise<ServiceBase> {
     const service = await this.serviceRepository.findById(id);
     if (!service) {
-      throw new NotFoundException('Serviço não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
     // Se está mudando o nome, verificar se não existe outro com mesmo nome
@@ -61,7 +62,7 @@ export class ServiceService {
         data.name,
       );
       if (existingService && existingService.id !== id) {
-        throw new ConflictException('Serviço com este nome já existe');
+        throw new ConflictException(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
       }
     }
 
@@ -80,7 +81,7 @@ export class ServiceService {
   async remove(id: string): Promise<ServiceBase> {
     const service = await this.serviceRepository.findById(id);
     if (!service) {
-      throw new NotFoundException('Serviço não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
     // Soft delete - marca como inativo

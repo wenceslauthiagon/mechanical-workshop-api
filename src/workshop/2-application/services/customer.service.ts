@@ -7,25 +7,24 @@ import { Customer } from '@prisma/client';
 import { CustomerRepository } from '../../4-infrastructure/repositories/customer.repository';
 import { CreateCustomerDto } from '../../1-presentation/dtos/customer/create-customer.dto';
 import { UpdateCustomerDto } from '../../1-presentation/dtos/customer/update-customer.dto';
+import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 
 @Injectable()
 export class CustomerService {
   constructor(private readonly customerRepository: CustomerRepository) {}
 
   async create(data: CreateCustomerDto): Promise<Customer> {
-    // Verificar se email já existe
     const existingEmailCustomer = await this.customerRepository.findByEmail(
       data.email,
     );
     if (existingEmailCustomer) {
-      throw new ConflictException('Email já cadastrado no sistema');
+      throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    // Verificar se documento (CPF/CNPJ) já existe
     const existingDocumentCustomer =
       await this.customerRepository.findByDocument(data.document);
     if (existingDocumentCustomer) {
-      throw new ConflictException('CPF/CNPJ já cadastrado no sistema');
+      throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
     }
 
     const customerData = {
@@ -43,7 +42,7 @@ export class CustomerService {
   async findById(id: string): Promise<Customer> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
     return customer;
   }
@@ -51,7 +50,7 @@ export class CustomerService {
   async findByDocument(document: string): Promise<Customer> {
     const customer = await this.customerRepository.findByDocument(document);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
     return customer;
   }
@@ -59,7 +58,7 @@ export class CustomerService {
   async findByEmail(email: string): Promise<Customer> {
     const customer = await this.customerRepository.findByEmail(email);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
     return customer;
   }
@@ -67,26 +66,24 @@ export class CustomerService {
   async update(id: string, data: UpdateCustomerDto): Promise<Customer> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
-    // Se está mudando o email, verificar se não existe
     if (data.email && data.email !== customer.email) {
       const existingCustomer = await this.customerRepository.findByEmail(
         data.email,
       );
       if (existingCustomer) {
-        throw new ConflictException('Email já cadastrado no sistema');
+        throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
       }
     }
 
-    // Se está mudando o documento, verificar se não existe
     if (data.document && data.document !== customer.document) {
       const existingCustomer = await this.customerRepository.findByDocument(
         data.document,
       );
       if (existingCustomer) {
-        throw new ConflictException('CPF/CNPJ já cadastrado no sistema');
+        throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
       }
     }
 
@@ -101,15 +98,12 @@ export class CustomerService {
   async remove(id: string): Promise<void> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException('Cliente não encontrado');
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
-    // Verificar se cliente tem veículos
     const vehicles = await this.customerRepository.findVehiclesByCustomerId(id);
     if (vehicles.length > 0) {
-      throw new ConflictException(
-        'Não é possível remover cliente com veículos cadastrados',
-      );
+      throw new ConflictException(ERROR_MESSAGES.CLIENT_HAS_VEHICLES);
     }
 
     await this.customerRepository.delete(id);

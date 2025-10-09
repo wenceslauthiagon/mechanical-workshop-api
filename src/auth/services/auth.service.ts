@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { User } from '@prisma/client';
+import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 
 export interface LoginDto {
   username: string;
@@ -52,7 +53,7 @@ export class AuthService {
     const user = await this.validateUser(loginDto.username, loginDto.password);
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
     const payload: JwtPayload = {

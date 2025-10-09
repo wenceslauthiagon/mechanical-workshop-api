@@ -62,7 +62,7 @@ export class UserService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
-        passwordHash: false, // Nunca retornar a senha
+        passwordHash: false, // Never return password
       },
     });
   }

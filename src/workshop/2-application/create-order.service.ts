@@ -7,6 +7,7 @@ import {
 import { Customer } from '@prisma/client';
 import { CustomerRepository } from '../4-infrastructure/repositories/customer.repository';
 import { CreateCustomerDto, UpdateCustomerDto } from '../1-presentation/dtos';
+import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 
 @Injectable()
 export class CreateOrderService {
@@ -18,7 +19,7 @@ export class CreateOrderService {
       createCustomerDto.email,
     );
     if (existingByEmail) {
-      throw new ConflictException('Email já cadastrado no sistema');
+      throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     // Verificar se documento já existe
@@ -26,7 +27,7 @@ export class CreateOrderService {
       createCustomerDto.document,
     );
     if (existingByDocument) {
-      throw new ConflictException('Documento já cadastrado no sistema');
+      throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
     }
 
     try {
@@ -36,7 +37,7 @@ export class CreateOrderService {
       };
       return await this.customerRepository.create(customerData);
     } catch {
-      throw new BadRequestException('Erro ao criar cliente');
+      throw new BadRequestException(ERROR_MESSAGES.CLIENT_CREATE_ERROR);
     }
   }
 
@@ -47,7 +48,7 @@ export class CreateOrderService {
   async findOne(id: string): Promise<Customer> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
     return customer;
   }
@@ -58,7 +59,7 @@ export class CreateOrderService {
   ): Promise<Customer> {
     const existingCustomer = await this.customerRepository.findById(id);
     if (!existingCustomer) {
-      throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     // Verificar conflitos de email (apenas se o email está sendo alterado)
@@ -70,7 +71,7 @@ export class CreateOrderService {
         updateCustomerDto.email,
       );
       if (existingByEmail) {
-        throw new ConflictException('Email já cadastrado no sistema');
+        throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
       }
     }
 
@@ -83,7 +84,7 @@ export class CreateOrderService {
         updateCustomerDto.document,
       );
       if (existingByDocument) {
-        throw new ConflictException('Documento já cadastrado no sistema');
+        throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
       }
     }
 
@@ -94,20 +95,20 @@ export class CreateOrderService {
       };
       return await this.customerRepository.update(id, updateData);
     } catch {
-      throw new BadRequestException('Erro ao atualizar cliente');
+      throw new BadRequestException(ERROR_MESSAGES.CLIENT_UPDATE_ERROR);
     }
   }
 
   async remove(id: string): Promise<void> {
     const existingCustomer = await this.customerRepository.findById(id);
     if (!existingCustomer) {
-      throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
+      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     try {
       await this.customerRepository.delete(id);
     } catch {
-      throw new BadRequestException('Erro ao remover cliente');
+      throw new BadRequestException(ERROR_MESSAGES.CLIENT_DELETE_ERROR);
     }
   }
 }
