@@ -12,8 +12,7 @@ export class LoginDto {
 
   @ApiProperty({
     description: 'Senha do usuário',
-    example: 'admin123',
-    minLength: 6,
+    example: 'your-password',
   })
   @IsNotEmpty()
   @IsString()

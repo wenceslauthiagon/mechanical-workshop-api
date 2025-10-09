@@ -2,6 +2,7 @@
 
 import { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
 import { AxiosFactory } from '../../infrastructure/http/AxiosFactory';
+import { APP_CONSTANTS, ENV_KEYS } from '../constants/app.constants';
 
 interface HealthCheckOptions {
   url: string;
@@ -26,13 +27,30 @@ class HealthChecker {
   private readonly axiosInstance: AxiosInstance;
 
   constructor(options: Partial<HealthCheckOptions> = {}) {
+    const host = process.env[ENV_KEYS.HOST] || APP_CONSTANTS.DEFAULT_HOST;
+    const port = process.env[ENV_KEYS.PORT] || APP_CONSTANTS.DEFAULT_PORT;
+    const displayHost = host === '0.0.0.0' ? 'localhost' : host;
+    const defaultHealthUrl = `http://${displayHost}:${port}/health`;
+
     this.options = {
-      url: process.env.HEALTH_CHECK_URL || 'http://localhost:3000/health',
-      timeout: parseInt(process.env.HEALTH_CHECK_TIMEOUT || '5000', 10),
-      retries: parseInt(process.env.HEALTH_CHECK_RETRIES || '3', 10),
-      retryDelay: parseInt(process.env.HEALTH_CHECK_RETRY_DELAY || '1000', 10),
+      url: process.env[ENV_KEYS.HEALTH_CHECK_URL] || defaultHealthUrl,
+      timeout: parseInt(
+        process.env[ENV_KEYS.HEALTH_CHECK_TIMEOUT] ||
+          APP_CONSTANTS.DEFAULT_HEALTH_TIMEOUT.toString(),
+        10,
+      ),
+      retries: parseInt(
+        process.env[ENV_KEYS.HEALTH_CHECK_RETRIES] ||
+          APP_CONSTANTS.DEFAULT_HEALTH_RETRIES.toString(),
+        10,
+      ),
+      retryDelay: parseInt(
+        process.env[ENV_KEYS.HEALTH_CHECK_RETRY_DELAY] ||
+          APP_CONSTANTS.DEFAULT_HEALTH_RETRY_DELAY.toString(),
+        10,
+      ),
       expectedStatus: 200,
-      userAgent: 'HealthChecker/2.0 (Mechanical Workshop API)',
+      userAgent: `HealthChecker/2.0 (${APP_CONSTANTS.APP_NAME})`,
       ...options,
     };
 
