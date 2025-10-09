@@ -3,9 +3,10 @@ import { PrismaService } from './prisma/prisma.service';
 import { WorkshopModule } from './workshop/workshop.module';
 import { AuthModule } from './auth/auth.module';
 import { AppConfigModule } from './shared/config/app-config.module';
+import { HealthCheckModule } from './shared/healthcheck/healthcheck.module';
 
 @Module({
-  imports: [AppConfigModule, WorkshopModule, AuthModule],
+  imports: [AppConfigModule, WorkshopModule, AuthModule, HealthCheckModule],
   controllers: [],
   providers: [PrismaService],
 })

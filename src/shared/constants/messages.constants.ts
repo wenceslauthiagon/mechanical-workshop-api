@@ -11,6 +11,8 @@ export const ERROR_MESSAGES = {
   ACCESS_TOKEN_NOT_FOUND: 'Access token not found',
   INVALID_ACCESS_TOKEN: 'Invalid access token',
   ACCESS_DENIED_ADMIN_REQUIRED: 'Acesso negado - Role ADMIN necessário',
+  USERS_ALREADY_EXIST:
+    'Já existem usuários no sistema. Use o endpoint padrão para criar novos usuários.',
 
   // Cliente
   CLIENT_NOT_FOUND: 'Cliente não encontrado',
@@ -196,6 +198,10 @@ export const API_DESCRIPTIONS = {
     'Retorna estatísticas gerais incluindo total de ordens concluídas, tempo médio de execução e precisão geral das estimativas.',
   SPECIFIC_SERVICE_STATS:
     'Retorna estatísticas detalhadas de execução para um serviço específico.',
+
+  // Health Check
+  HEALTH_CHECK_API:
+    'Endpoint para verificar se a API está funcionando corretamente',
 } as const;
 
 export const API_SUMMARY = {
@@ -247,6 +253,9 @@ export const API_SUMMARY = {
   SERVICE_EXECUTION_STATS: 'Estatísticas de execução por serviço',
   GENERAL_SYSTEM_STATS: 'Estatísticas gerais do sistema',
   SPECIFIC_SERVICE_STATS: 'Estatísticas de um serviço específico',
+
+  // Health Check
+  HEALTH_CHECK_API: 'Verificar saúde da API',
 } as const;
 
 export const API_TAGS = {
@@ -265,4 +274,12 @@ export const HEALTH_CHECK_MESSAGES = {
   NETWORK_ERROR: 'Network error',
   HTTP_ERROR: 'HTTP',
   HEALTH_STATUS_NOT_OK: 'Health status is not ok',
+} as const;
+
+export const HEALTH_CHECK_RESPONSES = {
+  STATUS_OK: 'ok',
+  API_WORKING: 'API funcionando corretamente',
+  UPTIME_DESCRIPTION: 'Tempo de atividade em segundos',
+  DEFAULT_VERSION: '1.0.0',
+  DEFAULT_ENVIRONMENT: 'development',
 } as const;

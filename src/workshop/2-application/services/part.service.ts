@@ -15,7 +15,6 @@ export class PartService {
   constructor(private readonly partRepository: PartRepository) {}
 
   async create(data: CreatePartDto): Promise<PartBase> {
-    // Verificar se número da peça já existe (se fornecido)
     if (data.partNumber) {
       const existingPart = await this.partRepository.findByPartNumber(
         data.partNumber,
@@ -75,7 +74,6 @@ export class PartService {
       throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
-    // Se está mudando o número da peça, verificar se não existe
     if (data.partNumber && data.partNumber !== part.partNumber) {
       const existingPart = await this.partRepository.findByPartNumber(
         data.partNumber,
@@ -118,7 +116,6 @@ export class PartService {
       throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
-    // Soft delete - marca como inativo
     return this.partRepository.update(id, { isActive: false });
   }
 }

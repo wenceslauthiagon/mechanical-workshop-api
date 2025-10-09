@@ -32,7 +32,7 @@ import { UserRole } from '@prisma/client';
 @Controller('api/customers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 

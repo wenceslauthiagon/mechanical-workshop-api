@@ -5,8 +5,10 @@ import {
   IsEmail,
   IsEnum,
   MinLength,
+  Validate,
 } from 'class-validator';
 import { UserRole } from '@prisma/client';
+import { PasswordMatchValidator } from '../validators/password-match.validator';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -27,13 +29,22 @@ export class CreateUserDto {
 
   @ApiProperty({
     description: 'Senha do usuário',
-    example: 'senha123',
+    example: 'Senha123',
     minLength: 6,
   })
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
   password: string;
+
+  @ApiProperty({
+    description: 'Confirmação da senha',
+    example: 'Senha123',
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Validate(PasswordMatchValidator)
+  confirmPassword: string;
 
   @ApiProperty({
     description: 'Função do usuário no sistema',

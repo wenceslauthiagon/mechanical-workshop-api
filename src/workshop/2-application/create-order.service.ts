@@ -14,7 +14,6 @@ export class CreateOrderService {
   constructor(private readonly customerRepository: CustomerRepository) {}
 
   async create(createCustomerDto: CreateCustomerDto): Promise<Customer> {
-    // Verificar se email já existe
     const existingByEmail = await this.customerRepository.findByEmail(
       createCustomerDto.email,
     );
@@ -22,7 +21,6 @@ export class CreateOrderService {
       throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    // Verificar se documento já existe
     const existingByDocument = await this.customerRepository.findByDocument(
       createCustomerDto.document,
     );
@@ -62,7 +60,6 @@ export class CreateOrderService {
       throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
-    // Verificar conflitos de email (apenas se o email está sendo alterado)
     if (
       updateCustomerDto.email &&
       updateCustomerDto.email !== existingCustomer.email
@@ -75,7 +72,6 @@ export class CreateOrderService {
       }
     }
 
-    // Verificar conflitos de documento (apenas se o documento está sendo alterado)
     if (
       updateCustomerDto.document &&
       updateCustomerDto.document !== existingCustomer.document

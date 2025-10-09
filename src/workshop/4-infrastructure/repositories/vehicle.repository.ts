@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Vehicle } from '@prisma/client';
+import type { Vehicle } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { IVehicleRepository } from '../../3-domain/repositories/vehicle-repository.interface';
 

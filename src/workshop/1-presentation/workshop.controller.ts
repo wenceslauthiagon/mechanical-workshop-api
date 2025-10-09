@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,15 +25,15 @@ import {
   SUCCESS_MESSAGES,
   ERROR_MESSAGES,
 } from '../../shared/constants/messages.constants';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
 
 @ApiTags('Customers')
 @Controller('api')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class WorkshopController {
   constructor(private readonly customerService: CreateOrderService) {}
 
-  // ================================
-  // CUSTOMER CRUD
-  // ================================
   @Post('customers')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

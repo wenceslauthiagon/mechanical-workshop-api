@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpCode,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,9 +24,12 @@ import { PartService } from '../../2-application/services/part.service';
 import { CreatePartDto } from '../dtos/part/create-part.dto';
 import { UpdatePartDto } from '../dtos/part/update-part.dto';
 import { PartResponseDto } from '../dtos/part/part-response.dto';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
 
 @ApiTags('Parts')
 @Controller('api/parts')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class PartController {
   constructor(private readonly partService: PartService) {}
 

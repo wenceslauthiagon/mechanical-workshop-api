@@ -23,7 +23,7 @@ import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 
-@ApiTags('Authentication')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -67,10 +67,29 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('users/first-admin')
+  @ApiOperation({
+    summary: 'Criar primeiro usuário admin',
+    description:
+      'Cria o primeiro usuário admin do sistema. Só funciona quando não há usuários cadastrados.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Primeiro admin criado com sucesso',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Já existem usuários no sistema',
+  })
+  async createFirstAdmin(@Body() createUserDto: CreateUserDto) {
+    const userData = this.removeConfirmPassword(createUserDto);
+    return this.userService.createFirstAdmin(userData);
+  }
+
   @Post('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Criar usuário (Admin apenas)',
     description: 'Cria um novo usuário no sistema. Requer role ADMIN.',
@@ -84,12 +103,13 @@ export class AuthController {
     description: 'Acesso negado - Role ADMIN necessário',
   })
   async createUser(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    const userData = this.removeConfirmPassword(createUserDto);
+    return this.userService.create(userData);
   }
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obter perfil do usuário',
     description: 'Retorna informações do usuário autenticado',
@@ -103,15 +123,15 @@ export class AuthController {
     description: 'Token inválido ou expirado',
   })
   async getProfile(@Request() req) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, ...user } = req.user;
+    void passwordHash; // Explicitamente ignorar a variável para evitar warning do eslint
     return user;
   }
 
   @Get('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Listar usuários (Admin apenas)',
     description: 'Lista todos os usuários do sistema. Requer role ADMIN.',
@@ -126,5 +146,13 @@ export class AuthController {
   })
   async getUsers() {
     return this.userService.findAll();
+  }
+
+  private removeConfirmPassword(
+    dto: CreateUserDto,
+  ): Omit<CreateUserDto, 'confirmPassword'> {
+    const { confirmPassword, ...userData } = dto;
+    void confirmPassword;
+    return userData;
   }
 }

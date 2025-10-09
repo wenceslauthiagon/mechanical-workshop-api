@@ -15,7 +15,6 @@ export class ServiceService {
   constructor(private readonly serviceRepository: ServiceRepository) {}
 
   async create(data: CreateServiceDto): Promise<ServiceBase> {
-    // Verificar se serviço com mesmo nome já existe
     const existingService = await this.serviceRepository.findByName(data.name);
     if (existingService) {
       throw new ConflictException(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
@@ -56,8 +55,7 @@ export class ServiceService {
       throw new NotFoundException(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
-    // Se está mudando o nome, verificar se não existe outro com mesmo nome
-    if (data.name && data.name !== service.name) {
+    if (data.name && service.name !== data.name) {
       const existingService = await this.serviceRepository.findByName(
         data.name,
       );
@@ -84,7 +82,10 @@ export class ServiceService {
       throw new NotFoundException(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
-    // Soft delete - marca como inativo
-    return this.serviceRepository.update(id, { isActive: false });
+    const updatedService = await this.serviceRepository.update(id, {
+      isActive: false,
+    });
+
+    return updatedService;
   }
 }

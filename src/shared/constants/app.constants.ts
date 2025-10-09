@@ -17,6 +17,21 @@ export const APP_CONSTANTS = {
 
   DEFAULT_DATABASE_SCHEMA: 'public',
 
+  // Security defaults
+  DEFAULT_JWT_SECRET_FALLBACK: 'your-secret-key-change-in-production',
+  RADIX_BASE_10: 10,
+
+  // Health check defaults
+  DEFAULT_HEALTH_URL: 'http://localhost:3000/health',
+
+  // Service Order constants
+  ORDER_NUMBER_PADDING: 3,
+  ORDER_NUMBER_PAD_CHAR: '0',
+
+  // Time conversion constants
+  MS_TO_HOURS_DIVISOR: 1000 * 60 * 60,
+  PERCENTAGE_MAX: 100,
+
   // Development defaults - never used in production
   DEV_ADMIN: {
     USERNAME: 'admin',

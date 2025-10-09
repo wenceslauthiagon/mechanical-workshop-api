@@ -7,16 +7,26 @@ import { AuthService } from './services/auth.service';
 import { UserService } from './services/user.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './controllers/auth.controller';
+import { APP_CONSTANTS, ENV_KEYS } from '../shared/constants/app.constants';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'your-secret-key',
-        signOptions: { expiresIn: '24h' },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const jwtSecret =
+          configService.get<string>(ENV_KEYS.JWT_SECRET) ||
+          APP_CONSTANTS.DEFAULT_JWT_SECRET_FALLBACK;
+        return {
+          secret: jwtSecret,
+          signOptions: {
+            expiresIn:
+              configService.get<string>(ENV_KEYS.JWT_EXPIRES_IN) ||
+              APP_CONSTANTS.DEFAULT_JWT_EXPIRES_IN,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

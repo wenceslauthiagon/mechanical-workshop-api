@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpCode,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,9 +24,12 @@ import {
 import { CreateServiceDto } from '../dtos/service/create-service.dto';
 import { UpdateServiceDto } from '../dtos/service/update-service.dto';
 import { ServiceService } from 'src/workshop/2-application/services/service.service';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
 
 @ApiTags('Services')
 @Controller('api/services')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 

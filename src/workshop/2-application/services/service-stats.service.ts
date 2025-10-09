@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ServiceOrderRepository } from '../../4-infrastructure/repositories/service-order.repository';
 import { ServiceRepository } from '../../4-infrastructure/repositories/service.repository';
+import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 
 export interface ServiceExecutionStats {
   serviceId: string;
@@ -26,11 +27,9 @@ export class ServiceStatsService {
   ) {}
 
   async getServiceExecutionStats(): Promise<ServiceExecutionStats[]> {
-    // Buscar todas as ordens de serviço finalizadas
     const completedOrders =
       await this.serviceOrderRepository.findCompletedOrders();
 
-    // Buscar todos os serviços
     const services = await this.serviceRepository.findAll();
 
     const statsMap = new Map<
@@ -44,15 +43,14 @@ export class ServiceStatsService {
       }
     >();
 
-    // Processar cada ordem finalizada
     for (const order of completedOrders) {
       if (!order.startedAt || !order.completedAt) continue;
 
       const executionTimeMs =
         order.completedAt.getTime() - order.startedAt.getTime();
-      const executionTimeHours = executionTimeMs / (1000 * 60 * 60);
+      const executionTimeHours =
+        executionTimeMs / APP_CONSTANTS.MS_TO_HOURS_DIVISOR;
 
-      // Processar serviços de cada ordem
       for (const serviceItem of order.services) {
         const serviceId = serviceItem.serviceId;
         const quantity = serviceItem.quantity;
@@ -72,7 +70,7 @@ export class ServiceStatsService {
 
         const stats = statsMap.get(serviceId)!;
         const estimatedTimeForQuantity =
-          (stats.estimatedMinutes * quantity) / 60; // em horas
+          (stats.estimatedMinutes * quantity) / 60;
         const proportionalExecutionTime =
           (executionTimeHours * quantity) /
           order.services.reduce((sum, s) => sum + s.quantity, 0);
@@ -83,7 +81,6 @@ export class ServiceStatsService {
       }
     }
 
-    // Converter para array de estatísticas
     const result: ServiceExecutionStats[] = [];
 
     for (const [serviceId, stats] of statsMap) {
@@ -95,10 +92,10 @@ export class ServiceStatsService {
         averageEstimatedHours > 0
           ? Math.max(
               0,
-              100 -
+              APP_CONSTANTS.PERCENTAGE_MAX -
                 (Math.abs(averageExecutionHours - averageEstimatedHours) /
                   averageEstimatedHours) *
-                  100,
+                  APP_CONSTANTS.PERCENTAGE_MAX,
             )
           : 0;
 
@@ -139,7 +136,8 @@ export class ServiceStatsService {
 
       const executionTimeMs =
         order.completedAt.getTime() - order.startedAt.getTime();
-      const executionTimeHours = executionTimeMs / (1000 * 60 * 60);
+      const executionTimeHours =
+        executionTimeMs / APP_CONSTANTS.MS_TO_HOURS_DIVISOR;
 
       totalExecutionTime += executionTimeHours;
       totalEstimatedTime += Number(order.estimatedTimeHours);
@@ -152,10 +150,10 @@ export class ServiceStatsService {
       averageEstimatedTime > 0
         ? Math.max(
             0,
-            100 -
+            APP_CONSTANTS.PERCENTAGE_MAX -
               (Math.abs(averageExecutionTime - averageEstimatedTime) /
                 averageEstimatedTime) *
-                100,
+                APP_CONSTANTS.PERCENTAGE_MAX,
           )
         : 0;
 

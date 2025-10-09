@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 
 export interface CreateUserData {
   username: string;
@@ -27,6 +28,19 @@ export class UserService {
         role: data.role || UserRole.EMPLOYEE,
       },
     });
+  }
+
+  async createFirstAdmin(data: CreateUserData): Promise<User> {
+    // Verificar se já existem usuários no sistema
+    const userCount = await this.prisma.user.count();
+
+    if (userCount > 0) {
+      throw new ConflictException(ERROR_MESSAGES.USERS_ALREADY_EXIST);
+    }
+
+    // Forçar role ADMIN para o primeiro usuário
+    const adminData = { ...data, role: UserRole.ADMIN };
+    return this.create(adminData);
   }
 
   async findByUsername(username: string): Promise<User | null> {

@@ -41,32 +41,49 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
-    .addTag('Customers', API_TAGS.CUSTOMERS)
-    .addTag('Vehicles', API_TAGS.VEHICLES)
-    .addTag('Services', API_TAGS.SERVICES)
-    .addTag('Parts', API_TAGS.PARTS)
-    .addTag('Service Orders', API_TAGS.SERVICE_ORDERS)
-    .addTag('Health Check', API_TAGS.HEALTH_CHECK)
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+
   const swaggerPath =
     process.env[ENV_KEYS.SWAGGER_PATH] || APP_CONSTANTS.DEFAULT_SWAGGER_PATH;
-  SwaggerModule.setup(`${swaggerPath}/swagger`, app, document);
+
+  const swaggerOptions = {
+    swaggerOptions: {
+      tagsSorter: (a: string, b: string) => {
+        const order = [
+          'Auth',
+          'Customers',
+          'Vehicles',
+          'Services',
+          'Parts',
+          'Service Orders',
+          'Public - Client API',
+          'Service Statistics',
+          'Health Check',
+        ];
+
+        const indexA = order.indexOf(a);
+        const indexB = order.indexOf(b);
+
+        if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+
+        return indexA - indexB;
+      },
+    },
+  };
+
+  SwaggerModule.setup(`${swaggerPath}/swagger`, app, document, swaggerOptions);
 
   const port = parseInt(
     process.env[ENV_KEYS.PORT] || APP_CONSTANTS.DEFAULT_PORT.toString(),
-    10,
+    APP_CONSTANTS.RADIX_BASE_10,
   );
   const host = process.env[ENV_KEYS.HOST] || APP_CONSTANTS.DEFAULT_HOST;
 
   await app.listen(port, host);
-
-  const displayHost = host === '0.0.0.0' ? 'localhost' : host;
-  console.log(`Application is running on: http://${displayHost}:${port}`);
-  console.log(
-    `Swagger docs available at: http://${displayHost}:${port}/${swaggerPath}/swagger`,
-  );
 }
 
 void bootstrap();

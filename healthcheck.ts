@@ -1,4 +1,5 @@
 import * as http from 'http';
+import { APP_CONSTANTS, ENV_KEYS } from './src/shared/constants/app.constants';
 
 interface HealthCheckOptions {
   url: string;
@@ -12,10 +13,24 @@ class HealthChecker {
 
   constructor(options: Partial<HealthCheckOptions> = {}) {
     this.options = {
-      url: process.env.HEALTH_CHECK_URL || 'http://localhost:3000/health',
-      timeout: parseInt(process.env.HEALTH_CHECK_TIMEOUT || '5000', 10),
-      retries: parseInt(process.env.HEALTH_CHECK_RETRIES || '3', 10),
-      retryDelay: parseInt(process.env.HEALTH_CHECK_RETRY_DELAY || '1000', 10),
+      url:
+        process.env[ENV_KEYS.HEALTH_CHECK_URL] ||
+        APP_CONSTANTS.DEFAULT_HEALTH_URL,
+      timeout: parseInt(
+        process.env[ENV_KEYS.HEALTH_CHECK_TIMEOUT] ||
+          APP_CONSTANTS.DEFAULT_HEALTH_TIMEOUT.toString(),
+        APP_CONSTANTS.RADIX_BASE_10,
+      ),
+      retries: parseInt(
+        process.env[ENV_KEYS.HEALTH_CHECK_RETRIES] ||
+          APP_CONSTANTS.DEFAULT_HEALTH_RETRIES.toString(),
+        APP_CONSTANTS.RADIX_BASE_10,
+      ),
+      retryDelay: parseInt(
+        process.env[ENV_KEYS.HEALTH_CHECK_RETRY_DELAY] ||
+          APP_CONSTANTS.DEFAULT_HEALTH_RETRY_DELAY.toString(),
+        APP_CONSTANTS.RADIX_BASE_10,
+      ),
       ...options,
     };
   }
@@ -26,7 +41,6 @@ class HealthChecker {
     for (let attempt = 1; attempt <= this.options.retries; attempt++) {
       try {
         await this.performHealthCheck();
-        console.log(`Health check passed on attempt ${attempt}`);
         return;
       } catch (error) {
         lastError = error as Error;
@@ -35,7 +49,6 @@ class HealthChecker {
         );
 
         if (attempt < this.options.retries) {
-          console.log(`Retrying in ${this.options.retryDelay}ms...`);
           await this.sleep(this.options.retryDelay);
         }
       }
@@ -73,11 +86,9 @@ class HealthChecker {
         response.on('end', () => {
           if (response.statusCode === 200) {
             try {
-              const healthData = JSON.parse(data) as { status?: string };
-              console.log(`Health status: ${healthData.status || 'unknown'}`);
+              JSON.parse(data) as { status?: string };
               resolve();
             } catch {
-              // If not JSON, just check status code
               resolve();
             }
           } else {
@@ -110,7 +121,6 @@ class HealthChecker {
   }
 }
 
-// Execute health check if this file is run directly
 if (require.main === module) {
   const checker = new HealthChecker();
   checker.check().catch((error) => {

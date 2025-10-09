@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   HttpStatus,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,9 +23,12 @@ import { CreateVehicleDto } from '../dtos/vehicle/create-vehicle.dto';
 import { UpdateVehicleDto } from '../dtos';
 import { VehicleResponseDto } from '../dtos/vehicle/vehicle-response.dto';
 import { VehicleService } from 'src/workshop/2-application/services/vehicle.service';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
 
 @ApiTags('Vehicles')
 @Controller('api/vehicles')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class VehicleController {
   constructor(private readonly vehicleService: VehicleService) {}
 

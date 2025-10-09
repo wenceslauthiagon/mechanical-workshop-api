@@ -17,6 +17,7 @@ import {
   ERROR_MESSAGES,
   NOTES_MESSAGES,
 } from '../../../shared/constants/messages.constants';
+import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 
 @Injectable()
 export class ServiceOrderService {
@@ -145,7 +146,6 @@ export class ServiceOrderService {
       }
     }
 
-    // Calcular data estimada com buffer de 20%
     const estimatedCompletionDate = new Date();
     const totalHoursWithBuffer = estimatedTimeHours * 1.2;
     estimatedCompletionDate.setHours(
@@ -207,10 +207,7 @@ export class ServiceOrderService {
       throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
 
-    // Validar transição de status
     this.validateStatusTransition(serviceOrder.status, data.status);
-
-    // Atualizar status e campos de data conforme necessário
     const updateData: {
       status: ServiceOrderStatus;
       startedAt?: Date;
@@ -234,13 +231,11 @@ export class ServiceOrderService {
         updateData.deliveredAt = now;
         break;
       case ServiceOrderStatus.AWAITING_APPROVAL:
-        // Para aguardando aprovação, não precisamos atualizar datas específicas
         break;
     }
 
     await this.serviceOrderRepository.updateStatus(id, updateData);
 
-    // Registrar histórico de status
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: id,
       status: data.status,
@@ -268,7 +263,6 @@ export class ServiceOrderService {
       startedAt: new Date(),
     });
 
-    // Registrar histórico
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: id,
       status: ServiceOrderStatus.IN_EXECUTION,
@@ -287,7 +281,6 @@ export class ServiceOrderService {
     return this.serviceOrderRepository.getStatusHistory(id);
   }
 
-  // Métodos para API pública
   async findByOrderNumber(
     orderNumber: string,
   ): Promise<ServiceOrderResponseDto> {
@@ -335,7 +328,10 @@ export class ServiceOrderService {
   private async generateOrderNumber(): Promise<string> {
     const year = new Date().getFullYear();
     const count = await this.serviceOrderRepository.countByYear(year);
-    return `OS-${year}-${String(count + 1).padStart(3, '0')}`;
+    return `OS-${year}-${String(count + 1).padStart(
+      APP_CONSTANTS.ORDER_NUMBER_PADDING,
+      APP_CONSTANTS.ORDER_NUMBER_PAD_CHAR,
+    )}`;
   }
 
   private validateStatusTransition(
@@ -354,7 +350,7 @@ export class ServiceOrderService {
       ],
       [ServiceOrderStatus.IN_EXECUTION]: [ServiceOrderStatus.FINISHED],
       [ServiceOrderStatus.FINISHED]: [ServiceOrderStatus.DELIVERED],
-      [ServiceOrderStatus.DELIVERED]: [], // Status final
+      [ServiceOrderStatus.DELIVERED]: [],
     };
 
     const allowedTransitions = validTransitions[currentStatus] || [];

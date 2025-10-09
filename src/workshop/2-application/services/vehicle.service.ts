@@ -19,13 +19,11 @@ export class VehicleService {
   ) {}
 
   async create(data: CreateVehicleDto): Promise<VehicleResponseDto> {
-    // Verificar se cliente existe
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
       throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
-    // Verificar se placa já existe
     const existingVehicle = await this.vehicleRepository.findByLicensePlate(
       data.licensePlate,
     );
@@ -51,7 +49,6 @@ export class VehicleService {
   }
 
   async findByCustomerId(customerId: string): Promise<VehicleResponseDto[]> {
-    // Verificar se cliente existe
     const customer = await this.customerRepository.findById(customerId);
     if (!customer) {
       throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
@@ -79,7 +76,6 @@ export class VehicleService {
       throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
-    // Se está mudando o cliente, verificar se o novo cliente existe
     if (data.customerId && data.customerId !== vehicle.customerId) {
       const customer = await this.customerRepository.findById(data.customerId);
       if (!customer) {
@@ -87,7 +83,6 @@ export class VehicleService {
       }
     }
 
-    // Se está mudando a placa, verificar se não existe
     if (data.licensePlate && data.licensePlate !== vehicle.licensePlate) {
       const existingVehicle = await this.vehicleRepository.findByLicensePlate(
         data.licensePlate,
@@ -109,7 +104,6 @@ export class VehicleService {
       throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
-    // Verificar se veículo tem ordens de serviço
     const hasServiceOrders = await this.vehicleRepository.hasServiceOrders(id);
     if (hasServiceOrders) {
       throw new ConflictException(ERROR_MESSAGES.VEHICLE_HAS_SERVICE_ORDERS);

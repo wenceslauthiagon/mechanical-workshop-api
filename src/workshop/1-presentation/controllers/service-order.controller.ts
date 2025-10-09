@@ -31,7 +31,7 @@ import { ServiceOrderResponseDto } from '../dtos/service-order/service-order-res
 @Controller('api/service-orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class ServiceOrderController {
   constructor(private readonly serviceOrderService: ServiceOrderService) {}
 
