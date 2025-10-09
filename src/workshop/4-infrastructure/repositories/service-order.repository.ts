@@ -260,6 +260,33 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     });
   }
 
+  async findCompletedOrders() {
+    return this.prisma.serviceOrder.findMany({
+      where: {
+        status: 'FINISHED',
+        startedAt: { not: null },
+        completedAt: { not: null },
+      },
+      include: {
+        customer: true,
+        vehicle: true,
+        services: {
+          include: {
+            service: true,
+          },
+        },
+        parts: {
+          include: {
+            part: true,
+          },
+        },
+      },
+      orderBy: {
+        completedAt: 'desc',
+      },
+    });
+  }
+
   async delete(id: string) {
     return this.prisma.serviceOrder.delete({
       where: { id },

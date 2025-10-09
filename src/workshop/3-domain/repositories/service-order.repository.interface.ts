@@ -138,5 +138,7 @@ export interface IServiceOrderRepository {
 
   findByVehicleId(vehicleId: string): Promise<ServiceOrderWithRelations[]>;
 
+  findCompletedOrders(): Promise<ServiceOrderWithRelations[]>;
+
   delete(id: string): Promise<ServiceOrder>;
 }

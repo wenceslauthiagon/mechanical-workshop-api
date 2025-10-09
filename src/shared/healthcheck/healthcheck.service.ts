@@ -44,16 +44,16 @@ class HealthChecker {
     const startTime = Date.now();
     let lastError: Error | null = null;
 
-    console.log(`🔍 Starting health check for: ${this.options.url}`);
+    console.log(`Starting health check for: ${this.options.url}`);
 
     for (let attempt = 1; attempt <= this.options.retries; attempt++) {
       try {
         const response = await this.performHealthCheck();
         const duration = Date.now() - startTime;
 
-        console.log(`✅ Health check passed on attempt ${attempt}`);
-        console.log(`⏱️  Response time: ${duration}ms`);
-        console.log(`📊 Response: ${JSON.stringify(response.data, null, 2)}`);
+        console.log(`Health check passed on attempt ${attempt}`);
+        console.log(`Response time: ${duration}ms`);
+        console.log(`Response: ${JSON.stringify(response.data, null, 2)}`);
 
         process.exit(0);
       } catch (error) {
@@ -61,12 +61,12 @@ class HealthChecker {
         const duration = Date.now() - startTime;
 
         console.warn(
-          `⚠️  Health check failed on attempt ${attempt}/${this.options.retries} (${duration}ms)`,
+          `Health check failed on attempt ${attempt}/${this.options.retries} (${duration}ms)`,
         );
-        console.warn(`❌ Error: ${lastError.message}`);
+        console.warn(`Error: ${lastError.message}`);
 
         if (attempt < this.options.retries) {
-          console.log(`⏳ Retrying in ${this.options.retryDelay}ms...`);
+          console.log(`Retrying in ${this.options.retryDelay}ms...`);
           await this.sleep(this.options.retryDelay);
         }
       }
@@ -74,16 +74,14 @@ class HealthChecker {
 
     const totalDuration = Date.now() - startTime;
     console.error(
-      `💀 Health check failed after ${this.options.retries} attempts (${totalDuration}ms)`,
+      `Health check failed after ${this.options.retries} attempts (${totalDuration}ms)`,
     );
-    console.error(`🔥 Final error: ${lastError?.message || 'Unknown error'}`);
+    console.error(`Final error: ${lastError?.message || 'Unknown error'}`);
 
     if (lastError instanceof AxiosError) {
+      console.error(`Status: ${lastError.response?.status || 'No response'}`);
       console.error(
-        `📡 Status: ${lastError.response?.status || 'No response'}`,
-      );
-      console.error(
-        `📄 Response: ${JSON.stringify(lastError.response?.data || 'No data', null, 2)}`,
+        `Response: ${JSON.stringify(lastError.response?.data || 'No data', null, 2)}`,
       );
     }
 
@@ -154,7 +152,7 @@ class HealthChecker {
 if (require.main === module) {
   const checker = new HealthChecker();
   checker.check().catch((error) => {
-    console.error('🚨 Unexpected error:', error);
+    console.error('Unexpected error:', error);
     process.exit(1);
   });
 }

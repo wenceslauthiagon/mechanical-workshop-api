@@ -1,4 +1,4 @@
-# 🔧 Sistema Integrado de Oficina Mecânica
+# 🔧 Mechanical Workshop API
 
 [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -7,119 +7,310 @@
 [![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
 [![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://swagger.io/)
 
-## 📋 Sobre o Projeto
+Sistema de gestão para oficina mecânica desenvolvido com NestJS, Prisma e PostgreSQL, seguindo os princípios de **Domain-Driven Design (DDD)** e **Clean Architecture**.
 
-Sistema Integrado de Atendimento e Execução de Serviços para oficina mecânica, desenvolvido como MVP (Minimum Viable Product) seguindo os princípios de **Domain-Driven Design (DDD)** e **Clean Architecture**.
+## 🚀 Tecnologias
 
-### 🎯 Funcionalidades Principais
+- **Backend**: NestJS 11 + TypeScript
+- **Database**: PostgreSQL com Prisma ORM
+- **Authentication**: JWT com bcryptjs
+- **Documentation**: Swagger/OpenAPI
+- **Architecture**: Clean Architecture (DDD)
+- **Containerization**: Docker & Docker Compose
 
-- **Gestão de Clientes**: CRUD completo com validação de CPF/CNPJ
-- **Controle de Veículos**: Cadastro e gerenciamento de veículos por cliente
-- **Ordens de Serviço**: Fluxo completo desde criação até entrega
-- **Gestão de Peças**: Controle de estoque e preços
-- **Autenticação JWT**: Segurança para APIs administrativas
-- **Documentação API**: Swagger/OpenAPI integrado
-- **Rastreamento em Tempo Real**: Acompanhamento do status dos serviços
+## 📋 Funcionalidades
 
-### 🏗️ Arquitetura
+### ✅ Gestão de Clientes
+- CRUD completo de clientes
+- Histórico de serviços por cliente
+- API pública para consulta de orçamentos
+
+### ✅ Gestão de Veículos
+- CRUD de veículos
+- Vinculação com clientes
+- Histórico de manutenções
+
+### ✅ Gestão de Peças
+- CRUD de peças/produtos
+- Controle de estoque
+- Preços e fornecedores
+
+### ✅ Gestão de Serviços
+- CRUD de tipos de serviços
+- Preços e descrições
+- Tempo estimado de execução
+
+### ✅ Ordens de Serviço
+- CRUD completo
+- Estados: PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+- Orçamento automático baseado em serviços e peças
+
+### ✅ Autenticação e Autorização
+- Sistema JWT completo
+- Roles: ADMIN, EMPLOYEE
+- Guards para proteção de rotas
+- Decoradores personalizados
+
+### ✅ Monitoramento
+- Estatísticas de desempenho por serviço
+- Tempo de execução e precisão de orçamentos
+- Health checks
+
+## 🏗️ Arquitetura
 
 ```
 src/
-├── 📁 domain/              # Entidades e regras de negócio
-│   ├── entities/           # Entidades do domínio
-│   └── repositories/       # Interfaces dos repositórios
-├── 📁 application/         # Casos de uso e DTOs
-│   ├── dtos/              # Data Transfer Objects
-│   └── use-cases/         # Lógica de aplicação
-├── 📁 infrastructure/      # Implementações externas
-│   ├── database/          # TypeORM e entidades
-│   └── auth/              # Autenticação JWT
-├── 📁 presentation/        # Controllers e APIs REST
-│   └── controllers/       # Endpoints HTTP
-└── 📁 shared/             # Código compartilhado
-    └── enums/             # Enumerações
+├── 📁 workshop/
+│   ├── 📁 1-presentation/     # Controllers e APIs REST
+│   │   └── controllers/       # Endpoints HTTP
+│   ├── 📁 2-application/      # Services e lógica de aplicação
+│   │   └── services/          # Casos de uso
+│   ├── 📁 3-domain/           # Entidades e regras de negócio
+│   │   └── entities/          # Entidades do domínio
+│   └── 📁 4-infrastructure/   # Repositórios e integrações
+│       └── repositories/      # Implementação Prisma
+├── 📁 auth/                   # Módulo de autenticação
+│   ├── controllers/           # Auth controller
+│   ├── services/              # Auth e User services
+│   ├── guards/                # JWT guards e roles
+│   └── decorators/            # Decoradores customizados
+├── 📁 public/                 # API pública (sem auth)
+└── 📁 shared/                 # Código compartilhado
+    └── enums/                 # Enumerações
 ```
 
-## 🚀 Tecnologias Utilizadas
+## 🐳 Quick Start com Docker (Recomendado)
 
-- **Backend**: NestJS v11 + TypeScript
-- **Banco de Dados**: PostgreSQL 15
-- **ORM**: TypeORM
-- **Autenticação**: JWT (JSON Web Tokens)
-- **Validação**: class-validator + class-transformer
-- **Documentação**: Swagger/OpenAPI
-- **Containerização**: Docker + Docker Compose
-- **Testes**: Jest
-- **Linting**: ESLint + Prettier
+### Pré-requisitos
+- Docker
+- Docker Compose
+- Make (opcional, mas recomendado)
 
-## Project setup
+### Setup Rápido
+
+1. **Clone o repositório**
+```bash
+git clone <repository-url>
+cd mechanical-workshop-api
+```
+
+2. **Inicie todo o ambiente**
+```bash
+# Com Make (recomendado)
+make setup
+
+# Ou manualmente
+docker-compose build
+docker-compose up -d
+```
+
+3. **Verifique se está funcionando**
+```bash
+# Com Make
+make health
+
+# Ou manualmente
+curl http://localhost:3000/health
+```
+
+### Comandos Docker Úteis
 
 ```bash
-$ npm install
+# Ver ajuda completa
+make help
+
+# Iniciar serviços
+make up
+
+# Ver logs
+make logs
+
+# Parar serviços  
+make down
+
+# Reiniciar
+make restart
+
+# Executar testes
+make test
+
+# Acessar shell da aplicação
+make shell-app
+
+# Backup do banco
+make backup-db
 ```
 
-## Compile and run the project
+## 🛠️ Instalação Local (Desenvolvimento)
+
+### Pré-requisitos
+- Node.js 18+
+- PostgreSQL 13+
+- npm ou yarn
+
+### Setup Local
+
+1. **Clone e instale dependências**
+```bash
+git clone <repository-url>
+cd mechanical-workshop-api
+npm install
+```
+
+2. **Configure ambiente**
+```bash
+cp .env.example .env
+# Edite o arquivo .env com suas configurações
+```
+
+3. **Setup do banco**
+```bash
+npx prisma migrate dev
+npx prisma generate
+npm run create-admin
+```
+
+4. **Inicie a aplicação**
+```bash
+npm run start:dev
+```
+
+## 🧪 Testes
 
 ```bash
-# development
-$ npm run start
+# Local
+npm run test
+npm run test:cov
+npm run test:e2e
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# Docker
+make test
+make test-cov
 ```
 
-## Run tests
+## 📚 API Documentation
 
+### URLs Importantes
+- **API**: http://localhost:3000
+- **Swagger**: http://localhost:3000/api
+- **Health Check**: http://localhost:3000/health
+
+### Endpoints Principais
+
+#### Autenticação
+- `POST /auth/login` - Login do usuário
+- `POST /auth/register` - Registro (apenas admins)
+
+#### Clientes
+- `GET /customers` - Listar clientes
+- `POST /customers` - Criar cliente
+- `GET /customers/:id` - Buscar cliente
+- `PUT /customers/:id` - Atualizar cliente
+- `DELETE /customers/:id` - Remover cliente
+
+#### API Pública
+- `GET /public/budget/:customerId/:vehicleId` - Consultar orçamento
+
+#### Estatísticas (Protegido)
+- `GET /service-stats` - Estatísticas gerais
+- `GET /service-stats/by-service` - Por tipo de serviço
+
+## 🗄️ Estrutura do Banco
+
+### Principais Entidades
+- **User**: Usuários do sistema (admin/funcionários)
+- **Customer**: Clientes da oficina
+- **Vehicle**: Veículos dos clientes
+- **Part**: Peças e produtos
+- **Service**: Tipos de serviços oferecidos
+- **ServiceOrder**: Ordens de serviço
+- **ServiceOrderItem**: Itens das ordens (serviços/peças)
+
+## 🔒 Segurança
+
+- Autenticação JWT com refresh tokens
+- Senhas hasheadas com bcryptjs
+- Roles e permissões granulares
+- Validação de entrada com class-validator
+- Rate limiting (configurável)
+- Docker multi-stage builds com usuário não-root
+
+## 🚀 Deploy
+
+### Docker em Produção
+
+1. **Configurar variáveis**
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Editar .env.docker com valores de produção
+nano .env.docker
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+2. **Deploy**
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+make prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Variáveis de Ambiente
 
-## Resources
+#### Desenvolvimento (.env)
+```env
+NODE_ENV=development
+PORT=3000
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/mechanical_workshop?schema=public"
+JWT_SECRET=your-dev-secret
+JWT_EXPIRES_IN=7d
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+#### Produção (.env.docker)
+```env
+NODE_ENV=production
+PORT=3000
+DATABASE_URL="postgresql://postgres:postgres@postgres:5432/mechanical_workshop?schema=public"
+JWT_SECRET=your-super-secret-production-key
+JWT_EXPIRES_IN=7d
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 🔧 Troubleshooting
 
-## Support
+### Problemas Comuns
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+1. **Porta 3000 em uso**
+```bash
+# Alterar porta no docker-compose.yml
+ports:
+  - "3001:3000"  # Host:Container
+```
 
-## Stay in touch
+2. **Banco não conecta**
+```bash
+# Verificar logs
+make logs-db
+make logs-app
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Resetar ambiente
+make clean
+make setup
+```
 
-## License
+3. **Container não inicia**
+```bash
+# Rebuild completo
+docker-compose down -v
+docker-compose build --no-cache
+docker-compose up -d
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📊 Monitoramento
+
+### Health Checks
+- **API**: `GET /health`
+- **Database**: Verificação automática no container
+
+### Métricas Disponíveis
+- Estatísticas de execução de serviços
+- Precisão de orçamentos
+- Tempo médio de atendimento
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT.

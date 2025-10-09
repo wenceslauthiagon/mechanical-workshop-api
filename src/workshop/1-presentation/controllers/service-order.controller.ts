@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   HttpStatus,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,7 +16,12 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
+import { Roles } from '../../../auth/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 import { ServiceOrderService } from '../../2-application/services/service-order.service';
 import { CreateServiceOrderDto } from '../dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../dtos/service-order/update-service-order-status.dto';
@@ -23,6 +29,9 @@ import { ServiceOrderResponseDto } from '../dtos/service-order/service-order-res
 
 @ApiTags('Service Orders')
 @Controller('api/service-orders')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
+@ApiBearerAuth()
 export class ServiceOrderController {
   constructor(private readonly serviceOrderService: ServiceOrderService) {}
 

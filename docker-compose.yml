@@ -40,15 +40,8 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
-    environment:
-      NODE_ENV: production
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: mechanical_workshop
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      JWT_EXPIRES_IN: 7d
+    env_file:
+      - .env.docker
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,6 +49,12 @@ services:
       - app-network
     volumes:
       - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Redis for caching (optional but recommended)
   redis:

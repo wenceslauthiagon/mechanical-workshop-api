@@ -9,11 +9,13 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
+  ApiBearerAuth,
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
@@ -21,9 +23,16 @@ import { CustomerService } from '../../2-application/services/customer.service';
 import { CreateCustomerDto } from '../dtos/customer/create-customer.dto';
 import { UpdateCustomerDto } from '../dtos/customer/update-customer.dto';
 import { CustomerResponseDto } from '../dtos/customer/customer-response.dto';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
+import { Roles } from '../../../auth/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Customers')
 @Controller('api/customers')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
+@ApiBearerAuth()
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 

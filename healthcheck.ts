@@ -26,26 +26,25 @@ class HealthChecker {
     for (let attempt = 1; attempt <= this.options.retries; attempt++) {
       try {
         await this.performHealthCheck();
-        console.log(`✅ Health check passed on attempt ${attempt}`);
-        process.exit(0);
+        console.log(`Health check passed on attempt ${attempt}`);
+        return;
       } catch (error) {
         lastError = error as Error;
         console.warn(
-          `⚠️  Health check failed on attempt ${attempt}/${this.options.retries}: ${lastError.message}`,
+          `Health check failed on attempt ${attempt}/${this.options.retries}: ${lastError.message}`,
         );
 
         if (attempt < this.options.retries) {
-          console.log(`⏳ Retrying in ${this.options.retryDelay}ms...`);
+          console.log(`Retrying in ${this.options.retryDelay}ms...`);
           await this.sleep(this.options.retryDelay);
         }
       }
     }
 
-    console.error(
-      `❌ Health check failed after ${this.options.retries} attempts`,
-    );
     console.error(`Last error: ${lastError?.message || 'Unknown error'}`);
-    process.exit(1);
+    throw new Error(
+      `Health check failed after ${this.options.retries} attempts`,
+    );
   }
 
   private async performHealthCheck(): Promise<void> {
@@ -75,9 +74,7 @@ class HealthChecker {
           if (response.statusCode === 200) {
             try {
               const healthData = JSON.parse(data) as { status?: string };
-              console.log(
-                `📊 Health status: ${healthData.status || 'unknown'}`,
-              );
+              console.log(`Health status: ${healthData.status || 'unknown'}`);
               resolve();
             } catch {
               // If not JSON, just check status code
