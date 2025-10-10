@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { PartRepository } from '../../4-infrastructure/repositories/part.repository';
@@ -24,7 +20,9 @@ export class PartService {
         data.partNumber,
       );
       if (existingPart) {
-        throw new ConflictException(ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS);
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -51,7 +49,7 @@ export class PartService {
   async findById(id: string): Promise<PartBase> {
     const part = await this.partRepository.findById(id);
     if (!part) {
-      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.PART_NOT_FOUND);
     }
     return part;
   }
@@ -59,7 +57,7 @@ export class PartService {
   async findByPartNumber(partNumber: string): Promise<PartBase> {
     const part = await this.partRepository.findByPartNumber(partNumber);
     if (!part) {
-      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.PART_NOT_FOUND);
     }
     return part;
   }
@@ -75,7 +73,7 @@ export class PartService {
   async update(id: string, data: UpdatePartDto): Promise<PartBase> {
     const part = await this.partRepository.findById(id);
     if (!part) {
-      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
     if (data.partNumber && data.partNumber !== part.partNumber) {
@@ -83,7 +81,9 @@ export class PartService {
         data.partNumber,
       );
       if (existingPart && existingPart.id !== id) {
-        throw new ConflictException(ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS);
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -103,12 +103,12 @@ export class PartService {
   async updateStock(id: string, quantity: number): Promise<PartBase> {
     const part = await this.partRepository.findById(id);
     if (!part) {
-      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
     const newStock = part.stock + quantity;
     if (newStock < 0) {
-      throw new ConflictException(ERROR_MESSAGES.INSUFFICIENT_STOCK);
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.INSUFFICIENT_STOCK);
     }
 
     return this.partRepository.update(id, { stock: newStock });
@@ -117,7 +117,7 @@ export class PartService {
   async remove(id: string): Promise<PartBase> {
     const part = await this.partRepository.findById(id);
     if (!part) {
-      throw new NotFoundException(ERROR_MESSAGES.PART_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
     return this.partRepository.update(id, { isActive: false });

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { User } from '@prisma/client';
@@ -61,7 +61,7 @@ export class AuthService {
       if (!user) {
         this.errorHandler.generateException(
           ERROR_MESSAGES.INVALID_CREDENTIALS,
-          401,
+          HttpStatus.UNAUTHORIZED,
         );
       }
 

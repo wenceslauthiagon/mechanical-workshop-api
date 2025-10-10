@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { VehicleRepository } from '../../4-infrastructure/repositories/vehicle.repository';
 import { CustomerRepository } from '../../4-infrastructure/repositories/customer.repository';
@@ -26,7 +22,7 @@ export class VehicleService {
       if (!customer) {
         this.errorHandler.generateException(
           ERROR_MESSAGES.CLIENT_NOT_FOUND,
-          404,
+          HttpStatus.NOT_FOUND,
         );
       }
 
@@ -36,7 +32,7 @@ export class VehicleService {
       if (existingVehicle) {
         this.errorHandler.generateException(
           ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS,
-          409,
+          HttpStatus.CONFLICT,
         );
       }
 
@@ -55,7 +51,7 @@ export class VehicleService {
   async findById(id: string): Promise<VehicleResponseDto> {
     const vehicle = await this.vehicleRepository.findById(id);
     if (!vehicle) {
-      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
     return this.mapToResponseDto(vehicle);
   }
@@ -63,7 +59,7 @@ export class VehicleService {
   async findByCustomerId(customerId: string): Promise<VehicleResponseDto[]> {
     const customer = await this.customerRepository.findById(customerId);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     const vehicles = await this.vehicleRepository.findByCustomerId(customerId);
@@ -74,7 +70,7 @@ export class VehicleService {
     const vehicle =
       await this.vehicleRepository.findByLicensePlate(licensePlate);
     if (!vehicle) {
-      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
     return this.mapToResponseDto(vehicle);
   }
@@ -85,13 +81,13 @@ export class VehicleService {
   ): Promise<VehicleResponseDto> {
     const vehicle = await this.vehicleRepository.findById(id);
     if (!vehicle) {
-      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
     if (data.customerId && data.customerId !== vehicle.customerId) {
       const customer = await this.customerRepository.findById(data.customerId);
       if (!customer) {
-        throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+        this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
       }
     }
 
@@ -100,7 +96,7 @@ export class VehicleService {
         data.licensePlate,
       );
       if (existingVehicle) {
-        throw new ConflictException(
+        this.errorHandler.handleConflictError(
           ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS,
         );
       }
@@ -113,12 +109,14 @@ export class VehicleService {
   async remove(id: string): Promise<void> {
     const vehicle = await this.vehicleRepository.findById(id);
     if (!vehicle) {
-      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
     const hasServiceOrders = await this.vehicleRepository.hasServiceOrders(id);
     if (hasServiceOrders) {
-      throw new ConflictException(ERROR_MESSAGES.VEHICLE_HAS_SERVICE_ORDERS);
+      this.errorHandler.handleConflictError(
+        ERROR_MESSAGES.VEHICLE_HAS_SERVICE_ORDERS,
+      );
     }
 
     await this.vehicleRepository.delete(id);

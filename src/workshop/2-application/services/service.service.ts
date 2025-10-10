@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { ServiceRepository } from '../../4-infrastructure/repositories/service.repository';
@@ -21,7 +17,9 @@ export class ServiceService {
   async create(data: CreateServiceDto): Promise<ServiceBase> {
     const existingService = await this.serviceRepository.findByName(data.name);
     if (existingService) {
-      throw new ConflictException(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
+      this.errorHandler.handleConflictError(
+        ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS,
+      );
     }
 
     return this.serviceRepository.create({
@@ -44,7 +42,7 @@ export class ServiceService {
   async findById(id: string): Promise<ServiceBase> {
     const service = await this.serviceRepository.findById(id);
     if (!service) {
-      throw new NotFoundException(ERROR_MESSAGES.SERVICE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
     return service;
   }
@@ -56,7 +54,7 @@ export class ServiceService {
   async update(id: string, data: UpdateServiceDto): Promise<ServiceBase> {
     const service = await this.serviceRepository.findById(id);
     if (!service) {
-      throw new NotFoundException(ERROR_MESSAGES.SERVICE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
     if (data.name && service.name !== data.name) {
@@ -64,7 +62,9 @@ export class ServiceService {
         data.name,
       );
       if (existingService && existingService.id !== id) {
-        throw new ConflictException(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -83,7 +83,7 @@ export class ServiceService {
   async remove(id: string): Promise<ServiceBase> {
     const service = await this.serviceRepository.findById(id);
     if (!service) {
-      throw new NotFoundException(ERROR_MESSAGES.SERVICE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
     const updatedService = await this.serviceRepository.update(id, {

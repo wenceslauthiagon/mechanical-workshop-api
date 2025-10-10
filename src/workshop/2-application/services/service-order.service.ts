@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { ServiceOrderStatus } from '@prisma/client';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
@@ -34,16 +30,17 @@ export class ServiceOrderService {
   async create(data: CreateServiceOrderDto): Promise<ServiceOrderResponseDto> {
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     const vehicle = await this.vehicleRepository.findById(data.vehicleId);
     if (!vehicle) {
-      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
     if (vehicle.customerId !== data.customerId) {
-      throw new BadRequestException(
+      this.errorHandler.generateException(
         ERROR_MESSAGES.VEHICLE_NOT_BELONGS_TO_CLIENT,
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -53,13 +50,14 @@ export class ServiceOrderService {
           serviceItem.serviceId,
         );
         if (!service) {
-          throw new NotFoundException(
+          this.errorHandler.handleNotFoundError(
             `Serviço ${serviceItem.serviceId} não encontrado`,
           );
         }
         if (!service.isActive) {
-          throw new BadRequestException(
+          this.errorHandler.generateException(
             `Serviço ${service.name} não está ativo`,
+            HttpStatus.BAD_REQUEST,
           );
         }
       }
@@ -69,18 +67,20 @@ export class ServiceOrderService {
       for (const partItem of data.parts) {
         const part = await this.partRepository.findById(partItem.partId);
         if (!part) {
-          throw new NotFoundException(
+          this.errorHandler.handleNotFoundError(
             `${ERROR_MESSAGES.PART_NOT_FOUND}: ${partItem.partId}`,
           );
         }
         if (!part.isActive) {
-          throw new BadRequestException(
+          this.errorHandler.generateException(
             `${ERROR_MESSAGES.PART_NOT_ACTIVE}: ${part.name}`,
+            HttpStatus.BAD_REQUEST,
           );
         }
         if (part.stock < partItem.quantity) {
-          throw new BadRequestException(
+          this.errorHandler.generateException(
             `${ERROR_MESSAGES.INSUFFICIENT_STOCK_FOR_PART} ${part.name}. Disponível: ${part.stock}, Solicitado: ${partItem.quantity}`,
+            HttpStatus.BAD_REQUEST,
           );
         }
       }
@@ -182,7 +182,9 @@ export class ServiceOrderService {
   async findById(id: string): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(
+        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
+      );
     }
     return this.mapToResponseDto(serviceOrder);
   }
@@ -190,7 +192,7 @@ export class ServiceOrderService {
   async findByCustomer(customerId: string): Promise<ServiceOrderResponseDto[]> {
     const customer = await this.customerRepository.findById(customerId);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     const serviceOrders =
@@ -206,7 +208,9 @@ export class ServiceOrderService {
   ): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(
+        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
+      );
     }
 
     this.validateStatusTransition(serviceOrder.status, data.status);
@@ -250,12 +254,15 @@ export class ServiceOrderService {
   async approveOrder(id: string): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(
+        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
+      );
     }
 
     if (serviceOrder.status !== ServiceOrderStatus.AWAITING_APPROVAL) {
-      throw new BadRequestException(
+      this.errorHandler.generateException(
         ERROR_MESSAGES.SERVICE_ORDER_NOT_AWAITING_APPROVAL,
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -277,7 +284,9 @@ export class ServiceOrderService {
   async getStatusHistory(id: string) {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(
+        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
+      );
     }
 
     return this.serviceOrderRepository.getStatusHistory(id);
@@ -289,7 +298,9 @@ export class ServiceOrderService {
     const serviceOrder =
       await this.serviceOrderRepository.findByOrderNumber(orderNumber);
     if (!serviceOrder) {
-      throw new NotFoundException(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(
+        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
+      );
     }
     return this.mapToResponseDto(serviceOrder);
   }
@@ -301,7 +312,7 @@ export class ServiceOrderService {
     const customer =
       await this.customerRepository.findByDocument(cleanDocument);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     const serviceOrders = await this.serviceOrderRepository.findByCustomerId(
@@ -318,7 +329,7 @@ export class ServiceOrderService {
     const vehicle =
       await this.vehicleRepository.findByLicensePlate(licensePlate);
     if (!vehicle) {
-      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
     const serviceOrders = await this.serviceOrderRepository.findByVehicleId(
@@ -359,8 +370,9 @@ export class ServiceOrderService {
 
     const allowedTransitions = validTransitions[currentStatus] || [];
     if (!allowedTransitions.includes(newStatus)) {
-      throw new BadRequestException(
+      this.errorHandler.generateException(
         `Transição de status inválida: ${currentStatus} → ${newStatus}. Transições permitidas: ${allowedTransitions.join(', ')}`,
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

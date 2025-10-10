@@ -1,31 +1,34 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { Customer } from '@prisma/client';
 import { CustomerRepository } from '../4-infrastructure/repositories/customer.repository';
 import { CreateCustomerDto, UpdateCustomerDto } from '../1-presentation/dtos';
 import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
+import { ErrorHandlerService } from '../../shared/services/error-handler.service';
 
 @Injectable()
 export class CreateOrderService {
-  constructor(private readonly customerRepository: CustomerRepository) {}
+  constructor(
+    private readonly customerRepository: CustomerRepository,
+    private readonly errorHandler: ErrorHandlerService,
+  ) {}
 
   async create(createCustomerDto: CreateCustomerDto): Promise<Customer> {
     const existingByEmail = await this.customerRepository.findByEmail(
       createCustomerDto.email,
     );
     if (existingByEmail) {
-      throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+      this.errorHandler.handleConflictError(
+        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+      );
     }
 
     const existingByDocument = await this.customerRepository.findByDocument(
       createCustomerDto.document,
     );
     if (existingByDocument) {
-      throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
+      this.errorHandler.handleConflictError(
+        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
+      );
     }
 
     try {
@@ -35,7 +38,10 @@ export class CreateOrderService {
       };
       return await this.customerRepository.create(customerData);
     } catch {
-      throw new BadRequestException(ERROR_MESSAGES.CLIENT_CREATE_ERROR);
+      this.errorHandler.generateException(
+        ERROR_MESSAGES.CLIENT_CREATE_ERROR,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -46,7 +52,7 @@ export class CreateOrderService {
   async findOne(id: string): Promise<Customer> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
     return customer;
   }
@@ -57,7 +63,7 @@ export class CreateOrderService {
   ): Promise<Customer> {
     const existingCustomer = await this.customerRepository.findById(id);
     if (!existingCustomer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     if (
@@ -68,7 +74,9 @@ export class CreateOrderService {
         updateCustomerDto.email,
       );
       if (existingByEmail) {
-        throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -80,7 +88,9 @@ export class CreateOrderService {
         updateCustomerDto.document,
       );
       if (existingByDocument) {
-        throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -91,20 +101,26 @@ export class CreateOrderService {
       };
       return await this.customerRepository.update(id, updateData);
     } catch {
-      throw new BadRequestException(ERROR_MESSAGES.CLIENT_UPDATE_ERROR);
+      this.errorHandler.generateException(
+        ERROR_MESSAGES.CLIENT_UPDATE_ERROR,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async remove(id: string): Promise<void> {
     const existingCustomer = await this.customerRepository.findById(id);
     if (!existingCustomer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     try {
       await this.customerRepository.delete(id);
     } catch {
-      throw new BadRequestException(ERROR_MESSAGES.CLIENT_DELETE_ERROR);
+      this.errorHandler.generateException(
+        ERROR_MESSAGES.CLIENT_DELETE_ERROR,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }
