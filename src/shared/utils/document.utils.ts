@@ -23,12 +23,13 @@ export class DocumentUtils {
   /**
    * Valida e normaliza um documento usando o Value Object Document
    * @param document - Documento com ou sem formatação
-   * @returns Documento normalizado e válido
+   * @returns Documento normalizado e válido (apenas números)
    * @throws Error se o documento for inválido
    */
   static validateAndNormalize(document: string): string {
     const documentVO = new Document(document);
-    return documentVO.value;
+    // Garantir que retorna apenas números
+    return documentVO.toString();
   }
 
   /**

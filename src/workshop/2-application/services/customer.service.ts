@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { Customer } from '@prisma/client';
 import { CustomerRepository } from '../../4-infrastructure/repositories/customer.repository';
@@ -33,13 +29,17 @@ export class CustomerService {
       data.email,
     );
     if (existingEmailCustomer) {
-      throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+      this.errorHandler.handleConflictError(
+        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+      );
     }
 
     const existingDocumentCustomer =
       await this.customerRepository.findByDocument(normalizedDocument);
     if (existingDocumentCustomer) {
-      throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
+      this.errorHandler.handleConflictError(
+        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
+      );
     }
 
     const customerData = {
@@ -58,7 +58,7 @@ export class CustomerService {
   async findById(id: string): Promise<Customer> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
     return customer;
   }
@@ -68,7 +68,7 @@ export class CustomerService {
     const customer =
       await this.customerRepository.findByDocument(normalizedDocument);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
     return customer;
   }
@@ -76,7 +76,7 @@ export class CustomerService {
   async findByEmail(email: string): Promise<Customer> {
     const customer = await this.customerRepository.findByEmail(email);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
     return customer;
   }
@@ -84,7 +84,7 @@ export class CustomerService {
   async update(id: string, data: UpdateCustomerDto): Promise<Customer> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     if (data.email && data.email !== customer.email) {
@@ -92,7 +92,9 @@ export class CustomerService {
         data.email,
       );
       if (existingCustomer) {
-        throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -109,7 +111,9 @@ export class CustomerService {
       const existingCustomer =
         await this.customerRepository.findByDocument(normalizedDocument);
       if (existingCustomer) {
-        throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -139,12 +143,12 @@ export class CustomerService {
   async remove(id: string): Promise<void> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
     const vehicles = await this.customerRepository.findVehiclesByCustomerId(id);
     if (vehicles.length > 0) {
-      throw new ConflictException(ERROR_MESSAGES.CLIENT_HAS_VEHICLES);
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.CLIENT_HAS_VEHICLES);
     }
 
     await this.customerRepository.delete(id);

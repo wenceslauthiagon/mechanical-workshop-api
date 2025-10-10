@@ -10,6 +10,11 @@ export class CustomerRepository implements ICustomerRepository {
   async create(
     data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Customer> {
+    console.log(
+      '🏪 REPOSITORY - Dados recebidos para salvar:',
+      JSON.stringify(data, null, 2),
+    );
+    console.log('🏪 REPOSITORY - Documento que será salvo:', data.document);
     return this.prisma.customer.create({
       data,
     });

@@ -37,7 +37,10 @@ export class CreateCustomerDto {
   @IsEnum(CustomerType)
   type: CustomerType;
 
-  @ApiProperty({ description: 'CPF ou CNPJ do cliente' })
+  @ApiProperty({
+    description: 'CPF ou CNPJ do cliente',
+    example: '123.456.789-10',
+  })
   @IsNotEmpty()
   @IsString()
   document: string;

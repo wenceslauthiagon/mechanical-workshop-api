@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CreateOrderService } from '../2-application/create-order.service';
+import { CustomerService } from '../2-application/services/customer.service';
 import { CreateCustomerDto, UpdateCustomerDto } from './dtos';
 import {
   API_SUMMARY,
@@ -34,7 +35,10 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 @Controller('api')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class WorkshopController {
-  constructor(private readonly customerService: CreateOrderService) {}
+  constructor(
+    private readonly createOrderService: CreateOrderService,
+    private readonly customerService: CustomerService,
+  ) {}
 
   @Post('customers')
   @HttpCode(HttpStatus.CREATED)
@@ -75,7 +79,7 @@ export class WorkshopController {
   @ApiResponse({ status: 200, description: SUCCESS_MESSAGES.CLIENT_FOUND })
   @ApiResponse({ status: 404, description: ERROR_MESSAGES.CLIENT_NOT_FOUND })
   findOneCustomer(@Param('id') id: string) {
-    return this.customerService.findOne(id);
+    return this.customerService.findById(id);
   }
 
   @Patch('customers/:id')
