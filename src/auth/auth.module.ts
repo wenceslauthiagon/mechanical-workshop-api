@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { SharedModule } from '../shared/shared.module';
 import { AuthService } from './services/auth.service';
 import { UserService } from './services/user.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -11,6 +12,7 @@ import { APP_CONSTANTS, ENV_KEYS } from '../shared/constants/app.constants';
 
 @Module({
   imports: [
+    SharedModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

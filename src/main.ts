@@ -4,9 +4,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { APP_CONSTANTS, ENV_KEYS } from './shared/constants/app.constants';
 import { API_TAGS } from './shared/constants/messages.constants';
+import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
+import { ErrorHandlerService } from './shared/services/error-handler.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Global exception filter
+  const errorHandlerService = new ErrorHandlerService();
+  app.useGlobalFilters(new GlobalExceptionFilter(errorHandlerService));
 
   app.useGlobalPipes(
     new ValidationPipe({

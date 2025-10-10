@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ServiceOrderRepository } from '../../4-infrastructure/repositories/service-order.repository';
 import { ServiceRepository } from '../../4-infrastructure/repositories/service.repository';
 import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
+import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 
 export interface ServiceExecutionStats {
   serviceId: string;
@@ -24,6 +25,7 @@ export class ServiceStatsService {
   constructor(
     private readonly serviceOrderRepository: ServiceOrderRepository,
     private readonly serviceRepository: ServiceRepository,
+    private readonly errorHandler: ErrorHandlerService,
   ) {}
 
   async getServiceExecutionStats(): Promise<ServiceExecutionStats[]> {

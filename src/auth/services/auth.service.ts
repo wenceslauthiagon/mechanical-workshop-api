@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { User } from '@prisma/client';
 import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
+import { ErrorHandlerService } from '../../shared/services/error-handler.service';
 
 export interface LoginDto {
   username: string;
@@ -31,6 +32,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly errorHandler: ErrorHandlerService,
   ) {}
 
   async validateUser(username: string, password: string): Promise<User | null> {
@@ -50,28 +52,38 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<LoginResponse> {
-    const user = await this.validateUser(loginDto.username, loginDto.password);
+    try {
+      const user = await this.validateUser(
+        loginDto.username,
+        loginDto.password,
+      );
 
-    if (!user) {
-      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
-    }
+      if (!user) {
+        this.errorHandler.generateException(
+          ERROR_MESSAGES.INVALID_CREDENTIALS,
+          401,
+        );
+      }
 
-    const payload: JwtPayload = {
-      sub: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-    };
-
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
+      const payload: JwtPayload = {
+        sub: user.id,
         username: user.username,
         email: user.email,
         role: user.role,
-      },
-    };
+      };
+
+      return {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
+      };
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
   }
 
   async validateJwtPayload(payload: JwtPayload): Promise<User | null> {

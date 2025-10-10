@@ -2,8 +2,8 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
+import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { Customer } from '@prisma/client';
 import { CustomerRepository } from '../../4-infrastructure/repositories/customer.repository';
 import { CreateCustomerDto } from '../../1-presentation/dtos/customer/create-customer.dto';
@@ -13,14 +13,20 @@ import { DocumentUtils } from '../../../shared/utils/document.utils';
 
 @Injectable()
 export class CustomerService {
-  constructor(private readonly customerRepository: CustomerRepository) {}
+  constructor(
+    private readonly customerRepository: CustomerRepository,
+    private readonly errorHandler: ErrorHandlerService,
+  ) {}
 
   async create(data: CreateCustomerDto): Promise<Customer> {
     let normalizedDocument: string;
     try {
       normalizedDocument = DocumentUtils.validateAndNormalize(data.document);
-    } catch {
-      throw new BadRequestException(ERROR_MESSAGES.INVALID_DOCUMENT);
+    } catch (error) {
+      this.errorHandler.handleValueObjectError(
+        error,
+        ERROR_MESSAGES.INVALID_DOCUMENT,
+      );
     }
 
     const existingEmailCustomer = await this.customerRepository.findByEmail(
@@ -94,8 +100,11 @@ export class CustomerService {
       let normalizedDocument: string;
       try {
         normalizedDocument = DocumentUtils.validateAndNormalize(data.document);
-      } catch {
-        throw new BadRequestException(ERROR_MESSAGES.INVALID_DOCUMENT);
+      } catch (error) {
+        this.errorHandler.handleValueObjectError(
+          error,
+          ERROR_MESSAGES.INVALID_DOCUMENT,
+        );
       }
       const existingCustomer =
         await this.customerRepository.findByDocument(normalizedDocument);
@@ -110,8 +119,11 @@ export class CustomerService {
         normalizedDocumentForUpdate = DocumentUtils.validateAndNormalize(
           data.document,
         );
-      } catch {
-        throw new BadRequestException(ERROR_MESSAGES.INVALID_DOCUMENT);
+      } catch (error) {
+        this.errorHandler.handleValueObjectError(
+          error,
+          ERROR_MESSAGES.INVALID_DOCUMENT,
+        );
       }
     }
 

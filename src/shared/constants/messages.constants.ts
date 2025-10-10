@@ -4,6 +4,11 @@ export const ERROR_MESSAGES = {
   UNKNOWN_ERROR: 'Unknown error',
   UNEXPECTED_ERROR: 'Unexpected error',
 
+  // Debug/Log messages
+  EXCEPTION_CAUGHT: 'Exception caught',
+  ERROR_HANDLER_THREW_EXCEPTION: 'ErrorHandlerService threw exception',
+  FALLBACK_TO_500_ERROR: 'Fallback to 500 error - unhandled exception type',
+
   // Autenticação
   INVALID_CREDENTIALS: 'Credenciais inválidas',
   INVALID_TOKEN: 'Token inválido',

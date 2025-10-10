@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { SharedModule } from '../shared/shared.module';
 import { WorkshopController } from './1-presentation/workshop.controller';
 import { ServiceOrderController } from './1-presentation/controllers/service-order.controller';
 import { VehicleController } from './1-presentation/controllers/vehicle.controller';
@@ -22,6 +23,7 @@ import { ServiceRepository } from './4-infrastructure/repositories/service.repos
 import { PartRepository } from './4-infrastructure/repositories/part.repository';
 
 @Module({
+  imports: [SharedModule],
   controllers: [
     WorkshopController,
     ServiceOrderController,

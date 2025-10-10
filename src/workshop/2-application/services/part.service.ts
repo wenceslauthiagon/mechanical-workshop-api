@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { PartRepository } from '../../4-infrastructure/repositories/part.repository';
 import { CreatePartDto } from '../../1-presentation/dtos/part/create-part.dto';
@@ -12,7 +13,10 @@ import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 
 @Injectable()
 export class PartService {
-  constructor(private readonly partRepository: PartRepository) {}
+  constructor(
+    private readonly partRepository: PartRepository,
+    private readonly errorHandler: ErrorHandlerService,
+  ) {}
 
   async create(data: CreatePartDto): Promise<PartBase> {
     if (data.partNumber) {

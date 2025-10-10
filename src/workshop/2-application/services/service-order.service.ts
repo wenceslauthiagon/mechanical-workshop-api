@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { ServiceOrderStatus } from '@prisma/client';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../1-presentation/dtos/service-order/update-service-order-status.dto';
@@ -27,6 +28,7 @@ export class ServiceOrderService {
     private readonly vehicleRepository: VehicleRepository,
     private readonly serviceRepository: ServiceRepository,
     private readonly partRepository: PartRepository,
+    private readonly errorHandler: ErrorHandlerService,
   ) {}
 
   async create(data: CreateServiceOrderDto): Promise<ServiceOrderResponseDto> {
