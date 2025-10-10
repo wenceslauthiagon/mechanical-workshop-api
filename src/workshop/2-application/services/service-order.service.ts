@@ -295,7 +295,9 @@ export class ServiceOrderService {
   async findByCustomerDocument(
     document: string,
   ): Promise<ServiceOrderResponseDto[]> {
-    const customer = await this.customerRepository.findByDocument(document);
+    const cleanDocument = document.replace(/[^\d]/g, '');
+    const customer =
+      await this.customerRepository.findByDocument(cleanDocument);
     if (!customer) {
       throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }

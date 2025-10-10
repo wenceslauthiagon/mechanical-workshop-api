@@ -17,6 +17,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 import { CreateVehicleDto } from '../dtos/vehicle/create-vehicle.dto';
@@ -27,6 +28,7 @@ import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 
 @ApiTags('Vehicles')
+@ApiBearerAuth('JWT-auth')
 @Controller('api/vehicles')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class VehicleController {

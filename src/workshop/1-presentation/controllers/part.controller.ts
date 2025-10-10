@@ -19,6 +19,7 @@ import {
   ApiParam,
   ApiBody,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { PartService } from '../../2-application/services/part.service';
 import { CreatePartDto } from '../dtos/part/create-part.dto';
@@ -28,6 +29,7 @@ import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 
 @ApiTags('Parts')
+@ApiBearerAuth('JWT-auth')
 @Controller('api/parts')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PartController {

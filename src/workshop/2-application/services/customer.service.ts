@@ -2,18 +2,27 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Customer } from '@prisma/client';
 import { CustomerRepository } from '../../4-infrastructure/repositories/customer.repository';
 import { CreateCustomerDto } from '../../1-presentation/dtos/customer/create-customer.dto';
 import { UpdateCustomerDto } from '../../1-presentation/dtos/customer/update-customer.dto';
 import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
+import { DocumentUtils } from '../../../shared/utils/document.utils';
 
 @Injectable()
 export class CustomerService {
   constructor(private readonly customerRepository: CustomerRepository) {}
 
   async create(data: CreateCustomerDto): Promise<Customer> {
+    let normalizedDocument: string;
+    try {
+      normalizedDocument = DocumentUtils.validateAndNormalize(data.document);
+    } catch {
+      throw new BadRequestException(ERROR_MESSAGES.INVALID_DOCUMENT);
+    }
+
     const existingEmailCustomer = await this.customerRepository.findByEmail(
       data.email,
     );
@@ -22,13 +31,14 @@ export class CustomerService {
     }
 
     const existingDocumentCustomer =
-      await this.customerRepository.findByDocument(data.document);
+      await this.customerRepository.findByDocument(normalizedDocument);
     if (existingDocumentCustomer) {
       throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
     }
 
     const customerData = {
       ...data,
+      document: normalizedDocument,
       additionalInfo: data.additionalInfo ?? null,
     };
 
@@ -48,7 +58,9 @@ export class CustomerService {
   }
 
   async findByDocument(document: string): Promise<Customer> {
-    const customer = await this.customerRepository.findByDocument(document);
+    const normalizedDocument = DocumentUtils.normalize(document);
+    const customer =
+      await this.customerRepository.findByDocument(normalizedDocument);
     if (!customer) {
       throw new NotFoundException(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
@@ -79,16 +91,33 @@ export class CustomerService {
     }
 
     if (data.document && data.document !== customer.document) {
-      const existingCustomer = await this.customerRepository.findByDocument(
-        data.document,
-      );
+      let normalizedDocument: string;
+      try {
+        normalizedDocument = DocumentUtils.validateAndNormalize(data.document);
+      } catch {
+        throw new BadRequestException(ERROR_MESSAGES.INVALID_DOCUMENT);
+      }
+      const existingCustomer =
+        await this.customerRepository.findByDocument(normalizedDocument);
       if (existingCustomer) {
         throw new ConflictException(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
       }
     }
 
+    let normalizedDocumentForUpdate: string | undefined;
+    if (data.document) {
+      try {
+        normalizedDocumentForUpdate = DocumentUtils.validateAndNormalize(
+          data.document,
+        );
+      } catch {
+        throw new BadRequestException(ERROR_MESSAGES.INVALID_DOCUMENT);
+      }
+    }
+
     const customerData = {
       ...data,
+      document: normalizedDocumentForUpdate,
       additionalInfo: data.additionalInfo ?? null,
     };
 

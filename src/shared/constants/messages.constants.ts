@@ -18,6 +18,7 @@ export const ERROR_MESSAGES = {
   CLIENT_NOT_FOUND: 'Cliente não encontrado',
   EMAIL_ALREADY_EXISTS: 'Email já cadastrado no sistema',
   DOCUMENT_ALREADY_EXISTS: 'CPF/CNPJ já cadastrado no sistema',
+  INVALID_DOCUMENT: 'Documento inválido. Informe um CPF ou CNPJ válido',
   CLIENT_HAS_VEHICLES:
     'Não é possível remover cliente com veículos cadastrados',
   CLIENT_HAS_REGISTERED_VEHICLES: 'Cliente possui veículos cadastrados',
