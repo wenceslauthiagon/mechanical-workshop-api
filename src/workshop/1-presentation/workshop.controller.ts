@@ -18,7 +18,6 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { CreateOrderService } from '../2-application/create-order.service';
 import { CustomerService } from '../2-application/services/customer.service';
 import { CreateCustomerDto, UpdateCustomerDto } from './dtos';
 import {
@@ -35,10 +34,7 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 @Controller('api')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class WorkshopController {
-  constructor(
-    private readonly createOrderService: CreateOrderService,
-    private readonly customerService: CustomerService,
-  ) {}
+  constructor(private readonly customerService: CustomerService) {}
 
   @Post('customers')
   @HttpCode(HttpStatus.CREATED)
