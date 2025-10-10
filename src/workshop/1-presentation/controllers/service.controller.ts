@@ -24,7 +24,7 @@ import {
 
 import { CreateServiceDto } from '../dtos/service/create-service.dto';
 import { UpdateServiceDto } from '../dtos/service/update-service.dto';
-import { ServiceService } from 'src/workshop/2-application/services/service.service';
+import { ServiceService } from '../../2-application/services/service.service';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 

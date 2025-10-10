@@ -23,7 +23,7 @@ import {
 import { CreateVehicleDto } from '../dtos/vehicle/create-vehicle.dto';
 import { UpdateVehicleDto } from '../dtos';
 import { VehicleResponseDto } from '../dtos/vehicle/vehicle-response.dto';
-import { VehicleService } from 'src/workshop/2-application/services/vehicle.service';
+import { VehicleService } from '../../2-application/services/vehicle.service';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 

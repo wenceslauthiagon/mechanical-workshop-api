@@ -7,8 +7,13 @@ module.exports = {
     '<rootDir>/test/**/*.test.ts'
   ],
   transform: {
-    '^.+\\.(t|js)$': 'ts-jest',
+    '^.+\\.(t|js)$': ['ts-jest', {
+      tsconfig: 'tsconfig.json',
+    }],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@faker-js/faker)/)',
+  ],
   collectCoverageFrom: [
     'src/**/*.(t|js)',
     '!src/**/*.spec.ts',
@@ -22,12 +27,14 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testTimeout: 30000,
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
   },
+  extensionsToTreatAsEsm: ['.ts'],
   globals: {
     'ts-jest': {
+      useESM: true,
       tsconfig: 'tsconfig.json',
     },
   },
