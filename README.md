@@ -79,38 +79,95 @@ src/
     └── enums/                 # Enumerações
 ```
 
+## � ANTES DE COMEÇAR (OBRIGATÓRIO)
+
+**⚠️ ATENÇÃO: Sem estes passos, a aplicação NÃO irá funcionar!**
+
+### 1. **Configure o arquivo .env (CRÍTICO)**
+```bash
+# Copie o arquivo de exemplo
+cp .env.example .env
+
+# Edite o .env com os valores corretos:
+nano .env  # ou use seu editor preferido
+```
+
+**⚠️ IMPORTANTE:** Configure as variáveis obrigatórias:
+- `DATABASE_URL` - URL de conexão do PostgreSQL
+- `JWT_SECRET` - Chave JWT (mínimo 32 caracteres)
+- `ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` - Dados do usuário admin
+
+**Veja o arquivo `.env.example` para referência dos valores necessários.**
+
+### 2. **Verifique os pré-requisitos**
+- ✅ Docker Desktop instalado e rodando
+- ✅ Docker Compose disponível
+- ✅ Porta 3000 livre (ou mude no docker-compose.yml)
+- ✅ Porta 5433 livre (PostgreSQL)
+
 ## 🐳 Quick Start com Docker (Recomendado)
 
-### Pré-requisitos
-- Docker
-- Docker Compose
-- Make (opcional, mas recomendado)
-
-### Setup Rápido
+### Setup Passo a Passo
 
 1. **Clone o repositório**
 ```bash
-git clone <repository-url>
+git clone https://github.com/wenceslauthiagon/mechanical-workshop-api.git
 cd mechanical-workshop-api
 ```
 
-2. **Inicie todo o ambiente**
+2. **Configure o .env (OBRIGATÓRIO!)**
 ```bash
-# Com Make (recomendado)
+cp .env.example .env
+# Edite o .env com os valores acima
+```
+
+3. **Inicie o ambiente (primeira vez)**
+```bash
+# Opção 1: Com Make (recomendado)
 make setup
 
-# Ou manualmente
-docker-compose build
+# Opção 2: Manualmente
+docker-compose build --no-cache
 docker-compose up -d
 ```
 
-3. **Verifique se está funcionando**
+4. **Aguarde e verifique os logs**
 ```bash
-# Com Make
-make health
+# Ver se tudo iniciou corretamente
+docker-compose logs -f
 
-# Ou manualmente
+# Pressione Ctrl+C para sair dos logs
+```
+
+5. **Verifique se está funcionando**
+```bash
+# Teste a API
 curl http://localhost:3000/health
+
+# Ou abra no navegador:
+# http://localhost:3000/health
+# http://localhost:3000/api (Swagger)
+```
+
+### ✅ **Como saber se funcionou?**
+
+Você deve ver estas mensagens nos logs:
+```
+✅ Banco de dados conectado!
+✅ Nest.js application successfully started
+✅ Mechanical Workshop API rodando em http://localhost:3000
+```
+
+E ao acessar `http://localhost:3000/health` deve retornar:
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-10-11T12:00:00.000Z",
+  "uptime": 3600,
+  "service": "Mechanical Workshop API",
+  "version": "1.0.0",
+  "environment": "development"
+}
 ```
 
 ### Comandos Docker Úteis
@@ -139,6 +196,38 @@ make shell-app
 
 # Backup do banco
 make backup-db
+```
+
+### 🗄️ **Comandos do Banco (Prisma)**
+
+```bash
+# Gerar cliente Prisma
+npm run db:generate
+
+# Aplicar migrations (desenvolvimento)
+npm run db:migrate
+
+# Aplicar migrations (produção)
+npm run db:migrate:deploy
+
+# Resetar banco (⚠️ APAGA DADOS!)
+npm run db:migrate:reset
+
+# Sincronizar schema (desenvolvimento)
+npm run db:push
+
+# Abrir Prisma Studio (interface gráfica)
+npm run db:studio
+```
+
+**Com Docker:**
+```bash
+# Aplicar migrations
+docker-compose exec app npx prisma migrate deploy
+
+# Abrir Prisma Studio
+docker-compose exec app npx prisma studio
+# Acesse: http://localhost:5555
 ```
 
 ## 🛠️ Instalação Local (Desenvolvimento)
@@ -270,37 +359,7 @@ JWT_SECRET=your-super-secret-production-key
 JWT_EXPIRES_IN=7d
 ```
 
-## 🔧 Troubleshooting
-
-### Problemas Comuns
-
-1. **Porta 3000 em uso**
-```bash
-# Alterar porta no docker-compose.yml
-ports:
-  - "3001:3000"  # Host:Container
-```
-
-2. **Banco não conecta**
-```bash
-# Verificar logs
-make logs-db
-make logs-app
-
-# Resetar ambiente
-make clean
-make setup
-```
-
-3. **Container não inicia**
-```bash
-# Rebuild completo
-docker-compose down -v
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-## 📊 Monitoramento
+##  Monitoramento
 
 ### Health Checks
 - **API**: `GET /health`
