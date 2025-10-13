@@ -9,6 +9,7 @@ import { PartController } from './1-presentation/controllers/part.controller';
 import { CustomerController } from './1-presentation/controllers/customer.controller';
 import { PublicServiceOrderController } from './1-presentation/controllers/public-service-order.controller';
 import { ServiceStatsController } from './1-presentation/controllers/service-stats.controller';
+import { MechanicController } from './1-presentation/controllers/mechanic.controller';
 import { CreateOrderService } from './2-application/create-order.service';
 import { ServiceOrderService } from './2-application/services/service-order.service';
 import { VehicleService } from './2-application/services/vehicle.service';
@@ -16,11 +17,13 @@ import { ServiceService } from './2-application/services/service.service';
 import { PartService } from './2-application/services/part.service';
 import { CustomerService } from './2-application/services/customer.service';
 import { ServiceStatsService } from './2-application/services/service-stats.service';
+import { MechanicService } from './2-application/services/mechanic.service';
 import { CustomerRepository } from './4-infrastructure/repositories/customer.repository';
 import { ServiceOrderRepository } from './4-infrastructure/repositories/service-order.repository';
 import { VehicleRepository } from './4-infrastructure/repositories/vehicle.repository';
 import { ServiceRepository } from './4-infrastructure/repositories/service.repository';
 import { PartRepository } from './4-infrastructure/repositories/part.repository';
+import { MechanicRepository } from './4-infrastructure/repositories/mechanic.repository';
 
 @Module({
   imports: [SharedModule],
@@ -33,6 +36,7 @@ import { PartRepository } from './4-infrastructure/repositories/part.repository'
     CustomerController,
     PublicServiceOrderController,
     ServiceStatsController,
+    MechanicController,
   ],
   providers: [
     PrismaService,
@@ -43,11 +47,17 @@ import { PartRepository } from './4-infrastructure/repositories/part.repository'
     PartService,
     CustomerService,
     ServiceStatsService,
+    MechanicService,
     CustomerRepository,
     ServiceOrderRepository,
     VehicleRepository,
     ServiceRepository,
     PartRepository,
+    MechanicRepository,
+    {
+      provide: 'IMechanicRepository',
+      useClass: MechanicRepository,
+    },
   ],
   exports: [
     CreateOrderService,
@@ -55,6 +65,7 @@ import { PartRepository } from './4-infrastructure/repositories/part.repository'
     VehicleService,
     ServiceService,
     PartService,
+    MechanicService,
   ],
 })
 export class WorkshopModule {}

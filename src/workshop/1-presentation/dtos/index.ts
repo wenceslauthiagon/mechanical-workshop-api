@@ -8,3 +8,6 @@ export * from './part/create-part.dto';
 export * from './part/update-part.dto';
 export * from './service-order/create-service-order.dto';
 export * from './service-order/update-service-order-status.dto';
+export * from './mechanic/create-mechanic.dto';
+export * from './mechanic/update-mechanic.dto';
+export * from './mechanic/mechanic-response.dto';

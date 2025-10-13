@@ -110,6 +110,7 @@ model ServiceOrder {
   orderNumber             String             @unique @map("order_number")
   customerId              String             @map("customer_id")
   vehicleId               String             @map("vehicle_id")
+  mechanicId              String?            @map("mechanic_id")
   status                  ServiceOrderStatus @default(RECEIVED)
   description             String
   totalServicePrice       Decimal            @default(0) @db.Decimal(10, 2) @map("total_service_price")
@@ -117,6 +118,7 @@ model ServiceOrder {
   totalPrice              Decimal            @default(0) @db.Decimal(10, 2) @map("total_price")
   estimatedTimeHours      Decimal            @default(0) @db.Decimal(5, 2) @map("estimated_time_hours")
   estimatedCompletionDate DateTime           @map("estimated_completion_date")
+  assignedAt              DateTime?          @map("assigned_at")
   startedAt               DateTime?          @map("started_at")
   completedAt             DateTime?          @map("completed_at")
   deliveredAt             DateTime?          @map("delivered_at")
@@ -127,6 +129,7 @@ model ServiceOrder {
   // Relations
   customer    Customer           @relation(fields: [customerId], references: [id])
   vehicle     Vehicle            @relation(fields: [vehicleId], references: [id])
+  mechanic    Mechanic?          @relation(fields: [mechanicId], references: [id])
   services    ServiceOrderItem[]
   parts       ServiceOrderPart[]
   statusHistory ServiceOrderStatusHistory[]
@@ -178,6 +181,24 @@ model ServiceOrderStatusHistory {
   serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
 
   @@map("service_order_status_history")
+}
+
+model Mechanic {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  phone          String?
+  specialties    String[] // Array de especialidades (ex: ["Motor", "Freios", "Elétrica"])
+  isActive       Boolean  @default(true) @map("is_active")
+  isAvailable    Boolean  @default(true) @map("is_available")
+  experienceYears Int     @default(0) @map("experience_years")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  serviceOrders ServiceOrder[]
+
+  @@map("mechanics")
 }
 
 model User {
