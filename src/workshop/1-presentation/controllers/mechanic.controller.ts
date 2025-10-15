@@ -10,12 +10,14 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { MechanicService } from '../../2-application/services/mechanic.service';
 import { CreateMechanicDto } from '../dtos/mechanic/create-mechanic.dto';
 import { UpdateMechanicDto } from '../dtos/mechanic/update-mechanic.dto';
 import { MechanicResponseDto } from '../dtos/mechanic/mechanic-response.dto';
 import { SERVICE_ORDER_CONSTANTS } from '../../../shared/constants/mechanic.constants';
 
+@ApiTags('Mechanics')
 @Controller('mechanics')
 export class MechanicController {
   constructor(private readonly mechanicService: MechanicService) {}

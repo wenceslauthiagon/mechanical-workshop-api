@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import type {
   IBudgetRepository,
   CreateBudgetData,
@@ -12,6 +12,7 @@ import { BUDGET_CONSTANTS } from '../../../shared/constants/budget.constants';
 @Injectable()
 export class BudgetService {
   constructor(
+    @Inject('IBudgetRepository')
     private readonly budgetRepository: IBudgetRepository,
     private readonly errorHandler: ErrorHandlerService,
   ) {}

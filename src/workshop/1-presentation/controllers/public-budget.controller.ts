@@ -12,7 +12,7 @@ import { BudgetResponseDto } from '../dtos/budget/budget-response.dto';
 import { BUDGET_CONSTANTS } from '../../../shared/constants/budget.constants';
 import { BudgetStatus } from '../../3-domain/entities/budget.entity';
 
-@ApiTags('public-budgets')
+@ApiTags('Public - Budgets')
 @Controller('public/budgets')
 export class PublicBudgetController {
   constructor(private readonly budgetService: BudgetService) {}

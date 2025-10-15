@@ -1,4 +1,4 @@
-// Mechanical Workshop Management System - Database Schema
+// Mechanical Workshop Management System - Database Schema (SQLite version for testing)
 // Complete system for managing clients, vehicles, services, parts and service orders
 
 generator client {
@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" 
+  provider = "sqlite" 
   url      = env("DATABASE_URL")
 }
 
@@ -73,7 +73,7 @@ model Service {
   id               String  @id @default(uuid())
   name             String
   description      String?
-  price            Decimal @db.Decimal(10, 2)
+  price            Decimal
   estimatedMinutes Int     @map("estimated_minutes")
   category         String
   isActive         Boolean @default(true) @map("is_active")
@@ -91,7 +91,7 @@ model Part {
   name        String
   description String?
   partNumber  String? @unique @map("part_number")
-  price       Decimal @db.Decimal(10, 2)
+  price       Decimal
   stock       Int     @default(0)
   minStock    Int     @default(0) @map("min_stock")
   supplier    String?
@@ -110,15 +110,13 @@ model ServiceOrder {
   orderNumber             String             @unique @map("order_number")
   customerId              String             @map("customer_id")
   vehicleId               String             @map("vehicle_id")
-  mechanicId              String?            @map("mechanic_id")
   status                  ServiceOrderStatus @default(RECEIVED)
   description             String
-  totalServicePrice       Decimal            @default(0) @db.Decimal(10, 2) @map("total_service_price")
-  totalPartsPrice         Decimal            @default(0) @db.Decimal(10, 2) @map("total_parts_price")
-  totalPrice              Decimal            @default(0) @db.Decimal(10, 2) @map("total_price")
-  estimatedTimeHours      Decimal            @default(0) @db.Decimal(5, 2) @map("estimated_time_hours")
+  totalServicePrice       Decimal               @default(0) @map("total_service_price")
+  totalPartsPrice         Decimal               @default(0) @map("total_parts_price")
+  totalPrice              Decimal               @default(0) @map("total_price")
+  estimatedTimeHours      Decimal               @default(0) @map("estimated_time_hours")
   estimatedCompletionDate DateTime           @map("estimated_completion_date")
-  assignedAt              DateTime?          @map("assigned_at")
   startedAt               DateTime?          @map("started_at")
   completedAt             DateTime?          @map("completed_at")
   deliveredAt             DateTime?          @map("delivered_at")
@@ -129,7 +127,6 @@ model ServiceOrder {
   // Relations
   customer    Customer           @relation(fields: [customerId], references: [id])
   vehicle     Vehicle            @relation(fields: [vehicleId], references: [id])
-  mechanic    Mechanic?          @relation(fields: [mechanicId], references: [id])
   services    ServiceOrderItem[]
   parts       ServiceOrderPart[]
   statusHistory ServiceOrderStatusHistory[]
@@ -142,8 +139,8 @@ model ServiceOrderItem {
   serviceOrderId String  @map("service_order_id")
   serviceId      String  @map("service_id")
   quantity       Int     @default(1)
-  price          Decimal @db.Decimal(10, 2)
-  totalPrice     Decimal @db.Decimal(10, 2) @map("total_price")
+  price          Decimal
+  totalPrice     Decimal @map("total_price")
   createdAt      DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -158,8 +155,8 @@ model ServiceOrderPart {
   serviceOrderId String  @map("service_order_id")
   partId         String  @map("part_id")
   quantity       Int
-  price          Decimal @db.Decimal(10, 2)
-  totalPrice     Decimal @db.Decimal(10, 2) @map("total_price")
+  price          Decimal
+  totalPrice     Decimal @map("total_price")
   createdAt      DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -181,24 +178,6 @@ model ServiceOrderStatusHistory {
   serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
 
   @@map("service_order_status_history")
-}
-
-model Mechanic {
-  id             String   @id @default(uuid())
-  name           String
-  email          String   @unique
-  phone          String?
-  specialties    String[] // Array de especialidades (ex: ["Motor", "Freios", "Elétrica"])
-  isActive       Boolean  @default(true) @map("is_active")
-  isAvailable    Boolean  @default(true) @map("is_available")
-  experienceYears Int     @default(0) @map("experience_years")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  serviceOrders ServiceOrder[]
-
-  @@map("mechanics")
 }
 
 model User {

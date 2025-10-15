@@ -9,7 +9,7 @@ import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ServiceOrderService } from '../../2-application/services/service-order.service';
 import { ServiceOrderResponseDto } from '../dtos/service-order/service-order-response.dto';
 
-@ApiTags('Public - Client API')
+@ApiTags('Public - Service Orders')
 @Controller('public/service-orders')
 export class PublicServiceOrderController {
   constructor(private readonly serviceOrderService: ServiceOrderService) {}

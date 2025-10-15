@@ -64,7 +64,10 @@ async function bootstrap() {
           'Services',
           'Parts',
           'Service Orders',
-          'Public - Client API',
+          'Mechanics',
+          'Budgets',
+          'Public - Service Orders',
+          'Public - Budgets',
           'Service Statistics',
           'Health Check',
         ];
