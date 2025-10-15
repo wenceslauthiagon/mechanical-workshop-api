@@ -156,4 +156,87 @@ export class EmailTemplates {
 </body>
 </html>`;
   }
+
+  static serviceOrderStatus(data: {
+    customerName: string;
+    orderNumber: string;
+    vehicleInfo: string;
+    status: string;
+    message: string;
+    companyName: string;
+    companyPhone: string;
+    companyEmail: string;
+  }): string {
+    const statusColors = {
+      IN_DIAGNOSIS: '#007bff',
+      AWAITING_APPROVAL: '#ffc107',
+      IN_EXECUTION: '#28a745',
+      FINISHED: '#17a2b8',
+      DELIVERED: '#6f42c1',
+    };
+
+    const statusIcons = {
+      IN_DIAGNOSIS: '🔍',
+      AWAITING_APPROVAL: '⏳',
+      IN_EXECUTION: '🔧',
+      FINISHED: '✅',
+      DELIVERED: '🚗',
+    };
+
+    const color = statusColors[data.status] || '#6c757d';
+    const icon = statusIcons[data.status] || '📋';
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Atualização da Ordem de Serviço</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: ${color}; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        .status-box { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid ${color}; }
+        .vehicle-info { background: #e9ecef; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .contact-info { background: #d4edda; padding: 15px; margin: 15px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 ${data.companyName}</h1>
+            <h2>${icon} Atualização da Ordem de Serviço</h2>
+        </div>
+        
+        <div class="content">
+            <p>Olá <strong>${data.customerName}</strong>,</p>
+            
+            <div class="status-box">
+                <h3>📋 Ordem de Serviço: ${data.orderNumber}</h3>
+                <div class="vehicle-info">
+                    <strong>Veículo:</strong> ${data.vehicleInfo}
+                </div>
+                <p><strong>Status Atual:</strong> <span style="color: ${color}; font-weight: bold;">${data.status}</span></p>
+                <p><strong>Informação:</strong> ${data.message}</p>
+            </div>
+            
+            <div class="contact-info">
+                <h4>📞 Precisa de mais informações?</h4>
+                <p><strong>Telefone:</strong> ${data.companyPhone}</p>
+                <p><strong>Email:</strong> ${data.companyEmail}</p>
+            </div>
+            
+            <p>Nossa equipe está trabalhando para oferecer o melhor serviço possível!</p>
+        </div>
+        
+        <div class="footer">
+            <p>Este é um email automático. Não é necessário responder.</p>
+            <p>&copy; ${new Date().getFullYear()} ${data.companyName} - Todos os direitos reservados</p>
+        </div>
+    </div>
+</body>
+</html>`;
+  }
 }

@@ -21,6 +21,7 @@ import { CustomerService } from './2-application/services/customer.service';
 import { ServiceStatsService } from './2-application/services/service-stats.service';
 import { MechanicService } from './2-application/services/mechanic.service';
 import { BudgetService } from './2-application/services/budget.service';
+import { NotificationService } from './2-application/services/notification.service';
 import { CustomerRepository } from './4-infrastructure/repositories/customer.repository';
 import { ServiceOrderRepository } from './4-infrastructure/repositories/service-order.repository';
 import { VehicleRepository } from './4-infrastructure/repositories/vehicle.repository';
@@ -28,6 +29,9 @@ import { ServiceRepository } from './4-infrastructure/repositories/service.repos
 import { PartRepository } from './4-infrastructure/repositories/part.repository';
 import { MechanicRepository } from './4-infrastructure/repositories/mechanic.repository';
 import { BudgetRepository } from './4-infrastructure/repositories/budget.repository';
+import { NotificationProviderFactory } from './4-infrastructure/providers/notification-provider.factory';
+import { GmailEmailProvider } from './4-infrastructure/providers/email/gmail-email.provider';
+import { MockSmsProvider } from './4-infrastructure/providers/sms/mock-sms.provider';
 
 @Module({
   imports: [SharedModule],
@@ -55,6 +59,7 @@ import { BudgetRepository } from './4-infrastructure/repositories/budget.reposit
     ServiceStatsService,
     MechanicService,
     BudgetService,
+    NotificationService,
     CustomerRepository,
     ServiceOrderRepository,
     VehicleRepository,
@@ -69,6 +74,15 @@ import { BudgetRepository } from './4-infrastructure/repositories/budget.reposit
     {
       provide: 'IBudgetRepository',
       useClass: BudgetRepository,
+    },
+    NotificationProviderFactory,
+    {
+      provide: 'IEmailProvider',
+      useClass: GmailEmailProvider,
+    },
+    {
+      provide: 'ISmsProvider',
+      useClass: MockSmsProvider,
     },
   ],
   exports: [

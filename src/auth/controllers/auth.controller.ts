@@ -124,7 +124,7 @@ export class AuthController {
   })
   async getProfile(@Request() req) {
     const { passwordHash, ...user } = req.user;
-    void passwordHash; // Explicitamente ignorar a variável para evitar warning do eslint
+    void passwordHash;
     return user;
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { NOTIFICATION_CONSTANTS } from '../../../shared/constants/notification.constants';
 import type {
   IEmailProvider,
@@ -13,8 +13,8 @@ export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
 
   constructor(
-    private readonly emailProvider: IEmailProvider,
-    private readonly smsProvider: ISmsProvider,
+    @Inject('IEmailProvider') private readonly emailProvider: IEmailProvider,
+    @Inject('ISmsProvider') private readonly smsProvider: ISmsProvider,
   ) {}
 
   async sendBudgetReadyNotification(
@@ -41,12 +41,12 @@ export class NotificationService {
         });
       }
 
-      this.logger.log(`Budget ready notification sent successfully`, {
+      this.logger.log(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_READY_SUCCESS, {
         budgetId: budget.id,
         customerEmail,
       });
     } catch (error) {
-      this.logger.error('Failed to send budget ready notification', {
+      this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_READY_ERROR, {
         error: error.message,
         budgetId: budget.id,
         customerEmail,
@@ -69,12 +69,12 @@ export class NotificationService {
         html: EmailTemplates.budgetApproved(emailData),
       });
 
-      this.logger.log(`Budget approved notification sent successfully`, {
+      this.logger.log(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_APPROVED_SUCCESS, {
         budgetId: budget.id,
         customerEmail,
       });
     } catch (error) {
-      this.logger.error('Failed to send budget approved notification', {
+      this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_APPROVED_ERROR, {
         error: error.message,
         budgetId: budget.id,
         customerEmail,
@@ -97,14 +97,70 @@ export class NotificationService {
         html: EmailTemplates.budgetRejected(emailData),
       });
 
-      this.logger.log(`Budget rejected notification sent successfully`, {
+      this.logger.log(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_REJECTED_SUCCESS, {
         budgetId: budget.id,
         customerEmail,
       });
     } catch (error) {
-      this.logger.error('Failed to send budget rejected notification', {
+      this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_REJECTED_ERROR, {
         error: error.message,
         budgetId: budget.id,
+        customerEmail,
+      });
+      throw error;
+    }
+  }
+
+  async sendServiceOrderStatusNotification(
+    serviceOrderId: string,
+    orderNumber: string,
+    status: string,
+    customerEmail: string,
+    customerName: string,
+    vehicleInfo: string,
+    customerPhone?: string,
+  ): Promise<void> {
+    try {
+      const message =
+        NOTIFICATION_CONSTANTS.STATUS_MESSAGES[status] ||
+        `Status atualizado para ${status}`;
+      const subject = `${NOTIFICATION_CONSTANTS.TEMPLATES.SERVICE_ORDER_STATUS} ${orderNumber}`;
+
+      await this.emailProvider.sendEmail({
+        to: customerEmail,
+        subject,
+        html: EmailTemplates.serviceOrderStatus({
+          customerName,
+          orderNumber,
+          vehicleInfo,
+          status,
+          message,
+          companyName: NOTIFICATION_CONSTANTS.COMPANY.NAME,
+          companyPhone: NOTIFICATION_CONSTANTS.COMPANY.PHONE,
+          companyEmail: NOTIFICATION_CONSTANTS.COMPANY.EMAIL,
+        }),
+      });
+
+      // Enviar SMS se habilitado e telefone fornecido
+      if (NOTIFICATION_CONSTANTS.SMS.ENABLED && customerPhone) {
+        await this.smsProvider.sendSms({
+          phone: customerPhone,
+          message: `${orderNumber}: ${message}. ${NOTIFICATION_CONSTANTS.COMPANY.PHONE}`,
+        });
+      }
+
+      this.logger.log(NOTIFICATION_CONSTANTS.MESSAGES.SERVICE_ORDER_SUCCESS, {
+        serviceOrderId,
+        orderNumber,
+        status,
+        customerEmail,
+      });
+    } catch (error) {
+      this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.SERVICE_ORDER_ERROR, {
+        error: error.message,
+        serviceOrderId,
+        orderNumber,
+        status,
         customerEmail,
       });
       throw error;

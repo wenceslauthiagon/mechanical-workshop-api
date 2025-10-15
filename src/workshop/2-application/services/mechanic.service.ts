@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import type {
   IMechanicRepository,
   CreateMechanicData,
@@ -11,6 +11,7 @@ import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants
 @Injectable()
 export class MechanicService {
   constructor(
+    @Inject('IMechanicRepository')
     private readonly mechanicRepository: IMechanicRepository,
     private readonly errorHandler: ErrorHandlerService,
   ) {}

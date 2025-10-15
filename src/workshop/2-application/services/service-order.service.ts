@@ -9,6 +9,7 @@ import { CustomerRepository } from '../../4-infrastructure/repositories/customer
 import { VehicleRepository } from '../../4-infrastructure/repositories/vehicle.repository';
 import { ServiceRepository } from '../../4-infrastructure/repositories/service.repository';
 import { PartRepository } from '../../4-infrastructure/repositories/part.repository';
+import { NotificationService } from './notification.service';
 import { ServiceOrderWithRelations } from '../../3-domain/repositories/service-order.repository.interface';
 import {
   ERROR_MESSAGES,
@@ -25,6 +26,7 @@ export class ServiceOrderService {
     private readonly serviceRepository: ServiceRepository,
     private readonly partRepository: PartRepository,
     private readonly errorHandler: ErrorHandlerService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(data: CreateServiceOrderDto): Promise<ServiceOrderResponseDto> {
@@ -248,6 +250,33 @@ export class ServiceOrderService {
       notes: data.notes || `Status alterado para ${data.status}`,
     });
 
+    // Enviar notificação para o cliente
+    try {
+      const customer = await this.customerRepository.findById(
+        serviceOrder.customerId,
+      );
+      const vehicle = await this.vehicleRepository.findById(
+        serviceOrder.vehicleId,
+      );
+
+      if (customer && vehicle) {
+        const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
+
+        await this.notificationService.sendServiceOrderStatusNotification(
+          id,
+          serviceOrder.orderNumber,
+          data.status,
+          customer.email,
+          customer.name,
+          vehicleInfo,
+          customer.phone,
+        );
+      }
+    } catch (notificationError) {
+      // Log do erro, mas não falha a operação principal
+      console.error('Failed to send status notification:', notificationError);
+    }
+
     return this.findById(id);
   }
 
@@ -392,10 +421,10 @@ export class ServiceOrderService {
       totalPrice: serviceOrder.totalPrice.toString(),
       estimatedTimeHours: serviceOrder.estimatedTimeHours.toString(),
       estimatedCompletionDate: serviceOrder.estimatedCompletionDate,
-      startedAt: serviceOrder.startedAt,
-      completedAt: serviceOrder.completedAt,
-      deliveredAt: serviceOrder.deliveredAt,
-      approvedAt: serviceOrder.approvedAt,
+      startedAt: serviceOrder.startedAt ?? null,
+      completedAt: serviceOrder.completedAt ?? null,
+      deliveredAt: serviceOrder.deliveredAt ?? null,
+      approvedAt: serviceOrder.approvedAt ?? null,
       createdAt: serviceOrder.createdAt,
       updatedAt: serviceOrder.updatedAt,
       customer: serviceOrder.customer
@@ -427,7 +456,7 @@ export class ServiceOrderService {
           totalPrice: item.totalPrice.toString(),
           service: {
             name: item.service.name,
-            description: item.service.description,
+            description: item.service.description ?? null,
             category: item.service.category,
           },
         })) || [],
@@ -440,8 +469,8 @@ export class ServiceOrderService {
           totalPrice: item.totalPrice.toString(),
           part: {
             name: item.part.name,
-            description: item.part.description,
-            partNumber: item.part.partNumber,
+            description: item.part.description ?? null,
+            partNumber: item.part.partNumber ?? null,
           },
         })) || [],
     };
