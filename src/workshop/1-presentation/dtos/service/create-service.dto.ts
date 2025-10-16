@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
   IsNotEmpty,
-  IsDecimal,
+  IsNumber,
   IsInt,
   Min,
   IsOptional,
@@ -35,16 +35,16 @@ export class CreateServiceDto {
 
   @ApiProperty({
     description: 'Preço do serviço em reais',
-    example: '89.90',
+    example: 89.9,
     type: 'number',
     format: 'decimal',
   })
-  @IsDecimal(
-    { decimal_digits: '0,2' },
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
     { message: 'Preço deve ter até 2 casas decimais' },
   )
   @IsNotEmpty()
-  price: string;
+  price: number;
 
   @ApiProperty({
     description: 'Tempo estimado em minutos',

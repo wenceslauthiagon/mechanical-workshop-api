@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import type {
   IMechanicRepository,
   CreateMechanicData,
@@ -144,8 +144,8 @@ export class MechanicService {
     try {
       const mechanic = await this.findById(mechanicId);
       if (!mechanic.isAvailable) {
-        throw new BadRequestException(
-          MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE,
+        this.errorHandler.handleError(
+          new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE),
         );
       }
 

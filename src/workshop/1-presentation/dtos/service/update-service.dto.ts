@@ -18,10 +18,10 @@ export class UpdateServiceDto extends PartialType(CreateServiceDto) {
 
   @ApiProperty({
     description: 'Preço do serviço em reais',
-    example: '89.90',
+    example: 89.9,
     required: false,
   })
-  price?: string;
+  price?: number;
 
   @ApiProperty({
     description: 'Tempo estimado em minutos',

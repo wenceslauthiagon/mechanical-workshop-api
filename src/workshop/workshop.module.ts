@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SharedModule } from '../shared/shared.module';
-import { WorkshopController } from './1-presentation/workshop.controller';
 import { ServiceOrderController } from './1-presentation/controllers/service-order.controller';
 import { VehicleController } from './1-presentation/controllers/vehicle.controller';
 import { ServiceController } from './1-presentation/controllers/service.controller';
@@ -28,6 +27,7 @@ import { VehicleRepository } from './4-infrastructure/repositories/vehicle.repos
 import { ServiceRepository } from './4-infrastructure/repositories/service.repository';
 import { PartRepository } from './4-infrastructure/repositories/part.repository';
 import { MechanicRepository } from './4-infrastructure/repositories/mechanic.repository';
+import { MechanicPrismaRepository } from './4-infrastructure/repositories/mechanic-prisma.repository';
 import { BudgetRepository } from './4-infrastructure/repositories/budget.repository';
 import { NotificationProviderFactory } from './4-infrastructure/providers/notification-provider.factory';
 import { GmailEmailProvider } from './4-infrastructure/providers/email/gmail-email.provider';
@@ -36,7 +36,6 @@ import { MockSmsProvider } from './4-infrastructure/providers/sms/mock-sms.provi
 @Module({
   imports: [SharedModule],
   controllers: [
-    WorkshopController,
     ServiceOrderController,
     VehicleController,
     ServiceController,
@@ -68,8 +67,12 @@ import { MockSmsProvider } from './4-infrastructure/providers/sms/mock-sms.provi
     MechanicRepository,
     BudgetRepository,
     {
+      provide: 'ICustomerRepository',
+      useClass: CustomerRepository,
+    },
+    {
       provide: 'IMechanicRepository',
-      useClass: MechanicRepository,
+      useClass: MechanicPrismaRepository,
     },
     {
       provide: 'IBudgetRepository',

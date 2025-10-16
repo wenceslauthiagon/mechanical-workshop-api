@@ -289,3 +289,12 @@ export const HEALTH_CHECK_RESPONSES = {
   DEFAULT_VERSION: '1.0.0',
   DEFAULT_ENVIRONMENT: 'development',
 } as const;
+
+export const NOTIFICATION_MESSAGES = {
+  FAILED_TO_SEND_STATUS_NOTIFICATION:
+    'Falha ao enviar notificação de status para OS',
+  FAILED_TO_SEND_BUDGET_NOTIFICATION:
+    'Falha ao enviar notificação de orçamento',
+  FAILED_TO_SEND_EMAIL: 'Falha ao enviar email',
+  FAILED_TO_SEND_SMS: 'Falha ao enviar SMS',
+} as const;

@@ -1,12 +1,8 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
 import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
+import { ErrorHandlerService } from '../../shared/services/error-handler.service';
 
 interface JwtPayload {
   sub: string;
@@ -21,21 +17,26 @@ interface AuthenticatedRequest extends Request {
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly errorHandler: ErrorHandlerService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_TOKEN_NOT_FOUND);
+      this.errorHandler.handleError(
+        new Error(ERROR_MESSAGES.ACCESS_TOKEN_NOT_FOUND),
+      );
     }
 
     try {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
       request.user = payload;
     } catch {
-      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
+      this.errorHandler.handleError(new Error(ERROR_MESSAGES.INVALID_TOKEN));
     }
 
     return true;

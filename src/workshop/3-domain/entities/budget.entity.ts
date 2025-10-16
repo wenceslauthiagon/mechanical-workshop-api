@@ -145,9 +145,9 @@ export interface BudgetItem {
 }
 
 export enum BudgetStatus {
-  DRAFT = 'DRAFT',
-  SENT = 'SENT',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  EXPIRED = 'EXPIRED',
+  DRAFT = 'RASCUNHO',
+  SENT = 'ENVIADO',
+  APPROVED = 'APROVADO',
+  REJECTED = 'REJEITADO',
+  EXPIRED = 'EXPIRADO',
 }
