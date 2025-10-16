@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { ServiceOrderStatus } from '@prisma/client';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
@@ -14,11 +14,14 @@ import { ServiceOrderWithRelations } from '../../3-domain/repositories/service-o
 import {
   ERROR_MESSAGES,
   NOTES_MESSAGES,
+  NOTIFICATION_MESSAGES,
 } from '../../../shared/constants/messages.constants';
 import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 
 @Injectable()
 export class ServiceOrderService {
+  private readonly logger = new Logger(ServiceOrderService.name);
+
   constructor(
     private readonly serviceOrderRepository: ServiceOrderRepository,
     private readonly customerRepository: CustomerRepository,
@@ -272,9 +275,11 @@ export class ServiceOrderService {
           customer.phone,
         );
       }
-    } catch (notificationError) {
-      // Log do erro, mas não falha a operação principal
-      console.error('Failed to send status notification:', notificationError);
+    } catch (error) {
+      this.logger.error(
+        `${NOTIFICATION_MESSAGES.FAILED_TO_SEND_STATUS_NOTIFICATION} ${serviceOrder.orderNumber}`,
+        error,
+      );
     }
 
     return this.findById(id);

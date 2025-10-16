@@ -168,19 +168,19 @@ export class EmailTemplates {
     companyEmail: string;
   }): string {
     const statusColors = {
-      IN_DIAGNOSIS: '#007bff',
-      AWAITING_APPROVAL: '#ffc107',
-      IN_EXECUTION: '#28a745',
-      FINISHED: '#17a2b8',
-      DELIVERED: '#6f42c1',
+      EM_DIAGNOSTICO: '#007bff',
+      AGUARDANDO_APROVACAO: '#ffc107',
+      EM_EXECUCAO: '#28a745',
+      FINALIZADA: '#17a2b8',
+      ENTREGUE: '#6f42c1',
     };
 
     const statusIcons = {
-      IN_DIAGNOSIS: '🔍',
-      AWAITING_APPROVAL: '⏳',
-      IN_EXECUTION: '🔧',
-      FINISHED: '✅',
-      DELIVERED: '🚗',
+      EM_DIAGNOSTICO: '🔍',
+      AGUARDANDO_APROVACAO: '⏳',
+      EM_EXECUCAO: '🔧',
+      FINALIZADA: '✅',
+      ENTREGUE: '🚗',
     };
 
     const color = statusColors[data.status] || '#6c757d';
