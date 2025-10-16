@@ -62,6 +62,6 @@ export interface IMechanicRepository {
 
   assignToServiceOrder(
     mechanicId: string,
-    serviceOrderId: string,
+    serviceOrderId?: string,
   ): Promise<void>;
 }

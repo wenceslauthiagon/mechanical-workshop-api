@@ -176,22 +176,22 @@ export class MechanicRepository implements IMechanicRepository {
     };
   }
 
-  async assignToServiceOrder(
-    mechanicId: string,
-    serviceOrderId: string,
-  ): Promise<void> {
-    const mechanic = this.mechanics.find((m) => m.id === mechanicId);
-    if (!mechanic) {
+  async assignToServiceOrder(mechanicId: string): Promise<void> {
+    const mechanicIndex = this.mechanics.findIndex((m) => m.id === mechanicId);
+    if (mechanicIndex === -1) {
       throw new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
     }
 
+    const mechanic = this.mechanics[mechanicIndex];
     if (!mechanic.isAvailable) {
       throw new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE);
     }
 
-    // Mock implementation - in real app, would update ServiceOrder
-    console.log(
-      `Mechanic ${mechanicId} assigned to ServiceOrder ${serviceOrderId}`,
-    );
+    // Marcar mecânico como ocupado e associado à OS
+    this.mechanics[mechanicIndex] = {
+      ...mechanic,
+      isAvailable: false,
+      updatedAt: this.getCurrentTimestamp(),
+    };
   }
 }

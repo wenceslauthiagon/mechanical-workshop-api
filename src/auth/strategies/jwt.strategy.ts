@@ -1,16 +1,18 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService, JwtPayload } from '../services/auth.service';
 import { ConfigService } from '@nestjs/config';
 import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 import { APP_CONSTANTS, ENV_KEYS } from '../../shared/constants/app.constants';
+import { ErrorHandlerService } from '../../shared/services/error-handler.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly errorHandler: ErrorHandlerService,
   ) {
     const jwtSecret =
       configService.get<string>(ENV_KEYS.JWT_SECRET) ||
@@ -27,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.authService.validateJwtPayload(payload);
 
     if (!user) {
-      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
+      this.errorHandler.handleError(new Error(ERROR_MESSAGES.INVALID_TOKEN));
     }
 
     return user;

@@ -1,12 +1,14 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import type {
   IBudgetRepository,
   CreateBudgetData,
   UpdateBudgetData,
   Budget,
 } from '../../3-domain/repositories/budget.repository.interface';
+import type { ICustomerRepository } from '../../3-domain/repositories/customer-repository.interface';
 import { BudgetStatus } from '../../3-domain/entities/budget.entity';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
+import { NotificationService } from './notification.service';
 import { BUDGET_CONSTANTS } from '../../../shared/constants/budget.constants';
 
 @Injectable()
@@ -14,7 +16,10 @@ export class BudgetService {
   constructor(
     @Inject('IBudgetRepository')
     private readonly budgetRepository: IBudgetRepository,
+    @Inject('ICustomerRepository')
+    private readonly customerRepository: ICustomerRepository,
     private readonly errorHandler: ErrorHandlerService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(data: CreateBudgetData): Promise<Budget> {
@@ -69,10 +74,32 @@ export class BudgetService {
       const budget = await this.findById(id);
 
       if (budget.status !== BudgetStatus.DRAFT) {
-        throw new BadRequestException(BUDGET_CONSTANTS.MESSAGES.ALREADY_SENT);
+        this.errorHandler.handleError(
+          new Error(BUDGET_CONSTANTS.MESSAGES.ALREADY_SENT),
+        );
       }
 
-      return await this.budgetRepository.updateStatus(id, BudgetStatus.SENT);
+      // Atualizar status do orçamento
+      const updatedBudget = await this.budgetRepository.updateStatus(
+        id,
+        BudgetStatus.SENT,
+      );
+
+      // Buscar dados do cliente para envio de notificação
+      const customer = await this.customerRepository.findById(
+        budget.customerId,
+      );
+      if (customer) {
+        // Enviar notificação por email
+        await this.notificationService.sendBudgetReadyNotification(
+          updatedBudget,
+          customer.email,
+          customer.name,
+          customer.phone || undefined,
+        );
+      }
+
+      return updatedBudget;
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -83,8 +110,8 @@ export class BudgetService {
       const budget = await this.findById(id);
 
       if (budget.status !== BudgetStatus.SENT) {
-        throw new BadRequestException(
-          BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION,
+        this.errorHandler.handleError(
+          new Error(BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION),
         );
       }
 
@@ -102,8 +129,8 @@ export class BudgetService {
       const budget = await this.findById(id);
 
       if (budget.status !== BudgetStatus.SENT) {
-        throw new BadRequestException(
-          BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION,
+        this.errorHandler.handleError(
+          new Error(BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION),
         );
       }
 

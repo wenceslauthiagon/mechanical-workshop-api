@@ -1,8 +1,9 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
+import { ErrorHandlerService } from '../../shared/services/error-handler.service';
 
 export interface CreateUserData {
   username: string;
@@ -15,7 +16,10 @@ export type SafeUser = Omit<User, 'passwordHash'>;
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly errorHandler: ErrorHandlerService,
+  ) {}
 
   async create(data: CreateUserData): Promise<User> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -35,7 +39,9 @@ export class UserService {
     const userCount = await this.prisma.user.count();
 
     if (userCount > 0) {
-      throw new ConflictException(ERROR_MESSAGES.USERS_ALREADY_EXIST);
+      this.errorHandler.handleError(
+        new Error(ERROR_MESSAGES.USERS_ALREADY_EXIST),
+      );
     }
 
     // Forçar role ADMIN para o primeiro usuário
