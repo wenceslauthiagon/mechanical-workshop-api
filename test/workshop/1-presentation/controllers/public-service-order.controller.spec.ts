@@ -20,7 +20,7 @@ describe('PublicServiceOrderController', () => {
     customerId: faker.string.uuid(),
     vehicleId: faker.string.uuid(),
     description: faker.lorem.paragraph(),
-    status: ServiceOrderStatus.IN_EXECUTION,
+    status: ServiceOrderStatus.EM_EXECUCAO,
     totalServicePrice: faker.number
       .float({ min: 100, max: 500, fractionDigits: 2 })
       .toFixed(2),
@@ -95,7 +95,7 @@ describe('PublicServiceOrderController', () => {
       );
       expect(result).toEqual(mockServiceOrderData);
       expect(result.orderNumber).toBe(mockOrderNumber);
-      expect(result.status).toBe(ServiceOrderStatus.IN_EXECUTION);
+      expect(result.status).toBe(ServiceOrderStatus.EM_EXECUCAO);
     });
 
     it('TC0002 - Should throw HttpException when order number not found', async () => {
@@ -178,7 +178,7 @@ describe('PublicServiceOrderController', () => {
         ...mockServiceOrderData,
         id: faker.string.uuid(),
         orderNumber: 'OS-2025-002',
-        status: ServiceOrderStatus.FINISHED,
+        status: ServiceOrderStatus.FINALIZADA,
       };
       const mockServiceOrders = [mockServiceOrderData, secondServiceOrder];
       serviceOrderService.findByCustomerDocument.mockResolvedValue(
@@ -275,7 +275,7 @@ describe('PublicServiceOrderController', () => {
         ...mockServiceOrderData,
         id: faker.string.uuid(),
         orderNumber: 'OS-2025-003',
-        status: ServiceOrderStatus.DELIVERED,
+        status: ServiceOrderStatus.ENTREGUE,
         completedAt: faker.date.past(),
         deliveredAt: faker.date.recent(),
       };
@@ -291,8 +291,8 @@ describe('PublicServiceOrderController', () => {
         mockLicensePlate,
       );
       expect(result).toHaveLength(2);
-      expect(result[0].status).toBe(ServiceOrderStatus.IN_EXECUTION);
-      expect(result[1].status).toBe(ServiceOrderStatus.DELIVERED);
+      expect(result[0].status).toBe(ServiceOrderStatus.EM_EXECUCAO);
+      expect(result[1].status).toBe(ServiceOrderStatus.ENTREGUE);
     });
 
     it('TC0003 - Should throw HttpException when vehicle plate not found', async () => {
