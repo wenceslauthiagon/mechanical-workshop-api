@@ -59,19 +59,19 @@
   <rect x="910" y="110" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
   <text x="960" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Atualizar</text>
   <text x="960" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Status para</text>
-  <text x="960" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AWAITING_APPROVAL</text>
+  <text x="960" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGUARDANDO_APROVACAO</text>
   
   <!-- Event 2 -->
   <rect x="1030" y="110" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
   <text x="1080" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Status</text>
   <text x="1080" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Alterado para</text>
-  <text x="1080" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AWAITING_APPROVAL</text>
+  <text x="1080" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGUARDANDO_APROVACAO</text>
   
   <!-- Read Model 2 -->
   <rect x="1150" y="110" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
   <text x="1200" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📋 Dashboard</text>
   <text x="1200" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Ordens</text>
-  <text x="1200" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AWAITING_APPROVAL</text>
+  <text x="1200" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGUARDANDO_APROVACAO</text>
   
   <!-- Aggregate -->
   <rect x="1270" y="110" width="120" height="60" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="8"/>
@@ -236,13 +236,13 @@
   <rect x="1190" y="430" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
   <text x="1250" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📧 Email</text>
   <text x="1250" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">NotificationService</text>
-  <text x="1250" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">(Status: FINISHED)</text>
+  <text x="1250" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">(Status: FINALIZADA)</text>
   
   <!-- External System 2 -->
   <rect x="1190" y="430" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
   <text x="1250" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📧 Email</text>
   <text x="1250" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">NotificationService</text>
-  <text x="1250" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">(Status: FINISHED)</text>
+  <text x="1250" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">(Status: FINALIZADA)</text>
   
   <!-- Read Model 2 -->
   <rect x="1330" y="430" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>

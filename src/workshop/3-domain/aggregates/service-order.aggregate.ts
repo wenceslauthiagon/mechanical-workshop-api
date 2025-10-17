@@ -55,7 +55,7 @@ export class ServiceOrderAggregate {
   ): ServiceOrderAggregate {
     const statusHistory: StatusHistoryEntry[] = [
       {
-        status: ServiceOrderStatus.RECEIVED,
+        status: ServiceOrderStatus.RECEBIDA,
         changedAt: new Date(),
         notes: 'Ordem de serviço recebida',
       },
@@ -66,7 +66,7 @@ export class ServiceOrderAggregate {
       orderNumber,
       customerId,
       vehicleId,
-      ServiceOrderStatus.RECEIVED,
+      ServiceOrderStatus.RECEBIDA,
       [],
       [],
       statusHistory,
@@ -211,31 +211,31 @@ export class ServiceOrderAggregate {
   }
 
   startExecution(): void {
-    if (this._status !== ServiceOrderStatus.AWAITING_APPROVAL) {
+    if (this._status !== ServiceOrderStatus.AGUARDANDO_APROVACAO) {
       throw new Error('Só é possível iniciar execução de ordens aprovadas');
     }
-    this.changeStatus(ServiceOrderStatus.IN_EXECUTION, 'Execução iniciada');
+    this.changeStatus(ServiceOrderStatus.EM_EXECUCAO, 'Execução iniciada');
   }
 
   finish(): void {
-    if (this._status !== ServiceOrderStatus.IN_EXECUTION) {
+    if (this._status !== ServiceOrderStatus.EM_EXECUCAO) {
       throw new Error('Só é possível finalizar ordens em execução');
     }
-    this.changeStatus(ServiceOrderStatus.FINISHED, 'Serviço finalizado');
+    this.changeStatus(ServiceOrderStatus.FINALIZADA, 'Serviço finalizado');
   }
 
   deliver(): void {
-    if (this._status !== ServiceOrderStatus.FINISHED) {
+    if (this._status !== ServiceOrderStatus.FINALIZADA) {
       throw new Error('Só é possível entregar ordens finalizadas');
     }
     this.changeStatus(
-      ServiceOrderStatus.DELIVERED,
+      ServiceOrderStatus.ENTREGUE,
       'Veículo entregue ao cliente',
     );
   }
 
   private ensureCanBeModified(): void {
-    if (this._status === ServiceOrderStatus.DELIVERED) {
+    if (this._status === ServiceOrderStatus.ENTREGUE) {
       throw new Error(
         'Não é possível modificar ordens de serviço já entregues',
       );
@@ -244,15 +244,17 @@ export class ServiceOrderAggregate {
 
   private validateStatusTransition(newStatus: ServiceOrderStatus): void {
     const validTransitions: Record<ServiceOrderStatus, ServiceOrderStatus[]> = {
-      [ServiceOrderStatus.RECEIVED]: [ServiceOrderStatus.IN_DIAGNOSIS],
-      [ServiceOrderStatus.IN_DIAGNOSIS]: [ServiceOrderStatus.AWAITING_APPROVAL],
-      [ServiceOrderStatus.AWAITING_APPROVAL]: [
-        ServiceOrderStatus.IN_EXECUTION,
-        ServiceOrderStatus.IN_DIAGNOSIS,
+      [ServiceOrderStatus.RECEBIDA]: [ServiceOrderStatus.EM_DIAGNOSTICO],
+      [ServiceOrderStatus.EM_DIAGNOSTICO]: [
+        ServiceOrderStatus.AGUARDANDO_APROVACAO,
       ],
-      [ServiceOrderStatus.IN_EXECUTION]: [ServiceOrderStatus.FINISHED],
-      [ServiceOrderStatus.FINISHED]: [ServiceOrderStatus.DELIVERED],
-      [ServiceOrderStatus.DELIVERED]: [],
+      [ServiceOrderStatus.AGUARDANDO_APROVACAO]: [
+        ServiceOrderStatus.EM_EXECUCAO,
+        ServiceOrderStatus.EM_DIAGNOSTICO,
+      ],
+      [ServiceOrderStatus.EM_EXECUCAO]: [ServiceOrderStatus.FINALIZADA],
+      [ServiceOrderStatus.FINALIZADA]: [ServiceOrderStatus.ENTREGUE],
+      [ServiceOrderStatus.ENTREGUE]: [],
     };
 
     const allowedTransitions = validTransitions[this._status] || [];

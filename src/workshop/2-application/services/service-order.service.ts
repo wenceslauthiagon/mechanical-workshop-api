@@ -101,7 +101,7 @@ export class ServiceOrderService {
       customerId: data.customerId,
       vehicleId: data.vehicleId,
       description: data.description,
-      status: ServiceOrderStatus.RECEIVED,
+      status: ServiceOrderStatus.RECEBIDA,
       totalServicePrice: 0,
       totalPartsPrice: 0,
       totalPrice: 0,
@@ -170,7 +170,7 @@ export class ServiceOrderService {
 
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: serviceOrder.id,
-      status: ServiceOrderStatus.RECEIVED,
+      status: ServiceOrderStatus.RECEBIDA,
       notes: NOTES_MESSAGES.SERVICE_ORDER_CREATED,
     });
 
@@ -230,18 +230,18 @@ export class ServiceOrderService {
 
     const now = new Date();
     switch (data.status) {
-      case ServiceOrderStatus.IN_EXECUTION:
+      case ServiceOrderStatus.EM_EXECUCAO:
         if (!serviceOrder.startedAt) {
           updateData.startedAt = now;
         }
         break;
-      case ServiceOrderStatus.FINISHED:
+      case ServiceOrderStatus.FINALIZADA:
         updateData.completedAt = now;
         break;
-      case ServiceOrderStatus.DELIVERED:
+      case ServiceOrderStatus.ENTREGUE:
         updateData.deliveredAt = now;
         break;
-      case ServiceOrderStatus.AWAITING_APPROVAL:
+      case ServiceOrderStatus.AGUARDANDO_APROVACAO:
         break;
     }
 
@@ -293,7 +293,7 @@ export class ServiceOrderService {
       );
     }
 
-    if (serviceOrder.status !== ServiceOrderStatus.AWAITING_APPROVAL) {
+    if (serviceOrder.status !== ServiceOrderStatus.AGUARDANDO_APROVACAO) {
       this.errorHandler.generateException(
         ERROR_MESSAGES.SERVICE_ORDER_NOT_AWAITING_APPROVAL,
         HttpStatus.BAD_REQUEST,
@@ -301,14 +301,14 @@ export class ServiceOrderService {
     }
 
     await this.serviceOrderRepository.updateStatus(id, {
-      status: ServiceOrderStatus.IN_EXECUTION,
+      status: ServiceOrderStatus.EM_EXECUCAO,
       approvedAt: new Date(),
       startedAt: new Date(),
     });
 
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: id,
-      status: ServiceOrderStatus.IN_EXECUTION,
+      status: ServiceOrderStatus.EM_EXECUCAO,
       notes: NOTES_MESSAGES.BUDGET_APPROVED_EXECUTION_STARTED,
     });
 
@@ -388,18 +388,18 @@ export class ServiceOrderService {
     newStatus: ServiceOrderStatus,
   ): void {
     const validTransitions: Record<ServiceOrderStatus, ServiceOrderStatus[]> = {
-      [ServiceOrderStatus.RECEIVED]: [ServiceOrderStatus.IN_DIAGNOSIS],
-      [ServiceOrderStatus.IN_DIAGNOSIS]: [
-        ServiceOrderStatus.AWAITING_APPROVAL,
-        ServiceOrderStatus.IN_EXECUTION,
+      [ServiceOrderStatus.RECEBIDA]: [ServiceOrderStatus.EM_DIAGNOSTICO],
+      [ServiceOrderStatus.EM_DIAGNOSTICO]: [
+        ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        ServiceOrderStatus.EM_EXECUCAO,
       ],
-      [ServiceOrderStatus.AWAITING_APPROVAL]: [
-        ServiceOrderStatus.IN_EXECUTION,
-        ServiceOrderStatus.IN_DIAGNOSIS,
+      [ServiceOrderStatus.AGUARDANDO_APROVACAO]: [
+        ServiceOrderStatus.EM_EXECUCAO,
+        ServiceOrderStatus.EM_DIAGNOSTICO,
       ],
-      [ServiceOrderStatus.IN_EXECUTION]: [ServiceOrderStatus.FINISHED],
-      [ServiceOrderStatus.FINISHED]: [ServiceOrderStatus.DELIVERED],
-      [ServiceOrderStatus.DELIVERED]: [],
+      [ServiceOrderStatus.EM_EXECUCAO]: [ServiceOrderStatus.FINALIZADA],
+      [ServiceOrderStatus.FINALIZADA]: [ServiceOrderStatus.ENTREGUE],
+      [ServiceOrderStatus.ENTREGUE]: [],
     };
 
     const allowedTransitions = validTransitions[currentStatus] || [];

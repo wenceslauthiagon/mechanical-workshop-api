@@ -263,7 +263,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   async findCompletedOrders() {
     return this.prisma.serviceOrder.findMany({
       where: {
-        status: 'FINISHED',
+        status: 'FINALIZADA',
         startedAt: { not: null },
         completedAt: { not: null },
       },
