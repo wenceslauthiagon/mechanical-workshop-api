@@ -29,7 +29,7 @@ export class ServiceOrderResponseDto {
   @ApiProperty({
     description: 'Status atual da ordem de serviço',
     enum: ServiceOrderStatus,
-    example: ServiceOrderStatus.RECEIVED,
+    example: ServiceOrderStatus.RECEBIDA,
   })
   status: ServiceOrderStatus;
 

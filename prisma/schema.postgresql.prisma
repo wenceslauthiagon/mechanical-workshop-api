@@ -17,12 +17,12 @@ enum CustomerType {
 }
 
 enum ServiceOrderStatus {
-  RECEIVED           // Recebida
-  IN_DIAGNOSIS       // Em diagnóstico
-  AWAITING_APPROVAL  // Aguardando aprovação
-  IN_EXECUTION       // Em execução
-  FINISHED           // Finalizada
-  DELIVERED          // Entregue
+  RECEBIDA           // Recebida
+  EM_DIAGNOSTICO     // Em diagnóstico
+  AGUARDANDO_APROVACAO  // Aguardando aprovação
+  EM_EXECUCAO        // Em execução
+  FINALIZADA         // Finalizada
+  ENTREGUE           // Entregue
 }
 
 enum UserRole {
@@ -110,7 +110,7 @@ model ServiceOrder {
   orderNumber             String             @unique @map("order_number")
   customerId              String             @map("customer_id")
   vehicleId               String             @map("vehicle_id")
-  status                  ServiceOrderStatus @default(RECEIVED)
+  status                  ServiceOrderStatus @default(RECEBIDA)
   description             String
   totalServicePrice       Decimal            @default(0) @db.Decimal(10, 2) @map("total_service_price")
   totalPartsPrice         Decimal            @default(0) @db.Decimal(10, 2) @map("total_parts_price")

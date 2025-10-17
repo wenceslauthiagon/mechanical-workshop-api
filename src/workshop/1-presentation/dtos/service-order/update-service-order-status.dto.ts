@@ -6,7 +6,7 @@ export class UpdateServiceOrderStatusDto {
   @ApiProperty({
     description: 'Novo status da ordem de serviço',
     enum: ServiceOrderStatus,
-    example: ServiceOrderStatus.IN_DIAGNOSIS,
+    example: ServiceOrderStatus.EM_DIAGNOSTICO,
   })
   @IsEnum(ServiceOrderStatus)
   status: ServiceOrderStatus;

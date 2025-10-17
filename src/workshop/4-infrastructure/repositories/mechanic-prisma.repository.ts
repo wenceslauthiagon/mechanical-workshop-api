@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { ServiceOrderStatus } from '@prisma/client';
+import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
+import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
 import {
   IMechanicRepository,
   CreateMechanicData,
@@ -10,7 +13,10 @@ import {
 
 @Injectable()
 export class MechanicPrismaRepository implements IMechanicRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly errorHandler: ErrorHandlerService,
+  ) {}
 
   async create(data: CreateMechanicData): Promise<Mechanic> {
     const createdMechanic = await this.prisma.mechanic.create({
@@ -29,22 +35,30 @@ export class MechanicPrismaRepository implements IMechanicRepository {
   async findAll(): Promise<MechanicWithStats[]> {
     const mechanics = await this.prisma.mechanic.findMany({
       include: {
-        serviceOrders: {
-          where: {
-            status: {
-              notIn: ['FINISHED', 'DELIVERED'],
-            },
-          },
-        },
+        serviceOrders: true,
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    return mechanics.map((mechanic) => ({
-      ...this.mapPrismaMechanic(mechanic),
-      activeServiceOrders: mechanic.serviceOrders.length,
-      completedServiceOrders: 0, // TODO: Count completed orders
-    }));
+    return mechanics.map((mechanic) => {
+      const activeServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status !== ServiceOrderStatus.FINALIZADA &&
+          so.status !== ServiceOrderStatus.ENTREGUE,
+      ).length;
+
+      const completedServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status === ServiceOrderStatus.FINALIZADA ||
+          so.status === ServiceOrderStatus.ENTREGUE,
+      ).length;
+
+      return {
+        ...this.mapPrismaMechanic(mechanic),
+        activeServiceOrders,
+        completedServiceOrders,
+      };
+    });
   }
 
   async findById(id: string): Promise<MechanicWithStats | null> {
@@ -58,11 +72,15 @@ export class MechanicPrismaRepository implements IMechanicRepository {
     if (!mechanic) return null;
 
     const activeServiceOrders = mechanic.serviceOrders.filter(
-      (so) => !['FINISHED', 'DELIVERED'].includes(so.status),
+      (so) =>
+        so.status !== ServiceOrderStatus.FINALIZADA &&
+        so.status !== ServiceOrderStatus.ENTREGUE,
     ).length;
 
-    const completedServiceOrders = mechanic.serviceOrders.filter((so) =>
-      ['FINISHED', 'DELIVERED'].includes(so.status),
+    const completedServiceOrders = mechanic.serviceOrders.filter(
+      (so) =>
+        so.status === ServiceOrderStatus.FINALIZADA ||
+        so.status === ServiceOrderStatus.ENTREGUE,
     ).length;
 
     return {
@@ -94,11 +112,15 @@ export class MechanicPrismaRepository implements IMechanicRepository {
 
     return mechanics.map((mechanic) => {
       const activeServiceOrders = mechanic.serviceOrders.filter(
-        (so) => !['FINISHED', 'DELIVERED'].includes(so.status),
+        (so) =>
+          so.status !== ServiceOrderStatus.FINALIZADA &&
+          so.status !== ServiceOrderStatus.ENTREGUE,
       ).length;
 
-      const completedServiceOrders = mechanic.serviceOrders.filter((so) =>
-        ['FINISHED', 'DELIVERED'].includes(so.status),
+      const completedServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status === ServiceOrderStatus.FINALIZADA ||
+          so.status === ServiceOrderStatus.ENTREGUE,
       ).length;
 
       return {
@@ -114,7 +136,7 @@ export class MechanicPrismaRepository implements IMechanicRepository {
       where: {
         isActive: true,
         specialties: {
-          contains: specialty, // Search in JSON string
+          contains: specialty,
         },
       },
       include: {
@@ -131,11 +153,15 @@ export class MechanicPrismaRepository implements IMechanicRepository {
 
     return filteredMechanics.map((mechanic) => {
       const activeServiceOrders = mechanic.serviceOrders.filter(
-        (so) => !['FINISHED', 'DELIVERED'].includes(so.status),
+        (so) =>
+          so.status !== ServiceOrderStatus.FINALIZADA &&
+          so.status !== ServiceOrderStatus.ENTREGUE,
       ).length;
 
-      const completedServiceOrders = mechanic.serviceOrders.filter((so) =>
-        ['FINISHED', 'DELIVERED'].includes(so.status),
+      const completedServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status === ServiceOrderStatus.FINALIZADA ||
+          so.status === ServiceOrderStatus.ENTREGUE,
       ).length;
 
       return {
@@ -176,7 +202,9 @@ export class MechanicPrismaRepository implements IMechanicRepository {
     });
 
     if (!mechanic) {
-      throw new Error('Mechanic not found');
+      this.errorHandler.handleNotFoundError(
+        MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
+      );
     }
 
     const updatedMechanic = await this.prisma.mechanic.update({
@@ -212,21 +240,25 @@ export class MechanicPrismaRepository implements IMechanicRepository {
     });
 
     if (!mechanic) {
-      throw new Error('Mechanic not found');
+      this.errorHandler.handleNotFoundError(
+        MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
+      );
     }
 
     const activeOrders = mechanic.serviceOrders.filter(
-      (so) => !['FINISHED', 'DELIVERED'].includes(so.status),
+      (so) =>
+        so.status !== ServiceOrderStatus.FINALIZADA &&
+        so.status !== ServiceOrderStatus.ENTREGUE,
     ).length;
 
     const completedThisMonth = mechanic.serviceOrders.filter(
       (so) =>
-        ['FINISHED', 'DELIVERED'].includes(so.status) &&
+        (so.status === ServiceOrderStatus.FINALIZADA ||
+          so.status === ServiceOrderStatus.ENTREGUE) &&
         so.completedAt &&
         so.completedAt >= startOfMonth,
     ).length;
 
-    // Calculate average completion time (in hours)
     const completedOrders = mechanic.serviceOrders.filter(
       (so) => so.completedAt && so.startedAt,
     );
@@ -245,7 +277,7 @@ export class MechanicPrismaRepository implements IMechanicRepository {
     return {
       activeOrders,
       completedThisMonth,
-      averageCompletionTime: Math.round(averageCompletionTime * 100) / 100, // Round to 2 decimal places
+      averageCompletionTime: Math.round(averageCompletionTime * 100) / 100,
     };
   }
 
@@ -253,13 +285,13 @@ export class MechanicPrismaRepository implements IMechanicRepository {
     mechanicId: string,
     serviceOrderId?: string,
   ): Promise<void> {
-    // Marcar mecânico como indisponível
+    // Mark mechanic as unavailable
     await this.prisma.mechanic.update({
       where: { id: mechanicId },
       data: { isAvailable: false },
     });
 
-    // Se foi fornecido um serviceOrderId, associar o mecânico à OS
+    // If a serviceOrderId was provided, associate the mechanic with the service order
     if (serviceOrderId) {
       await this.prisma.serviceOrder.update({
         where: { id: serviceOrderId },
