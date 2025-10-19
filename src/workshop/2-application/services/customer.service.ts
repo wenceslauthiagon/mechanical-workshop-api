@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { Customer } from '@prisma/client';
-import { CustomerRepository } from '../../4-infrastructure/repositories/customer.repository';
+import type { ICustomerRepository } from '../../3-domain/repositories/customer-repository.interface';
 import { CreateCustomerDto } from '../../1-presentation/dtos/customer/create-customer.dto';
 import { UpdateCustomerDto } from '../../1-presentation/dtos/customer/update-customer.dto';
 import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
@@ -10,7 +10,8 @@ import { DocumentUtils } from '../../../shared/utils/document.utils';
 @Injectable()
 export class CustomerService {
   constructor(
-    private readonly customerRepository: CustomerRepository,
+    @Inject('ICustomerRepository')
+    private readonly customerRepository: ICustomerRepository,
     private readonly errorHandler: ErrorHandlerService,
   ) {}
 

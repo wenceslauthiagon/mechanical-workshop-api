@@ -53,7 +53,7 @@ export class BudgetResponseDto {
   @ApiProperty({
     description: 'Status do orçamento',
     enum: BudgetStatus,
-    example: BudgetStatus.SENT,
+    example: BudgetStatus.ENVIADO,
   })
   status: BudgetStatus;
 
@@ -62,6 +62,12 @@ export class BudgetResponseDto {
     example: '2023-10-13T10:00:00Z',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    description: 'Data de última atualização',
+    example: '2023-10-13T11:30:00Z',
+  })
+  updatedAt: Date;
 
   constructor(data: any) {
     this.id = data.id;
@@ -74,5 +80,6 @@ export class BudgetResponseDto {
     this.validUntil = data.validUntil;
     this.status = data.status;
     this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
   }
 }

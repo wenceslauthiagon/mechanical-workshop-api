@@ -4,7 +4,10 @@ export interface IServiceRepository {
   create(
     data: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Service>;
-  findAll(): Promise<Service[]>;
+  findAll(filters?: {
+    category?: string;
+    active?: boolean;
+  }): Promise<Service[]>;
   findById(id: string): Promise<Service | null>;
   findByName(name: string): Promise<Service | null>;
   findByCategory(category: string): Promise<Service[]>;
