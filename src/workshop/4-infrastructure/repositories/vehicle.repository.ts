@@ -12,17 +12,11 @@ export class VehicleRepository implements IVehicleRepository {
   ): Promise<Vehicle> {
     return this.prisma.vehicle.create({
       data,
-      include: {
-        customer: true,
-      },
     });
   }
 
   async findAll(): Promise<Vehicle[]> {
     return this.prisma.vehicle.findMany({
-      include: {
-        customer: true,
-      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -30,27 +24,18 @@ export class VehicleRepository implements IVehicleRepository {
   async findById(id: string): Promise<Vehicle | null> {
     return this.prisma.vehicle.findUnique({
       where: { id },
-      include: {
-        customer: true,
-      },
     });
   }
 
   async findByPlate(plate: string): Promise<Vehicle | null> {
     return this.prisma.vehicle.findUnique({
       where: { licensePlate: plate },
-      include: {
-        customer: true,
-      },
     });
   }
 
   async findByLicensePlate(licensePlate: string): Promise<Vehicle | null> {
     return this.prisma.vehicle.findUnique({
       where: { licensePlate },
-      include: {
-        customer: true,
-      },
     });
   }
 
@@ -64,9 +49,6 @@ export class VehicleRepository implements IVehicleRepository {
   async findByCustomerId(customerId: string): Promise<Vehicle[]> {
     return this.prisma.vehicle.findMany({
       where: { customerId },
-      include: {
-        customer: true,
-      },
     });
   }
 
@@ -77,9 +59,6 @@ export class VehicleRepository implements IVehicleRepository {
     return this.prisma.vehicle.update({
       where: { id },
       data,
-      include: {
-        customer: true,
-      },
     });
   }
 

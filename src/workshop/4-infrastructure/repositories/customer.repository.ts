@@ -17,9 +17,6 @@ export class CustomerRepository implements ICustomerRepository {
 
   async findAll(): Promise<Customer[]> {
     return this.prisma.customer.findMany({
-      include: {
-        vehicles: true,
-      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -27,9 +24,6 @@ export class CustomerRepository implements ICustomerRepository {
   async findById(id: string): Promise<Customer | null> {
     return this.prisma.customer.findUnique({
       where: { id },
-      include: {
-        vehicles: true,
-      },
     });
   }
 
@@ -42,20 +36,13 @@ export class CustomerRepository implements ICustomerRepository {
   async findByDocument(document: string): Promise<Customer | null> {
     return this.prisma.customer.findUnique({
       where: { document },
-      include: {
-        vehicles: true,
-      },
     });
   }
 
   async findVehiclesByCustomerId(customerId: string) {
-    const customer = await this.prisma.customer.findUnique({
-      where: { id: customerId },
-      include: {
-        vehicles: true,
-      },
+    return this.prisma.vehicle.findMany({
+      where: { customerId },
     });
-    return customer?.vehicles || [];
   }
 
   async update(

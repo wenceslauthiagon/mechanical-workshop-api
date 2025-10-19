@@ -1,35 +1,4 @@
-import type {
-  ServiceOrderStatus,
-  ServiceOrder,
-  Customer,
-  Vehicle,
-  Service,
-  Part,
-  Mechanic,
-} from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
-
-export interface ServiceOrderWithRelations extends ServiceOrder {
-  customer: Customer;
-  vehicle: Vehicle;
-  mechanic: Mechanic | null;
-  services: Array<{
-    id: string;
-    serviceId: string;
-    quantity: number;
-    price: Decimal;
-    totalPrice: Decimal;
-    service: Service;
-  }>;
-  parts: Array<{
-    id: string;
-    partId: string;
-    quantity: number;
-    price: Decimal;
-    totalPrice: Decimal;
-    part: Part;
-  }>;
-}
+import type { ServiceOrderStatus, ServiceOrder } from '@prisma/client';
 
 export interface CreateServiceOrderData {
   orderNumber: string;
@@ -45,13 +14,13 @@ export interface CreateServiceOrderData {
 }
 
 export interface IServiceOrderRepository {
-  create(data: CreateServiceOrderData): Promise<ServiceOrderWithRelations>;
+  create(data: CreateServiceOrderData): Promise<ServiceOrder>;
 
-  findAll(): Promise<ServiceOrderWithRelations[]>;
+  findAll(): Promise<ServiceOrder[]>;
 
-  findById(id: string): Promise<ServiceOrderWithRelations | null>;
+  findById(id: string): Promise<ServiceOrder | null>;
 
-  findByCustomerId(customerId: string): Promise<ServiceOrderWithRelations[]>;
+  findByCustomerId(customerId: string): Promise<ServiceOrder[]>;
 
   updateStatus(
     id: string,
@@ -81,15 +50,7 @@ export interface IServiceOrderRepository {
     quantity: number;
     price: number;
     totalPrice: number;
-  }): Promise<{
-    id: string;
-    serviceOrderId: string;
-    serviceId: string;
-    quantity: number;
-    price: Decimal;
-    totalPrice: Decimal;
-    createdAt: Date;
-  }>;
+  }): Promise<any>;
 
   addPartItem(data: {
     serviceOrderId: string;
@@ -97,50 +58,24 @@ export interface IServiceOrderRepository {
     quantity: number;
     price: number;
     totalPrice: number;
-  }): Promise<{
-    id: string;
-    serviceOrderId: string;
-    partId: string;
-    quantity: number;
-    price: Decimal;
-    totalPrice: Decimal;
-    createdAt: Date;
-  }>;
+  }): Promise<any>;
 
   addStatusHistory(data: {
     serviceOrderId: string;
     status: ServiceOrderStatus;
     notes?: string;
     changedBy?: string;
-  }): Promise<{
-    id: string;
-    serviceOrderId: string;
-    status: ServiceOrderStatus;
-    notes: string | null;
-    changedBy: string | null;
-    createdAt: Date;
-  }>;
+  }): Promise<any>;
 
-  getStatusHistory(serviceOrderId: string): Promise<
-    Array<{
-      id: string;
-      serviceOrderId: string;
-      status: ServiceOrderStatus;
-      notes: string | null;
-      changedBy: string | null;
-      createdAt: Date;
-    }>
-  >;
+  getStatusHistory(serviceOrderId: string): Promise<any[]>;
 
   countByYear(year: number): Promise<number>;
 
-  findByOrderNumber(
-    orderNumber: string,
-  ): Promise<ServiceOrderWithRelations | null>;
+  findByOrderNumber(orderNumber: string): Promise<ServiceOrder | null>;
 
-  findByVehicleId(vehicleId: string): Promise<ServiceOrderWithRelations[]>;
+  findByVehicleId(vehicleId: string): Promise<ServiceOrder[]>;
 
-  findCompletedOrders(): Promise<ServiceOrderWithRelations[]>;
+  findCompletedOrders(): Promise<ServiceOrder[]>;
 
   delete(id: string): Promise<ServiceOrder>;
 }
