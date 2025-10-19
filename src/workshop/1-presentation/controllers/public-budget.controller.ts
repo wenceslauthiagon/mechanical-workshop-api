@@ -110,7 +110,7 @@ export class PublicBudgetController {
   }> {
     const budget = await this.budgetService.findById(id);
     const isExpired = new Date() > budget.validUntil;
-    const canInteract = budget.status === BudgetStatus.SENT && !isExpired;
+    const canInteract = budget.status === BudgetStatus.ENVIADO && !isExpired;
 
     return {
       id: budget.id,

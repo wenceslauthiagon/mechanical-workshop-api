@@ -31,6 +31,14 @@ enum UserRole {
   CLIENT
 }
 
+enum BudgetStatus {
+  RASCUNHO
+  ENVIADO
+  APROVADO
+  REJEITADO
+  EXPIRADO
+}
+
 // Models
 model Customer {
   id        String      @id @default(uuid())
@@ -47,6 +55,7 @@ model Customer {
   // Relations
   vehicles      Vehicle[]
   serviceOrders ServiceOrder[]
+  budgets       Budget[]
 
   @@map("customers")
 }
@@ -82,6 +91,7 @@ model Service {
 
   // Relations
   serviceOrderItems ServiceOrderItem[]
+  budgetItems       BudgetItem[]
 
   @@map("services")
 }
@@ -101,6 +111,7 @@ model Part {
 
   // Relations
   serviceOrderParts ServiceOrderPart[]
+  budgetItems       BudgetItem[]
 
   @@map("parts")
 }
@@ -132,6 +143,7 @@ model ServiceOrder {
   services    ServiceOrderItem[]
   parts       ServiceOrderPart[]
   statusHistory ServiceOrderStatusHistory[]
+  budget      Budget?
 
   @@map("service_orders")
 }
@@ -211,4 +223,48 @@ model User {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model Budget {
+  id             String        @id @default(uuid())
+  serviceOrderId String        @unique @map("service_order_id")
+  customerId     String        @map("customer_id")
+  subtotal       Decimal       @default(0)
+  taxes          Decimal       @default(0)
+  discount       Decimal       @default(0)
+  total          Decimal       @default(0)
+  validUntil     DateTime      @map("valid_until")
+  status         BudgetStatus  @default(RASCUNHO)
+  sentAt         DateTime?     @map("sent_at")
+  approvedAt     DateTime?     @map("approved_at")
+  rejectedAt     DateTime?     @map("rejected_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  customer     Customer     @relation(fields: [customerId], references: [id])
+  items        BudgetItem[]
+
+  @@map("budgets")
+}
+
+model BudgetItem {
+  id          String  @id @default(uuid())
+  budgetId    String  @map("budget_id")
+  type        String  // 'SERVICE' or 'PART'
+  serviceId   String? @map("service_id")
+  partId      String? @map("part_id")
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Decimal @map("unit_price")
+  total       Decimal
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  budget  Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  service Service? @relation(fields: [serviceId], references: [id])
+  part    Part?    @relation(fields: [partId], references: [id])
+
+  @@map("budget_items")
 }

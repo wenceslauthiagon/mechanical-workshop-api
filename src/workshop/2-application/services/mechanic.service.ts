@@ -144,8 +144,8 @@ export class MechanicService {
     try {
       const mechanic = await this.findById(mechanicId);
       if (!mechanic.isAvailable) {
-        this.errorHandler.handleError(
-          new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE),
+        this.errorHandler.handleConflictError(
+          MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE,
         );
       }
 
@@ -153,6 +153,24 @@ export class MechanicService {
         mechanicId,
         serviceOrderId,
       );
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async markAsUnavailable(mechanicId: string): Promise<void> {
+    try {
+      await this.findById(mechanicId);
+      await this.mechanicRepository.markAsUnavailable(mechanicId);
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async releaseFromServiceOrder(mechanicId: string): Promise<void> {
+    try {
+      await this.findById(mechanicId);
+      await this.mechanicRepository.releaseFromServiceOrder(mechanicId);
     } catch (error) {
       this.errorHandler.handleError(error);
     }

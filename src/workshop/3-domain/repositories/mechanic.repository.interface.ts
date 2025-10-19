@@ -64,4 +64,8 @@ export interface IMechanicRepository {
     mechanicId: string,
     serviceOrderId?: string,
   ): Promise<void>;
+
+  markAsUnavailable(mechanicId: string): Promise<void>;
+
+  releaseFromServiceOrder(mechanicId: string): Promise<void>;
 }

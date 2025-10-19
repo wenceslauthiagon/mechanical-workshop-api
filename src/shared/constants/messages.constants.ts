@@ -48,6 +48,10 @@ export const ERROR_MESSAGES = {
   SERVICE_ORDER_NOT_FOUND: 'Ordem de serviço não encontrada',
   SERVICE_ORDER_NOT_AWAITING_APPROVAL:
     'Ordem de serviço não está aguardando aprovação',
+  MECHANIC_REQUIRED_FOR_EXECUTION:
+    'Para iniciar a execução, é necessário atrelar um mecânico à ordem de serviço.',
+  MECHANIC_BUSY_WITH_OTHER_ORDER:
+    'Mecânico já está ocupado executando outra ordem de serviço.',
 
   // Serviço
   SERVICE_NOT_FOUND: 'Serviço não encontrado',

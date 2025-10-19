@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { ServiceOrderRepository } from '../../4-infrastructure/repositories/service-order.repository';
-import { ServiceRepository } from '../../4-infrastructure/repositories/service.repository';
+import { Injectable, Inject } from '@nestjs/common';
+import type { IServiceOrderRepository } from '../../3-domain/repositories/service-order.repository.interface';
+import type { IServiceRepository } from '../../3-domain/repositories/service-repository.interface';
 import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 
@@ -23,8 +23,10 @@ export interface OverallStats {
 @Injectable()
 export class ServiceStatsService {
   constructor(
-    private readonly serviceOrderRepository: ServiceOrderRepository,
-    private readonly serviceRepository: ServiceRepository,
+    @Inject('IServiceOrderRepository')
+    private readonly serviceOrderRepository: IServiceOrderRepository,
+    @Inject('IServiceRepository')
+    private readonly serviceRepository: IServiceRepository,
     private readonly errorHandler: ErrorHandlerService,
   ) {}
 

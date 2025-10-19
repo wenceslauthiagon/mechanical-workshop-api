@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { Decimal } from '@prisma/client/runtime/library';
-import { ServiceRepository } from '../../4-infrastructure/repositories/service.repository';
+import type { IServiceRepository } from '../../3-domain/repositories/service-repository.interface';
 import { CreateServiceDto } from '../../1-presentation/dtos/service/create-service.dto';
 import { UpdateServiceDto } from '../../1-presentation/dtos/service/update-service.dto';
 import { ServiceBase } from '../../3-domain/entities/service.entity';
@@ -10,7 +10,8 @@ import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 @Injectable()
 export class ServiceService {
   constructor(
-    private readonly serviceRepository: ServiceRepository,
+    @Inject('IServiceRepository')
+    private readonly serviceRepository: IServiceRepository,
     private readonly errorHandler: ErrorHandlerService,
   ) {}
 

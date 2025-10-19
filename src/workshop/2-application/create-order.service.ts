@@ -1,6 +1,6 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpStatus, Inject } from '@nestjs/common';
 import { Customer } from '@prisma/client';
-import { CustomerRepository } from '../4-infrastructure/repositories/customer.repository';
+import type { ICustomerRepository } from '../3-domain/repositories/customer-repository.interface';
 import { CreateCustomerDto, UpdateCustomerDto } from '../1-presentation/dtos';
 import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 import { ErrorHandlerService } from '../../shared/services/error-handler.service';
@@ -8,7 +8,8 @@ import { ErrorHandlerService } from '../../shared/services/error-handler.service
 @Injectable()
 export class CreateOrderService {
   constructor(
-    private readonly customerRepository: CustomerRepository,
+    @Inject('ICustomerRepository')
+    private readonly customerRepository: ICustomerRepository,
     private readonly errorHandler: ErrorHandlerService,
   ) {}
 
