@@ -1,7 +1,7 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpStatus, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
-import { VehicleRepository } from '../../4-infrastructure/repositories/vehicle.repository';
-import { CustomerRepository } from '../../4-infrastructure/repositories/customer.repository';
+import type { IVehicleRepository } from '../../3-domain/repositories/vehicle-repository.interface';
+import type { ICustomerRepository } from '../../3-domain/repositories/customer-repository.interface';
 import { CreateVehicleDto } from '../../1-presentation/dtos/vehicle/create-vehicle.dto';
 import { UpdateVehicleDto } from '../../1-presentation/dtos/vehicle/update-vehicle.dto';
 import { VehicleResponseDto } from '../../1-presentation/dtos/vehicle/vehicle-response.dto';
@@ -11,8 +11,10 @@ import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 @Injectable()
 export class VehicleService {
   constructor(
-    private readonly vehicleRepository: VehicleRepository,
-    private readonly customerRepository: CustomerRepository,
+    @Inject('IVehicleRepository')
+    private readonly vehicleRepository: IVehicleRepository,
+    @Inject('ICustomerRepository')
+    private readonly customerRepository: ICustomerRepository,
     private readonly errorHandler: ErrorHandlerService,
   ) {}
 
@@ -26,7 +28,7 @@ export class VehicleService {
         );
       }
 
-      const existingVehicle = await this.vehicleRepository.findByLicensePlate(
+      const existingVehicle = await this.vehicleRepository.findByPlate(
         data.licensePlate,
       );
       if (existingVehicle) {
@@ -67,8 +69,7 @@ export class VehicleService {
   }
 
   async findByLicensePlate(licensePlate: string): Promise<VehicleResponseDto> {
-    const vehicle =
-      await this.vehicleRepository.findByLicensePlate(licensePlate);
+    const vehicle = await this.vehicleRepository.findByPlate(licensePlate);
     if (!vehicle) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
@@ -92,7 +93,7 @@ export class VehicleService {
     }
 
     if (data.licensePlate && data.licensePlate !== vehicle.licensePlate) {
-      const existingVehicle = await this.vehicleRepository.findByLicensePlate(
+      const existingVehicle = await this.vehicleRepository.findByPlate(
         data.licensePlate,
       );
       if (existingVehicle) {

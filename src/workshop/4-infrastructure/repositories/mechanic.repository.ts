@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { ServiceOrderStatus } from '@prisma/client';
+import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
 import {
   IMechanicRepository,
@@ -8,154 +11,217 @@ import {
   Mechanic,
 } from '../../3-domain/repositories/mechanic.repository.interface';
 
-interface DateProvider {
-  now(): Date;
-}
-
-class DefaultDateProvider implements DateProvider {
-  now(): Date {
-    return new Date();
-  }
-}
-
 @Injectable()
 export class MechanicRepository implements IMechanicRepository {
-  private mechanics: Mechanic[] = [];
-  private dateProvider: DateProvider = new DefaultDateProvider();
-  private readonly ID_PREFIX = 'mech';
-  private readonly RANDOM_ID_LENGTH = 9;
-
-  private generateId(): string {
-    const timestamp = Date.now();
-    const randomString = Math.random()
-      .toString(36)
-      .substring(2, 2 + this.RANDOM_ID_LENGTH);
-    return `${this.ID_PREFIX}_${timestamp}_${randomString}`;
-  }
-
-  private getCurrentTimestamp(): Date {
-    return this.dateProvider.now();
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly errorHandler: ErrorHandlerService,
+  ) {}
 
   async create(data: CreateMechanicData): Promise<Mechanic> {
-    const currentTime = this.getCurrentTimestamp();
-    const mechanic: Mechanic = {
-      id: this.generateId(),
-      name: data.name,
-      email: data.email,
-      phone: data.phone || null,
-      specialties: data.specialties,
-      experienceYears:
-        data.experienceYears ||
-        MECHANIC_CONSTANTS.DEFAULT_VALUES.EXPERIENCE_YEARS,
-      isActive: MECHANIC_CONSTANTS.DEFAULT_VALUES.IS_ACTIVE,
-      isAvailable: MECHANIC_CONSTANTS.DEFAULT_VALUES.IS_AVAILABLE,
-      createdAt: currentTime,
-      updatedAt: currentTime,
-    };
-    this.mechanics.push(mechanic);
-    return mechanic;
+    const createdMechanic = await this.prisma.mechanic.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone || null,
+        specialties: JSON.stringify(data.specialties),
+        experienceYears: data.experienceYears || 0,
+      },
+    });
+
+    return this.mapPrismaMechanic(createdMechanic);
   }
 
   async findAll(): Promise<MechanicWithStats[]> {
-    return this.mechanics.map((mechanic) => ({
-      ...mechanic,
-      activeServiceOrders: MECHANIC_CONSTANTS.DEFAULT_VALUES.ACTIVE_ORDERS,
-      completedServiceOrders:
-        MECHANIC_CONSTANTS.DEFAULT_VALUES.COMPLETED_ORDERS,
-    }));
+    const mechanics = await this.prisma.mechanic.findMany({
+      include: {
+        serviceOrders: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return mechanics.map((mechanic) => {
+      const activeServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status !== ServiceOrderStatus.FINALIZADA &&
+          so.status !== ServiceOrderStatus.ENTREGUE,
+      ).length;
+
+      const completedServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status === ServiceOrderStatus.FINALIZADA ||
+          so.status === ServiceOrderStatus.ENTREGUE,
+      ).length;
+
+      return {
+        ...this.mapPrismaMechanic(mechanic),
+        activeServiceOrders,
+        completedServiceOrders,
+      };
+    });
   }
 
   async findById(id: string): Promise<MechanicWithStats | null> {
-    const mechanic = this.mechanics.find((m) => m.id === id);
+    const mechanic = await this.prisma.mechanic.findUnique({
+      where: { id },
+      include: {
+        serviceOrders: true,
+      },
+    });
+
     if (!mechanic) return null;
 
+    const activeServiceOrders = mechanic.serviceOrders.filter(
+      (so) =>
+        so.status !== ServiceOrderStatus.FINALIZADA &&
+        so.status !== ServiceOrderStatus.ENTREGUE,
+    ).length;
+
+    const completedServiceOrders = mechanic.serviceOrders.filter(
+      (so) =>
+        so.status === ServiceOrderStatus.FINALIZADA ||
+        so.status === ServiceOrderStatus.ENTREGUE,
+    ).length;
+
     return {
-      ...mechanic,
-      activeServiceOrders: MECHANIC_CONSTANTS.DEFAULT_VALUES.ACTIVE_ORDERS,
-      completedServiceOrders:
-        MECHANIC_CONSTANTS.DEFAULT_VALUES.COMPLETED_ORDERS,
+      ...this.mapPrismaMechanic(mechanic),
+      activeServiceOrders,
+      completedServiceOrders,
     };
   }
 
   async findByEmail(email: string): Promise<Mechanic | null> {
-    return this.mechanics.find((m) => m.email === email) || null;
+    const mechanic = await this.prisma.mechanic.findUnique({
+      where: { email },
+    });
+
+    return mechanic ? this.mapPrismaMechanic(mechanic) : null;
   }
 
   async findAvailable(): Promise<MechanicWithStats[]> {
-    return this.mechanics
-      .filter((m) => m.isActive && m.isAvailable)
-      .map((mechanic) => ({
-        ...mechanic,
-        activeServiceOrders: MECHANIC_CONSTANTS.DEFAULT_VALUES.ACTIVE_ORDERS,
-        completedServiceOrders:
-          MECHANIC_CONSTANTS.DEFAULT_VALUES.COMPLETED_ORDERS,
-      }));
+    const mechanics = await this.prisma.mechanic.findMany({
+      where: {
+        isActive: true,
+        isAvailable: true,
+      },
+      include: {
+        serviceOrders: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return mechanics.map((mechanic) => {
+      const activeServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status !== ServiceOrderStatus.FINALIZADA &&
+          so.status !== ServiceOrderStatus.ENTREGUE,
+      ).length;
+
+      const completedServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status === ServiceOrderStatus.FINALIZADA ||
+          so.status === ServiceOrderStatus.ENTREGUE,
+      ).length;
+
+      return {
+        ...this.mapPrismaMechanic(mechanic),
+        activeServiceOrders,
+        completedServiceOrders,
+      };
+    });
   }
 
   async findBySpecialty(specialty: string): Promise<MechanicWithStats[]> {
-    return this.mechanics
-      .filter((m) => m.isActive && m.specialties.includes(specialty))
-      .map((mechanic) => ({
-        ...mechanic,
-        activeServiceOrders: MECHANIC_CONSTANTS.DEFAULT_VALUES.ACTIVE_ORDERS,
-        completedServiceOrders:
-          MECHANIC_CONSTANTS.DEFAULT_VALUES.COMPLETED_ORDERS,
-      }));
+    const mechanics = await this.prisma.mechanic.findMany({
+      where: {
+        isActive: true,
+        specialties: {
+          contains: specialty,
+        },
+      },
+      include: {
+        serviceOrders: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Filter by parsed specialties for exact match
+    const filteredMechanics = mechanics.filter((mechanic) => {
+      const specialties = JSON.parse(mechanic.specialties);
+      return specialties.includes(specialty);
+    });
+
+    return filteredMechanics.map((mechanic) => {
+      const activeServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status !== ServiceOrderStatus.FINALIZADA &&
+          so.status !== ServiceOrderStatus.ENTREGUE,
+      ).length;
+
+      const completedServiceOrders = mechanic.serviceOrders.filter(
+        (so) =>
+          so.status === ServiceOrderStatus.FINALIZADA ||
+          so.status === ServiceOrderStatus.ENTREGUE,
+      ).length;
+
+      return {
+        ...this.mapPrismaMechanic(mechanic),
+        activeServiceOrders,
+        completedServiceOrders,
+      };
+    });
   }
 
   async update(id: string, data: UpdateMechanicData): Promise<Mechanic> {
-    const mechanicIndex = this.mechanics.findIndex((m) => m.id === id);
-    if (mechanicIndex === -1) {
-      throw new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
-    }
-
-    const mechanic = this.mechanics[mechanicIndex];
-    this.mechanics[mechanicIndex] = {
-      ...mechanic,
+    const updateData: any = {
       ...(data.name && { name: data.name }),
       ...(data.email && { email: data.email }),
       ...(data.phone !== undefined && { phone: data.phone }),
-      ...(data.specialties && { specialties: data.specialties }),
+      ...(data.specialties && {
+        specialties: JSON.stringify(data.specialties),
+      }),
       ...(data.isActive !== undefined && { isActive: data.isActive }),
       ...(data.isAvailable !== undefined && { isAvailable: data.isAvailable }),
       ...(data.experienceYears !== undefined && {
         experienceYears: data.experienceYears,
       }),
-      updatedAt: this.getCurrentTimestamp(),
     };
 
-    return this.mechanics[mechanicIndex];
+    const updatedMechanic = await this.prisma.mechanic.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return this.mapPrismaMechanic(updatedMechanic);
   }
 
   async toggleAvailability(id: string): Promise<Mechanic> {
-    const mechanicIndex = this.mechanics.findIndex((m) => m.id === id);
-    if (mechanicIndex === -1) {
-      throw new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
+    const mechanic = await this.prisma.mechanic.findUnique({
+      where: { id },
+      select: { isAvailable: true },
+    });
+
+    if (!mechanic) {
+      this.errorHandler.handleNotFoundError(
+        MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
+      );
     }
 
-    this.mechanics[mechanicIndex] = {
-      ...this.mechanics[mechanicIndex],
-      isAvailable: !this.mechanics[mechanicIndex].isAvailable,
-      updatedAt: this.getCurrentTimestamp(),
-    };
+    const updatedMechanic = await this.prisma.mechanic.update({
+      where: { id },
+      data: { isAvailable: !mechanic.isAvailable },
+    });
 
-    return this.mechanics[mechanicIndex];
+    return this.mapPrismaMechanic(updatedMechanic);
   }
 
   async delete(id: string): Promise<Mechanic> {
-    const mechanicIndex = this.mechanics.findIndex((m) => m.id === id);
-    if (mechanicIndex === -1) {
-      throw new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
-    }
+    const deletedMechanic = await this.prisma.mechanic.update({
+      where: { id },
+      data: { isActive: false },
+    });
 
-    this.mechanics[mechanicIndex] = {
-      ...this.mechanics[mechanicIndex],
-      isActive: false,
-      updatedAt: this.getCurrentTimestamp(),
-    };
-
-    return this.mechanics[mechanicIndex];
+    return this.mapPrismaMechanic(deletedMechanic);
   }
 
   async getWorkload(mechanicId: string): Promise<{
@@ -163,35 +229,100 @@ export class MechanicRepository implements IMechanicRepository {
     completedThisMonth: number;
     averageCompletionTime: number;
   }> {
-    const mechanic = this.mechanics.find((m) => m.id === mechanicId);
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const mechanic = await this.prisma.mechanic.findUnique({
+      where: { id: mechanicId },
+      include: {
+        serviceOrders: true,
+      },
+    });
+
     if (!mechanic) {
-      throw new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
+      this.errorHandler.handleNotFoundError(
+        MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
+      );
+    }
+
+    const activeOrders = mechanic.serviceOrders.filter(
+      (so) =>
+        so.status !== ServiceOrderStatus.FINALIZADA &&
+        so.status !== ServiceOrderStatus.ENTREGUE,
+    ).length;
+
+    const completedThisMonth = mechanic.serviceOrders.filter(
+      (so) =>
+        (so.status === ServiceOrderStatus.FINALIZADA ||
+          so.status === ServiceOrderStatus.ENTREGUE) &&
+        so.completedAt &&
+        so.completedAt >= startOfMonth,
+    ).length;
+
+    const completedOrders = mechanic.serviceOrders.filter(
+      (so) => so.completedAt && so.startedAt,
+    );
+
+    let averageCompletionTime = 0;
+    if (completedOrders.length > 0) {
+      const totalHours = completedOrders.reduce((total, so) => {
+        const startTime = so.startedAt!.getTime();
+        const endTime = so.completedAt!.getTime();
+        const hours = (endTime - startTime) / (1000 * 60 * 60);
+        return total + hours;
+      }, 0);
+      averageCompletionTime = totalHours / completedOrders.length;
     }
 
     return {
-      activeOrders: MECHANIC_CONSTANTS.DEFAULT_VALUES.ACTIVE_ORDERS,
-      completedThisMonth: MECHANIC_CONSTANTS.DEFAULT_VALUES.COMPLETED_ORDERS,
-      averageCompletionTime:
-        MECHANIC_CONSTANTS.DEFAULT_VALUES.AVERAGE_COMPLETION_TIME,
+      activeOrders,
+      completedThisMonth,
+      averageCompletionTime: Math.round(averageCompletionTime * 100) / 100,
     };
   }
 
-  async assignToServiceOrder(mechanicId: string): Promise<void> {
-    const mechanicIndex = this.mechanics.findIndex((m) => m.id === mechanicId);
-    if (mechanicIndex === -1) {
-      throw new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
+  async assignToServiceOrder(
+    mechanicId: string,
+    serviceOrderId?: string,
+  ): Promise<void> {
+    // If a serviceOrderId was provided, associate the mechanic with the service order
+    // Do NOT mark as unavailable yet - that happens when OS enters EM_EXECUCAO
+    if (serviceOrderId) {
+      await this.prisma.serviceOrder.update({
+        where: { id: serviceOrderId },
+        data: { mechanicId },
+      });
     }
+  }
 
-    const mechanic = this.mechanics[mechanicIndex];
-    if (!mechanic.isAvailable) {
-      throw new Error(MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE);
-    }
+  async markAsUnavailable(mechanicId: string): Promise<void> {
+    // Mark mechanic as unavailable when OS enters EM_EXECUCAO
+    await this.prisma.mechanic.update({
+      where: { id: mechanicId },
+      data: { isAvailable: false },
+    });
+  }
 
-    // Marcar mecânico como ocupado e associado à OS
-    this.mechanics[mechanicIndex] = {
-      ...mechanic,
-      isAvailable: false,
-      updatedAt: this.getCurrentTimestamp(),
+  async releaseFromServiceOrder(mechanicId: string): Promise<void> {
+    // Mark mechanic as available again
+    await this.prisma.mechanic.update({
+      where: { id: mechanicId },
+      data: { isAvailable: true },
+    });
+  }
+
+  private mapPrismaMechanic(prismaMechanic: any): Mechanic {
+    return {
+      id: prismaMechanic.id,
+      name: prismaMechanic.name,
+      email: prismaMechanic.email,
+      phone: prismaMechanic.phone,
+      specialties: JSON.parse(prismaMechanic.specialties),
+      experienceYears: prismaMechanic.experienceYears,
+      isActive: prismaMechanic.isActive,
+      isAvailable: prismaMechanic.isAvailable,
+      createdAt: prismaMechanic.createdAt,
+      updatedAt: prismaMechanic.updatedAt,
     };
   }
 }

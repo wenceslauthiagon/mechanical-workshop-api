@@ -134,6 +134,18 @@ export class ServiceOrderResponseDto {
   };
 
   @ApiProperty({
+    description: 'Dados do mecânico responsável',
+    nullable: true,
+  })
+  mechanic?: {
+    id: string;
+    name: string;
+    specialty: string;
+    phone: string;
+    isAvailable: boolean;
+  } | null;
+
+  @ApiProperty({
     description: 'Serviços incluídos na ordem',
     type: 'array',
     items: {

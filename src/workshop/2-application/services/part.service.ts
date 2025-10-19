@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { Decimal } from '@prisma/client/runtime/library';
-import { PartRepository } from '../../4-infrastructure/repositories/part.repository';
+import type { IPartRepository } from '../../3-domain/repositories/part-repository.interface';
 import { CreatePartDto } from '../../1-presentation/dtos/part/create-part.dto';
 import { UpdatePartDto } from '../../1-presentation/dtos/part/update-part.dto';
 import { PartBase } from '../../3-domain/entities/part.entity';
@@ -10,7 +10,8 @@ import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 @Injectable()
 export class PartService {
   constructor(
-    private readonly partRepository: PartRepository,
+    @Inject('IPartRepository')
+    private readonly partRepository: IPartRepository,
     private readonly errorHandler: ErrorHandlerService,
   ) {}
 

@@ -2518,4 +2518,3 @@ describe('VehicleController', () => {
     });
   });
 });
-

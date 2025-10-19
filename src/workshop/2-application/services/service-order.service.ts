@@ -1,15 +1,16 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { ServiceOrderStatus } from '@prisma/client';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../1-presentation/dtos/service-order/update-service-order-status.dto';
 import { ServiceOrderResponseDto } from '../../1-presentation/dtos/service-order/service-order-response.dto';
-import { ServiceOrderRepository } from '../../4-infrastructure/repositories/service-order.repository';
-import { CustomerRepository } from '../../4-infrastructure/repositories/customer.repository';
-import { VehicleRepository } from '../../4-infrastructure/repositories/vehicle.repository';
-import { ServiceRepository } from '../../4-infrastructure/repositories/service.repository';
-import { PartRepository } from '../../4-infrastructure/repositories/part.repository';
+import type { IServiceOrderRepository } from '../../3-domain/repositories/service-order.repository.interface';
+import type { ICustomerRepository } from '../../3-domain/repositories/customer-repository.interface';
+import type { IVehicleRepository } from '../../3-domain/repositories/vehicle-repository.interface';
+import type { IServiceRepository } from '../../3-domain/repositories/service-repository.interface';
+import type { IPartRepository } from '../../3-domain/repositories/part-repository.interface';
 import { NotificationService } from './notification.service';
+import { MechanicService } from './mechanic.service';
 import { ServiceOrderWithRelations } from '../../3-domain/repositories/service-order.repository.interface';
 import {
   ERROR_MESSAGES,
@@ -23,13 +24,19 @@ export class ServiceOrderService {
   private readonly logger = new Logger(ServiceOrderService.name);
 
   constructor(
-    private readonly serviceOrderRepository: ServiceOrderRepository,
-    private readonly customerRepository: CustomerRepository,
-    private readonly vehicleRepository: VehicleRepository,
-    private readonly serviceRepository: ServiceRepository,
-    private readonly partRepository: PartRepository,
+    @Inject('IServiceOrderRepository')
+    private readonly serviceOrderRepository: IServiceOrderRepository,
+    @Inject('ICustomerRepository')
+    private readonly customerRepository: ICustomerRepository,
+    @Inject('IVehicleRepository')
+    private readonly vehicleRepository: IVehicleRepository,
+    @Inject('IServiceRepository')
+    private readonly serviceRepository: IServiceRepository,
+    @Inject('IPartRepository')
+    private readonly partRepository: IPartRepository,
     private readonly errorHandler: ErrorHandlerService,
     private readonly notificationService: NotificationService,
+    private readonly mechanicService: MechanicService,
   ) {}
 
   async create(data: CreateServiceOrderDto): Promise<ServiceOrderResponseDto> {
@@ -230,17 +237,52 @@ export class ServiceOrderService {
 
     const now = new Date();
     switch (data.status) {
-      case ServiceOrderStatus.EM_EXECUCAO:
+      case ServiceOrderStatus.EM_EXECUCAO: {
+        // Validate if there is a mechanic assigned to the service order
+        if (!serviceOrder.mechanicId) {
+          this.errorHandler.generateException(
+            'Para iniciar a execução, é necessário atrelar um mecânico à ordem de serviço.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        // Check if the mechanic is already executing another service order
+        const mechanic = await this.mechanicService.findById(
+          serviceOrder.mechanicId,
+        );
+        if (!mechanic.isAvailable) {
+          this.errorHandler.handleConflictError(
+            'Mecânico já está ocupado executando outra ordem de serviço.',
+          );
+        }
+
+        // Mark mechanic as unavailable when service order starts execution
+        await this.mechanicService.markAsUnavailable(serviceOrder.mechanicId);
         if (!serviceOrder.startedAt) {
           updateData.startedAt = now;
         }
         break;
-      case ServiceOrderStatus.FINALIZADA:
+      }
+      case ServiceOrderStatus.FINALIZADA: {
         updateData.completedAt = now;
+        // Release mechanic when service is completed
+        if (serviceOrder.mechanicId) {
+          await this.mechanicService.releaseFromServiceOrder(
+            serviceOrder.mechanicId,
+          );
+        }
         break;
-      case ServiceOrderStatus.ENTREGUE:
+      }
+      case ServiceOrderStatus.ENTREGUE: {
         updateData.deliveredAt = now;
+        // Release mechanic when service is delivered (in case it wasn't released before)
+        if (serviceOrder.mechanicId) {
+          await this.mechanicService.releaseFromServiceOrder(
+            serviceOrder.mechanicId,
+          );
+        }
         break;
+      }
       case ServiceOrderStatus.AGUARDANDO_APROVACAO:
         break;
     }
@@ -253,7 +295,7 @@ export class ServiceOrderService {
       notes: data.notes || `Status alterado para ${data.status}`,
     });
 
-    // Enviar notificação para o cliente
+    // Send notification to customer
     try {
       const customer = await this.customerRepository.findById(
         serviceOrder.customerId,
@@ -360,8 +402,7 @@ export class ServiceOrderService {
   async findByVehiclePlate(
     licensePlate: string,
   ): Promise<ServiceOrderResponseDto[]> {
-    const vehicle =
-      await this.vehicleRepository.findByLicensePlate(licensePlate);
+    const vehicle = await this.vehicleRepository.findByPlate(licensePlate);
     if (!vehicle) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
@@ -452,6 +493,16 @@ export class ServiceOrderService {
             color: serviceOrder.vehicle.color,
           }
         : undefined,
+      mechanic: serviceOrder.mechanic
+        ? {
+            id: serviceOrder.mechanic.id,
+            name: serviceOrder.mechanic.name,
+            specialty:
+              JSON.parse(serviceOrder.mechanic.specialties)[0] || 'Geral',
+            phone: serviceOrder.mechanic.phone || '',
+            isAvailable: serviceOrder.mechanic.isAvailable,
+          }
+        : null,
       services:
         serviceOrder.services?.map((item) => ({
           id: item.id,

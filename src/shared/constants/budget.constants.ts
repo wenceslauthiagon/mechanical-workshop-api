@@ -15,6 +15,11 @@ export const BUDGET_CONSTANTS = {
   },
   MESSAGES: {
     NOT_FOUND: 'Orçamento não encontrado',
+    ONLY_SENT_CAN_BE_APPROVED: 'Apenas orçamentos enviados podem ser aprovados',
+    ONLY_SENT_CAN_BE_REJECTED:
+      'Apenas orçamentos enviados podem ser rejeitados',
+    ONLY_DRAFT_CAN_BE_SENT: 'Apenas orçamentos em rascunho podem ser enviados',
+    EXPIRED_CANNOT_BE_APPROVED: 'Orçamento expirado não pode ser aprovado',
     ALREADY_SENT: 'Orçamento já foi enviado',
     ALREADY_APPROVED: 'Orçamento já foi aprovado',
     ALREADY_REJECTED: 'Orçamento já foi rejeitado',

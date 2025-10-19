@@ -5,12 +5,14 @@ import type {
   Vehicle,
   Service,
   Part,
+  Mechanic,
 } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export interface ServiceOrderWithRelations extends ServiceOrder {
   customer: Customer;
   vehicle: Vehicle;
+  mechanic: Mechanic | null;
   services: Array<{
     id: string;
     serviceId: string;

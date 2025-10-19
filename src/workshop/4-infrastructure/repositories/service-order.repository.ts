@@ -7,6 +7,22 @@ import { IServiceOrderRepository } from 'src/workshop/3-domain/repositories/serv
 export class ServiceOrderRepository implements IServiceOrderRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  private readonly defaultIncludes = {
+    customer: true,
+    vehicle: true,
+    mechanic: true,
+    services: {
+      include: {
+        service: true,
+      },
+    },
+    parts: {
+      include: {
+        part: true,
+      },
+    },
+  };
+
   async create(data: {
     orderNumber: string;
     customerId: string;
@@ -27,82 +43,27 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
         totalPrice: data.totalPrice,
         estimatedTimeHours: data.estimatedTimeHours,
       },
-      include: {
-        customer: true,
-        vehicle: true,
-        services: {
-          include: {
-            service: true,
-          },
-        },
-        parts: {
-          include: {
-            part: true,
-          },
-        },
-      },
+      include: this.defaultIncludes,
     });
   }
 
   async findAll() {
     return this.prisma.serviceOrder.findMany({
-      include: {
-        customer: true,
-        vehicle: true,
-        services: {
-          include: {
-            service: true,
-          },
-        },
-        parts: {
-          include: {
-            part: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      include: this.defaultIncludes,
     });
   }
 
   async findById(id: string) {
     return this.prisma.serviceOrder.findUnique({
       where: { id },
-      include: {
-        customer: true,
-        vehicle: true,
-        services: {
-          include: {
-            service: true,
-          },
-        },
-        parts: {
-          include: {
-            part: true,
-          },
-        },
-      },
+      include: this.defaultIncludes,
     });
   }
 
   async findByCustomerId(customerId: string) {
     return this.prisma.serviceOrder.findMany({
       where: { customerId },
-      include: {
-        customer: true,
-        vehicle: true,
-        services: {
-          include: {
-            service: true,
-          },
-        },
-        parts: {
-          include: {
-            part: true,
-          },
-        },
-      },
+      include: this.defaultIncludes,
       orderBy: {
         createdAt: 'desc',
       },
@@ -220,40 +181,14 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   async findByOrderNumber(orderNumber: string) {
     return this.prisma.serviceOrder.findUnique({
       where: { orderNumber },
-      include: {
-        customer: true,
-        vehicle: true,
-        services: {
-          include: {
-            service: true,
-          },
-        },
-        parts: {
-          include: {
-            part: true,
-          },
-        },
-      },
+      include: this.defaultIncludes,
     });
   }
 
   async findByVehicleId(vehicleId: string) {
     return this.prisma.serviceOrder.findMany({
       where: { vehicleId },
-      include: {
-        customer: true,
-        vehicle: true,
-        services: {
-          include: {
-            service: true,
-          },
-        },
-        parts: {
-          include: {
-            part: true,
-          },
-        },
-      },
+      include: this.defaultIncludes,
       orderBy: {
         createdAt: 'desc',
       },
@@ -263,24 +198,11 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   async findCompletedOrders() {
     return this.prisma.serviceOrder.findMany({
       where: {
-        status: 'FINALIZADA',
+        status: ServiceOrderStatus.FINALIZADA,
         startedAt: { not: null },
         completedAt: { not: null },
       },
-      include: {
-        customer: true,
-        vehicle: true,
-        services: {
-          include: {
-            service: true,
-          },
-        },
-        parts: {
-          include: {
-            part: true,
-          },
-        },
-      },
+      include: this.defaultIncludes,
       orderBy: {
         completedAt: 'desc',
       },

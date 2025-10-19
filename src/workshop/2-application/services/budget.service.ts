@@ -73,24 +73,22 @@ export class BudgetService {
     try {
       const budget = await this.findById(id);
 
-      if (budget.status !== BudgetStatus.DRAFT) {
+      if (budget.status !== BudgetStatus.RASCUNHO) {
         this.errorHandler.handleError(
-          new Error(BUDGET_CONSTANTS.MESSAGES.ALREADY_SENT),
+          new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_DRAFT_CAN_BE_SENT),
         );
       }
 
-      // Atualizar status do orçamento
       const updatedBudget = await this.budgetRepository.updateStatus(
         id,
-        BudgetStatus.SENT,
+        BudgetStatus.ENVIADO,
       );
 
-      // Buscar dados do cliente para envio de notificação
+      // Send notification to customer
       const customer = await this.customerRepository.findById(
         budget.customerId,
       );
       if (customer) {
-        // Enviar notificação por email
         await this.notificationService.sendBudgetReadyNotification(
           updatedBudget,
           customer.email,
@@ -109,15 +107,22 @@ export class BudgetService {
     try {
       const budget = await this.findById(id);
 
-      if (budget.status !== BudgetStatus.SENT) {
+      if (budget.status !== BudgetStatus.ENVIADO) {
         this.errorHandler.handleError(
-          new Error(BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION),
+          new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_APPROVED),
+        );
+      }
+
+      // Check if budget is not expired
+      if (new Date() > budget.validUntil) {
+        this.errorHandler.handleError(
+          new Error(BUDGET_CONSTANTS.MESSAGES.EXPIRED_CANNOT_BE_APPROVED),
         );
       }
 
       return await this.budgetRepository.updateStatus(
         id,
-        BudgetStatus.APPROVED,
+        BudgetStatus.APROVADO,
       );
     } catch (error) {
       this.errorHandler.handleError(error);
@@ -128,15 +133,15 @@ export class BudgetService {
     try {
       const budget = await this.findById(id);
 
-      if (budget.status !== BudgetStatus.SENT) {
+      if (budget.status !== BudgetStatus.ENVIADO) {
         this.errorHandler.handleError(
-          new Error(BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION),
+          new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_REJECTED),
         );
       }
 
       return await this.budgetRepository.updateStatus(
         id,
-        BudgetStatus.REJECTED,
+        BudgetStatus.REJEITADO,
       );
     } catch (error) {
       this.errorHandler.handleError(error);
@@ -147,6 +152,50 @@ export class BudgetService {
     try {
       await this.findById(id);
       await this.budgetRepository.delete(id);
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async findExpiredBudgets(): Promise<Budget[]> {
+    try {
+      return await this.budgetRepository.findExpired();
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async markAsExpired(id: string): Promise<Budget> {
+    try {
+      const budget = await this.findById(id);
+
+      // Only allow expiration for RASCUNHO and ENVIADO status
+      if (
+        budget.status !== BudgetStatus.RASCUNHO &&
+        budget.status !== BudgetStatus.ENVIADO
+      ) {
+        this.errorHandler.handleError(
+          new Error(BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION),
+        );
+      }
+
+      return await this.budgetRepository.markAsExpired(id);
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async findByCustomerId(customerId: string): Promise<Budget[]> {
+    try {
+      return await this.budgetRepository.findByCustomerId(customerId);
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async findByStatus(status: BudgetStatus): Promise<Budget[]> {
+    try {
+      return await this.budgetRepository.findByStatus(status);
     } catch (error) {
       this.errorHandler.handleError(error);
     }

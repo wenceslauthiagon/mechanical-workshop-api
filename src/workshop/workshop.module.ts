@@ -27,7 +27,6 @@ import { VehicleRepository } from './4-infrastructure/repositories/vehicle.repos
 import { ServiceRepository } from './4-infrastructure/repositories/service.repository';
 import { PartRepository } from './4-infrastructure/repositories/part.repository';
 import { MechanicRepository } from './4-infrastructure/repositories/mechanic.repository';
-import { MechanicPrismaRepository } from './4-infrastructure/repositories/mechanic-prisma.repository';
 import { BudgetRepository } from './4-infrastructure/repositories/budget.repository';
 import { NotificationProviderFactory } from './4-infrastructure/providers/notification-provider.factory';
 import { GmailEmailProvider } from './4-infrastructure/providers/email/gmail-email.provider';
@@ -49,6 +48,35 @@ import { MockSmsProvider } from './4-infrastructure/providers/sms/mock-sms.provi
   ],
   providers: [
     PrismaService,
+    NotificationService,
+    {
+      provide: 'ICustomerRepository',
+      useClass: CustomerRepository,
+    },
+    {
+      provide: 'IServiceOrderRepository',
+      useClass: ServiceOrderRepository,
+    },
+    {
+      provide: 'IVehicleRepository',
+      useClass: VehicleRepository,
+    },
+    {
+      provide: 'IServiceRepository',
+      useClass: ServiceRepository,
+    },
+    {
+      provide: 'IPartRepository',
+      useClass: PartRepository,
+    },
+    {
+      provide: 'IMechanicRepository',
+      useClass: MechanicRepository,
+    },
+    {
+      provide: 'IBudgetRepository',
+      useClass: BudgetRepository,
+    },
     CreateOrderService,
     ServiceOrderService,
     VehicleService,
@@ -58,26 +86,6 @@ import { MockSmsProvider } from './4-infrastructure/providers/sms/mock-sms.provi
     ServiceStatsService,
     MechanicService,
     BudgetService,
-    NotificationService,
-    CustomerRepository,
-    ServiceOrderRepository,
-    VehicleRepository,
-    ServiceRepository,
-    PartRepository,
-    MechanicRepository,
-    BudgetRepository,
-    {
-      provide: 'ICustomerRepository',
-      useClass: CustomerRepository,
-    },
-    {
-      provide: 'IMechanicRepository',
-      useClass: MechanicPrismaRepository,
-    },
-    {
-      provide: 'IBudgetRepository',
-      useClass: BudgetRepository,
-    },
     NotificationProviderFactory,
     {
       provide: 'IEmailProvider',
@@ -95,7 +103,6 @@ import { MockSmsProvider } from './4-infrastructure/providers/sms/mock-sms.provi
     ServiceService,
     PartService,
     MechanicService,
-    BudgetService,
   ],
 })
 export class WorkshopModule {}

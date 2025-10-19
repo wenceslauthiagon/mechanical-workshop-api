@@ -1,4 +1,4 @@
-import { Customer } from '@prisma/client';
+import { Customer, Vehicle } from '@prisma/client';
 
 export interface ICustomerRepository {
   create(
@@ -8,6 +8,7 @@ export interface ICustomerRepository {
   findById(id: string): Promise<Customer | null>;
   findByEmail(email: string): Promise<Customer | null>;
   findByDocument(document: string): Promise<Customer | null>;
+  findVehiclesByCustomerId(customerId: string): Promise<Vehicle[]>;
   update(
     id: string,
     data: Partial<Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>>,

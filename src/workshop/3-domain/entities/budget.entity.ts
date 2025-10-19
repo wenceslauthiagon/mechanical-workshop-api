@@ -1,3 +1,5 @@
+import { BUDGET_CONSTANTS } from '../../../shared/constants/budget.constants';
+
 export class BudgetEntity {
   constructor(
     public readonly id: string,
@@ -24,12 +26,15 @@ export class BudgetEntity {
     validDays?: number;
   }): BudgetEntity {
     const subtotal = data.items.reduce((sum, item) => sum + item.total, 0);
-    const taxes = subtotal * 0.1; // 10% de impostos
-    const discount = 0;
+    const taxes = subtotal * BUDGET_CONSTANTS.DEFAULT_VALUES.TAX_RATE;
+    const discount = BUDGET_CONSTANTS.DEFAULT_VALUES.DISCOUNT;
     const total = subtotal + taxes - discount;
 
     const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + (data.validDays || 15)); // 15 dias padrão
+    validUntil.setDate(
+      validUntil.getDate() +
+        (data.validDays || BUDGET_CONSTANTS.DEFAULT_VALUES.VALID_DAYS),
+    );
 
     return new BudgetEntity(
       `budget_${Date.now()}`,
@@ -41,7 +46,7 @@ export class BudgetEntity {
       discount,
       total,
       validUntil,
-      BudgetStatus.DRAFT,
+      BudgetStatus.RASCUNHO,
       undefined,
       undefined,
       undefined,
@@ -49,12 +54,12 @@ export class BudgetEntity {
   }
 
   approve(): BudgetEntity {
-    if (this.status !== BudgetStatus.SENT) {
-      throw new Error('Apenas orçamentos enviados podem ser aprovados');
+    if (this.status !== BudgetStatus.ENVIADO) {
+      throw new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_APPROVED);
     }
 
     if (this.isExpired()) {
-      throw new Error('Orçamento expirado não pode ser aprovado');
+      throw new Error(BUDGET_CONSTANTS.MESSAGES.EXPIRED_CANNOT_BE_APPROVED);
     }
 
     return new BudgetEntity(
@@ -67,7 +72,7 @@ export class BudgetEntity {
       this.discount,
       this.total,
       this.validUntil,
-      BudgetStatus.APPROVED,
+      BudgetStatus.APROVADO,
       this.sentAt,
       new Date(),
       undefined,
@@ -77,8 +82,8 @@ export class BudgetEntity {
   }
 
   reject(): BudgetEntity {
-    if (this.status !== BudgetStatus.SENT) {
-      throw new Error('Apenas orçamentos enviados podem ser rejeitados');
+    if (this.status !== BudgetStatus.ENVIADO) {
+      throw new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_REJECTED);
     }
 
     return new BudgetEntity(
@@ -91,7 +96,7 @@ export class BudgetEntity {
       this.discount,
       this.total,
       this.validUntil,
-      BudgetStatus.REJECTED,
+      BudgetStatus.REJEITADO,
       this.sentAt,
       undefined,
       new Date(),
@@ -101,8 +106,8 @@ export class BudgetEntity {
   }
 
   send(): BudgetEntity {
-    if (this.status !== BudgetStatus.DRAFT) {
-      throw new Error('Apenas orçamentos em rascunho podem ser enviados');
+    if (this.status !== BudgetStatus.RASCUNHO) {
+      throw new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_DRAFT_CAN_BE_SENT);
     }
 
     return new BudgetEntity(
@@ -115,7 +120,7 @@ export class BudgetEntity {
       this.discount,
       this.total,
       this.validUntil,
-      BudgetStatus.SENT,
+      BudgetStatus.ENVIADO,
       new Date(),
       undefined,
       undefined,
@@ -129,7 +134,7 @@ export class BudgetEntity {
   }
 
   canBeModified(): boolean {
-    return this.status === BudgetStatus.DRAFT;
+    return this.status === BudgetStatus.RASCUNHO;
   }
 }
 
@@ -145,9 +150,9 @@ export interface BudgetItem {
 }
 
 export enum BudgetStatus {
-  DRAFT = 'RASCUNHO',
-  SENT = 'ENVIADO',
-  APPROVED = 'APROVADO',
-  REJECTED = 'REJEITADO',
-  EXPIRED = 'EXPIRADO',
+  RASCUNHO = 'RASCUNHO',
+  ENVIADO = 'ENVIADO',
+  APROVADO = 'APROVADO',
+  REJEITADO = 'REJEITADO',
+  EXPIRADO = 'EXPIRADO',
 }

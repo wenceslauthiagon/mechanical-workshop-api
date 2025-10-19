@@ -8,6 +8,7 @@ export interface IVehicleRepository {
   findById(id: string): Promise<Vehicle | null>;
   findByPlate(plate: string): Promise<Vehicle | null>;
   findByCustomerId(customerId: string): Promise<Vehicle[]>;
+  hasServiceOrders(vehicleId: string): Promise<boolean>;
   update(
     id: string,
     data: Partial<Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>>,
