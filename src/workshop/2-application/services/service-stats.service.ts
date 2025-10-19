@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { IServiceOrderRepository } from '../../3-domain/repositories/service-order.repository.interface';
 import type { IServiceRepository } from '../../3-domain/repositories/service-repository.interface';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 
@@ -27,6 +28,7 @@ export class ServiceStatsService {
     private readonly serviceOrderRepository: IServiceOrderRepository,
     @Inject('IServiceRepository')
     private readonly serviceRepository: IServiceRepository,
+    private readonly prisma: PrismaService,
     private readonly errorHandler: ErrorHandlerService,
   ) {}
 
@@ -55,7 +57,17 @@ export class ServiceStatsService {
       const executionTimeHours =
         executionTimeMs / APP_CONSTANTS.MS_TO_HOURS_DIVISOR;
 
-      for (const serviceItem of order.services) {
+      // Fetch service items for this order
+      const serviceItems = await this.prisma.serviceOrderItem.findMany({
+        where: { serviceOrderId: order.id },
+      });
+
+      const totalQuantity = serviceItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0,
+      );
+
+      for (const serviceItem of serviceItems) {
         const serviceId = serviceItem.serviceId;
         const quantity = serviceItem.quantity;
 
@@ -76,8 +88,7 @@ export class ServiceStatsService {
         const estimatedTimeForQuantity =
           (stats.estimatedMinutes * quantity) / 60;
         const proportionalExecutionTime =
-          (executionTimeHours * quantity) /
-          order.services.reduce((sum, s) => sum + s.quantity, 0);
+          (executionTimeHours * quantity) / totalQuantity;
 
         stats.totalExecutionTime += proportionalExecutionTime;
         stats.totalEstimatedTime += estimatedTimeForQuantity;

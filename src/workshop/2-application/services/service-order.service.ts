@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable, Logger, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus, ServiceOrder } from '@prisma/client';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../1-presentation/dtos/service-order/update-service-order-status.dto';
 import { ServiceOrderResponseDto } from '../../1-presentation/dtos/service-order/service-order-response.dto';
@@ -11,7 +11,7 @@ import type { IServiceRepository } from '../../3-domain/repositories/service-rep
 import type { IPartRepository } from '../../3-domain/repositories/part-repository.interface';
 import { NotificationService } from './notification.service';
 import { MechanicService } from './mechanic.service';
-import { ServiceOrderWithRelations } from '../../3-domain/repositories/service-order.repository.interface';
+import { PrismaService } from '../../../prisma/prisma.service';
 import {
   ERROR_MESSAGES,
   NOTES_MESSAGES,
@@ -34,6 +34,7 @@ export class ServiceOrderService {
     private readonly serviceRepository: IServiceRepository,
     @Inject('IPartRepository')
     private readonly partRepository: IPartRepository,
+    private readonly prisma: PrismaService,
     private readonly errorHandler: ErrorHandlerService,
     private readonly notificationService: NotificationService,
     private readonly mechanicService: MechanicService,
@@ -186,9 +187,10 @@ export class ServiceOrderService {
 
   async findAll(): Promise<ServiceOrderResponseDto[]> {
     const serviceOrders = await this.serviceOrderRepository.findAll();
-    return serviceOrders.map((serviceOrder) =>
+    const responsePromises = serviceOrders.map((serviceOrder) =>
       this.mapToResponseDto(serviceOrder),
     );
+    return Promise.all(responsePromises);
   }
 
   async findById(id: string): Promise<ServiceOrderResponseDto> {
@@ -198,7 +200,7 @@ export class ServiceOrderService {
         ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
       );
     }
-    return this.mapToResponseDto(serviceOrder);
+    return await this.mapToResponseDto(serviceOrder);
   }
 
   async findByCustomer(customerId: string): Promise<ServiceOrderResponseDto[]> {
@@ -209,9 +211,10 @@ export class ServiceOrderService {
 
     const serviceOrders =
       await this.serviceOrderRepository.findByCustomerId(customerId);
-    return serviceOrders.map((serviceOrder) =>
+    const responsePromises = serviceOrders.map((serviceOrder) =>
       this.mapToResponseDto(serviceOrder),
     );
+    return Promise.all(responsePromises);
   }
 
   async updateStatus(
@@ -394,9 +397,10 @@ export class ServiceOrderService {
     const serviceOrders = await this.serviceOrderRepository.findByCustomerId(
       customer.id,
     );
-    return serviceOrders.map((serviceOrder) =>
+    const responsePromises = serviceOrders.map((serviceOrder) =>
       this.mapToResponseDto(serviceOrder),
     );
+    return Promise.all(responsePromises);
   }
 
   async findByVehiclePlate(
@@ -410,9 +414,10 @@ export class ServiceOrderService {
     const serviceOrders = await this.serviceOrderRepository.findByVehicleId(
       vehicle.id,
     );
-    return serviceOrders.map((serviceOrder) =>
+    const responsePromises = serviceOrders.map((serviceOrder) =>
       this.mapToResponseDto(serviceOrder),
     );
+    return Promise.all(responsePromises);
   }
 
   private async generateOrderNumber(): Promise<string> {
@@ -452,9 +457,65 @@ export class ServiceOrderService {
     }
   }
 
-  private mapToResponseDto(
-    serviceOrder: ServiceOrderWithRelations,
-  ): ServiceOrderResponseDto {
+  private async mapToResponseDto(
+    serviceOrder: ServiceOrder,
+  ): Promise<ServiceOrderResponseDto> {
+    // Fetch related data separately to ensure freshness
+    const customer = await this.customerRepository.findById(
+      serviceOrder.customerId,
+    );
+    const vehicle = await this.vehicleRepository.findById(
+      serviceOrder.vehicleId,
+    );
+    const mechanic = serviceOrder.mechanicId
+      ? await this.mechanicService.findById(serviceOrder.mechanicId)
+      : null;
+
+    // Fetch service order items separately
+    const serviceItems = await this.prisma.serviceOrderItem.findMany({
+      where: { serviceOrderId: serviceOrder.id },
+    });
+    const partItems = await this.prisma.serviceOrderPart.findMany({
+      where: { serviceOrderId: serviceOrder.id },
+    });
+
+    // Fetch related services and parts
+    const services = await Promise.all(
+      serviceItems.map(async (item) => {
+        const service = await this.serviceRepository.findById(item.serviceId);
+        return {
+          id: item.id,
+          serviceId: item.serviceId,
+          quantity: item.quantity,
+          price: item.price.toString(),
+          totalPrice: item.totalPrice.toString(),
+          service: {
+            name: service?.name || '',
+            description: service?.description || null,
+            category: service?.category || '',
+          },
+        };
+      }),
+    );
+
+    const parts = await Promise.all(
+      partItems.map(async (item) => {
+        const part = await this.partRepository.findById(item.partId);
+        return {
+          id: item.id,
+          partId: item.partId,
+          quantity: item.quantity,
+          price: item.price.toString(),
+          totalPrice: item.totalPrice.toString(),
+          part: {
+            name: part?.name || '',
+            description: part?.description || null,
+            partNumber: part?.partNumber || null,
+          },
+        };
+      }),
+    );
+
     return {
       id: serviceOrder.id,
       orderNumber: serviceOrder.orderNumber,
@@ -473,62 +534,37 @@ export class ServiceOrderService {
       approvedAt: serviceOrder.approvedAt ?? null,
       createdAt: serviceOrder.createdAt,
       updatedAt: serviceOrder.updatedAt,
-      customer: serviceOrder.customer
+      customer: customer
         ? {
-            id: serviceOrder.customer.id,
-            name: serviceOrder.customer.name,
-            document: serviceOrder.customer.document,
-            type: serviceOrder.customer.type,
-            email: serviceOrder.customer.email,
-            phone: serviceOrder.customer.phone,
+            id: customer.id,
+            name: customer.name,
+            document: customer.document,
+            type: customer.type,
+            email: customer.email,
+            phone: customer.phone,
           }
         : undefined,
-      vehicle: serviceOrder.vehicle
+      vehicle: vehicle
         ? {
-            id: serviceOrder.vehicle.id,
-            licensePlate: serviceOrder.vehicle.licensePlate,
-            brand: serviceOrder.vehicle.brand,
-            model: serviceOrder.vehicle.model,
-            year: serviceOrder.vehicle.year,
-            color: serviceOrder.vehicle.color,
+            id: vehicle.id,
+            licensePlate: vehicle.licensePlate,
+            brand: vehicle.brand,
+            model: vehicle.model,
+            year: vehicle.year,
+            color: vehicle.color,
           }
         : undefined,
-      mechanic: serviceOrder.mechanic
+      mechanic: mechanic
         ? {
-            id: serviceOrder.mechanic.id,
-            name: serviceOrder.mechanic.name,
-            specialty:
-              JSON.parse(serviceOrder.mechanic.specialties)[0] || 'Geral',
-            phone: serviceOrder.mechanic.phone || '',
-            isAvailable: serviceOrder.mechanic.isAvailable,
+            id: mechanic.id,
+            name: mechanic.name,
+            specialty: mechanic.specialties?.[0] || 'Geral',
+            phone: mechanic.phone || '',
+            isAvailable: mechanic.isAvailable,
           }
         : null,
-      services:
-        serviceOrder.services?.map((item) => ({
-          id: item.id,
-          serviceId: item.serviceId,
-          quantity: item.quantity,
-          price: item.price.toString(),
-          totalPrice: item.totalPrice.toString(),
-          service: {
-            name: item.service.name,
-            description: item.service.description ?? null,
-            category: item.service.category,
-          },
-        })) || [],
-      parts:
-        serviceOrder.parts?.map((item) => ({
-          id: item.id,
-          partId: item.partId,
-          quantity: item.quantity,
-          price: item.price.toString(),
-          totalPrice: item.totalPrice.toString(),
-          part: {
-            name: item.part.name,
-            description: item.part.description ?? null,
-            partNumber: item.part.partNumber ?? null,
-          },
-        })) || [],
+      services,
+      parts,
     };
   }
 }

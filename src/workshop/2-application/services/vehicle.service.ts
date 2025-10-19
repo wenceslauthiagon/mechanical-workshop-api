@@ -5,7 +5,7 @@ import type { ICustomerRepository } from '../../3-domain/repositories/customer-r
 import { CreateVehicleDto } from '../../1-presentation/dtos/vehicle/create-vehicle.dto';
 import { UpdateVehicleDto } from '../../1-presentation/dtos/vehicle/update-vehicle.dto';
 import { VehicleResponseDto } from '../../1-presentation/dtos/vehicle/vehicle-response.dto';
-import { VehicleWithCustomer } from '../../3-domain/entities/vehicle.entity';
+import type { Vehicle, Customer } from '@prisma/client';
 import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 
 @Injectable()
@@ -19,35 +19,44 @@ export class VehicleService {
   ) {}
 
   async create(data: CreateVehicleDto): Promise<VehicleResponseDto> {
-    try {
-      const customer = await this.customerRepository.findById(data.customerId);
-      if (!customer) {
-        this.errorHandler.generateException(
-          ERROR_MESSAGES.CLIENT_NOT_FOUND,
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      const existingVehicle = await this.vehicleRepository.findByPlate(
-        data.licensePlate,
+    const customer = await this.customerRepository.findById(data.customerId);
+    if (!customer) {
+      this.errorHandler.generateException(
+        ERROR_MESSAGES.CLIENT_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
       );
-      if (existingVehicle) {
-        this.errorHandler.generateException(
-          ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS,
-          HttpStatus.CONFLICT,
-        );
-      }
-
-      const vehicle = await this.vehicleRepository.create(data);
-      return this.mapToResponseDto(vehicle);
-    } catch (error) {
-      this.errorHandler.handleError(error);
     }
+
+    const existingVehicle = await this.vehicleRepository.findByPlate(
+      data.licensePlate,
+    );
+    if (existingVehicle) {
+      this.errorHandler.generateException(
+        ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS,
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const vehicle = await this.vehicleRepository.create(data);
+    // Fetch fresh customer data
+    const freshCustomer = await this.customerRepository.findById(
+      data.customerId,
+    );
+    return this.mapToResponseDto(vehicle, freshCustomer);
   }
 
   async findAll(): Promise<VehicleResponseDto[]> {
     const vehicles = await this.vehicleRepository.findAll();
-    return vehicles.map((vehicle) => this.mapToResponseDto(vehicle));
+    // Fetch fresh customer data for each vehicle
+    const vehiclesWithCustomers = await Promise.all(
+      vehicles.map(async (vehicle) => {
+        const customer = await this.customerRepository.findById(
+          vehicle.customerId,
+        );
+        return this.mapToResponseDto(vehicle, customer);
+      }),
+    );
+    return vehiclesWithCustomers;
   }
 
   async findById(id: string): Promise<VehicleResponseDto> {
@@ -55,17 +64,16 @@ export class VehicleService {
     if (!vehicle) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
-    return this.mapToResponseDto(vehicle);
+    // Fetch fresh customer data
+    const customer = await this.customerRepository.findById(vehicle.customerId);
+    return this.mapToResponseDto(vehicle, customer);
   }
 
   async findByCustomerId(customerId: string): Promise<VehicleResponseDto[]> {
-    const customer = await this.customerRepository.findById(customerId);
-    if (!customer) {
-      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
-    }
-
     const vehicles = await this.vehicleRepository.findByCustomerId(customerId);
-    return vehicles.map((vehicle) => this.mapToResponseDto(vehicle));
+    // Fetch fresh customer data
+    const customer = await this.customerRepository.findById(customerId);
+    return vehicles.map((vehicle) => this.mapToResponseDto(vehicle, customer));
   }
 
   async findByLicensePlate(licensePlate: string): Promise<VehicleResponseDto> {
@@ -73,7 +81,9 @@ export class VehicleService {
     if (!vehicle) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
-    return this.mapToResponseDto(vehicle);
+    // Fetch fresh customer data
+    const customer = await this.customerRepository.findById(vehicle.customerId);
+    return this.mapToResponseDto(vehicle, customer);
   }
 
   async update(
@@ -104,7 +114,11 @@ export class VehicleService {
     }
 
     const updatedVehicle = await this.vehicleRepository.update(id, data);
-    return this.mapToResponseDto(updatedVehicle);
+    // Fetch fresh customer data
+    const customer = await this.customerRepository.findById(
+      updatedVehicle.customerId,
+    );
+    return this.mapToResponseDto(updatedVehicle, customer);
   }
 
   async remove(id: string): Promise<void> {
@@ -123,7 +137,10 @@ export class VehicleService {
     await this.vehicleRepository.delete(id);
   }
 
-  private mapToResponseDto(vehicle: VehicleWithCustomer): VehicleResponseDto {
+  private mapToResponseDto(
+    vehicle: Vehicle,
+    customer?: Customer | null,
+  ): VehicleResponseDto {
     return {
       id: vehicle.id,
       licensePlate: vehicle.licensePlate,
@@ -134,13 +151,13 @@ export class VehicleService {
       color: vehicle.color,
       createdAt: vehicle.createdAt,
       updatedAt: vehicle.updatedAt,
-      customer: vehicle.customer
+      customer: customer
         ? {
-            id: vehicle.customer.id,
-            name: vehicle.customer.name,
-            document: vehicle.customer.document,
-            email: vehicle.customer.email,
-            phone: vehicle.customer.phone,
+            id: customer.id,
+            name: customer.name,
+            document: customer.document,
+            email: customer.email,
+            phone: customer.phone,
           }
         : undefined,
     };
