@@ -80,6 +80,18 @@ describe('PartController', () => {
     partService = module.get(PartService);
   });
 
+  it('should be defined', () => {
+    expect(partController).toBeDefined();
+    expect(partController).toBeInstanceOf(PartController);
+    expect(partService).toBeDefined();
+  });
+
+  it('should instantiate controller with service dependency', () => {
+    const mockService = {} as PartService;
+    const testController = new PartController(mockService);
+    expect(testController).toBeInstanceOf(PartController);
+  });
+
   describe('create', () => {
     it('TC0001 - Should create a part successfully', async () => {
       const createdPart = {

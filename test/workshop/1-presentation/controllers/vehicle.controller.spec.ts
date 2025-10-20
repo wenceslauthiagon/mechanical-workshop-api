@@ -74,6 +74,16 @@ describe('VehicleController', () => {
     vehicleService = module.get(VehicleService);
   });
 
+  it('should be defined', () => {
+    expect(vehicleController).toBeDefined();
+    expect(vehicleController).toBeInstanceOf(VehicleController);
+  });
+
+  it('should instantiate with service dependency', () => {
+    const controller = new VehicleController(vehicleService);
+    expect(controller).toBeDefined();
+  });
+
   describe('create', () => {
     it('TC0001 - Should create a vehicle successfully', async () => {
       const createdVehicle = { ...mockVehicleData, ...mockCreateVehicleDto };
