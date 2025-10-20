@@ -35,16 +35,14 @@ export class UserService {
   }
 
   async createFirstAdmin(data: CreateUserData): Promise<User> {
-    // Verificar se já existem usuários no sistema
+    // Check if there are already users in the system
     const userCount = await this.prisma.user.count();
 
     if (userCount > 0) {
-      this.errorHandler.handleError(
-        new Error(ERROR_MESSAGES.USERS_ALREADY_EXIST),
-      );
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.USERS_ALREADY_EXIST);
     }
 
-    // Forçar role ADMIN para o primeiro usuário
+    // Force ADMIN role for first user
     const adminData = { ...data, role: UserRole.ADMIN };
     return this.create(adminData);
   }

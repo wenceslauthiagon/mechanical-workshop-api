@@ -88,15 +88,29 @@ export class PartService {
       }
     }
 
-    const updateData = {
-      name: data.name,
-      description: data.description ?? null,
-      partNumber: data.partNumber ?? null,
-      price: data.price ? new Decimal(data.price) : undefined,
-      stock: data.stock,
-      minStock: data.minStock,
-      supplier: data.supplier ?? null,
-    };
+    // Only include fields that are present in the PATCH request
+    const updateData: any = {};
+    if (Object.prototype.hasOwnProperty.call(data, 'name')) {
+      updateData.name = data.name;
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'description')) {
+      updateData.description = data.description;
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'partNumber')) {
+      updateData.partNumber = data.partNumber;
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'price') && data.price) {
+      updateData.price = new Decimal(data.price);
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'stock')) {
+      updateData.stock = data.stock;
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'minStock')) {
+      updateData.minStock = data.minStock;
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'supplier')) {
+      updateData.supplier = data.supplier;
+    }
 
     return this.partRepository.update(id, updateData);
   }

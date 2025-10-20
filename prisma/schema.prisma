@@ -143,7 +143,7 @@ model ServiceOrder {
   services    ServiceOrderItem[]
   parts       ServiceOrderPart[]
   statusHistory ServiceOrderStatusHistory[]
-  budget      Budget?
+  budgets     Budget[]
 
   @@map("service_orders")
 }
@@ -227,7 +227,7 @@ model User {
 
 model Budget {
   id             String        @id @default(uuid())
-  serviceOrderId String        @unique @map("service_order_id")
+  serviceOrderId String        @map("service_order_id")
   customerId     String        @map("customer_id")
   subtotal       Decimal       @default(0)
   taxes          Decimal       @default(0)
