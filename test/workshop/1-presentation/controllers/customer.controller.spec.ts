@@ -93,6 +93,18 @@ describe('CustomerController', () => {
     customerService = module.get(CustomerService);
   });
 
+  it('should be defined', () => {
+    expect(customerController).toBeDefined();
+    expect(customerController).toBeInstanceOf(CustomerController);
+    expect(customerService).toBeDefined();
+  });
+
+  it('should instantiate controller with service dependency', () => {
+    const mockService = {} as CustomerService;
+    const testController = new CustomerController(mockService);
+    expect(testController).toBeInstanceOf(CustomerController);
+  });
+
   describe('create', () => {
     it('TC0001 - Should create a customer successfully', async () => {
       customerService.create.mockResolvedValue(mockCustomerData);
@@ -322,6 +334,15 @@ describe('CustomerController', () => {
       const result = await customerController.findOne(mockCustomerId);
 
       expect(result.vehicles).toBeUndefined();
+    });
+
+    it('TC0003 - Should throw error when customer not found', async () => {
+      const error = new Error('Customer not found');
+      customerService.findById.mockRejectedValue(error);
+
+      await expect(customerController.findOne('invalid-id')).rejects.toThrow(
+        error,
+      );
     });
   });
 });

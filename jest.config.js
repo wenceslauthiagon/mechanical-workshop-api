@@ -7,22 +7,33 @@ module.exports = {
     '<rootDir>/test/**/*.test.ts'
   ],
   transform: {
-    '^.+\\.(t|js)$': ['ts-jest', {
+    '^.+\\.(t|j)s$': ['ts-jest', {
       tsconfig: 'tsconfig.json',
+      useESM: false,
     }],
   },
   transformIgnorePatterns: [
     'node_modules/(?!(@faker-js/faker)/)',
   ],
   collectCoverageFrom: [
-    'src/**/*.(t|js)',
+    'src/**/*.{ts,js}',
     '!src/**/*.spec.ts',
     '!src/**/*.test.ts',
     '!src/**/*.d.ts',
     '!src/main.ts',
+    '!src/**/*.interface.ts',
+    '!src/**/index.ts',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
+  // coverageThreshold: {
+  //   global: {
+  //     branches: 70,
+  //     functions: 70,
+  //     lines: 70,
+  //     statements: 70,
+  //   },
+  // },
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
@@ -30,12 +41,5 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
-  },
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-      tsconfig: 'tsconfig.json',
-    },
   },
 };

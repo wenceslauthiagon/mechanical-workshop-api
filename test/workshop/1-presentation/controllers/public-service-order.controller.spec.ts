@@ -81,6 +81,20 @@ describe('PublicServiceOrderController', () => {
     serviceOrderService = module.get(ServiceOrderService);
   });
 
+  it('should be defined', () => {
+    expect(publicServiceOrderController).toBeDefined();
+    expect(publicServiceOrderController).toBeInstanceOf(
+      PublicServiceOrderController,
+    );
+    expect(serviceOrderService).toBeDefined();
+  });
+
+  it('should instantiate controller with service dependency', () => {
+    const mockService = {} as ServiceOrderService;
+    const testController = new PublicServiceOrderController(mockService);
+    expect(testController).toBeInstanceOf(PublicServiceOrderController);
+  });
+
   describe('findByOrderNumber', () => {
     it('TC0001 - Should find service order by order number successfully', async () => {
       serviceOrderService.findByOrderNumber.mockResolvedValue(
