@@ -32,9 +32,7 @@ describe('ServiceController', () => {
   const mockCreateServiceDto: CreateServiceDto = {
     name: faker.commerce.productName(),
     description: faker.lorem.sentence(),
-    price: faker.number
-      .float({ min: 50, max: 500, fractionDigits: 2 })
-      .toFixed(2),
+    price: faker.number.float({ min: 50, max: 500, fractionDigits: 2 }),
     category: mockCategory,
     estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
   };
@@ -42,10 +40,10 @@ describe('ServiceController', () => {
   const mockUpdateServiceDto: UpdateServiceDto = {
     name: faker.commerce.productName(),
     description: faker.lorem.sentence(),
-    price: faker.number
-      .float({ min: 50, max: 500, fractionDigits: 2 })
-      .toFixed(2),
+    price: faker.number.float({ min: 50, max: 500, fractionDigits: 2 }),
     estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
+    category: faker.commerce.department(),
+    isActive: true,
   };
 
   beforeEach(async () => {
@@ -68,6 +66,16 @@ describe('ServiceController', () => {
 
     serviceController = module.get<ServiceController>(ServiceController);
     serviceService = module.get(ServiceService);
+  });
+
+  it('should be defined', () => {
+    expect(serviceController).toBeDefined();
+    expect(serviceController).toBeInstanceOf(ServiceController);
+  });
+
+  it('should instantiate with service dependency', () => {
+    const controller = new ServiceController(serviceService);
+    expect(controller).toBeDefined();
   });
 
   describe('create', () => {

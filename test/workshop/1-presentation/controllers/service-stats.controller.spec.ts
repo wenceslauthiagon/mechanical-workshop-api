@@ -70,8 +70,10 @@ describe('ServiceStatsController', () => {
     serviceStatsService = module.get(ServiceStatsService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(controller).toBeDefined();
+    expect(controller).toBeInstanceOf(ServiceStatsController);
+    expect(serviceStatsService).toBeDefined();
   });
 
   describe('getServiceStats', () => {
