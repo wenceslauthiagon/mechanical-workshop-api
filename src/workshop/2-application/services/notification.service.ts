@@ -172,7 +172,6 @@ export class NotificationService {
     customerName: string,
   ): BudgetEmailData {
     const baseUrl = NOTIFICATION_CONSTANTS.URLS.BASE;
-    const publicPath = NOTIFICATION_CONSTANTS.URLS.PUBLIC_BUDGET;
 
     return {
       customerName,
@@ -180,9 +179,9 @@ export class NotificationService {
       orderNumber: budget.serviceOrderId,
       total: budget.total,
       validUntil: budget.validUntil,
-      viewLink: `${baseUrl}${publicPath}/${budget.id}`,
-      approveLink: `${baseUrl}${publicPath}/${budget.id}/approve`,
-      rejectLink: `${baseUrl}${publicPath}/${budget.id}/reject`,
+      viewLink: `${baseUrl}/api/swagger#/Public%20-%20Budgets/PublicBudgetController_viewBudget`,
+      approveLink: `${baseUrl}/api/swagger#/Public%20-%20Budgets/PublicBudgetController_approveBudget`,
+      rejectLink: `${baseUrl}/api/swagger#/Public%20-%20Budgets/PublicBudgetController_rejectBudget`,
       companyName: NOTIFICATION_CONSTANTS.COMPANY.NAME,
       companyPhone: NOTIFICATION_CONSTANTS.COMPANY.PHONE,
       companyEmail: NOTIFICATION_CONSTANTS.COMPANY.EMAIL,

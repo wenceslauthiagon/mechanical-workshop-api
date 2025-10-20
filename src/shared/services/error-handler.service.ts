@@ -9,6 +9,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ERROR_MESSAGES } from '../constants/messages.constants';
+import { BUDGET_CONSTANTS } from '../constants/budget.constants';
 
 @Injectable()
 export class ErrorHandlerService {
@@ -28,6 +29,12 @@ export class ErrorHandlerService {
     // Se já é uma HttpException do NestJS, só re-lança
     if (error instanceof HttpException) {
       throw error;
+    }
+
+    // Handle Prisma constraint errors
+    if (this.isPrismaConstraintError(error)) {
+      const message = this.extractPrismaConstraintMessage(error);
+      throw new ConflictException(message);
     }
 
     const message = this.extractErrorMessage(error);
@@ -121,5 +128,43 @@ export class ErrorHandlerService {
    */
   handleForbiddenError(message: string): never {
     this.generateException(message, this.statusCodes.Forbidden);
+  }
+
+  /**
+   * Verifica se é um erro de constraint do Prisma
+   */
+  private isPrismaConstraintError(error: any): boolean {
+    return (
+      error?.code === 'P2002' || // Unique constraint violation
+      error?.code === 'P2003' || // Foreign key constraint violation
+      error?.message?.includes('Unique constraint failed') ||
+      error?.message?.includes('Foreign key constraint failed')
+    );
+  }
+
+  /**
+   * Extrai mensagem apropriada para erros de constraint do Prisma
+   */
+  private extractPrismaConstraintMessage(error: any): string {
+    if (error?.message?.includes('service_order_id')) {
+      return BUDGET_CONSTANTS.MESSAGES.ALREADY_EXISTS_FOR_SERVICE_ORDER;
+    }
+    if (error?.message?.includes('part_number')) {
+      return 'Já existe uma peça com este número';
+    }
+    if (error?.message?.includes('document')) {
+      return 'Já existe um cliente com este documento';
+    }
+    if (error?.message?.includes('license_plate')) {
+      return 'Já existe um veículo com esta placa';
+    }
+    if (error?.message?.includes('email')) {
+      return 'Já existe um usuário com este email';
+    }
+    if (error?.message?.includes('username')) {
+      return 'Já existe um usuário com este nome de usuário';
+    }
+
+    return 'Dados duplicados encontrados. Verifique os campos únicos.';
   }
 }

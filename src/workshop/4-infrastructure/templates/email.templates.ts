@@ -34,16 +34,22 @@ export class EmailTemplates {
             <p>Seu orçamento está pronto! Confira os detalhes abaixo:</p>
             
             <div class="budget-info">
-                <h3>📋 Orçamento #${data.orderNumber}</h3>
-                <p><strong>Valor Total:</strong> R$ ${data.total.toFixed(2)}</p>
-                <p><strong>Válido até:</strong> ${data.validUntil.toLocaleDateString('pt-BR')}</p>
+                <h3>📋 Orçamento #${data.budgetId.substring(0, 8)}</h3>
+                <p><strong>ID do Orçamento:</strong> <code style="background: #f8f9fa; padding: 2px 8px; border-radius: 3px; font-family: monospace;">${data.budgetId}</code></p>
+                <p><strong>Valor Total:</strong> R$ ${data.total}</p>
+                <p><strong>Válido até:</strong> ${new Date(data.validUntil).toLocaleDateString('pt-BR')}</p>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
+                <p><strong>🌐 Acesse nossa API no Swagger:</strong></p>
                 <a href="${data.viewLink}" class="button btn-view">👁️ Visualizar Orçamento</a>
                 <br>
                 <a href="${data.approveLink}" class="button btn-approve">✅ Aprovar</a>
                 <a href="${data.rejectLink}" class="button btn-reject">❌ Rejeitar</a>
+                <br><br>
+                <p style="font-size: 12px; color: #666;">
+                    💡 <strong>Dica:</strong> Use o ID do orçamento acima nos endpoints da API
+                </p>
             </div>
             
             <p><strong>Precisa de ajuda?</strong></p>

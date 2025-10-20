@@ -20,6 +20,13 @@ export const BUDGET_CONSTANTS = {
       'Apenas orçamentos enviados podem ser rejeitados',
     ONLY_DRAFT_CAN_BE_SENT: 'Apenas orçamentos em rascunho podem ser enviados',
     EXPIRED_CANNOT_BE_APPROVED: 'Orçamento expirado não pode ser aprovado',
+    ALREADY_EXISTS_FOR_SERVICE_ORDER:
+      'Já existe um orçamento para esta ordem de serviço',
+    ACTIVE_BUDGET_EXISTS_FOR_SERVICE_ORDER:
+      'Já existe um orçamento ativo para esta ordem de serviço. Finalize o orçamento atual antes de criar um novo.',
+    ITEMS_REQUIRED: 'Items do orçamento são obrigatórios',
+    SERVICE_ORDER_NOT_FOUND: 'Ordem de serviço não encontrada',
+    CUSTOMER_NOT_FOUND: 'Cliente não encontrado',
     ALREADY_SENT: 'Orçamento já foi enviado',
     ALREADY_APPROVED: 'Orçamento já foi aprovado',
     ALREADY_REJECTED: 'Orçamento já foi rejeitado',
