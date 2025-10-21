@@ -57,7 +57,7 @@ describe('PartService', () => {
     errorHandler = module.get(ErrorHandlerService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(service).toBeDefined();
   });
 

@@ -91,12 +91,12 @@ describe('AuthController', () => {
     userService = module.get<jest.Mocked<UserService>>(UserService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(controller).toBeDefined();
     expect(controller).toBeInstanceOf(AuthController);
   });
 
-  it('should instantiate with service dependencies', () => {
+  it('Should instantiate with service dependencies', () => {
     const testController = new AuthController(authService, userService);
     expect(testController).toBeDefined();
   });

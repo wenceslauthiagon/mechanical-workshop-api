@@ -59,7 +59,7 @@ describe('NotificationService', () => {
     jest.restoreAllMocks();
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(service).toBeDefined();
   });
 

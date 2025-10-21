@@ -76,12 +76,12 @@ describe('ServiceOrderController', () => {
       module.get<jest.Mocked<ServiceOrderService>>(ServiceOrderService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(controller).toBeDefined();
     expect(controller).toBeInstanceOf(ServiceOrderController);
   });
 
-  it('should instantiate with service dependency', () => {
+  it('Should instantiate with service dependency', () => {
     const testController = new ServiceOrderController(serviceOrderService);
     expect(testController).toBeDefined();
   });

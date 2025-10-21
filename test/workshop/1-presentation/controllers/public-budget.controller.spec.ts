@@ -96,13 +96,13 @@ describe('PublicBudgetController', () => {
     budgetService = module.get<jest.Mocked<BudgetService>>(BudgetService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(controller).toBeDefined();
     expect(controller).toBeInstanceOf(PublicBudgetController);
     expect(budgetService).toBeDefined();
   });
 
-  it('should instantiate controller with service dependency', () => {
+  it('Should instantiate controller with service dependency', () => {
     const mockService = {} as BudgetService;
     const testController = new PublicBudgetController(mockService);
     expect(testController).toBeInstanceOf(PublicBudgetController);

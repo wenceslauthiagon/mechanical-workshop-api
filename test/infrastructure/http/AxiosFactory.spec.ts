@@ -39,7 +39,7 @@ describe('AxiosFactory', () => {
     mockedAxios.create.mockReturnValue(mockAxiosInstance);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(AxiosFactory).toBeDefined();
   });
 

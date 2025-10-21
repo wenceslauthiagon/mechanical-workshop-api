@@ -46,12 +46,12 @@ describe('JwtAuthGuard', () => {
       module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(guard).toBeDefined();
     expect(guard).toBeInstanceOf(JwtAuthGuard);
   });
 
-  it('should instantiate with service dependency', () => {
+  it('Should instantiate with service dependency', () => {
     const testGuard = new JwtAuthGuard(errorHandler);
     expect(testGuard).toBeDefined();
   });

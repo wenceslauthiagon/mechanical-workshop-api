@@ -55,12 +55,12 @@ describe('RolesGuard', () => {
     reflector = module.get<jest.Mocked<Reflector>>(Reflector);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(guard).toBeDefined();
     expect(guard).toBeInstanceOf(RolesGuard);
   });
 
-  it('should instantiate with reflector dependency', () => {
+  it('Should instantiate with reflector dependency', () => {
     const testGuard = new RolesGuard(reflector);
     expect(testGuard).toBeDefined();
   });
