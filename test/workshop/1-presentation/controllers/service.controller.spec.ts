@@ -68,12 +68,12 @@ describe('ServiceController', () => {
     serviceService = module.get(ServiceService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(serviceController).toBeDefined();
     expect(serviceController).toBeInstanceOf(ServiceController);
   });
 
-  it('should instantiate with service dependency', () => {
+  it('Should instantiate with service dependency', () => {
     const controller = new ServiceController(serviceService);
     expect(controller).toBeDefined();
   });

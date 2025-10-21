@@ -80,13 +80,13 @@ describe('PartController', () => {
     partService = module.get(PartService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(partController).toBeDefined();
     expect(partController).toBeInstanceOf(PartController);
     expect(partService).toBeDefined();
   });
 
-  it('should instantiate controller with service dependency', () => {
+  it('Should instantiate controller with service dependency', () => {
     const mockService = {} as PartService;
     const testController = new PartController(mockService);
     expect(testController).toBeInstanceOf(PartController);

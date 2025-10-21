@@ -27,12 +27,12 @@ describe('ErrorHandlerService', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(service).toBeDefined();
     expect(service).toBeInstanceOf(ErrorHandlerService);
   });
 
-  it('should instantiate with service dependency', () => {
+  it('Should instantiate with service dependency', () => {
     const testService = new ErrorHandlerService();
     expect(testService).toBeDefined();
   });

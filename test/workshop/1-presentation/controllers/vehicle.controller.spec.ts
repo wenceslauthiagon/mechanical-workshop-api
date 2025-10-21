@@ -74,12 +74,12 @@ describe('VehicleController', () => {
     vehicleService = module.get(VehicleService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(vehicleController).toBeDefined();
     expect(vehicleController).toBeInstanceOf(VehicleController);
   });
 
-  it('should instantiate with service dependency', () => {
+  it('Should instantiate with service dependency', () => {
     const controller = new VehicleController(vehicleService);
     expect(controller).toBeDefined();
   });

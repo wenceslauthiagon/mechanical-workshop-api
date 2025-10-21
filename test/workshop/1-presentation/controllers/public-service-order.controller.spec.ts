@@ -81,7 +81,7 @@ describe('PublicServiceOrderController', () => {
     serviceOrderService = module.get(ServiceOrderService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(publicServiceOrderController).toBeDefined();
     expect(publicServiceOrderController).toBeInstanceOf(
       PublicServiceOrderController,
