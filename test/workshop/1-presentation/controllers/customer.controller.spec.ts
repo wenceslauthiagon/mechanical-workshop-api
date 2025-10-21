@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
 import { CustomerType } from '@prisma/client';
@@ -22,7 +22,7 @@ describe('CustomerController', () => {
     email: faker.internet.email(),
     phone: faker.phone.number(),
     address: faker.location.streetAddress(),
-    type: CustomerType.INDIVIDUAL,
+    type: CustomerType.PESSOA_FISICA,
     document: mockDocument,
     additionalInfo: faker.lorem.sentence(),
     createdAt: faker.date.past(),
@@ -44,7 +44,7 @@ describe('CustomerController', () => {
     email: faker.internet.email(),
     phone: faker.phone.number(),
     address: faker.location.streetAddress(),
-    type: CustomerType.INDIVIDUAL,
+    type: CustomerType.PESSOA_FISICA,
     document: '98765432100',
     additionalInfo: faker.lorem.sentence(),
   };

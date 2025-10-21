@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext } from '@nestjs/common';
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/pt_BR';
 
 import { JwtAuthGuard } from '../../../src/auth/guards/jwt-auth.guard';
 import { ErrorHandlerService } from '../../../src/shared/services/error-handler.service';

@@ -12,8 +12,8 @@ datasource db {
 
 // Enums
 enum CustomerType {
-  INDIVIDUAL
-  COMPANY
+  PESSOA_FISICA
+  PESSOA_JURIDICA
 }
 
 enum ServiceOrderStatus {

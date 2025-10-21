@@ -31,7 +31,7 @@ export class CreateCustomerDto {
 
   @ApiProperty({
     enum: CustomerType,
-    description: 'Tipo do cliente (INDIVIDUAL ou COMPANY)',
+    description: 'Tipo do cliente (PESSOA_FISICA ou PESSOA_JURIDICA)',
   })
   @IsNotEmpty()
   @IsEnum(CustomerType)
