@@ -50,12 +50,12 @@ describe('AuthService (Infrastructure)', () => {
     mockedBcrypt.compare.mockReset();
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(service).toBeDefined();
     expect(service).toBeInstanceOf(AuthService);
   });
 
-  it('should instantiate with service dependency', () => {
+  it('Should instantiate with service dependency', () => {
     const testService = new AuthService(jwtService);
     expect(testService).toBeDefined();
   });

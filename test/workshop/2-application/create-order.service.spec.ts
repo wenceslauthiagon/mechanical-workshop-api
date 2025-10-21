@@ -56,7 +56,7 @@ describe('CreateOrderService', () => {
     service = module.get<CreateOrderService>(CreateOrderService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(service).toBeDefined();
   });
 

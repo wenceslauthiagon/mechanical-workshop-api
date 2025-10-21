@@ -83,7 +83,7 @@ describe('ServiceStatsService', () => {
     prismaService = module.get(PrismaService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(service).toBeDefined();
   });
 

@@ -98,12 +98,12 @@ describe('UserService', () => {
     mockedBcrypt.compare.mockReset();
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(service).toBeDefined();
     expect(service).toBeInstanceOf(UserService);
   });
 
-  it('should instantiate with service dependencies', () => {
+  it('Should instantiate with service dependencies', () => {
     const testService = new UserService(prismaService, errorHandler);
     expect(testService).toBeDefined();
   });

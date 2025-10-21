@@ -80,13 +80,13 @@ describe('MechanicController', () => {
     mechanicService = module.get<jest.Mocked<MechanicService>>(MechanicService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(controller).toBeDefined();
     expect(controller).toBeInstanceOf(MechanicController);
     expect(mechanicService).toBeDefined();
   });
 
-  it('should instantiate controller with service dependency', () => {
+  it('Should instantiate controller with service dependency', () => {
     const mockService = {} as MechanicService;
     const testController = new MechanicController(mockService);
     expect(testController).toBeInstanceOf(MechanicController);

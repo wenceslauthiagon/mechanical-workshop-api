@@ -75,12 +75,12 @@ describe('JwtStrategy', () => {
       module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(strategy).toBeDefined();
     expect(strategy).toBeInstanceOf(JwtStrategy);
   });
 
-  it('should instantiate with service dependencies', () => {
+  it('Should instantiate with service dependencies', () => {
     configService.get.mockReturnValue(mockJwtSecret);
     const testStrategy = new JwtStrategy(
       authService,
