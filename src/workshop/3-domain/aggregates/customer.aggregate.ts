@@ -123,8 +123,8 @@ export class CustomerAggregate {
     // Validar se o tipo de cliente está compatível com o documento
     const isCompany = document.value.length === 14;
     const expectedType = isCompany
-      ? CustomerType.COMPANY
-      : CustomerType.INDIVIDUAL;
+      ? CustomerType.PESSOA_JURIDICA
+      : CustomerType.PESSOA_FISICA;
 
     if (this._type !== expectedType) {
       throw new Error(
@@ -137,11 +137,11 @@ export class CustomerAggregate {
   }
 
   isCompany(): boolean {
-    return this._type === CustomerType.COMPANY;
+    return this._type === CustomerType.PESSOA_JURIDICA;
   }
 
   isIndividual(): boolean {
-    return this._type === CustomerType.INDIVIDUAL;
+    return this._type === CustomerType.PESSOA_FISICA;
   }
 
   getDocumentFormatted(): string {
