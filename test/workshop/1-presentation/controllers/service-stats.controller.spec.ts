@@ -3,7 +3,7 @@ import { ServiceStatsController } from '../../../../src/workshop/1-presentation/
 import { ServiceStatsService } from '../../../../src/workshop/2-application/services/service-stats.service';
 import { JwtAuthGuard } from '../../../../src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../src/auth/guards/roles.guard';
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/pt_BR';
 
 describe('ServiceStatsController', () => {
   let controller: ServiceStatsController;

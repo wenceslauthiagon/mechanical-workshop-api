@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ServiceOrderStatus } from '@prisma/client';
@@ -44,7 +44,7 @@ describe('PublicServiceOrderController', () => {
       id: faker.string.uuid(),
       name: faker.person.fullName(),
       document: mockDocument,
-      type: 'INDIVIDUAL',
+      type: 'PESSOA_FISICA',
       email: faker.internet.email(),
       phone: faker.phone.number(),
     },
