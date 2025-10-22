@@ -46,6 +46,7 @@ module.exports = {
     "<rootDir>/src/infrastructure/http/AxiosFactory.ts",
     "<rootDir>/src/workshop/1-presentation/dtos/",
     "<rootDir>/src/workshop/1-presentation/responses/",
+    "<rootDir>/src/workshop/4-infrastructure/",
     "<rootDir>/src/workshop/workshop.module.ts",
     "<rootDir>/src/auth/dto/",
     "<rootDir>/src/auth/decorators/",
