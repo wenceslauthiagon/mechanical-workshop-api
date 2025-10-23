@@ -264,17 +264,79 @@ npm run create-admin
 npm run start:dev
 ```
 
-## 🧪 Testes
+## 🧪 Testing
+
+### Testing Strategy
+
+This project follows a comprehensive testing approach with three layers:
+
+1. **Unit Tests** - Fast, isolated tests for domain logic (100% coverage target)
+2. **Integration Tests** - Database and repository tests with SQLite
+3. **E2E Tests** - Full application flow tests
+
+For detailed information, see [Testing Strategy Documentation](./docs/TESTING_STRATEGY.md).
+
+### Running Tests
 
 ```bash
-# Local
-npm run test
+# Unit tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Coverage report
 npm run test:cov
+
+# Integration tests
 npm run test:e2e
 
-# Docker
+# Run specific test file
+npm test customer.service.spec.ts
+
+# Run tests matching pattern
+npm test -- --testNamePattern="Should create"
+```
+
+### With Docker
+
+```bash
+# Run all unit tests
 make test
+
+# Run with coverage
 make test-cov
+
+# Run integration tests
+docker-compose exec app npm run test:e2e
+```
+
+### Coverage Requirements
+
+| Layer | Target | Purpose |
+|-------|--------|---------|
+| Domain (3-domain) | 100% | Core business logic |
+| Application (2-application) | 90%+ | Orchestration |
+| Presentation (1-presentation) | 80%+ | Controllers |
+| Infrastructure (4-infrastructure) | Integration only | External dependencies |
+
+### Test Naming Convention
+
+```typescript
+describe('ServiceName Unit Tests', () => {
+  describe('TC001 - Feature group', () => {
+    it('TC001 - Should do something specific', () => {
+      // Arrange
+      const input = {...};
+      
+      // Act
+      const result = service.method(input);
+      
+      // Assert
+      expect(result).toBeDefined();
+    });
+  });
+});
 ```
 
 ## 📚 API Documentation
