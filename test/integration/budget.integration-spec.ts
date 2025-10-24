@@ -6,31 +6,7 @@ import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
 import * as bcrypt from 'bcryptjs';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-
-function generateValidCPF(): string {
-  const numbers = Array.from({ length: 9 }, () =>
-    faker.number.int({ min: 0, max: 9 }),
-  );
-
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    sum += numbers[i] * (10 - i);
-  }
-  let remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  numbers.push(remainder);
-
-  sum = 0;
-  for (let i = 0; i < 10; i++) {
-    sum += numbers[i] * (11 - i);
-  }
-  remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  numbers.push(remainder);
-
-  const cpf = numbers.join('');
-  return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-}
+import { generateValidCPF } from '../utils/test-helpers';
 
 describe('Budget Integration Tests', () => {
   let app: INestApplication;
