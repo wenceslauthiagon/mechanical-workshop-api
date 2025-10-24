@@ -87,7 +87,7 @@ describe('Budget Integration Tests', () => {
         licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         customerId: customerId,
         brand: faker.vehicle.manufacturer(),
-        model: faker.vehicle.model(),
+        model: faker.vehicle.model() || 'Test Model',
         year: faker.number.int({ min: 2000, max: 2024 }),
         color: faker.color.human(),
       });
@@ -102,6 +102,10 @@ describe('Budget Integration Tests', () => {
         vehicleId: vehicleId,
         description: faker.lorem.sentence(),
       });
+
+    if (serviceOrderResponse.status !== 201) {
+      console.log('Service Order creation failed:', serviceOrderResponse.body);
+    }
 
     serviceOrderId = serviceOrderResponse.body.id;
   });
@@ -138,6 +142,10 @@ describe('Budget Integration Tests', () => {
             },
           ],
         });
+
+      if (response.status !== 201) {
+        console.log('Budget creation failed:', response.body);
+      }
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');

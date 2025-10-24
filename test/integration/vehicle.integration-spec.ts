@@ -20,7 +20,7 @@ const mockCustomer = {
 const mockVehicle = {
   licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
   brand: faker.vehicle.manufacturer(),
-  model: faker.vehicle.model(),
+  model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
   year: faker.number.int({ min: 2000, max: 2024 }),
   color: faker.color.human(),
 };
@@ -180,7 +180,7 @@ describe('Vehicle Integration Tests', () => {
         licensePlate: uniquePlate,
         customerId: customerId,
         brand: faker.vehicle.manufacturer(),
-        model: faker.vehicle.model(),
+        model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
         year: faker.number.int({ min: 2000, max: 2024 }),
         color: faker.color.human(),
       };
@@ -189,10 +189,6 @@ describe('Vehicle Integration Tests', () => {
         .post('/api/vehicles')
         .set('Authorization', `Bearer ${authToken}`)
         .send(newVehicle);
-
-      if (createResponse.status !== 201) {
-        console.log('Create vehicle error:', createResponse.body);
-      }
 
       expect(createResponse.status).toBe(201);
 
@@ -311,7 +307,7 @@ describe('Vehicle Integration Tests', () => {
         licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         customerId: customerId,
         brand: faker.vehicle.manufacturer(),
-        model: faker.vehicle.model(),
+        model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
         year: faker.number.int({ min: 2000, max: 2024 }),
         color: faker.color.human(),
       };
