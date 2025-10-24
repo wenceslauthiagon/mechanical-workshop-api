@@ -22,16 +22,45 @@ export class UserService {
   ) {}
 
   async create(data: CreateUserData): Promise<User> {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-
-    return this.prisma.user.create({
-      data: {
-        username: data.username,
-        email: data.email,
-        passwordHash: hashedPassword,
-        role: data.role || UserRole.EMPLOYEE,
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ username: data.username }, { email: data.email }],
       },
     });
+
+    if (existingUser) {
+      if (existingUser.username === data.username) {
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.USERNAME_ALREADY_EXISTS,
+        );
+      }
+      if (existingUser.email === data.email) {
+        this.errorHandler.handleConflictError(
+          ERROR_MESSAGES.EMAIL_USER_ALREADY_EXISTS,
+        );
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    try {
+      return await this.prisma.user.create({
+        data: {
+          username: data.username,
+          email: data.email,
+          passwordHash: hashedPassword,
+          role: data.role || UserRole.EMPLOYEE,
+        },
+      });
+    } catch (error) {
+      if (error.code === 'P2002') {
+        const field = error.meta?.target?.[0] || 'field';
+        this.errorHandler.handleConflictError(
+          `${field} ${ERROR_MESSAGES.FIELD_ALREADY_EXISTS}`,
+        );
+      }
+      throw error;
+    }
   }
 
   async createFirstAdmin(data: CreateUserData): Promise<User> {

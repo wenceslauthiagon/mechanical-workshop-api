@@ -18,6 +18,9 @@ export const ERROR_MESSAGES = {
   ACCESS_DENIED_ADMIN_REQUIRED: 'Acesso negado - Role ADMIN necessário',
   USERS_ALREADY_EXIST:
     'Já existem usuários no sistema. Use o endpoint padrão para criar novos usuários.',
+  USERNAME_ALREADY_EXISTS: 'Username já está em uso. Por favor, escolha outro.',
+  EMAIL_USER_ALREADY_EXISTS: 'Email já está em uso. Por favor, escolha outro.',
+  FIELD_ALREADY_EXISTS: 'já está em uso. Por favor, escolha outro.',
 
   // Cliente
   CLIENT_NOT_FOUND: 'Cliente não encontrado',
