@@ -9,12 +9,12 @@ describe('PasswordMatchValidator', () => {
     validator = new PasswordMatchValidator();
   });
 
-  it('should be defined', () => {
+  it('Should be defined', () => {
     expect(validator).toBeDefined();
     expect(validator).toBeInstanceOf(PasswordMatchValidator);
   });
 
-  it('should instantiate without dependencies', () => {
+  it('Should instantiate without dependencies', () => {
     const testValidator = new PasswordMatchValidator();
     expect(testValidator).toBeDefined();
   });

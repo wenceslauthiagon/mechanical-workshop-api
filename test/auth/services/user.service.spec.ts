@@ -58,6 +58,7 @@ describe('UserService', () => {
         findUnique: jest
           .fn()
           .mockImplementation(() => Promise.resolve(mockUser)),
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve(null)),
         findMany: jest
           .fn()
           .mockImplementation(() => Promise.resolve([mockSafeUser])),

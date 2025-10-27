@@ -137,7 +137,7 @@ describe('Authorization RBAC Integration Tests', () => {
   });
 
   describe('ADMIN role authorization', () => {
-    it('TC0001 - ADMIN should create users', async () => {
+    it('TC0001 - ADMIN Should create users', async () => {
       const newUser = {
         username: faker.internet.username(),
         password: 'Test@123',
@@ -155,7 +155,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
     });
 
-    it('TC0002 - ADMIN should list all users', async () => {
+    it('TC0002 - ADMIN Should list all users', async () => {
       const response = await request(app.getHttpServer())
         .get('/auth/users')
         .set('Authorization', `Bearer ${adminToken}`);
@@ -164,7 +164,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('TC0003 - ADMIN should create customers', async () => {
+    it('TC0003 - ADMIN Should create customers', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/customers')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -174,7 +174,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
     });
 
-    it('TC0004 - ADMIN should create services', async () => {
+    it('TC0004 - ADMIN Should create services', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/services')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -184,7 +184,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
     });
 
-    it('TC0005 - ADMIN should create parts', async () => {
+    it('TC0005 - ADMIN Should create parts', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/parts')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -194,7 +194,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
     });
 
-    it('TC0006 - ADMIN should create mechanics', async () => {
+    it('TC0006 - ADMIN Should create mechanics', async () => {
       const response = await request(app.getHttpServer())
         .post('/mechanics')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -204,7 +204,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
     });
 
-    it('TC0007 - ADMIN should access stats endpoints', async () => {
+    it('TC0007 - ADMIN Should access stats endpoints', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/stats/overall')
         .set('Authorization', `Bearer ${adminToken}`);
@@ -214,7 +214,7 @@ describe('Authorization RBAC Integration Tests', () => {
   });
 
   describe('EMPLOYEE role authorization', () => {
-    it('TC0001 - EMPLOYEE should create customers', async () => {
+    it('TC0001 - EMPLOYEE Should create customers', async () => {
       const customer = {
         document: generateValidCPF(),
         type: 'PESSOA_FISICA' as const,
@@ -233,7 +233,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
     });
 
-    it('TC0002 - EMPLOYEE should access stats endpoints', async () => {
+    it('TC0002 - EMPLOYEE Should access stats endpoints', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/stats/overall')
         .set('Authorization', `Bearer ${employeeToken}`);
@@ -241,7 +241,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.status).toBe(200);
     });
 
-    it('TC0003 - EMPLOYEE should list customers', async () => {
+    it('TC0003 - EMPLOYEE Should list customers', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/customers')
         .set('Authorization', `Bearer ${employeeToken}`);
@@ -250,7 +250,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('TC0004 - EMPLOYEE should list services', async () => {
+    it('TC0004 - EMPLOYEE Should list services', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/services')
         .set('Authorization', `Bearer ${employeeToken}`);
@@ -259,7 +259,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('TC0005 - EMPLOYEE should list parts', async () => {
+    it('TC0005 - EMPLOYEE Should list parts', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/parts')
         .set('Authorization', `Bearer ${employeeToken}`);
@@ -268,7 +268,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('TC0006 - EMPLOYEE should list mechanics', async () => {
+    it('TC0006 - EMPLOYEE Should list mechanics', async () => {
       const response = await request(app.getHttpServer())
         .get('/mechanics')
         .set('Authorization', `Bearer ${employeeToken}`);
@@ -290,7 +290,7 @@ describe('Authorization RBAC Integration Tests', () => {
       console.error = originalConsoleError;
     });
 
-    it('TC0001 - EMPLOYEE should not create users', async () => {
+    it('TC0001 - EMPLOYEE Should not create users', async () => {
       const newUser = {
         username: faker.internet.username(),
         password: 'Test@123',
@@ -307,7 +307,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.status).toBe(403);
     });
 
-    it('TC0002 - EMPLOYEE should not list all users', async () => {
+    it('TC0002 - EMPLOYEE Should not list all users', async () => {
       const response = await request(app.getHttpServer())
         .get('/auth/users')
         .set('Authorization', `Bearer ${employeeToken}`);

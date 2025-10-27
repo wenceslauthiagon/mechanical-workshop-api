@@ -65,9 +65,10 @@ const mockData = {
   part: {
     name: faker.vehicle.bicycle(),
     description: faker.commerce.productDescription(),
-    price: faker.number.int({ min: 10, max: 200 }).toString(),
+    partNumber: faker.string.alphanumeric(8).toUpperCase(),
+    price: faker.commerce.price({ min: 10, max: 200, dec: 2 }),
     stock: faker.number.int({ min: 50, max: 200 }),
-    minimumStock: faker.number.int({ min: 5, max: 20 }),
+    minStock: faker.number.int({ min: 5, max: 20 }),
     supplier: faker.company.name(),
   },
   serviceOrder: {

@@ -88,7 +88,7 @@ describe('Part Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(mockPart.name);
       expect(response.body.partNumber).toBe(mockPart.partNumber);
-      expect(response.body.price).toBe(mockPart.price);
+      expect(parseFloat(response.body.price)).toBe(parseFloat(mockPart.price));
       expect(response.body.stock).toBe(mockPart.stock);
       expect(response.body.minStock).toBe(mockPart.minStock);
       expect(response.body.supplier).toBe(mockPart.supplier);
