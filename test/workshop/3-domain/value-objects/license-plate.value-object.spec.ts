@@ -61,6 +61,16 @@ describe('LicensePlate', () => {
 
       expect(result).toBe('ABC-1D23');
     });
+
+    it('TC0003 - Should handle edge case with internal value manipulation', () => {
+      const licensePlate = new LicensePlate('ABC1234');
+
+      (licensePlate as any)._value = 'ABC';
+
+      const result = licensePlate.formatted;
+
+      expect(result).toBe('ABC');
+    });
   });
 
   describe('equals', () => {

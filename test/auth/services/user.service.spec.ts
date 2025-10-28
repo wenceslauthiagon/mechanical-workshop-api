@@ -149,6 +149,90 @@ describe('UserService', () => {
         },
       });
     });
+
+    it('TC0003 - Should throw error when username already exists', async () => {
+      const existingUser = { ...mockUser, username: mockUsername };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(
+        existingUser,
+      );
+      errorHandler.handleConflictError.mockImplementation(() => {
+        throw new Error('Username já existe');
+      });
+
+      await expect(service.create(mockCreateUserData)).rejects.toThrow(
+        'Username já existe',
+      );
+
+      expect(errorHandler.handleConflictError).toHaveBeenCalled();
+    });
+
+    it('TC0004 - Should throw error when email already exists', async () => {
+      const existingUser = {
+        ...mockUser,
+        username: 'different',
+        email: mockEmail,
+      };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(
+        existingUser,
+      );
+      errorHandler.handleConflictError.mockImplementation(() => {
+        throw new Error('Email já existe');
+      });
+
+      await expect(service.create(mockCreateUserData)).rejects.toThrow(
+        'Email já existe',
+      );
+
+      expect(errorHandler.handleConflictError).toHaveBeenCalled();
+    });
+
+    it('TC0005 - Should handle Prisma unique constraint error', async () => {
+      const prismaError: any = {
+        code: 'P2002',
+        meta: { target: ['username'] },
+      };
+      mockedBcrypt.hash.mockResolvedValue(mockHashedPassword as never);
+      (prismaService.user.create as jest.Mock).mockRejectedValue(prismaError);
+      errorHandler.handleConflictError.mockImplementation(() => {
+        throw new Error('Field already exists');
+      });
+
+      await expect(service.create(mockCreateUserData)).rejects.toThrow(
+        'Field already exists',
+      );
+
+      expect(errorHandler.handleConflictError).toHaveBeenCalled();
+    });
+
+    it('TC0006 - Should handle Prisma error without meta target', async () => {
+      const prismaError: any = {
+        code: 'P2002',
+        meta: {},
+      };
+      mockedBcrypt.hash.mockResolvedValue(mockHashedPassword as never);
+      (prismaService.user.create as jest.Mock).mockRejectedValue(prismaError);
+      errorHandler.handleConflictError.mockImplementation(() => {
+        throw new Error('field já existe');
+      });
+
+      await expect(service.create(mockCreateUserData)).rejects.toThrow(
+        'field já existe',
+      );
+
+      expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
+        'field já está em uso. Por favor, escolha outro.',
+      );
+    });
+
+    it('TC0007 - Should rethrow non-P2002 errors', async () => {
+      const genericError = new Error('Database error');
+      mockedBcrypt.hash.mockResolvedValue(mockHashedPassword as never);
+      (prismaService.user.create as jest.Mock).mockRejectedValue(genericError);
+
+      await expect(service.create(mockCreateUserData)).rejects.toThrow(
+        'Database error',
+      );
+    });
   });
 
   describe('createFirstAdmin', () => {
