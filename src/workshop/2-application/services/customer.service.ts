@@ -6,6 +6,7 @@ import { CreateCustomerDto } from '../../1-presentation/dtos/customer/create-cus
 import { UpdateCustomerDto } from '../../1-presentation/dtos/customer/update-customer.dto';
 import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 import { DocumentUtils } from '../../../shared/utils/document.utils';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class CustomerService {
@@ -54,6 +55,19 @@ export class CustomerService {
 
   async findAll(): Promise<Customer[]> {
     return this.customerRepository.findAll();
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<Customer>> {
+    const { skip, take, page = 1, limit = 10 } = paginationDto;
+
+    const [customers, total] = await Promise.all([
+      this.customerRepository.findMany(skip, take),
+      this.customerRepository.count(),
+    ]);
+
+    return new PaginatedResponseDto(customers, page, limit, total);
   }
 
   async findById(id: string): Promise<Customer> {

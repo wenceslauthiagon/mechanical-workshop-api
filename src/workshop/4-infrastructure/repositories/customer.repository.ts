@@ -21,6 +21,18 @@ export class CustomerRepository implements ICustomerRepository {
     });
   }
 
+  async findMany(skip: number, take: number): Promise<Customer[]> {
+    return this.prisma.customer.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.customer.count();
+  }
+
   async findById(id: string): Promise<Customer | null> {
     return this.prisma.customer.findUnique({
       where: { id },

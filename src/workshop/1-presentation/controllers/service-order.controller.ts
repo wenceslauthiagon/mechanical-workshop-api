@@ -26,6 +26,7 @@ import { ServiceOrderService } from '../../2-application/services/service-order.
 import { CreateServiceOrderDto } from '../dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../dtos/service-order/update-service-order-status.dto';
 import { ServiceOrderResponseDto } from '../dtos/service-order/service-order-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @ApiTags('Service Orders')
 @Controller('api/service-orders')
@@ -62,25 +63,41 @@ export class ServiceOrderController {
 
   @Get()
   @ApiOperation({
-    summary: 'Listar todas as ordens de serviço',
-    description: 'Retorna todas as ordens de serviço do sistema',
+    summary: 'Listar ordens de serviço com paginação',
+    description: 'Retorna lista paginada de ordens de serviço do sistema',
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Lista de ordens de serviço retornada com sucesso',
-    type: [ServiceOrderResponseDto],
+    description: 'Lista paginada de ordens de serviço retornada com sucesso',
   })
   @ApiQuery({
     name: 'customerId',
     required: false,
     description: 'Filtrar por ID do cliente',
   })
-  async findAll(
+  async findAllPaginated(
+    @Query() paginationDto: PaginationDto,
     @Query('customerId') customerId?: string,
-  ): Promise<ServiceOrderResponseDto[]> {
+  ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
     if (customerId) {
-      return this.serviceOrderService.findByCustomer(customerId);
+      const orders = await this.serviceOrderService.findByCustomer(customerId);
+      return new PaginatedResponseDto(orders, 1, orders.length, orders.length);
     }
+    return this.serviceOrderService.findAllPaginated(paginationDto);
+  }
+
+  @Get('all')
+  @ApiOperation({
+    summary: 'Listar todas as ordens de serviço (sem paginação)',
+    description:
+      'Retorna todas as ordens de serviço - use com cuidado em produção',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista completa de ordens de serviço retornada com sucesso',
+    type: [ServiceOrderResponseDto],
+  })
+  async findAll(): Promise<ServiceOrderResponseDto[]> {
     return this.serviceOrderService.findAll();
   }
 

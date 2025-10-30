@@ -16,6 +16,8 @@ export const ERROR_MESSAGES = {
   ACCESS_TOKEN_NOT_FOUND: 'Access token not found',
   INVALID_ACCESS_TOKEN: 'Invalid access token',
   ACCESS_DENIED_ADMIN_REQUIRED: 'Acesso negado - Role ADMIN necessário',
+  PASSWORD_CONFIRMATION_MISMATCH:
+    'A confirmação de senha deve ser igual à senha',
   USERS_ALREADY_EXIST:
     'Já existem usuários no sistema. Use o endpoint padrão para criar novos usuários.',
   USERNAME_ALREADY_EXISTS: 'Username já está em uso. Por favor, escolha outro.',

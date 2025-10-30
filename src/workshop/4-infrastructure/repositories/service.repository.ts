@@ -36,6 +36,55 @@ export class ServiceRepository implements IServiceRepository {
     });
   }
 
+  async findMany(
+    skip: number,
+    take: number,
+    filters?: {
+      category?: string;
+      active?: boolean;
+    },
+  ): Promise<Service[]> {
+    const where: {
+      category?: string;
+      isActive?: boolean;
+    } = {};
+
+    if (filters?.category) {
+      where.category = filters.category;
+    }
+
+    if (filters?.active !== undefined) {
+      where.isActive = filters.active;
+    }
+
+    return this.prisma.service.findMany({
+      skip,
+      take,
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async count(filters?: {
+    category?: string;
+    active?: boolean;
+  }): Promise<number> {
+    const where: {
+      category?: string;
+      isActive?: boolean;
+    } = {};
+
+    if (filters?.category) {
+      where.category = filters.category;
+    }
+
+    if (filters?.active !== undefined) {
+      where.isActive = filters.active;
+    }
+
+    return this.prisma.service.count({ where });
+  }
+
   async findById(id: string): Promise<Service | null> {
     return this.prisma.service.findUnique({ where: { id } });
   }

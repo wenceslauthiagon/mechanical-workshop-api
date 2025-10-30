@@ -7,6 +7,20 @@ export interface IPartRepository {
     active?: boolean;
     lowStock?: boolean;
   }): Promise<Part[]>;
+  findMany(
+    skip: number,
+    take: number,
+    filters?: {
+      supplier?: string;
+      active?: boolean;
+      lowStock?: boolean;
+    },
+  ): Promise<Part[]>;
+  count(filters?: {
+    supplier?: string;
+    active?: boolean;
+    lowStock?: boolean;
+  }): Promise<number>;
   findById(id: string): Promise<Part | null>;
   findByPartNumber(partNumber: string): Promise<Part | null>;
   findBySupplier(supplier: string): Promise<Part[]>;

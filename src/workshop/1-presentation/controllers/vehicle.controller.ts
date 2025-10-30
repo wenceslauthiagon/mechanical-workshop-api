@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpCode,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,6 +25,7 @@ import { CreateVehicleDto } from '../dtos/vehicle/create-vehicle.dto';
 import { UpdateVehicleDto } from '../dtos';
 import { VehicleResponseDto } from '../dtos/vehicle/vehicle-response.dto';
 import { VehicleService } from '../../2-application/services/vehicle.service';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 
@@ -63,12 +65,28 @@ export class VehicleController {
 
   @Get()
   @ApiOperation({
-    summary: 'Listar todos os veículos',
-    description: 'Retorna lista completa de veículos cadastrados',
+    summary: 'Listar veículos com paginação',
+    description: 'Retorna lista paginada de veículos cadastrados',
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Lista de veículos retornada com sucesso',
+    description: 'Lista paginada de veículos retornada com sucesso',
+  })
+  async findAllPaginated(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<VehicleResponseDto>> {
+    return await this.vehicleService.findAllPaginated(paginationDto);
+  }
+
+  @Get('all')
+  @ApiOperation({
+    summary: 'Listar todos os veículos (sem paginação)',
+    description:
+      'Retorna lista completa de veículos - use com cuidado em produção',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista completa de veículos retornada com sucesso',
     type: [VehicleResponseDto],
   })
   async findAll(): Promise<VehicleResponseDto[]> {

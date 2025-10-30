@@ -18,6 +18,10 @@ export interface IServiceOrderRepository {
 
   findAll(): Promise<ServiceOrder[]>;
 
+  findMany(skip: number, take: number): Promise<ServiceOrder[]>;
+
+  count(): Promise<number>;
+
   findById(id: string): Promise<ServiceOrder | null>;
 
   findByCustomerId(customerId: string): Promise<ServiceOrder[]>;

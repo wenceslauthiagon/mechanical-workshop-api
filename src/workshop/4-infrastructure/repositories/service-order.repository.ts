@@ -36,6 +36,18 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     });
   }
 
+  async findMany(skip: number, take: number) {
+    return this.prisma.serviceOrder.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.serviceOrder.count();
+  }
+
   async findById(id: string) {
     return this.prisma.serviceOrder.findUnique({
       where: { id },

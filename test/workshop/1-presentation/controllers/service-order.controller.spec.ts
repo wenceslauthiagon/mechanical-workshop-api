@@ -126,12 +126,16 @@ describe('ServiceOrderController', () => {
       const mockServiceOrders = [mockServiceOrder];
       serviceOrderService.findByCustomer.mockResolvedValue(mockServiceOrders);
 
-      const result = await controller.findAll(mockCustomerId);
+      const result = await controller.findAllPaginated(
+        { page: 1, limit: 10 } as any,
+        mockCustomerId,
+      );
 
       expect(serviceOrderService.findByCustomer).toHaveBeenCalledWith(
         mockCustomerId,
       );
-      expect(result).toEqual(mockServiceOrders);
+      expect(result.data).toEqual(mockServiceOrders);
+      expect(result.pagination.total).toBe(1);
     });
   });
 

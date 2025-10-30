@@ -10,6 +10,7 @@ import {
   HttpStatus,
   ParseUUIDPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,6 +28,7 @@ import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles } from '../../../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @ApiTags('Customers')
 @Controller('api/customers')
@@ -59,12 +61,33 @@ export class CustomerController {
 
   @Get()
   @ApiOperation({
-    summary: 'Listar todos os clientes',
-    description: 'Retorna lista completa de clientes cadastrados',
+    summary: 'Listar clientes com paginação',
+    description: 'Retorna lista paginada de clientes cadastrados',
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de clientes retornada com sucesso',
+    description: 'Lista paginada de clientes retornada com sucesso',
+  })
+  async findAllPaginated(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<CustomerResponseDto>> {
+    const result = await this.customerService.findAllPaginated(paginationDto);
+
+    return {
+      data: result.data.map((customer) => this.mapToResponseDto(customer)),
+      pagination: result.pagination,
+    };
+  }
+
+  @Get('all')
+  @ApiOperation({
+    summary: 'Listar todos os clientes (sem paginação)',
+    description:
+      'Retorna lista completa de clientes cadastrados - use com cuidado em produção',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista completa de clientes retornada com sucesso',
     type: [CustomerResponseDto],
   })
   async findAll(): Promise<CustomerResponseDto[]> {

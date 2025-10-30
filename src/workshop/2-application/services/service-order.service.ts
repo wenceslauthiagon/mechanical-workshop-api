@@ -18,6 +18,7 @@ import {
   NOTIFICATION_MESSAGES,
 } from '../../../shared/constants/messages.constants';
 import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class ServiceOrderService {
@@ -191,6 +192,24 @@ export class ServiceOrderService {
       this.mapToResponseDto(serviceOrder),
     );
     return Promise.all(responsePromises);
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
+    const { skip, take, page = 1, limit = 10 } = paginationDto;
+
+    const [serviceOrders, total] = await Promise.all([
+      this.serviceOrderRepository.findMany(skip, take),
+      this.serviceOrderRepository.count(),
+    ]);
+
+    const responsePromises = serviceOrders.map((serviceOrder) =>
+      this.mapToResponseDto(serviceOrder),
+    );
+    const responseDtos = await Promise.all(responsePromises);
+
+    return new PaginatedResponseDto(responseDtos, page, limit, total);
   }
 
   async findById(id: string): Promise<ServiceOrderResponseDto> {

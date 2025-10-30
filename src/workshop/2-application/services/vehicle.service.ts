@@ -7,6 +7,7 @@ import { UpdateVehicleDto } from '../../1-presentation/dtos/vehicle/update-vehic
 import { VehicleResponseDto } from '../../1-presentation/dtos/vehicle/vehicle-response.dto';
 import type { Vehicle, Customer } from '@prisma/client';
 import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class VehicleService {
@@ -57,6 +58,28 @@ export class VehicleService {
       }),
     );
     return vehiclesWithCustomers;
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<VehicleResponseDto>> {
+    const { skip, take, page = 1, limit = 10 } = paginationDto;
+
+    const [vehicles, total] = await Promise.all([
+      this.vehicleRepository.findMany(skip, take),
+      this.vehicleRepository.count(),
+    ]);
+
+    const vehiclesWithCustomers = await Promise.all(
+      vehicles.map(async (vehicle) => {
+        const customer = await this.customerRepository.findById(
+          vehicle.customerId,
+        );
+        return this.mapToResponseDto(vehicle, customer);
+      }),
+    );
+
+    return new PaginatedResponseDto(vehiclesWithCustomers, page, limit, total);
   }
 
   async findById(id: string): Promise<VehicleResponseDto> {

@@ -3,6 +3,7 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
+import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 
 @ValidatorConstraint({ name: 'passwordMatch', async: false })
 export class PasswordMatchValidator implements ValidatorConstraintInterface {
@@ -11,7 +12,7 @@ export class PasswordMatchValidator implements ValidatorConstraintInterface {
     return object.password === confirmPassword;
   }
 
-  defaultMessage(args: ValidationArguments) {
-    return 'A confirmação de senha deve ser igual à senha';
+  defaultMessage() {
+    return ERROR_MESSAGES.PASSWORD_CONFIRMATION_MISMATCH;
   }
 }

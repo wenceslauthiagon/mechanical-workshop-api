@@ -47,6 +47,72 @@ export class PartRepository implements IPartRepository {
     });
   }
 
+  async findMany(
+    skip: number,
+    take: number,
+    filters?: {
+      supplier?: string;
+      active?: boolean;
+      lowStock?: boolean;
+    },
+  ): Promise<Part[]> {
+    if (filters?.lowStock) {
+      return this.prisma.$queryRaw`
+        SELECT * FROM parts 
+        WHERE stock <= min_stock 
+        AND is_active = true
+        ORDER BY name ASC
+        LIMIT ${take} OFFSET ${skip}
+      `;
+    }
+
+    const where: any = {};
+
+    if (filters?.supplier) {
+      where.supplier = filters.supplier;
+    }
+
+    if (filters?.active !== undefined) {
+      where.isActive = filters.active;
+    }
+
+    return this.prisma.part.findMany({
+      skip,
+      take,
+      where,
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  async count(filters?: {
+    supplier?: string;
+    active?: boolean;
+    lowStock?: boolean;
+  }): Promise<number> {
+    if (filters?.lowStock) {
+      const result: any = await this.prisma.$queryRaw`
+        SELECT COUNT(*) as count FROM parts 
+        WHERE stock <= min_stock 
+        AND is_active = true
+      `;
+      return parseInt(result[0]?.count || '0');
+    }
+
+    const where: any = {};
+
+    if (filters?.supplier) {
+      where.supplier = filters.supplier;
+    }
+
+    if (filters?.active !== undefined) {
+      where.isActive = filters.active;
+    }
+
+    return this.prisma.part.count({ where });
+  }
+
   async findById(id: string): Promise<Part | null> {
     return this.prisma.part.findUnique({
       where: { id },
