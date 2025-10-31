@@ -40,6 +40,10 @@ export interface IMechanicRepository {
 
   findAll(): Promise<MechanicWithStats[]>;
 
+  findMany(skip: number, take: number): Promise<MechanicWithStats[]>;
+
+  count(): Promise<number>;
+
   findById(id: string): Promise<MechanicWithStats | null>;
 
   findByEmail(email: string): Promise<Mechanic | null>;

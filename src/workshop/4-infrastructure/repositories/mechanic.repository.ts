@@ -66,6 +66,46 @@ export class MechanicRepository implements IMechanicRepository {
     return mechanicsWithStats;
   }
 
+  async findMany(skip: number, take: number): Promise<MechanicWithStats[]> {
+    const mechanics = await this.prisma.mechanic.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const mechanicsWithStats = await Promise.all(
+      mechanics.map(async (mechanic) => {
+        const serviceOrders = await this.prisma.serviceOrder.findMany({
+          where: { mechanicId: mechanic.id },
+        });
+
+        const activeServiceOrders = serviceOrders.filter(
+          (so) =>
+            so.status !== ServiceOrderStatus.FINALIZADA &&
+            so.status !== ServiceOrderStatus.ENTREGUE,
+        ).length;
+
+        const completedServiceOrders = serviceOrders.filter(
+          (so) =>
+            so.status === ServiceOrderStatus.FINALIZADA ||
+            so.status === ServiceOrderStatus.ENTREGUE,
+        ).length;
+
+        return {
+          ...this.mapPrismaMechanic(mechanic),
+          activeServiceOrders,
+          completedServiceOrders,
+        };
+      }),
+    );
+
+    return mechanicsWithStats;
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.mechanic.count();
+  }
+
   async findById(id: string): Promise<MechanicWithStats | null> {
     const mechanic = await this.prisma.mechanic.findUnique({
       where: { id },

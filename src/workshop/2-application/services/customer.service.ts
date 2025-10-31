@@ -60,14 +60,14 @@ export class CustomerService {
   async findAllPaginated(
     paginationDto: PaginationDto,
   ): Promise<PaginatedResponseDto<Customer>> {
-    const { skip, take, page = 1, limit = 10 } = paginationDto;
+    const { skip, take, page = 0, size = 10 } = paginationDto;
 
     const [customers, total] = await Promise.all([
       this.customerRepository.findMany(skip, take),
       this.customerRepository.count(),
     ]);
 
-    return new PaginatedResponseDto(customers, page, limit, total);
+    return new PaginatedResponseDto(customers, page, size, total);
   }
 
   async findById(id: string): Promise<Customer> {

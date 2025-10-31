@@ -197,7 +197,7 @@ export class ServiceOrderService {
   async findAllPaginated(
     paginationDto: PaginationDto,
   ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
-    const { skip, take, page = 1, limit = 10 } = paginationDto;
+    const { skip, take, page = 0, size = 10 } = paginationDto;
 
     const [serviceOrders, total] = await Promise.all([
       this.serviceOrderRepository.findMany(skip, take),
@@ -209,7 +209,7 @@ export class ServiceOrderService {
     );
     const responseDtos = await Promise.all(responsePromises);
 
-    return new PaginatedResponseDto(responseDtos, page, limit, total);
+    return new PaginatedResponseDto(responseDtos, page, size, total);
   }
 
   async findById(id: string): Promise<ServiceOrderResponseDto> {

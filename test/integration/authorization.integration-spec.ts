@@ -94,8 +94,10 @@ describe('Authorization RBAC Integration Tests', () => {
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
 
     const hashedAdminPassword = await bcrypt.hash(mockAdmin.password, 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: mockAdmin.email },
+      update: {},
+      create: {
         username: mockAdmin.username,
         passwordHash: hashedAdminPassword,
         email: mockAdmin.email,
@@ -104,8 +106,10 @@ describe('Authorization RBAC Integration Tests', () => {
     });
 
     const hashedEmployeePassword = await bcrypt.hash(mockEmployee.password, 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: mockEmployee.email },
+      update: {},
+      create: {
         username: mockEmployee.username,
         passwordHash: hashedEmployeePassword,
         email: mockEmployee.email,
@@ -243,7 +247,7 @@ describe('Authorization RBAC Integration Tests', () => {
 
     it('TC0003 - EMPLOYEE Should list customers', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/customers')
+        .get('/api/customers/all')
         .set('Authorization', `Bearer ${employeeToken}`);
 
       expect(response.status).toBe(200);
@@ -252,7 +256,7 @@ describe('Authorization RBAC Integration Tests', () => {
 
     it('TC0004 - EMPLOYEE Should list services', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/services')
+        .get('/api/services/all')
         .set('Authorization', `Bearer ${employeeToken}`);
 
       expect(response.status).toBe(200);
@@ -261,7 +265,7 @@ describe('Authorization RBAC Integration Tests', () => {
 
     it('TC0005 - EMPLOYEE Should list parts', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/parts')
+        .get('/api/parts/all')
         .set('Authorization', `Bearer ${employeeToken}`);
 
       expect(response.status).toBe(200);
@@ -270,7 +274,7 @@ describe('Authorization RBAC Integration Tests', () => {
 
     it('TC0006 - EMPLOYEE Should list mechanics', async () => {
       const response = await request(app.getHttpServer())
-        .get('/mechanics')
+        .get('/mechanics/all')
         .set('Authorization', `Bearer ${employeeToken}`);
 
       expect(response.status).toBe(200);

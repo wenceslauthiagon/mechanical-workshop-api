@@ -114,8 +114,10 @@ describe('Service Order Integration Tests', () => {
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
 
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
         username: 'admin',
         email: 'admin@test.com',
         passwordHash: hashedPassword,
@@ -295,7 +297,7 @@ describe('Service Order Integration Tests', () => {
 
     it('TC0013 - Should list all service orders', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/service-orders')
+        .get('/api/service-orders/all')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
@@ -309,8 +311,10 @@ describe('Service Order Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body[0].customerId).toBe(customerId);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('pagination');
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data[0].customerId).toBe(customerId);
     });
   });
 

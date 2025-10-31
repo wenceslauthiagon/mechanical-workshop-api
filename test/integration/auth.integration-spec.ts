@@ -58,8 +58,10 @@ describe('Auth Integration Tests', () => {
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
 
     const hashedAdminPassword = await bcrypt.hash(mockAdmin.password, 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: mockAdmin.email },
+      update: {},
+      create: {
         username: mockAdmin.username,
         passwordHash: hashedAdminPassword,
         email: mockAdmin.email,
@@ -68,8 +70,10 @@ describe('Auth Integration Tests', () => {
     });
 
     const hashedEmployeePassword = await bcrypt.hash(mockEmployee.password, 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: mockEmployee.email },
+      update: {},
+      create: {
         username: mockEmployee.username,
         passwordHash: hashedEmployeePassword,
         email: mockEmployee.email,

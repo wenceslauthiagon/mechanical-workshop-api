@@ -95,8 +95,10 @@ describe('Complete E2E Workflow Integration Tests', () => {
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
 
     const hashedPassword = await bcrypt.hash('Admin@1234', 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
         username: 'admin',
         passwordHash: hashedPassword,
         email: 'admin@workshop.com',
@@ -370,7 +372,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
 
     it('TC0020 - Should verify overall statistics updated', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/service-orders')
+        .get('/api/service-orders/all')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 

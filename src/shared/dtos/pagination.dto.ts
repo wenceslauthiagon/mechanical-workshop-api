@@ -1,20 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsOptional, IsPositive, Min, Max } from 'class-validator';
+import { IsOptional, Min, Max } from 'class-validator';
 
 export class PaginationDto {
   @ApiProperty({
-    description: 'Número da página (começando em 1)',
-    example: 1,
-    minimum: 1,
+    description: 'Número da página (começando em 0)',
+    example: 0,
+    minimum: 0,
     required: false,
-    default: 1,
+    default: 0,
   })
   @IsOptional()
   @Type(() => Number)
-  @IsPositive({ message: 'A página deve ser um número positivo' })
-  @Min(1, { message: 'A página deve ser no mínimo 1' })
-  page?: number = 1;
+  @Min(0, { message: 'A página deve ser no mínimo 0' })
+  page?: number = 0;
 
   @ApiProperty({
     description: 'Número de itens por página',
@@ -26,17 +25,16 @@ export class PaginationDto {
   })
   @IsOptional()
   @Type(() => Number)
-  @IsPositive({ message: 'O limite deve ser um número positivo' })
-  @Min(1, { message: 'O limite deve ser no mínimo 1' })
-  @Max(100, { message: 'O limite deve ser no máximo 100' })
-  limit?: number = 10;
+  @Min(1, { message: 'O tamanho deve ser no mínimo 1' })
+  @Max(100, { message: 'O tamanho deve ser no máximo 100' })
+  size?: number = 10;
 
   get skip(): number {
-    return ((this.page || 1) - 1) * (this.limit || 10);
+    return (this.page || 0) * (this.size || 10);
   }
 
   get take(): number {
-    return this.limit || 10;
+    return this.size || 10;
   }
 }
 
@@ -47,22 +45,16 @@ export class PaginatedResponseDto<T> {
   @ApiProperty({ description: 'Metadados da paginação' })
   pagination: {
     page: number;
-    limit: number;
-    total: number;
     totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
+    totalRecords: number;
   };
 
-  constructor(data: T[], page: number, limit: number, total: number) {
+  constructor(data: T[], page: number, size: number, total: number) {
     this.data = data;
     this.pagination = {
       page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-      hasNext: page * limit < total,
-      hasPrev: page > 1,
+      totalPages: Math.ceil(total / size),
+      totalRecords: total,
     };
   }
 }

@@ -27,6 +27,7 @@ import { UpdateServiceDto } from '../dtos/service/update-service.dto';
 import { ServiceService } from '../../2-application/services/service.service';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @ApiTags('Services')
 @ApiBearerAuth('JWT-auth')
@@ -60,8 +61,8 @@ export class ServiceController {
 
   @Get()
   @ApiOperation({
-    summary: 'Listar todos os serviços',
-    description: 'Retorna lista de serviços com filtros opcionais',
+    summary: 'Listar serviços com paginação',
+    description: 'Retorna lista paginada de serviços com filtros opcionais',
   })
   @ApiQuery({
     name: 'category',
@@ -76,7 +77,39 @@ export class ServiceController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Lista de serviços retornada com sucesso',
+    description: 'Lista paginada de serviços retornada com sucesso',
+  })
+  async findAllPaginated(
+    @Query() paginationDto: PaginationDto,
+    @Query('category') category?: string,
+    @Query('active') active?: boolean,
+  ) {
+    return await this.serviceService.findAllPaginated(paginationDto, {
+      category,
+      active,
+    });
+  }
+
+  @Get('all')
+  @ApiOperation({
+    summary: 'Listar todos os serviços (sem paginação)',
+    description:
+      'Retorna lista completa de serviços - use com cuidado em produção',
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    description: 'Filtrar por categoria',
+  })
+  @ApiQuery({
+    name: 'active',
+    required: false,
+    description: 'Filtrar por status ativo/inativo',
+    type: Boolean,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista completa de serviços retornada com sucesso',
   })
   async findAll(
     @Query('category') category?: string,

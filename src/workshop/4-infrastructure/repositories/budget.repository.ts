@@ -257,6 +257,30 @@ export class BudgetRepository implements IBudgetRepository {
     return budgetsWithItems;
   }
 
+  async findMany(skip: number, take: number): Promise<Budget[]> {
+    const budgets = await this.prisma.budget.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Fetch items separately for each budget
+    const budgetsWithItems = await Promise.all(
+      budgets.map(async (budget) => {
+        const items = await this.prisma.budgetItem.findMany({
+          where: { budgetId: budget.id },
+        });
+        return this.mapToEntity({ ...budget, items });
+      }),
+    );
+
+    return budgetsWithItems;
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.budget.count();
+  }
+
   async findExpired(): Promise<Budget[]> {
     const now = new Date();
     const budgets = await this.prisma.budget.findMany({

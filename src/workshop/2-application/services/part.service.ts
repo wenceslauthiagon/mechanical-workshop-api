@@ -6,6 +6,7 @@ import { CreatePartDto } from '../../1-presentation/dtos/part/create-part.dto';
 import { UpdatePartDto } from '../../1-presentation/dtos/part/update-part.dto';
 import { PartBase } from '../../3-domain/entities/part.entity';
 import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class PartService {
@@ -45,6 +46,31 @@ export class PartService {
     lowStock?: boolean;
   }): Promise<PartBase[]> {
     return this.partRepository.findAll(filters);
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+    filters?: {
+      supplier?: string;
+      active?: boolean;
+      lowStock?: boolean;
+    },
+  ): Promise<PaginatedResponseDto<PartBase>> {
+    const [parts, total] = await Promise.all([
+      this.partRepository.findMany(
+        paginationDto.skip,
+        paginationDto.take,
+        filters,
+      ),
+      this.partRepository.count(filters),
+    ]);
+
+    return new PaginatedResponseDto(
+      parts,
+      paginationDto.page || 0,
+      paginationDto.size || 10,
+      total,
+    );
   }
 
   async findById(id: string): Promise<PartBase> {

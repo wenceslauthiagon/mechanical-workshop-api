@@ -6,6 +6,7 @@ import { CreateServiceDto } from '../../1-presentation/dtos/service/create-servi
 import { UpdateServiceDto } from '../../1-presentation/dtos/service/update-service.dto';
 import { ServiceBase } from '../../3-domain/entities/service.entity';
 import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class ServiceService {
@@ -38,6 +39,30 @@ export class ServiceService {
     active?: boolean;
   }): Promise<ServiceBase[]> {
     return this.serviceRepository.findAll(filters);
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+    filters?: {
+      category?: string;
+      active?: boolean;
+    },
+  ): Promise<PaginatedResponseDto<ServiceBase>> {
+    const [services, total] = await Promise.all([
+      this.serviceRepository.findMany(
+        paginationDto.skip,
+        paginationDto.take,
+        filters,
+      ),
+      this.serviceRepository.count(filters),
+    ]);
+
+    return new PaginatedResponseDto(
+      services,
+      paginationDto.page || 0,
+      paginationDto.size || 10,
+      total,
+    );
   }
 
   async findById(id: string): Promise<ServiceBase> {

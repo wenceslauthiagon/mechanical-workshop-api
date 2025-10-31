@@ -27,6 +27,7 @@ import { UpdatePartDto } from '../dtos/part/update-part.dto';
 import { PartResponseDto } from '../dtos/part/part-response.dto';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @ApiTags('Parts')
 @ApiBearerAuth('JWT-auth')
@@ -56,8 +57,8 @@ export class PartController {
 
   @Get()
   @ApiOperation({
-    summary: 'Listar peças',
-    description: 'Listar todas as peças com filtros opcionais',
+    summary: 'Listar peças com paginação',
+    description: 'Listar peças de forma paginada com filtros opcionais',
   })
   @ApiQuery({
     name: 'supplier',
@@ -78,7 +79,52 @@ export class PartController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de peças',
+    description: 'Lista paginada de peças',
+  })
+  async findAllPaginated(
+    @Query() paginationDto: PaginationDto,
+    @Query('supplier') supplier?: string,
+    @Query('active') active?: boolean,
+    @Query('lowStock') lowStock?: boolean,
+  ): Promise<PaginatedResponseDto<PartResponseDto>> {
+    const result = await this.partService.findAllPaginated(paginationDto, {
+      supplier,
+      active,
+      lowStock,
+    });
+
+    return {
+      data: result.data.map((part) => this.mapToResponseDto(part)),
+      pagination: result.pagination,
+    };
+  }
+
+  @Get('all')
+  @ApiOperation({
+    summary: 'Listar todas as peças (sem paginação)',
+    description:
+      'Listar todas as peças com filtros opcionais - use com cuidado em produção',
+  })
+  @ApiQuery({
+    name: 'supplier',
+    required: false,
+    description: 'Filtrar por fornecedor',
+  })
+  @ApiQuery({
+    name: 'active',
+    required: false,
+    type: Boolean,
+    description: 'Filtrar por status ativo/inativo',
+  })
+  @ApiQuery({
+    name: 'lowStock',
+    required: false,
+    type: Boolean,
+    description: 'Filtrar peças com estoque baixo',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista completa de peças',
     type: [PartResponseDto],
   })
   async findAll(

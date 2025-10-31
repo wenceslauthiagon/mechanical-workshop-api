@@ -7,6 +7,7 @@ import type {
 } from '../../3-domain/repositories/mechanic.repository.interface';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class MechanicService {
@@ -39,6 +40,29 @@ export class MechanicService {
   async findAll(): Promise<MechanicWithStats[]> {
     try {
       return await this.mechanicRepository.findAll();
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<MechanicWithStats>> {
+    try {
+      const [mechanics, total] = await Promise.all([
+        this.mechanicRepository.findMany(
+          paginationDto.skip,
+          paginationDto.take,
+        ),
+        this.mechanicRepository.count(),
+      ]);
+
+      return new PaginatedResponseDto(
+        mechanics,
+        paginationDto.page || 0,
+        paginationDto.size || 10,
+        total,
+      );
     } catch (error) {
       this.errorHandler.handleError(error);
     }

@@ -57,8 +57,10 @@ describe('Service Integration Tests', () => {
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
 
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
         username: 'admin',
         passwordHash: hashedPassword,
         email: 'admin@test.com',
@@ -101,7 +103,7 @@ describe('Service Integration Tests', () => {
 
     it('TC0002 - Should list all services', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/services')
+        .get('/api/services/all')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
@@ -138,7 +140,7 @@ describe('Service Integration Tests', () => {
 
     it('TC0005 - Should filter services by active status', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/services')
+        .get('/api/services/all')
         .query({ active: true })
         .set('Authorization', `Bearer ${authToken}`);
 

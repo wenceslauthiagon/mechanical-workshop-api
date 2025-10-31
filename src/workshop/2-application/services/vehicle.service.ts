@@ -63,7 +63,7 @@ export class VehicleService {
   async findAllPaginated(
     paginationDto: PaginationDto,
   ): Promise<PaginatedResponseDto<VehicleResponseDto>> {
-    const { skip, take, page = 1, limit = 10 } = paginationDto;
+    const { skip, take, page = 0, size = 10 } = paginationDto;
 
     const [vehicles, total] = await Promise.all([
       this.vehicleRepository.findMany(skip, take),
@@ -79,7 +79,7 @@ export class VehicleService {
       }),
     );
 
-    return new PaginatedResponseDto(vehiclesWithCustomers, page, limit, total);
+    return new PaginatedResponseDto(vehiclesWithCustomers, page, size, total);
   }
 
   async findById(id: string): Promise<VehicleResponseDto> {

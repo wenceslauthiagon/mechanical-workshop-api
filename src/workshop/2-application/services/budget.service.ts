@@ -15,6 +15,7 @@ import { ErrorHandlerService } from '../../../shared/services/error-handler.serv
 import { NotificationService } from './notification.service';
 import { BUDGET_CONSTANTS } from '../../../shared/constants/budget.constants';
 import { BudgetWithRelationsResponseDto } from '../../1-presentation/dtos/budget/budget-with-relations-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class BudgetService {
@@ -84,6 +85,29 @@ export class BudgetService {
   async findAll(): Promise<Budget[]> {
     try {
       return await this.budgetRepository.findAll();
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<Budget>> {
+    try {
+      const [budgets, total] = await Promise.all([
+        this.budgetRepository.findMany(
+          paginationDto.skip,
+          paginationDto.take,
+        ),
+        this.budgetRepository.count(),
+      ]);
+
+      return new PaginatedResponseDto(
+        budgets,
+        paginationDto.page || 0,
+        paginationDto.size || 10,
+        total,
+      );
     } catch (error) {
       this.errorHandler.handleError(error);
     }

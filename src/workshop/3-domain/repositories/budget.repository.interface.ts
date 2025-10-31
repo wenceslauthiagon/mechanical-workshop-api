@@ -47,6 +47,10 @@ export interface IBudgetRepository {
 
   findAll(): Promise<Budget[]>;
 
+  findMany(skip: number, take: number): Promise<Budget[]>;
+
+  count(): Promise<number>;
+
   findById(id: string): Promise<Budget | null>;
 
   findByServiceOrderId(serviceOrderId: string): Promise<Budget[]>;

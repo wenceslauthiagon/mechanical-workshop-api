@@ -48,8 +48,10 @@ describe('Budget Integration Tests', () => {
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
 
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
         username: 'admin',
         passwordHash: hashedPassword,
         email: 'admin@test.com',
@@ -158,7 +160,7 @@ describe('Budget Integration Tests', () => {
 
     it('TC0002 - Should list all budgets', async () => {
       const response = await request(app.getHttpServer())
-        .get('/budgets')
+        .get('/budgets/all')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);

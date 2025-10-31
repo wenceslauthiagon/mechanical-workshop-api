@@ -76,8 +76,10 @@ describe('Budget Workflow Integration Tests', () => {
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
 
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
         username: 'admin',
         passwordHash: hashedPassword,
         email: 'admin@test.com',

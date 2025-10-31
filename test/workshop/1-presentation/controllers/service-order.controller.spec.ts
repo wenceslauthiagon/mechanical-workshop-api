@@ -7,6 +7,7 @@ import { ServiceOrderController } from '../../../../src/workshop/1-presentation/
 import { ServiceOrderService } from '../../../../src/workshop/2-application/services/service-order.service';
 import { CreateServiceOrderDto } from '../../../../src/workshop/1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../../../src/workshop/1-presentation/dtos/service-order/update-service-order-status.dto';
+import { PaginationDto } from '../../../../src/shared/dtos/pagination.dto';
 
 describe('ServiceOrderController', () => {
   let controller: ServiceOrderController;
@@ -126,8 +127,12 @@ describe('ServiceOrderController', () => {
       const mockServiceOrders = [mockServiceOrder];
       serviceOrderService.findByCustomer.mockResolvedValue(mockServiceOrders);
 
+      const paginationDto = new PaginationDto();
+      paginationDto.page = 0;
+      paginationDto.size = 10;
+
       const result = await controller.findAllPaginated(
-        { page: 1, limit: 10 } as any,
+        paginationDto,
         mockCustomerId,
       );
 
@@ -135,7 +140,7 @@ describe('ServiceOrderController', () => {
         mockCustomerId,
       );
       expect(result.data).toEqual(mockServiceOrders);
-      expect(result.pagination.total).toBe(1);
+      expect(result.pagination.totalRecords).toBe(1);
     });
   });
 

@@ -81,7 +81,7 @@ export class ServiceOrderController {
   ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
     if (customerId) {
       const orders = await this.serviceOrderService.findByCustomer(customerId);
-      return new PaginatedResponseDto(orders, 1, orders.length, orders.length);
+      return new PaginatedResponseDto(orders, 0, orders.length, orders.length);
     }
     return this.serviceOrderService.findAllPaginated(paginationDto);
   }
