@@ -137,6 +137,8 @@ describe('ServiceOrderService', () => {
       serviceOrder: {
         create: jest.fn(),
         findAll: jest.fn(),
+        findMany: jest.fn(),
+        count: jest.fn(),
         findById: jest.fn(),
         findByCustomerId: jest.fn(),
         findByOrderNumber: jest.fn(),
@@ -328,6 +330,39 @@ describe('ServiceOrderService', () => {
 
       expect(result).toHaveLength(1);
       expect(repositories.serviceOrder.findAll).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated service orders', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      repositories.serviceOrder.findMany.mockResolvedValue([mockServiceOrder]);
+      repositories.serviceOrder.count.mockResolvedValue(1);
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
+      services.mechanic.findById.mockResolvedValue(mockMechanic);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toHaveLength(1);
+      expect(result.pagination.totalRecords).toBe(1);
+      expect(result.pagination.totalPages).toBe(1);
+      expect(repositories.serviceOrder.findMany).toHaveBeenCalled();
+      expect(repositories.serviceOrder.count).toHaveBeenCalled();
+    });
+
+    it('TC0002 - Should return empty paginated result', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      repositories.serviceOrder.findMany.mockResolvedValue([]);
+      repositories.serviceOrder.count.mockResolvedValue(0);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
+      expect(result.pagination.totalPages).toBe(0);
     });
   });
 

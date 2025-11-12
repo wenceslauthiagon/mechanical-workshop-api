@@ -55,6 +55,7 @@ describe('MechanicController', () => {
     const mockMechanicService = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findAllPaginated: jest.fn(),
       findAvailable: jest.fn(),
       findBySpecialty: jest.fn(),
       findById: jest.fn(),
@@ -137,6 +138,42 @@ describe('MechanicController', () => {
 
       expect(mechanicService.findAll).toHaveBeenCalledWith();
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated mechanics', async () => {
+      const mockMechanics = [mockMechanic, { ...mockMechanic, id: uuidv4() }];
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: mockMechanics,
+        pagination: { page: 0, totalPages: 1, totalRecords: 2 },
+      };
+
+      mechanicService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await controller.findAllPaginated(paginationDto as any);
+
+      expect(mechanicService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]).toBeInstanceOf(MechanicResponseDto);
+      expect(result.pagination.totalRecords).toBe(2);
+    });
+
+    it('TC0002 - Should return empty paginated result', async () => {
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: [],
+        pagination: { page: 0, totalPages: 0, totalRecords: 0 },
+      };
+
+      mechanicService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await controller.findAllPaginated(paginationDto as any);
+
+      expect(mechanicService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
     });
   });
 

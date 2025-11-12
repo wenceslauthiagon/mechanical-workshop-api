@@ -64,6 +64,7 @@ describe('PartController', () => {
           useValue: {
             create: jest.fn(),
             findAll: jest.fn(),
+            findAllPaginated: jest.fn(),
             findLowStock: jest.fn(),
             findBySupplier: jest.fn(),
             findById: jest.fn(),
@@ -212,6 +213,109 @@ describe('PartController', () => {
 
       await expect(partController.findAll()).rejects.toThrow(mockError);
       expect(partService.findAll).toHaveBeenCalledWith({});
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated parts without filters', async () => {
+      const mockParts = [mockPartData];
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: mockParts,
+        pagination: { page: 0, totalPages: 1, totalRecords: 1 },
+      };
+
+      partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await partController.findAllPaginated(paginationDto as any);
+
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {});
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].id).toBe(mockPartData.id);
+      expect(result.pagination.totalRecords).toBe(1);
+    });
+
+    it('TC0002 - Should return paginated parts with supplier filter', async () => {
+      const mockParts = [mockPartData];
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: mockParts,
+        pagination: { page: 0, totalPages: 1, totalRecords: 1 },
+      };
+
+      partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await partController.findAllPaginated(
+        paginationDto as any,
+        mockSupplier,
+      );
+
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
+        supplier: mockSupplier,
+      });
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].supplier).toBe(mockSupplier);
+    });
+
+    it('TC0003 - Should return paginated parts with active filter', async () => {
+      const mockParts = [mockPartData];
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: mockParts,
+        pagination: { page: 0, totalPages: 1, totalRecords: 1 },
+      };
+
+      partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await partController.findAllPaginated(
+        paginationDto as any,
+        undefined,
+        true,
+      );
+
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
+        active: true,
+      });
+      expect(result.data).toHaveLength(1);
+    });
+
+    it('TC0004 - Should return paginated parts with lowStock filter', async () => {
+      const mockParts = [mockPartData];
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: mockParts,
+        pagination: { page: 0, totalPages: 1, totalRecords: 1 },
+      };
+
+      partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await partController.findAllPaginated(
+        paginationDto as any,
+        undefined,
+        undefined,
+        true,
+      );
+
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
+        lowStock: true,
+      });
+      expect(result.data).toHaveLength(1);
+    });
+
+    it('TC0005 - Should return empty paginated result when no parts found', async () => {
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: [],
+        pagination: { page: 0, totalPages: 0, totalRecords: 0 },
+      };
+
+      partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await partController.findAllPaginated(paginationDto as any);
+
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {});
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
     });
   });
 

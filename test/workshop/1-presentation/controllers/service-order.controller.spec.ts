@@ -55,6 +55,7 @@ describe('ServiceOrderController', () => {
     const mockServiceOrderService = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findAllPaginated: jest.fn(),
       findById: jest.fn(),
       findByCustomer: jest.fn(),
       updateStatus: jest.fn(),
@@ -123,7 +124,23 @@ describe('ServiceOrderController', () => {
       expect(result).toEqual(mockServiceOrders);
     });
 
-    it('TC0002 - Should return service orders by customer when customerId provided', async () => {
+    it('TC0002 - Should return paginated service orders when no customerId', async () => {
+      const paginationDto = new PaginationDto();
+      paginationDto.page = 1;
+      paginationDto.size = 10;
+      const mockPaginatedResponse = {
+        data: [mockServiceOrder],
+        pagination: { page: 1, size: 10, totalPages: 1, totalRecords: 1 },
+      };
+      serviceOrderService.findAllPaginated.mockResolvedValue(mockPaginatedResponse);
+
+      const result = await controller.findAllPaginated(paginationDto);
+
+      expect(serviceOrderService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result).toEqual(mockPaginatedResponse);
+    });
+
+    it('TC0003 - Should return service orders by customer when customerId provided', async () => {
       const mockServiceOrders = [mockServiceOrder];
       serviceOrderService.findByCustomer.mockResolvedValue(mockServiceOrders);
 

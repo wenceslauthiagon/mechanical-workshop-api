@@ -57,6 +57,8 @@ describe('MechanicService', () => {
     const mockRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
       findAvailable: jest.fn(),
@@ -164,6 +166,30 @@ describe('MechanicService', () => {
 
       await expect(service.findAll()).rejects.toThrow('DB error');
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated mechanics', async () => {
+      const mechanics = [mockMechanic];
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      mechanicRepository.findMany.mockResolvedValue(mechanics);
+      mechanicRepository.count.mockResolvedValue(1);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(mechanicRepository.findMany).toHaveBeenCalledWith(0, 10);
+      expect(mechanicRepository.count).toHaveBeenCalled();
+      expect(result.data).toEqual(mechanics);
+      expect(result.pagination.totalRecords).toBe(1);
+    });
+
+    it('TC0002 - Should handle errors', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      const error = new Error('DB error');
+      mechanicRepository.findMany.mockRejectedValue(error);
+
+      await expect(service.findAllPaginated(paginationDto)).rejects.toThrow('DB error');
     });
   });
 

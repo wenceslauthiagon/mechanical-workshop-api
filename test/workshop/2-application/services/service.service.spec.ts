@@ -32,6 +32,8 @@ describe('ServiceService', () => {
     const mockServiceRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
       findById: jest.fn(),
       findByName: jest.fn(),
       findByCategory: jest.fn(),
@@ -185,6 +187,38 @@ describe('ServiceService', () => {
 
       expect(serviceRepository.findAll).toHaveBeenCalledWith({ active: true });
       expect(result).toEqual(mockServices);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated services without filters', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      const mockServices = [createMockService(), createMockService()];
+      serviceRepository.findMany.mockResolvedValue(mockServices);
+      serviceRepository.count.mockResolvedValue(2);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toHaveLength(2);
+      expect(result.pagination.totalRecords).toBe(2);
+      expect(result.pagination.totalPages).toBe(1);
+      expect(serviceRepository.findMany).toHaveBeenCalledWith(0, 10, undefined);
+      expect(serviceRepository.count).toHaveBeenCalledWith(undefined);
+    });
+
+    it('TC0002 - Should return paginated services with filters', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      const filters = { category: 'Mecânica', active: true };
+      const mockServices = [createMockService()];
+      serviceRepository.findMany.mockResolvedValue(mockServices);
+      serviceRepository.count.mockResolvedValue(1);
+
+      const result = await service.findAllPaginated(paginationDto, filters);
+
+      expect(result.data).toHaveLength(1);
+      expect(result.pagination.totalRecords).toBe(1);
+      expect(serviceRepository.findMany).toHaveBeenCalledWith(0, 10, filters);
+      expect(serviceRepository.count).toHaveBeenCalledWith(filters);
     });
   });
 

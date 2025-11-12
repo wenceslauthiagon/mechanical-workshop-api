@@ -55,6 +55,7 @@ describe('ServiceController', () => {
           useValue: {
             create: jest.fn(),
             findAll: jest.fn(),
+            findAllPaginated: jest.fn(),
             findById: jest.fn(),
             findByCategory: jest.fn(),
             update: jest.fn(),
@@ -126,6 +127,23 @@ describe('ServiceController', () => {
 
       expect(serviceService.findAll).toHaveBeenCalledWith({});
       expect(result).toEqual(mockServices);
+    });
+
+    it('TC0001a - Should return paginated services', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      const mockPaginatedResponse = {
+        data: [mockServiceData],
+        pagination: { page: 1, size: 10, totalPages: 1, totalRecords: 1 },
+      };
+      serviceService.findAllPaginated.mockResolvedValue(mockPaginatedResponse);
+
+      const result = await serviceController.findAllPaginated(paginationDto);
+
+      expect(serviceService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
+        category: undefined,
+        active: undefined,
+      });
+      expect(result).toEqual(mockPaginatedResponse);
     });
 
     it('TC0002 - Should return services filtered by category', async () => {

@@ -43,6 +43,8 @@ describe('VehicleService', () => {
     const mockVehicleRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
       findById: jest.fn(),
       findByCustomerId: jest.fn(),
       findByPlate: jest.fn(),
@@ -187,6 +189,38 @@ describe('VehicleService', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].customer).toBeUndefined();
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated vehicles with customer data', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      const mockVehicles = [createMockVehicle(), createMockVehicle()];
+      const mockCustomer = createMockCustomer();
+      vehicleRepository.findMany.mockResolvedValue(mockVehicles);
+      vehicleRepository.count.mockResolvedValue(2);
+      customerRepository.findById.mockResolvedValue(mockCustomer);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toHaveLength(2);
+      expect(result.pagination.totalRecords).toBe(2);
+      expect(result.pagination.totalPages).toBe(1);
+      expect(result.data[0].customer).toBeDefined();
+      expect(vehicleRepository.findMany).toHaveBeenCalledWith(0, 10);
+      expect(vehicleRepository.count).toHaveBeenCalled();
+    });
+
+    it('TC0002 - Should return empty paginated result', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      vehicleRepository.findMany.mockResolvedValue([]);
+      vehicleRepository.count.mockResolvedValue(0);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
+      expect(result.pagination.totalPages).toBe(0);
     });
   });
 

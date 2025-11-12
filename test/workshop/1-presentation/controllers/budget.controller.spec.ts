@@ -118,6 +118,7 @@ describe('BudgetController', () => {
     const mockBudgetService = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findAllPaginated: jest.fn(),
       findById: jest.fn(),
       findByServiceOrderId: jest.fn(),
       sendBudget: jest.fn(),
@@ -187,6 +188,42 @@ describe('BudgetController', () => {
 
       expect(budgetService.findAll).toHaveBeenCalledWith();
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated budgets', async () => {
+      const mockBudgets = [mockBudget, { ...mockBudget, id: uuidv4() }];
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: mockBudgets,
+        pagination: { page: 0, totalPages: 1, totalRecords: 2 },
+      };
+
+      budgetService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await controller.findAllPaginated(paginationDto as any);
+
+      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]).toBeInstanceOf(BudgetResponseDto);
+      expect(result.pagination.totalRecords).toBe(2);
+    });
+
+    it('TC0002 - Should return empty paginated result when no budgets found', async () => {
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: [],
+        pagination: { page: 0, totalPages: 0, totalRecords: 0 },
+      };
+
+      budgetService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await controller.findAllPaginated(paginationDto as any);
+
+      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
     });
   });
 

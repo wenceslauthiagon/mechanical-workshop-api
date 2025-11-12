@@ -50,6 +50,8 @@ describe('CustomerService', () => {
     const mockRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
       findByDocument: jest.fn(),
@@ -204,6 +206,35 @@ describe('CustomerService', () => {
       const result = await service.findAll();
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated customers', async () => {
+      const customers = [mockCustomer];
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      customerRepository.findMany.mockResolvedValue(customers);
+      customerRepository.count.mockResolvedValue(1);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(customerRepository.findMany).toHaveBeenCalledWith(0, 10);
+      expect(customerRepository.count).toHaveBeenCalled();
+      expect(result.data).toEqual(customers);
+      expect(result.pagination.totalRecords).toBe(1);
+      expect(result.pagination.page).toBe(0);
+      expect(result.pagination.totalPages).toBe(1);
+    });
+
+    it('TC0002 - Should return empty paginated result', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      customerRepository.findMany.mockResolvedValue([]);
+      customerRepository.count.mockResolvedValue(0);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toEqual([]);
+      expect(result.pagination.totalRecords).toBe(0);
     });
   });
 

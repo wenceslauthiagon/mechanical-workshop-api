@@ -43,6 +43,7 @@ module.exports = {
     "<rootDir>/src/shared/logger/",
     "<rootDir>/src/shared/shared.module.ts",
     "<rootDir>/src/shared/healthcheck/",
+    "<rootDir>/src/shared/dtos/",
     "<rootDir>/src/infrastructure/http/AxiosFactory.ts",
     "<rootDir>/src/workshop/1-presentation/dtos/",
     "<rootDir>/src/workshop/1-presentation/responses/",

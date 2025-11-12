@@ -60,6 +60,7 @@ describe('VehicleController', () => {
           useValue: {
             create: jest.fn(),
             findAll: jest.fn(),
+            findAllPaginated: jest.fn(),
             findById: jest.fn(),
             findByCustomerId: jest.fn(),
             findByLicensePlate: jest.fn(),
@@ -125,6 +126,20 @@ describe('VehicleController', () => {
 
       expect(vehicleService.findAll).toHaveBeenCalled();
       expect(result).toEqual(mockVehicles);
+    });
+
+    it('TC0001a - Should return paginated vehicles', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      const mockPaginatedResponse = {
+        data: [mockVehicleData],
+        pagination: { page: 1, size: 10, totalPages: 1, totalRecords: 1 },
+      };
+      vehicleService.findAllPaginated.mockResolvedValue(mockPaginatedResponse);
+
+      const result = await vehicleController.findAllPaginated(paginationDto);
+
+      expect(vehicleService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result).toEqual(mockPaginatedResponse);
     });
 
     it('TC0002 - Should return empty array when no vehicles found', async () => {

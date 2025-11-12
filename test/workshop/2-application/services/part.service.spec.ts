@@ -36,6 +36,8 @@ describe('PartService', () => {
       update: jest.fn(),
       updateStock: jest.fn(),
       remove: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
     };
 
     const mockErrorHandler = {
@@ -202,6 +204,36 @@ describe('PartService', () => {
 
       expect(partRepository.findAll).toHaveBeenCalledWith(filters);
       expect(result).toEqual(mockParts);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated parts without filters', async () => {
+      const mockParts = [createMockPart()];
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      partRepository.findMany.mockResolvedValue(mockParts);
+      partRepository.count.mockResolvedValue(1);
+
+      const result = await service.findAllPaginated(paginationDto, {});
+
+      expect(partRepository.findMany).toHaveBeenCalledWith(0, 10, {});
+      expect(partRepository.count).toHaveBeenCalledWith({});
+      expect(result.data).toEqual(mockParts);
+      expect(result.pagination.totalRecords).toBe(1);
+    });
+
+    it('TC0002 - Should return paginated parts with filters', async () => {
+      const mockParts = [createMockPart()];
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      const filters = { supplier: 'Test', active: true };
+      partRepository.findMany.mockResolvedValue(mockParts);
+      partRepository.count.mockResolvedValue(1);
+
+      const result = await service.findAllPaginated(paginationDto, filters);
+
+      expect(partRepository.findMany).toHaveBeenCalledWith(0, 10, filters);
+      expect(partRepository.count).toHaveBeenCalledWith(filters);
+      expect(result.data).toEqual(mockParts);
     });
   });
 
