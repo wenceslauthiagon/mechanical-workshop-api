@@ -239,10 +239,10 @@ jobs:
     steps:
       - name: Notify Success
         if: needs.deploy-to-kubernetes.result == 'success'
-        run: echo "✅ Deployment successful!"
+        run: echo "Deployment successful!"
 
       - name: Notify Failure
         if: needs.deploy-to-kubernetes.result == 'failure'
         run: |
-          echo "❌ Deployment failed!"
+          echo "Deployment failed!"
           exit 1
