@@ -101,6 +101,34 @@ export class ServiceOrderController {
     return this.serviceOrderService.findAll();
   }
 
+  @Get('priority')
+  @ApiOperation({
+    summary: 'Listar ordens de serviço com prioridade',
+    description:
+      'Lista ordens de serviço ordenadas por prioridade (Em Execução > Aguardando Aprovação > Diagnóstico > Recebida) e data (mais antigas primeiro). Exclui OS finalizadas e entregues.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número da página',
+  })
+  @ApiQuery({
+    name: 'size',
+    required: false,
+    type: Number,
+    description: 'Tamanho da página',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista ordenada por prioridade retornada com sucesso',
+  })
+  async findAllWithPriority(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
+    return this.serviceOrderService.findAllPaginatedWithPriority(paginationDto);
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Buscar ordem de serviço por ID',

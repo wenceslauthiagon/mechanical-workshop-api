@@ -132,11 +132,15 @@ describe('ServiceOrderController', () => {
         data: [mockServiceOrder],
         pagination: { page: 1, size: 10, totalPages: 1, totalRecords: 1 },
       };
-      serviceOrderService.findAllPaginated.mockResolvedValue(mockPaginatedResponse);
+      serviceOrderService.findAllPaginated.mockResolvedValue(
+        mockPaginatedResponse,
+      );
 
       const result = await controller.findAllPaginated(paginationDto);
 
-      expect(serviceOrderService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(serviceOrderService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
       expect(result).toEqual(mockPaginatedResponse);
     });
 

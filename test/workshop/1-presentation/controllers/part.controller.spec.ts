@@ -227,9 +227,14 @@ describe('PartController', () => {
 
       partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await partController.findAllPaginated(paginationDto as any);
+      const result = await partController.findAllPaginated(
+        paginationDto as any,
+      );
 
-      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {});
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+        {},
+      );
       expect(result.data).toHaveLength(1);
       expect(result.data[0].id).toBe(mockPartData.id);
       expect(result.pagination.totalRecords).toBe(1);
@@ -311,9 +316,14 @@ describe('PartController', () => {
 
       partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await partController.findAllPaginated(paginationDto as any);
+      const result = await partController.findAllPaginated(
+        paginationDto as any,
+      );
 
-      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {});
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+        {},
+      );
       expect(result.data).toHaveLength(0);
       expect(result.pagination.totalRecords).toBe(0);
     });

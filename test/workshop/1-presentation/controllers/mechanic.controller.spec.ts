@@ -154,7 +154,9 @@ describe('MechanicController', () => {
 
       const result = await controller.findAllPaginated(paginationDto as any);
 
-      expect(mechanicService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(mechanicService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
       expect(result.data).toHaveLength(2);
       expect(result.data[0]).toBeInstanceOf(MechanicResponseDto);
       expect(result.pagination.totalRecords).toBe(2);
@@ -171,7 +173,9 @@ describe('MechanicController', () => {
 
       const result = await controller.findAllPaginated(paginationDto as any);
 
-      expect(mechanicService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(mechanicService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
       expect(result.data).toHaveLength(0);
       expect(result.pagination.totalRecords).toBe(0);
     });

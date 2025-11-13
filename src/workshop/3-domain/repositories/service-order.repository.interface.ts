@@ -20,6 +20,10 @@ export interface IServiceOrderRepository {
 
   findMany(skip: number, take: number): Promise<ServiceOrder[]>;
 
+  findManyWithPriority(skip: number, take: number): Promise<ServiceOrder[]>;
+
+  countWithPriority(): Promise<number>;
+
   count(): Promise<number>;
 
   findById(id: string): Promise<ServiceOrder | null>;
