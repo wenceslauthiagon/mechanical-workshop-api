@@ -189,7 +189,9 @@ describe('MechanicService', () => {
       const error = new Error('DB error');
       mechanicRepository.findMany.mockRejectedValue(error);
 
-      await expect(service.findAllPaginated(paginationDto)).rejects.toThrow('DB error');
+      await expect(service.findAllPaginated(paginationDto)).rejects.toThrow(
+        'DB error',
+      );
     });
   });
 

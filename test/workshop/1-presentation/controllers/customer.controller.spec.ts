@@ -182,9 +182,13 @@ describe('CustomerController', () => {
 
       customerService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await customerController.findAllPaginated(paginationDto as any);
+      const result = await customerController.findAllPaginated(
+        paginationDto as any,
+      );
 
-      expect(customerService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(customerService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
       expect(result.data).toHaveLength(1);
       expect(result.data[0]).toEqual(mockCustomerResponseDto);
       expect(result.pagination.totalRecords).toBe(1);
@@ -199,9 +203,13 @@ describe('CustomerController', () => {
 
       customerService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await customerController.findAllPaginated(paginationDto as any);
+      const result = await customerController.findAllPaginated(
+        paginationDto as any,
+      );
 
-      expect(customerService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(customerService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
       expect(result.data).toHaveLength(0);
       expect(result.pagination.totalRecords).toBe(0);
     });

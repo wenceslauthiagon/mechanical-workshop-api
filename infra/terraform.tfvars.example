@@ -1,0 +1,8 @@
+database_password = "workshop123"
+jwt_secret        = "your-super-secret-jwt-key-change-in-production"
+kubeconfig_path   = "~/.kube/config"
+kube_context      = "docker-desktop"
+namespace         = "mechanical-workshop"
+app_name          = "workshop-api"
+app_replicas      = 3
+app_image         = "workshop-api:latest"

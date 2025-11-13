@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable, Logger, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
+import { EmailService } from '../../../shared/services/email.service';
 import { ServiceOrderStatus, ServiceOrder } from '@prisma/client';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../1-presentation/dtos/service-order/update-service-order-status.dto';
@@ -37,6 +38,7 @@ export class ServiceOrderService {
     private readonly partRepository: IPartRepository,
     private readonly prisma: PrismaService,
     private readonly errorHandler: ErrorHandlerService,
+    private readonly emailService: EmailService,
     private readonly notificationService: NotificationService,
     private readonly mechanicService: MechanicService,
   ) {}
@@ -212,6 +214,24 @@ export class ServiceOrderService {
     return new PaginatedResponseDto(responseDtos, page, size, total);
   }
 
+  async findAllPaginatedWithPriority(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
+    const { skip, take, page = 0, size = 10 } = paginationDto;
+
+    const [serviceOrders, total] = await Promise.all([
+      this.serviceOrderRepository.findManyWithPriority(skip, take),
+      this.serviceOrderRepository.countWithPriority(),
+    ]);
+
+    const responsePromises = serviceOrders.map((serviceOrder) =>
+      this.mapToResponseDto(serviceOrder),
+    );
+    const responseDtos = await Promise.all(responsePromises);
+
+    return new PaginatedResponseDto(responseDtos, page, size, total);
+  }
+
   async findById(id: string): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
@@ -317,18 +337,17 @@ export class ServiceOrderService {
       notes: data.notes || `Status alterado para ${data.status}`,
     });
 
-    // Send notification to customer
-    try {
-      const customer = await this.customerRepository.findById(
-        serviceOrder.customerId,
-      );
-      const vehicle = await this.vehicleRepository.findById(
-        serviceOrder.vehicleId,
-      );
+    const customer = await this.customerRepository.findById(
+      serviceOrder.customerId,
+    );
+    const vehicle = await this.vehicleRepository.findById(
+      serviceOrder.vehicleId,
+    );
 
-      if (customer && vehicle) {
-        const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
+    if (customer && vehicle) {
+      const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
 
+      try {
         await this.notificationService.sendServiceOrderStatusNotification(
           id,
           serviceOrder.orderNumber,
@@ -338,12 +357,25 @@ export class ServiceOrderService {
           vehicleInfo,
           customer.phone,
         );
+      } catch (error) {
+        this.logger.warn(`Failed to send push notification: ${error.message}`);
       }
-    } catch (error) {
-      this.logger.error(
-        `${NOTIFICATION_MESSAGES.FAILED_TO_SEND_STATUS_NOTIFICATION} ${serviceOrder.orderNumber}`,
-        error,
-      );
+
+      if (customer.email) {
+        try {
+          await this.emailService.sendStatusChangeNotification({
+            customerName: customer.name,
+            customerEmail: customer.email,
+            orderNumber: serviceOrder.orderNumber,
+            newStatus: data.status,
+            statusMessage: data.notes || `Status alterado para ${data.status}`,
+          });
+        } catch (error) {
+          this.logger.warn(
+            `Failed to send email notification: ${error.message}`,
+          );
+        }
+      }
     }
 
     return this.findById(id);

@@ -138,7 +138,9 @@ describe('VehicleController', () => {
 
       const result = await vehicleController.findAllPaginated(paginationDto);
 
-      expect(vehicleService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(vehicleService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
       expect(result).toEqual(mockPaginatedResponse);
     });
 

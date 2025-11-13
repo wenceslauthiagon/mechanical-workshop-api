@@ -139,10 +139,13 @@ describe('ServiceController', () => {
 
       const result = await serviceController.findAllPaginated(paginationDto);
 
-      expect(serviceService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
-        category: undefined,
-        active: undefined,
-      });
+      expect(serviceService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+        {
+          category: undefined,
+          active: undefined,
+        },
+      );
       expect(result).toEqual(mockPaginatedResponse);
     });
 

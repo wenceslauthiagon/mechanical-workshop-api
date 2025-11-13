@@ -136,7 +136,9 @@ describe('DefaultServiceOrderPolicy', () => {
     });
 
     it('TC0007 - Should return empty array for invalid status', () => {
-      const result = policy.getValidTransitions('INVALID_STATUS' as ServiceOrderStatus);
+      const result = policy.getValidTransitions(
+        'INVALID_STATUS' as ServiceOrderStatus,
+      );
 
       expect(result).toEqual([]);
     });

@@ -95,10 +95,7 @@ export class BudgetService {
   ): Promise<PaginatedResponseDto<Budget>> {
     try {
       const [budgets, total] = await Promise.all([
-        this.budgetRepository.findMany(
-          paginationDto.skip,
-          paginationDto.take,
-        ),
+        this.budgetRepository.findMany(paginationDto.skip, paginationDto.take),
         this.budgetRepository.count(),
       ]);
 

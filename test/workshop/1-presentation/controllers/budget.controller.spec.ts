@@ -204,7 +204,9 @@ describe('BudgetController', () => {
 
       const result = await controller.findAllPaginated(paginationDto as any);
 
-      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
       expect(result.data).toHaveLength(2);
       expect(result.data[0]).toBeInstanceOf(BudgetResponseDto);
       expect(result.pagination.totalRecords).toBe(2);
@@ -221,7 +223,9 @@ describe('BudgetController', () => {
 
       const result = await controller.findAllPaginated(paginationDto as any);
 
-      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
       expect(result.data).toHaveLength(0);
       expect(result.pagination.totalRecords).toBe(0);
     });

@@ -359,7 +359,9 @@ describe('BudgetService', () => {
       const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
       repositories.budget.findMany.mockRejectedValue(new Error('DB error'));
 
-      await expect(service.findAllPaginated(paginationDto)).rejects.toThrow('DB error');
+      await expect(service.findAllPaginated(paginationDto)).rejects.toThrow(
+        'DB error',
+      );
     });
   });
 

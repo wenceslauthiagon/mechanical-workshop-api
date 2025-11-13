@@ -44,6 +44,44 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     });
   }
 
+  async findManyWithPriority(skip: number, take: number) {
+    const statusPriority = {
+      [ServiceOrderStatus.EM_EXECUCAO]: 1,
+      [ServiceOrderStatus.AGUARDANDO_APROVACAO]: 2,
+      [ServiceOrderStatus.EM_DIAGNOSTICO]: 3,
+      [ServiceOrderStatus.RECEBIDA]: 4,
+    };
+
+    const orders = await this.prisma.serviceOrder.findMany({
+      where: {
+        status: {
+          notIn: [ServiceOrderStatus.FINALIZADA, ServiceOrderStatus.ENTREGUE],
+        },
+      },
+    });
+
+    const sortedOrders = orders
+      .sort((a, b) => {
+        const priorityDiff =
+          (statusPriority[a.status] || 999) - (statusPriority[b.status] || 999);
+        if (priorityDiff !== 0) return priorityDiff;
+        return a.createdAt.getTime() - b.createdAt.getTime();
+      })
+      .slice(skip, skip + take);
+
+    return sortedOrders;
+  }
+
+  async countWithPriority(): Promise<number> {
+    return this.prisma.serviceOrder.count({
+      where: {
+        status: {
+          notIn: [ServiceOrderStatus.FINALIZADA, ServiceOrderStatus.ENTREGUE],
+        },
+      },
+    });
+  }
+
   async count(): Promise<number> {
     return this.prisma.serviceOrder.count();
   }
