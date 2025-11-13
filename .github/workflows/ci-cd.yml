@@ -56,6 +56,9 @@ jobs:
       - name: Run linter
         run: npm run lint
 
+      - name: Use PostgreSQL schema
+        run: cp prisma/schema.postgresql.prisma prisma/schema.prisma
+
       - name: Generate Prisma Client
         run: npx prisma generate
 
