@@ -140,6 +140,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check KUBECONFIG
+        run: |
+          if [ -z "$KUBECONFIG_DATA" ]; then
+            echo "⚠️  KUBECONFIG secret not configured. Skipping Kubernetes deployment."
+            echo "ℹ️  To enable K8s deployment, configure KUBECONFIG secret in repository settings."
+            exit 0
+          fi
+
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
