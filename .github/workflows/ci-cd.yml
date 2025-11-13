@@ -65,7 +65,7 @@ jobs:
       - name: Run migrations
         env:
           DATABASE_URL: postgresql://workshop:workshop123@localhost:5432/workshop_test
-        run: npx prisma migrate deploy
+        run: npx prisma db push --skip-generate
 
       - name: Run tests
         env:
