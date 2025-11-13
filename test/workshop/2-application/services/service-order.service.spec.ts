@@ -8,6 +8,7 @@ import { ServiceOrderService } from '../../../../src/workshop/2-application/serv
 import { ErrorHandlerService } from '../../../../src/shared/services/error-handler.service';
 import { NotificationService } from '../../../../src/workshop/2-application/services/notification.service';
 import { MechanicService } from '../../../../src/workshop/2-application/services/mechanic.service';
+import { EmailService } from '../../../../src/shared/services/email.service';
 import { PrismaService } from '../../../../src/prisma/prisma.service';
 import { CreateServiceOrderDto } from '../../../../src/workshop/1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../../../src/workshop/1-presentation/dtos/service-order/update-service-order-status.dto';
@@ -173,6 +174,10 @@ describe('ServiceOrderService', () => {
         markAsUnavailable: jest.fn(),
         releaseFromServiceOrder: jest.fn(),
       },
+      email: {
+        sendStatusChangeNotification: jest.fn(),
+        sendBudgetApprovalRequest: jest.fn(),
+      },
       prisma: {
         serviceOrderItem: { findMany: jest.fn() },
         serviceOrderPart: { findMany: jest.fn() },
@@ -193,6 +198,7 @@ describe('ServiceOrderService', () => {
         { provide: ErrorHandlerService, useValue: mockServices.errorHandler },
         { provide: NotificationService, useValue: mockServices.notification },
         { provide: MechanicService, useValue: mockServices.mechanic },
+        { provide: EmailService, useValue: mockServices.email },
         { provide: PrismaService, useValue: mockServices.prisma },
       ],
     }).compile();
