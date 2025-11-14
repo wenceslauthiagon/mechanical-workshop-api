@@ -95,6 +95,13 @@ resource "kubernetes_deployment" "postgres" {
     }
   }
 
+  wait_for_rollout = false
+
+  timeouts {
+    create = "5m"
+    update = "5m"
+  }
+
   spec {
     replicas = 1
 
@@ -233,6 +240,13 @@ resource "kubernetes_deployment" "redis" {
     }
   }
 
+  wait_for_rollout = false
+
+  timeouts {
+    create = "5m"
+    update = "5m"
+  }
+
   spec {
     replicas = 1
 
@@ -339,6 +353,13 @@ resource "kubernetes_deployment" "workshop_api" {
       app  = var.app_name
       tier = "backend"
     }
+  }
+
+  wait_for_rollout = false
+
+  timeouts {
+    create = "5m"
+    update = "5m"
   }
 
   spec {
