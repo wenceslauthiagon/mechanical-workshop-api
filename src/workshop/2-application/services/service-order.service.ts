@@ -16,7 +16,6 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import {
   ERROR_MESSAGES,
   NOTES_MESSAGES,
-  NOTIFICATION_MESSAGES,
 } from '../../../shared/constants/messages.constants';
 import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 import { PaginationDto, PaginatedResponseDto } from '../../../shared';
@@ -283,7 +282,7 @@ export class ServiceOrderService {
         // Validate if there is a mechanic assigned to the service order
         if (!serviceOrder.mechanicId) {
           this.errorHandler.generateException(
-            'Para iniciar a execução, é necessário atrelar um mecânico à ordem de serviço.',
+            ERROR_MESSAGES.MECHANIC_REQUIRED_FOR_EXECUTION,
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -294,7 +293,7 @@ export class ServiceOrderService {
         );
         if (!mechanic.isAvailable) {
           this.errorHandler.handleConflictError(
-            'Mecânico já está ocupado executando outra ordem de serviço.',
+            ERROR_MESSAGES.MECHANIC_BUSY_WITH_OTHER_ORDER,
           );
         }
 
