@@ -463,7 +463,7 @@ resource "kubernetes_service" "workshop_api" {
   }
 
   spec {
-    type = "LoadBalancer"
+    type = "NodePort"
 
     port {
       port        = 80
