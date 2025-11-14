@@ -150,6 +150,7 @@ jobs:
 
       - name: Load Docker image to Kind
         run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           IMAGE_NAME_LOWER=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
           docker pull $IMAGE_NAME_LOWER
           kind load docker-image $IMAGE_NAME_LOWER --name workshop
