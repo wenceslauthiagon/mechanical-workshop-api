@@ -92,6 +92,9 @@ jobs:
       contents: read
       packages: write
     
+    outputs:
+      image-tag: ${{ steps.set-tag.outputs.tag }}
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -106,23 +109,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Set image tag
+        id: set-tag
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)
+          
+          if [ "$BRANCH_NAME" = "main" ]; then
+            TAG="latest"
+          else
+            TAG="${BRANCH_NAME}-${SHA_SHORT}"
+          fi
+          
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Building with tag: $TAG"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ghcr.io/creative-ia/mechanical-workshop-api:${{ steps.set-tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           target: production
@@ -131,7 +139,7 @@ jobs:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     
     steps:
       - name: Checkout code
@@ -151,9 +159,17 @@ jobs:
       - name: Load Docker image to Kind
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          IMAGE_NAME_LOWER=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
-          docker pull $IMAGE_NAME_LOWER
-          kind load docker-image $IMAGE_NAME_LOWER --name workshop
+          
+          IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
+          IMAGE_NAME="ghcr.io/creative-ia/mechanical-workshop-api:$IMAGE_TAG"
+          
+          echo "Pulling image: $IMAGE_NAME"
+          docker pull $IMAGE_NAME
+          
+          echo "Loading image into Kind cluster..."
+          kind load docker-image $IMAGE_NAME --name workshop
+          
+          echo "Image loaded successfully"
 
       - name: Create namespace
         run: kubectl apply -f k8s/namespace.yaml
@@ -171,7 +187,14 @@ jobs:
         run: kubectl apply -f k8s/redis-deployment.yaml
 
       - name: Deploy API
-        run: kubectl apply -f k8s/app-deployment.yaml
+        run: |
+          IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
+          IMAGE_NAME="ghcr.io/creative-ia/mechanical-workshop-api:$IMAGE_TAG"
+          
+          # Update image in deployment
+          sed -i "s|image: workshop-api:latest|image: $IMAGE_NAME|g" k8s/app-deployment.yaml
+          
+          kubectl apply -f k8s/app-deployment.yaml
 
       - name: Deploy HPA
         run: kubectl apply -f k8s/hpa.yaml
