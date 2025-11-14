@@ -26,14 +26,14 @@ export class NotificationService {
     try {
       const emailData = this.prepareBudgetEmailData(budget, customerName);
 
-      // Enviar email
+      // Send email
       await this.emailProvider.sendEmail({
         to: customerEmail,
         subject: `${NOTIFICATION_CONSTANTS.TEMPLATES.BUDGET_READY} - ${budget.id.substring(0, 8)}`,
         html: EmailTemplates.budgetReady(emailData),
       });
 
-      // Enviar SMS se habilitado e telefone fornecido
+      // Send SMS if enabled and phone number provided.
       if (NOTIFICATION_CONSTANTS.SMS.ENABLED && customerPhone) {
         await this.smsProvider.sendSms({
           phone: customerPhone,
@@ -141,7 +141,7 @@ export class NotificationService {
         }),
       });
 
-      // Enviar SMS se habilitado e telefone fornecido
+      // Send SMS if enabled and phone number provided.
       if (NOTIFICATION_CONSTANTS.SMS.ENABLED && customerPhone) {
         await this.smsProvider.sendSms({
           phone: customerPhone,
