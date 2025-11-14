@@ -27,7 +27,7 @@ import { UpdateServiceDto } from '../dtos/service/update-service.dto';
 import { ServiceService } from '../../2-application/services/service.service';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { PaginationDto, PaginatedResponseDto } from '../../../shared';
+import { PaginationDto } from '../../../shared';
 
 @ApiTags('Services')
 @ApiBearerAuth('JWT-auth')

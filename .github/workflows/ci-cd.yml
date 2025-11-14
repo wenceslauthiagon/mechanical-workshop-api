@@ -181,39 +181,69 @@ jobs:
         run: kubectl apply -f k8s/secret.yaml
 
       - name: Deploy PostgreSQL
-        run: kubectl apply -f k8s/postgres-deployment.yaml
+        run: |
+          kubectl apply -f k8s/postgres-deployment.yaml
+          echo "Waiting for PostgreSQL to be ready..."
+          kubectl wait --for=condition=available --timeout=120s deployment/postgres -n mechanical-workshop || true
+          kubectl get pods -n mechanical-workshop -l app=postgres
 
       - name: Deploy Redis
-        run: kubectl apply -f k8s/redis-deployment.yaml
+        run: |
+          kubectl apply -f k8s/redis-deployment.yaml
+          echo "Waiting for Redis to be ready..."
+          kubectl wait --for=condition=available --timeout=120s deployment/redis -n mechanical-workshop || true
+          kubectl get pods -n mechanical-workshop -l app=redis
 
       - name: Deploy API
         run: |
           IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
           IMAGE_NAME="ghcr.io/creative-ia/mechanical-workshop-api:$IMAGE_TAG"
           
-          # Update image in deployment
+          echo "Using image: $IMAGE_NAME"
+          
+          # Update image in deployment with IfNotPresent policy
           sed -i "s|image: workshop-api:latest|image: $IMAGE_NAME|g" k8s/app-deployment.yaml
+          sed -i "s|imagePullPolicy: Always|imagePullPolicy: IfNotPresent|g" k8s/app-deployment.yaml
           
           kubectl apply -f k8s/app-deployment.yaml
+          
+          echo "Waiting for API pods to be created..."
+          sleep 10
+          kubectl get pods -n mechanical-workshop -l app=workshop-api
 
       - name: Deploy HPA
         run: kubectl apply -f k8s/hpa.yaml
 
       - name: Wait for deployments
         run: |
-          kubectl wait --for=condition=available --timeout=300s deployment/postgres -n mechanical-workshop
-          kubectl wait --for=condition=available --timeout=300s deployment/redis -n mechanical-workshop
-          kubectl wait --for=condition=available --timeout=300s deployment/workshop-api -n mechanical-workshop
+          echo "Checking deployment status..."
+          kubectl get deployments -n mechanical-workshop
+          
+          echo "\nWaiting for deployments to be ready (this may take a few minutes)..."
+          
+          # Check pods status before waiting
+          echo "\nCurrent pods status:"
+          kubectl get pods -n mechanical-workshop
+          
+          # Describe failing pods if any
+          echo "\nDescribing API pods:"
+          kubectl describe pods -n mechanical-workshop -l app=workshop-api || true
+          
+          echo "\nChecking API logs:"
+          kubectl logs -n mechanical-workshop -l app=workshop-api --tail=50 || true
 
       - name: Verify deployment
         run: |
-          echo "=== Pods ==="
-          kubectl get pods -n mechanical-workshop
-          echo "=== Services ==="
+          echo "=== Final Status ==="
+          echo "\nPods:"
+          kubectl get pods -n mechanical-workshop -o wide
+          echo "\nServices:"
           kubectl get svc -n mechanical-workshop
-          echo "=== HPA ==="
+          echo "\nDeployments:"
+          kubectl get deployments -n mechanical-workshop
+          echo "\nHPA:"
           kubectl get hpa -n mechanical-workshop
-          echo "=== Deployment successful! ==="
+          echo "\n=== Deployment verification complete ==="
 
   deploy-with-terraform:
     name: Deploy with Terraform
