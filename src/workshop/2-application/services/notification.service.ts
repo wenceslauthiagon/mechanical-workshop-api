@@ -141,7 +141,6 @@ export class NotificationService {
         }),
       });
 
-      // Send SMS if enabled and phone number provided.
       if (NOTIFICATION_CONSTANTS.SMS.ENABLED && customerPhone) {
         await this.smsProvider.sendSms({
           phone: customerPhone,
