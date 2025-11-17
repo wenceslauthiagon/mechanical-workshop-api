@@ -1,0 +1,417 @@
+{
+  "info": {
+    "name": "Mechanical Workshop API - Phase 2",
+    "description": "Complete API collection for the Mechanical Workshop Management System\n\n**Features:**\n- Authentication (JWT)\n- Customers Management\n- Vehicles Management\n- Service Orders (with priority listing)\n- Budgets Management\n- Email Notifications\n- Statistics & Reporting\n\n**Environment Variables:**\n- `baseUrl`: http://localhost:3000\n- `token`: (auto-set after login)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.access_token);",
+                  "    console.log('✅ Token saved:', response.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@workshop.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with email and password. Returns JWT token."
+          },
+          "response": []
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass@123\",\n  \"role\": \"EMPLOYEE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Get current user profile"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👥 Customers",
+      "item": [
+        {
+          "name": "List Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers?page=0&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "limit", "value": "10"}
+              ]
+            },
+            "description": "Get paginated list of customers"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", ":id"],
+              "variable": [{"key": "id", "value": "uuid-here"}]
+            },
+            "description": "Get customer details by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao@email.com\",\n  \"phone\": \"+55 11 98765-4321\",\n  \"address\": \"Rua Example, 123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"]
+            },
+            "description": "Create a new customer"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+55 11 98888-8888\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", ":id"],
+              "variable": [{"key": "id", "value": "uuid-here"}]
+            },
+            "description": "Update customer data"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Customer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", ":id"],
+              "variable": [{"key": "id", "value": "uuid-here"}]
+            },
+            "description": "Delete a customer"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🚗 Vehicles",
+      "item": [
+        {
+          "name": "List Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles?page=0&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"uuid-here\",\n  \"make\": \"Toyota\",\n  \"model\": \"Corolla\",\n  \"year\": 2023,\n  \"licensePlate\": \"ABC-1234\",\n  \"color\": \"Prata\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📋 Service Orders",
+      "item": [
+        {
+          "name": "List Service Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-orders?page=0&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Service Orders by Priority ⭐",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-orders/priority",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders", "priority"]
+            },
+            "description": "**Phase 2 Feature**: Get service orders sorted by priority:\n1. Em Execução\n2. Aguardando Aprovação\n3. Diagnóstico\n4. Recebida"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Service Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"uuid\",\n  \"vehicleId\": \"uuid\",\n  \"description\": \"Revisão completa dos 10.000km\",\n  \"serviceItems\": [\n    { \"serviceId\": \"uuid\", \"quantity\": 1 },\n    { \"partId\": \"uuid\", \"quantity\": 2 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/service-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "💰 Budgets",
+      "item": [
+        {
+          "name": "Create Budget",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceOrderId\": \"uuid\",\n  \"items\": [...],\n  \"subtotal\": 1500.00,\n  \"taxes\": 150.00,\n  \"total\": 1650.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/budgets",
+              "host": ["{{baseUrl}}"],
+              "path": ["budgets"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Budget",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/budgets/:id/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["budgets", ":id", "approve"],
+              "variable": [{"key": "id", "value": "uuid-here"}]
+            },
+            "description": "Approve a budget"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Budget (Public) 🌐",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/budget/:customerId/:vehicleId",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "budget", ":customerId", ":vehicleId"],
+              "variable": [
+                {"key": "customerId", "value": "uuid-here"},
+                {"key": "vehicleId", "value": "uuid-here"}
+              ]
+            },
+            "description": "**Public API** - No authentication required"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Statistics",
+      "item": [
+        {
+          "name": "Get Service Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Stats by Service",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-stats/by-service",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-stats", "by-service"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "❤️ Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Health check endpoint"
+      },
+      "response": []
+    }
+  ]
+}

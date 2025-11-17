@@ -251,10 +251,6 @@ jobs:
     needs: [build-and-push, deploy-to-kubernetes]
     if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[terraform]')
     
-    env:
-      TF_VAR_database_password: ${{ secrets.DATABASE_PASSWORD || 'workshop123' }}
-      TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET || 'default-jwt-secret-key' }}
-    
     defaults:
       run:
         working-directory: ./infra
@@ -291,8 +287,8 @@ jobs:
           terraform plan \
             -var="kube_context=kind-workshop-terraform" \
             -var="app_image=ghcr.io/creative-ia/mechanical-workshop-api:latest" \
-            -var="database_password=${{ env.TF_VAR_database_password }}" \
-            -var="jwt_secret=${{ env.TF_VAR_jwt_secret }}"
+            -var="database_password=workshop123" \
+            -var="jwt_secret=default-jwt-secret-key"
 
       - name: Terraform Apply
         if: github.event_name == 'push'
@@ -300,8 +296,8 @@ jobs:
           terraform apply -auto-approve \
             -var="kube_context=kind-workshop-terraform" \
             -var="app_image=ghcr.io/creative-ia/mechanical-workshop-api:latest" \
-            -var="database_password=${{ env.TF_VAR_database_password }}" \
-            -var="jwt_secret=${{ env.TF_VAR_jwt_secret }}"
+            -var="database_password=workshop123" \
+            -var="jwt_secret=default-jwt-secret-key"
       
       - name: Verify Terraform Deployment
         run: |

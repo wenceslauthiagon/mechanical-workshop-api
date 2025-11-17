@@ -56,6 +56,7 @@ describe('ServiceOrderController', () => {
       create: jest.fn(),
       findAll: jest.fn(),
       findAllPaginated: jest.fn(),
+      findAllPaginatedWithPriority: jest.fn(),
       findById: jest.fn(),
       findByCustomer: jest.fn(),
       updateStatus: jest.fn(),
@@ -162,6 +163,33 @@ describe('ServiceOrderController', () => {
       );
       expect(result.data).toEqual(mockServiceOrders);
       expect(result.pagination.totalRecords).toBe(1);
+    });
+  });
+
+  describe('findAllWithPriority', () => {
+    it('TC0001 - Should return service orders with priority ordering', async () => {
+      const paginationDto: PaginationDto = { page: 0, size: 10 };
+      const mockServiceOrders = [mockServiceOrder];
+      const mockPaginatedResponse = {
+        data: mockServiceOrders,
+        pagination: {
+          page: 0,
+          size: 10,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      serviceOrderService.findAllPaginatedWithPriority.mockResolvedValue(
+        mockPaginatedResponse,
+      );
+
+      const result = await controller.findAllWithPriority(paginationDto);
+
+      expect(
+        serviceOrderService.findAllPaginatedWithPriority,
+      ).toHaveBeenCalledWith(paginationDto);
+      expect(result).toEqual(mockPaginatedResponse);
+      expect(result.data).toEqual(mockServiceOrders);
     });
   });
 

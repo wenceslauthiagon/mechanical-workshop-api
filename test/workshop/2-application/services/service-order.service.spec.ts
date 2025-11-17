@@ -139,7 +139,9 @@ describe('ServiceOrderService', () => {
         create: jest.fn(),
         findAll: jest.fn(),
         findMany: jest.fn(),
+        findManyWithPriority: jest.fn(),
         count: jest.fn(),
+        countWithPriority: jest.fn(),
         findById: jest.fn(),
         findByCustomerId: jest.fn(),
         findByOrderNumber: jest.fn(),
@@ -215,6 +217,7 @@ describe('ServiceOrderService', () => {
       errorHandler: module.get(ErrorHandlerService),
       notification: module.get(NotificationService),
       mechanic: module.get(MechanicService),
+      email: module.get(EmailService),
       prisma: module.get(PrismaService),
     };
   });
@@ -365,6 +368,46 @@ describe('ServiceOrderService', () => {
       repositories.serviceOrder.count.mockResolvedValue(0);
 
       const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
+      expect(result.pagination.totalPages).toBe(0);
+    });
+  });
+
+  describe('findAllPaginatedWithPriority', () => {
+    it('TC0001 - Should return paginated service orders with priority', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      repositories.serviceOrder.findManyWithPriority.mockResolvedValue([
+        mockServiceOrder,
+      ]);
+      repositories.serviceOrder.countWithPriority.mockResolvedValue(1);
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
+      services.mechanic.findById.mockResolvedValue(mockMechanic);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
+
+      const result = await service.findAllPaginatedWithPriority(paginationDto);
+
+      expect(result.data).toHaveLength(1);
+      expect(result.pagination.totalRecords).toBe(1);
+      expect(result.pagination.page).toBe(0);
+      expect(repositories.serviceOrder.findManyWithPriority).toHaveBeenCalledWith(
+        0,
+        10,
+      );
+      expect(
+        repositories.serviceOrder.countWithPriority,
+      ).toHaveBeenCalled();
+    });
+
+    it('TC0002 - Should return empty paginated result with priority', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      repositories.serviceOrder.findManyWithPriority.mockResolvedValue([]);
+      repositories.serviceOrder.countWithPriority.mockResolvedValue(0);
+
+      const result = await service.findAllPaginatedWithPriority(paginationDto);
 
       expect(result.data).toHaveLength(0);
       expect(result.pagination.totalRecords).toBe(0);
@@ -769,17 +812,24 @@ describe('ServiceOrderService', () => {
         ...mockServiceOrder,
         status: ServiceOrderStatus.EM_DIAGNOSTICO,
       };
+      const customerWithEmail = { ...mockCustomer, email: 'test@example.com' };
+      
       repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
-      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.customer.findById.mockResolvedValue(customerWithEmail);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      services.notification.sendServiceOrderStatusNotification.mockRejectedValue(
-        new Error('Notification failed'),
+      services.notification.sendServiceOrderStatusNotification.mockResolvedValue(
+        undefined,
+      );
+      services.email.sendStatusChangeNotification.mockRejectedValue(
+        new Error('Email failed'),
       );
       jest
         .spyOn(service, 'findById')
         .mockResolvedValue(mockServiceOrder as any);
+
+      const loggerWarnSpy = jest.spyOn(service['logger'], 'warn');
 
       const result = await service.updateStatus(
         mockServiceOrder.id,
@@ -788,6 +838,9 @@ describe('ServiceOrderService', () => {
 
       expect(result).toBeDefined();
       expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to send email notification'),
+      );
     });
 
     it('TC0003 - Should skip notification if customer or vehicle not found', async () => {
@@ -817,6 +870,43 @@ describe('ServiceOrderService', () => {
       expect(
         services.notification.sendServiceOrderStatusNotification,
       ).not.toHaveBeenCalled();
+    });
+
+    it('TC0004 - Should handle push notification error gracefully', async () => {
+      const aguardandoDto = {
+        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        notes: faker.lorem.sentence(),
+      };
+      const orderEmDiagnostico = {
+        ...mockServiceOrder,
+        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+      };
+      const customerWithPhone = { ...mockCustomer, phone: '+5511999999999' };
+
+      repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
+      repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
+      repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
+      repositories.customer.findById.mockResolvedValue(customerWithPhone);
+      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
+      services.notification.sendServiceOrderStatusNotification.mockRejectedValue(
+        new Error('Push notification failed'),
+      );
+      jest
+        .spyOn(service, 'findById')
+        .mockResolvedValue(mockServiceOrder as any);
+
+      const loggerWarnSpy = jest.spyOn(service['logger'], 'warn');
+
+      const result = await service.updateStatus(
+        mockServiceOrder.id,
+        aguardandoDto,
+      );
+
+      expect(result).toBeDefined();
+      expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to send push notification'),
+      );
     });
   });
 
