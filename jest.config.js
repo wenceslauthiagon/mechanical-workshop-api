@@ -1,41 +1,19 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/test'],
-  testMatch: [
-    '<rootDir>/test/**/*.spec.ts',
-    '<rootDir>/test/**/*.test.ts'
-  ],
-  transform: {
-    '^.+\\.(t|js)$': ['ts-jest', {
-      tsconfig: 'tsconfig.json',
-    }],
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  moduleNameMapper: {
+    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+    '^@application/(.*)$': '<rootDir>/src/application/$1',
+    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(@faker-js/faker)/)',
-  ],
   collectCoverageFrom: [
-    'src/**/*.(t|js)',
-    '!src/**/*.spec.ts',
+    'src/**/*.ts',
     '!src/**/*.test.ts',
-    '!src/**/*.d.ts',
-    '!src/main.ts',
+    '!src/**/*.spec.ts',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
-  moduleFileExtensions: ['js', 'json', 'ts'],
-  rootDir: '.',
-  testTimeout: 30000,
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@test/(.*)$': '<rootDir>/test/$1',
-  },
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-      tsconfig: 'tsconfig.json',
-    },
-  },
 };

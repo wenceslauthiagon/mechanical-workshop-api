@@ -1,375 +1,336 @@
-# 🔧 Mechanical Workshop API
+# Pet Management API
 
-[![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-[![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
-[![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://swagger.io/)
-
-Sistema de gestão para oficina mecânica desenvolvido com NestJS, Prisma e PostgreSQL, seguindo os princípios de **Domain-Driven Design (DDD)** e **Clean Architecture**.
-
-## 🚀 Tecnologias
-
-- **Backend**: NestJS 11 + TypeScript
-- **Database**: PostgreSQL com Prisma ORM
-- **Authentication**: JWT com bcryptjs
-- **Documentation**: Swagger/OpenAPI
-- **Architecture**: Clean Architecture (DDD)
-- **Containerization**: Docker & Docker Compose
-
-## 📋 Funcionalidades
-
-### ✅ Gestão de Clientes
-- CRUD completo de clientes
-- Histórico de serviços por cliente
-- API pública para consulta de orçamentos
-
-### ✅ Gestão de Veículos
-- CRUD de veículos
-- Vinculação com clientes
-- Histórico de manutenções
-
-### ✅ Gestão de Peças
-- CRUD de peças/produtos
-- Controle de estoque
-- Preços e fornecedores
-
-### ✅ Gestão de Serviços
-- CRUD de tipos de serviços
-- Preços e descrições
-- Tempo estimado de execução
-
-### ✅ Ordens de Serviço
-- CRUD completo
-- Estados: PENDING, IN_PROGRESS, COMPLETED, CANCELLED
-- Orçamento automático baseado em serviços e peças
-
-### ✅ Autenticação e Autorização
-- Sistema JWT completo
-- Roles: ADMIN, EMPLOYEE
-- Guards para proteção de rotas
-- Decoradores personalizados
-
-### ✅ Monitoramento
-- Estatísticas de desempenho por serviço
-- Tempo de execução e precisão de orçamentos
-- Health checks
+API RESTful para gerenciamento de pets (cães e gatos) construída com **Clean Architecture**, **TypeScript** e princípios **SOLID**.
 
 ## 🏗️ Arquitetura
 
+O projeto segue os princípios da **Clean Architecture** com separação clara de responsabilidades:
+
 ```
 src/
-├── 📁 workshop/
-│   ├── 📁 1-presentation/     # Controllers e APIs REST
-│   │   └── controllers/       # Endpoints HTTP
-│   ├── 📁 2-application/      # Services e lógica de aplicação
-│   │   └── services/          # Casos de uso
-│   ├── 📁 3-domain/           # Entidades e regras de negócio
-│   │   └── entities/          # Entidades do domínio
-│   └── 📁 4-infrastructure/   # Repositórios e integrações
-│       └── repositories/      # Implementação Prisma
-├── 📁 auth/                   # Módulo de autenticação
-│   ├── controllers/           # Auth controller
-│   ├── services/              # Auth e User services
-│   ├── guards/                # JWT guards e roles
-│   └── decorators/            # Decoradores customizados
-├── 📁 public/                 # API pública (sem auth)
-└── 📁 shared/                 # Código compartilhado
-    └── enums/                 # Enumerações
+├── domain/              # Camada de Domínio
+│   ├── entities/        # Entidades do negócio
+│   └── repositories/    # Interfaces dos repositórios (Port Out)
+├── application/         # Camada de Aplicação
+│   └── use-cases/       # Casos de uso (Port In)
+├── infrastructure/      # Camada de Infraestrutura
+│   ├── api/            # Controllers, Routes, DTOs (Adapters)
+│   └── database/       # Implementação dos repositórios (Adapters)
+└── shared/             # Código compartilhado
+    ├── constants/      # Constantes e enums
+    ├── errors/         # Exceções customizadas
+    └── services/       # Serviços compartilhados (ex: ErrorHandler)
 ```
 
-## � ANTES DE COMEÇAR (OBRIGATÓRIO)
+### Princípios Aplicados
 
-**⚠️ ATENÇÃO: Sem estes passos, a aplicação NÃO irá funcionar!**
+- ✅ **Clean Code**: Código limpo, legível e bem organizado
+- ✅ **Clean Architecture**: Separação de camadas e dependências
+- ✅ **SOLID**: Todos os 5 princípios aplicados
+- ✅ **Ports & Adapters**: Inversão de dependências
+- ✅ **TypeScript strict mode**: Sem uso de `any`
+- ✅ **Dependency Injection**: Injeção de dependências manual
+- ✅ **Error Handling Service**: Tratamento centralizado de erros
+- ✅ **Constants**: Sem valores hardcoded, uso de constantes
 
-### 1. **Configure o arquivo .env (CRÍTICO)**
-```bash
-# Copie o arquivo de exemplo
-cp .env.example .env
+## 🚀 Tecnologias
 
-# Edite o .env com os valores corretos:
-nano .env  # ou use seu editor preferido
-```
+- **Node.js** + **TypeScript**
+- **Express** - Framework web
+- **Prisma ORM** - ORM para PostgreSQL
+- **PostgreSQL** - Banco de dados
+- **Zod** - Validação de schemas
+- **Jest** - Testes unitários
 
-**⚠️ IMPORTANTE:** Configure as variáveis obrigatórias:
-- `DATABASE_URL` - URL de conexão do PostgreSQL
-- `JWT_SECRET` - Chave JWT (mínimo 32 caracteres)
-- `ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` - Dados do usuário admin
+## 📋 Funcionalidades
 
-**Veja o arquivo `.env.example` para referência dos valores necessários.**
+### Gerenciamento de Pets
+- Cadastro de pets (cães e gatos)
+- Atualização de informações
+- Listagem por proprietário
+- Exclusão de pets
 
-### 2. **Verifique os pré-requisitos**
-- ✅ Docker Desktop instalado e rodando
-- ✅ Docker Compose disponível
-- ✅ Porta 3000 livre (ou mude no docker-compose.yml)
-- ✅ Porta 5433 livre (PostgreSQL)
+### Controle de Vacinas
+- Registro de vacinas aplicadas
+- Agendamento de próximas doses
+- Histórico completo de vacinação
+- Alertas de vacinas atrasadas
 
-## 🐳 Quick Start com Docker (Recomendado)
+### Gestão de Medicações
+- Registro de medicações
+- Controle de dosagem e frequência
+- Medicações ativas
+- Histórico de tratamentos
 
-### Setup Passo a Passo
+### Consultas Veterinárias
+- Registro de visitas ao veterinário
+- Histórico médico completo
+- Diagnósticos e tratamentos
+- Resultados de exames
+
+## 🔧 Instalação
+
+### Pré-requisitos
+
+- Node.js 18+ 
+- PostgreSQL 14+
+- npm ou yarn
+
+### Passos
 
 1. **Clone o repositório**
 ```bash
-git clone https://github.com/wenceslauthiagon/mechanical-workshop-api.git
-cd mechanical-workshop-api
-```
-
-2. **Configure o .env (OBRIGATÓRIO!)**
-```bash
-cp .env.example .env
-# Edite o .env com os valores acima
-```
-
-3. **Inicie o ambiente (primeira vez)**
-```bash
-# Opção 1: Com Make (recomendado)
-make setup
-
-# Opção 2: Manualmente
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-4. **Aguarde e verifique os logs**
-```bash
-# Ver se tudo iniciou corretamente
-docker-compose logs -f
-
-# Pressione Ctrl+C para sair dos logs
-```
-
-5. **Verifique se está funcionando**
-```bash
-# Teste a API
-curl http://localhost:3000/health
-
-# Ou abra no navegador:
-# http://localhost:3000/health
-# http://localhost:3000/api (Swagger)
-```
-
-### ✅ **Como saber se funcionou?**
-
-Você deve ver estas mensagens nos logs:
-```
-✅ Banco de dados conectado!
-✅ Nest.js application successfully started
-✅ Mechanical Workshop API rodando em http://localhost:3000
-```
-
-E ao acessar `http://localhost:3000/health` deve retornar:
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-10-11T12:00:00.000Z",
-  "uptime": 3600,
-  "service": "Mechanical Workshop API",
-  "version": "1.0.0",
-  "environment": "development"
-}
-```
-
-### Comandos Docker Úteis
-
-```bash
-# Ver ajuda completa
-make help
-
-# Iniciar serviços
-make up
-
-# Ver logs
-make logs
-
-# Parar serviços  
-make down
-
-# Reiniciar
-make restart
-
-# Executar testes
-make test
-
-# Acessar shell da aplicação
-make shell-app
-
-# Backup do banco
-make backup-db
-```
-
-### 🗄️ **Comandos do Banco (Prisma)**
-
-```bash
-# Gerar cliente Prisma
-npm run db:generate
-
-# Aplicar migrations (desenvolvimento)
-npm run db:migrate
-
-# Aplicar migrations (produção)
-npm run db:migrate:deploy
-
-# Resetar banco (⚠️ APAGA DADOS!)
-npm run db:migrate:reset
-
-# Sincronizar schema (desenvolvimento)
-npm run db:push
-
-# Abrir Prisma Studio (interface gráfica)
-npm run db:studio
-```
-
-**Com Docker:**
-```bash
-# Aplicar migrations
-docker-compose exec app npx prisma migrate deploy
-
-# Abrir Prisma Studio
-docker-compose exec app npx prisma studio
-# Acesse: http://localhost:5555
-```
-
-## 🛠️ Instalação Local (Desenvolvimento)
-
-### Pré-requisitos
-- Node.js 18+
-- PostgreSQL 13+
-- npm ou yarn
-
-### Setup Local
-
-1. **Clone e instale dependências**
-```bash
 git clone <repository-url>
-cd mechanical-workshop-api
+cd pet-management-api
+```
+
+2. **Instale as dependências**
+```bash
 npm install
 ```
 
-2. **Configure ambiente**
-```bash
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
+3. **Configure as variáveis de ambiente**
+
+Crie um arquivo `.env` na raiz do projeto:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/pet_management?schema=public"
+PORT=3000
+NODE_ENV=development
 ```
 
-3. **Setup do banco**
+4. **Execute as migrations do banco**
 ```bash
-npx prisma migrate dev
-npx prisma generate
-npm run create-admin
+npm run prisma:migrate
 ```
 
-4. **Inicie a aplicação**
+5. **Gere o Prisma Client**
 ```bash
-npm run start:dev
+npm run prisma:generate
+```
+
+6. **Inicie o servidor**
+```bash
+npm run dev
+```
+
+O servidor estará disponível em `http://localhost:3000`
+
+## 📚 API Endpoints
+
+### Owners (Proprietários)
+
+```http
+POST   /api/owners           # Criar proprietário
+GET    /api/owners/:id       # Buscar por ID
+```
+
+### Pets
+
+```http
+POST   /api/pets                  # Cadastrar pet
+GET    /api/pets/:id              # Buscar por ID
+GET    /api/pets/owner/:ownerId  # Listar pets do proprietário
+PUT    /api/pets/:id              # Atualizar pet
+DELETE /api/pets/:id              # Deletar pet
+```
+
+### Vacinas
+
+```http
+POST   /api/vaccines              # Registrar vacina
+GET    /api/vaccines/pet/:petId   # Listar vacinas do pet
+PUT    /api/vaccines/:id          # Atualizar vacina
+```
+
+### Medicações
+
+```http
+POST   /api/medications                   # Agendar medicação
+GET    /api/medications/pet/:petId        # Listar medicações do pet
+GET    /api/medications/pet/:petId/active # Listar medicações ativas
+```
+
+### Consultas Veterinárias
+
+```http
+POST   /api/veterinary-visits              # Registrar consulta
+GET    /api/veterinary-visits/pet/:petId   # Listar consultas do pet
+```
+
+## 📝 Exemplos de Request
+
+### Criar Proprietário
+
+```json
+POST /api/owners
+{
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "phone": "+5511999999999",
+  "address": "Rua Exemplo, 123"
+}
+```
+
+### Cadastrar Pet
+
+```json
+POST /api/pets
+{
+  "name": "Rex",
+  "type": "DOG",
+  "breed": "Golden Retriever",
+  "gender": "MALE",
+  "birthDate": "2020-05-15T00:00:00.000Z",
+  "weight": 25.5,
+  "color": "Dourado",
+  "microchipNumber": "123456789",
+  "ownerId": "uuid-do-proprietario"
+}
+```
+
+### Registrar Vacina
+
+```json
+POST /api/vaccines
+{
+  "petId": "uuid-do-pet",
+  "name": "V10",
+  "description": "Vacina polivalente",
+  "scheduledDate": "2024-01-15T10:00:00.000Z",
+  "applicationDate": "2024-01-15T10:30:00.000Z",
+  "nextDoseDate": "2024-02-15T10:00:00.000Z",
+  "veterinarianName": "Dr. Carlos",
+  "clinicName": "Clínica VetLife",
+  "status": "APPLIED"
+}
+```
+
+### Agendar Medicação
+
+```json
+POST /api/medications
+{
+  "petId": "uuid-do-pet",
+  "name": "Antibiótico X",
+  "type": "comprimido",
+  "dosage": "500mg",
+  "frequency": "TWICE_DAILY",
+  "startDate": "2024-01-10T00:00:00.000Z",
+  "endDate": "2024-01-20T00:00:00.000Z",
+  "prescribedBy": "Dr. Carlos",
+  "reason": "Infecção bacteriana",
+  "instructions": "Administrar com alimento",
+  "status": "ACTIVE"
+}
 ```
 
 ## 🧪 Testes
 
 ```bash
-# Local
-npm run test
-npm run test:cov
-npm run test:e2e
+# Executar todos os testes
+npm test
 
-# Docker
-make test
-make test-cov
+# Executar com watch mode
+npm run test:watch
+
+# Coverage
+npm run test -- --coverage
 ```
 
-## 📚 API Documentation
+## 📦 Scripts Disponíveis
 
-### URLs Importantes
-- **API**: http://localhost:3000
-- **Swagger**: http://localhost:3000/api
-- **Health Check**: http://localhost:3000/health
-
-### Endpoints Principais
-
-#### Autenticação
-- `POST /auth/login` - Login do usuário
-- `POST /auth/register` - Registro (apenas admins)
-
-#### Clientes
-- `GET /customers` - Listar clientes
-- `POST /customers` - Criar cliente
-- `GET /customers/:id` - Buscar cliente
-- `PUT /customers/:id` - Atualizar cliente
-- `DELETE /customers/:id` - Remover cliente
-
-#### API Pública
-- `GET /public/budget/:customerId/:vehicleId` - Consultar orçamento
-
-#### Estatísticas (Protegido)
-- `GET /service-stats` - Estatísticas gerais
-- `GET /service-stats/by-service` - Por tipo de serviço
-
-## 🗄️ Estrutura do Banco
-
-### Principais Entidades
-- **User**: Usuários do sistema (admin/funcionários)
-- **Customer**: Clientes da oficina
-- **Vehicle**: Veículos dos clientes
-- **Part**: Peças e produtos
-- **Service**: Tipos de serviços oferecidos
-- **ServiceOrder**: Ordens de serviço
-- **ServiceOrderItem**: Itens das ordens (serviços/peças)
-
-## 🔒 Segurança
-
-- Autenticação JWT com refresh tokens
-- Senhas hasheadas com bcryptjs
-- Roles e permissões granulares
-- Validação de entrada com class-validator
-- Rate limiting (configurável)
-- Docker multi-stage builds com usuário não-root
-
-## 🚀 Deploy
-
-### Docker em Produção
-
-1. **Configurar variáveis**
 ```bash
-# Editar .env.docker com valores de produção
-nano .env.docker
+npm run dev           # Desenvolvimento com hot reload
+npm run build         # Build para produção
+npm start            # Iniciar servidor de produção
+npm test             # Executar testes
+npm run lint         # Verificar código
+npm run format       # Formatar código
+npm run prisma:migrate    # Executar migrations
+npm run prisma:generate   # Gerar Prisma Client
+npm run prisma:studio     # Abrir Prisma Studio
 ```
 
-2. **Deploy**
-```bash
-make prod
+## 🗄️ Modelo de Dados
+
+### Entidades Principais
+
+- **Owner**: Proprietário do pet
+- **Pet**: Informações do animal
+- **Vaccine**: Registro de vacinas
+- **Medication**: Controle de medicamentos
+- **MedicationDose**: Doses administradas
+- **VeterinaryVisit**: Consultas veterinárias
+
+### Relacionamentos
+
+- Um Owner pode ter vários Pets
+- Um Pet pode ter várias Vaccines, Medications e VeterinaryVisits
+- Uma Medication pode ter várias MedicationDoses
+
+## 🎯 Próximos Passos
+
+Para integração com app Android:
+
+1. **Autenticação**: Implementar JWT/OAuth
+2. **Websockets**: Notificações em tempo real
+3. **Upload de imagens**: Fotos dos pets
+4. **Agendamentos**: Sistema de lembretes push
+5. **Relatórios**: Gráficos e estatísticas
+6. **Exportação**: PDF dos históricos médicos
+
+## Phase 2 (Tech Challenge) Deliverables
+
+- Dockerfile: docker/Dockerfile
+- docker-compose: docker/docker-compose.yml
+- Kubernetes manifests: k8s/*.yaml
+- Terraform scaffold: infra/*.tf
+- CI/CD workflow: .github/workflows/ci-cd.yml
+- Unit test example: src/__tests__/health.test.ts
+
+Follow the repository structure and update secrets and image references before deploying to a cloud provider.
+
+## 🏗️ Padrões de Código
+
+### Error Handling
+
+O projeto utiliza um serviço centralizado de tratamento de erros (`ErrorHandlerService`) que:
+
+- Normaliza todos os erros para um formato consistente
+- Trata erros específicos do Prisma (constraint violations, not found, etc)
+- Usa constantes para mensagens de erro (sem hardcoded strings)
+- Mapeia erros de domínio para status HTTP apropriados
+- Registra logs estruturados
+
+Exemplo de uso:
+```typescript
+const errorHandlerService = new ErrorHandlerService();
+const errorDetails = errorHandlerService.handleError(error);
+// { message, statusCode, timestamp, error }
 ```
 
-### Variáveis de Ambiente
+### Constants
 
-#### Desenvolvimento (.env)
-```env
-NODE_ENV=development
-PORT=3000
-DATABASE_URL="postgresql://postgres:postgres@localhost:5433/mechanical_workshop?schema=public"
-JWT_SECRET=your-dev-secret
-JWT_EXPIRES_IN=7d
-```
+Todas as mensagens e valores fixos estão em arquivos de constantes:
 
-#### Produção (.env.docker)
-```env
-NODE_ENV=production
-PORT=3000
-DATABASE_URL="postgresql://postgres:postgres@postgres:5432/mechanical_workshop?schema=public"
-JWT_SECRET=your-super-secret-production-key
-JWT_EXPIRES_IN=7d
-```
+- `ERROR_MESSAGES`: Mensagens de erro
+- `SUCCESS_MESSAGES`: Mensagens de sucesso
+- `HTTP_STATUS`: Códigos HTTP
 
-##  Monitoramento
+Isso facilita:
+- Manutenção e alterações
+- Internacionalização (i18n) futura
+- Consistência das mensagens
+- Testes mais robustos
 
-### Health Checks
-- **API**: `GET /health`
-- **Database**: Verificação automática no container
+## 🤝 Contribuindo
 
-### Métricas Disponíveis
-- Estatísticas de execução de serviços
-- Precisão de orçamentos
-- Tempo médio de atendimento
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests.
 
-## 📝 Licença
+## 📄 Licença
 
-Este projeto está sob a licença MIT.
+MIT
+
+---
+
+Desenvolvido com ❤️ seguindo as melhores práticas de Clean Code e Clean Architecture

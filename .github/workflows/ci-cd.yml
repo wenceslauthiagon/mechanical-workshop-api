@@ -1,0 +1,32 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test --silent
+      - name: Build
+        run: npm run build
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          push: false
+          tags: ghcr.io/${{ github.repository }}:latest
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v3
+        with:
+          manifests: 'k8s/*.yaml'

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pet-management-app
+  namespace: pet-management
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pet-management
+  template:
+    metadata:
+      labels:
+        app: pet-management
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/your-org/pet-management:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: pet-management-config
+            - secretRef:
+                name: pet-management-secrets
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
