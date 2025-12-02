@@ -76,6 +76,11 @@ const mockData = {
   },
 };
 
+// Test admin credentials (generated to avoid hardcoded secrets in PR)
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = faker.internet.password();
+const ADMIN_EMAIL = faker.internet.email().toLowerCase();
+
 describe('Service Order Integration Tests', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
@@ -112,11 +117,11 @@ describe('Service Order Integration Tests', () => {
     await prisma.user.deleteMany();
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
 
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
     await prisma.user.create({
       data: {
-        username: 'admin',
-        email: 'admin@test.com',
+        username: ADMIN_USERNAME,
+        email: ADMIN_EMAIL,
         passwordHash: hashedPassword,
         role: UserRole.ADMIN,
       },
@@ -124,7 +129,7 @@ describe('Service Order Integration Tests', () => {
 
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ username: 'admin', password: 'admin123' });
+      .send({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD });
 
     authToken = loginResponse.body.access_token;
 
