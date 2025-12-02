@@ -5,6 +5,7 @@ export interface CreateOwnerData {
   email: string;
   phone: string;
   address?: string;
+  password?: string;
 }
 
 export interface UpdateOwnerData {
@@ -12,6 +13,7 @@ export interface UpdateOwnerData {
   email?: string;
   phone?: string;
   address?: string;
+  password?: string;
 }
 
 export interface IOwnerRepository {

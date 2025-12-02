@@ -83,15 +83,13 @@ export class ErrorHandlerService {
     const message = this.extractErrorMessage(error);
     const statusCode = this.extractStatusCode(error);
 
-    logger.error('Error Handler', `[${statusCode}] ${message}`, 'ErrorHandler', {
-      stack: error?.stack,
-    });
+    logger.error(`[${statusCode}] ${message}`, error?.stack, 'ErrorHandler');
 
     this.throwAppropriateException(message, statusCode);
   }
 
   generateException(message: string, statusCode: number): never {
-    logger.error('Exception Generated', `[${statusCode}] ${message}`, 'ErrorHandler');
+    logger.error(`[${statusCode}] ${message}`, undefined, 'ErrorHandler');
     this.throwAppropriateException(message, statusCode);
   }
 

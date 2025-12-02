@@ -31,7 +31,7 @@ export class ServiceOrderController {
     res.json(updated);
   }
 
-  async list(req: Request, res: Response) {
+  async list(_req: Request, res: Response) {
     const data = await this.listUseCase.execute();
     res.json(data);
   }

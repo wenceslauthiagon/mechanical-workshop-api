@@ -15,6 +15,8 @@ export class PrismaServiceOrderRepository implements IServiceOrderRepository {
       const so: ServiceOrder = {
         id,
         ...payload,
+        status: (payload as any).status ?? 'RECEBIDA',
+        isDeleted: (payload as any).isDeleted ?? false,
         createdAt: now,
         updatedAt: now,
       } as unknown as ServiceOrder;
@@ -22,7 +24,14 @@ export class PrismaServiceOrderRepository implements IServiceOrderRepository {
       return so;
     }
 
-    const created = await prisma.serviceOrder.create({ data: payload as any });
+    // Ensure defaults are applied after payload spread to avoid undefined overwrites
+    const dataToCreate = {
+      ...payload,
+      status: (payload as any).status ?? 'RECEBIDA',
+      isDeleted: (payload as any).isDeleted ?? false,
+    };
+
+    const created = await (prisma as any).serviceOrder.create({ data: dataToCreate as any });
     return created as unknown as ServiceOrder;
   }
 
@@ -30,7 +39,7 @@ export class PrismaServiceOrderRepository implements IServiceOrderRepository {
     if (isTest) {
       return inMemory[id] ?? null;
     }
-    const so = await prisma.serviceOrder.findUnique({ where: { id } });
+    const so = await (prisma as any).serviceOrder.findUnique({ where: { id } });
     return so as unknown as ServiceOrder | null;
   }
 
@@ -42,7 +51,7 @@ export class PrismaServiceOrderRepository implements IServiceOrderRepository {
       so.updatedAt = new Date();
       return so;
     }
-    const updated = await prisma.serviceOrder.update({ where: { id }, data: { status } });
+    const updated = await (prisma as any).serviceOrder.update({ where: { id }, data: { status } });
     return updated as unknown as ServiceOrder;
   }
 
@@ -55,7 +64,7 @@ export class PrismaServiceOrderRepository implements IServiceOrderRepository {
       so.updatedAt = new Date();
       return so;
     }
-    const updated = await prisma.serviceOrder.update({ where: { id }, data: { status } });
+    const updated = await (prisma as any).serviceOrder.update({ where: { id }, data: { status } });
     return updated as unknown as ServiceOrder;
   }
 
@@ -72,7 +81,7 @@ export class PrismaServiceOrderRepository implements IServiceOrderRepository {
       where.isDeleted = false;
       where.status = { notIn: ['FINALIZADA', 'ENTREGUE'] };
     }
-    const results = await prisma.serviceOrder.findMany({ where, orderBy: [{ status: 'asc' }, { createdAt: 'asc' }] });
+    const results = await (prisma as any).serviceOrder.findMany({ where, orderBy: [{ status: 'asc' }, { createdAt: 'asc' }] });
     return results as unknown as ServiceOrder[];
   }
 }

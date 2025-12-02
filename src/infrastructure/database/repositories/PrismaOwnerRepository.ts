@@ -12,6 +12,7 @@ export class PrismaOwnerRepository implements IOwnerRepository {
         email: data.email,
         phone: data.phone,
         address: data.address,
+        password: data.password ?? Math.random().toString(36).slice(2, 10),
       },
     });
 
@@ -42,6 +43,7 @@ export class PrismaOwnerRepository implements IOwnerRepository {
         email: data.email,
         phone: data.phone,
         address: data.address,
+        ...(data.password ? { password: data.password } : {}),
       },
     });
 
