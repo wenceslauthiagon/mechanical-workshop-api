@@ -73,5 +73,6 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
+    '^@prisma/client$': '<rootDir>/src/mocks/prisma-shim.ts',
   },
 };
