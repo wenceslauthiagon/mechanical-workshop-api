@@ -1,6 +1,9 @@
 import { ValidationArguments } from 'class-validator';
+import { faker } from '@faker-js/faker/locale/pt_BR';
 
 import { PasswordMatchValidator } from '../../../src/auth/validators/password-match.validator';
+
+const TEST_PASSWORD = faker.internet.password();
 
 describe('PasswordMatchValidator', () => {
   let validator: PasswordMatchValidator;
@@ -22,38 +25,38 @@ describe('PasswordMatchValidator', () => {
   describe('validate', () => {
     it('TC0001 - Should return true when passwords match', () => {
       const mockObject = {
-        password: 'password123',
-        confirmPassword: 'password123',
+        password: TEST_PASSWORD,
+        confirmPassword: TEST_PASSWORD,
       };
 
       const mockArgs: ValidationArguments = {
         object: mockObject,
         property: 'confirmPassword',
-        value: 'password123',
+        value: TEST_PASSWORD,
         constraints: [],
         targetName: 'TestClass',
       };
 
-      const result = validator.validate('password123', mockArgs);
+      const result = validator.validate(TEST_PASSWORD, mockArgs);
 
       expect(result).toBe(true);
     });
 
     it('TC0002 - Should return false when passwords do not match', () => {
       const mockObject = {
-        password: 'password123',
-        confirmPassword: 'differentPassword',
+        password: TEST_PASSWORD,
+        confirmPassword: `${TEST_PASSWORD}_diff`,
       };
 
       const mockArgs: ValidationArguments = {
         object: mockObject,
         property: 'confirmPassword',
-        value: 'differentPassword',
+        value: `${TEST_PASSWORD}_diff`,
         constraints: [],
         targetName: 'TestClass',
       };
 
-      const result = validator.validate('differentPassword', mockArgs);
+      const result = validator.validate(`${TEST_PASSWORD}_diff`, mockArgs);
 
       expect(result).toBe(false);
     });
@@ -61,18 +64,18 @@ describe('PasswordMatchValidator', () => {
     it('TC0003 - Should return false when password is undefined', () => {
       const mockObject = {
         password: undefined,
-        confirmPassword: 'password123',
+        confirmPassword: TEST_PASSWORD,
       };
 
       const mockArgs: ValidationArguments = {
         object: mockObject,
         property: 'confirmPassword',
-        value: 'password123',
+        value: TEST_PASSWORD,
         constraints: [],
         targetName: 'TestClass',
       };
 
-      const result = validator.validate('password123', mockArgs);
+      const result = validator.validate(TEST_PASSWORD, mockArgs);
 
       expect(result).toBe(false);
     });
