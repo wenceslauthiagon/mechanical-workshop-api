@@ -1,0 +1,180 @@
+import swaggerJsdoc from 'swagger-jsdoc';
+import { version } from '../../../../package.json';
+
+const options: swaggerJsdoc.Options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Pet Management API',
+      version: version,
+      description: 'API completa para gerenciamento de pets, incluindo vacinas, medicações, consultas veterinárias, lembretes e histórico de peso',
+      contact: {
+        name: 'API Support',
+      },
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+        description: 'Development server',
+      },
+    ],
+    components: {
+      schemas: {
+        Owner: {
+          type: 'object',
+          required: ['name', 'email'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            name: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            phone: { type: 'string', nullable: true },
+            address: { type: 'string', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Pet: {
+          type: 'object',
+          required: ['name', 'species', 'breed', 'birthDate', 'ownerId'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            name: { type: 'string' },
+            species: { type: 'string' },
+            breed: { type: 'string' },
+            birthDate: { type: 'string', format: 'date' },
+            gender: { type: 'string', enum: ['MALE', 'FEMALE'], nullable: true },
+            color: { type: 'string', nullable: true },
+            weight: { type: 'number', format: 'float', nullable: true },
+            microchipNumber: { type: 'string', nullable: true },
+            specialNeeds: { type: 'string', nullable: true },
+            ownerId: { type: 'string', format: 'uuid' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Vaccine: {
+          type: 'object',
+          required: ['name', 'applicationDate', 'veterinarianName', 'petId'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            name: { type: 'string' },
+            applicationDate: { type: 'string', format: 'date' },
+            nextDoseDate: { type: 'string', format: 'date', nullable: true },
+            veterinarianName: { type: 'string' },
+            clinic: { type: 'string', nullable: true },
+            batch: { type: 'string', nullable: true },
+            notes: { type: 'string', nullable: true },
+            petId: { type: 'string', format: 'uuid' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Medication: {
+          type: 'object',
+          required: ['name', 'type', 'dosage', 'frequency', 'startDate', 'endDate', 'veterinarianName', 'petId'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            name: { type: 'string' },
+            type: { type: 'string', enum: ['ANTIBIOTIC', 'ANTI_INFLAMMATORY', 'ANALGESIC', 'ANTIPARASITIC', 'VITAMIN', 'FLEA_TICK_CONTROL', 'DEWORMER', 'OTHER'] },
+            dosage: { type: 'string' },
+            frequency: { type: 'string' },
+            startDate: { type: 'string', format: 'date' },
+            endDate: { type: 'string', format: 'date' },
+            veterinarianName: { type: 'string' },
+            notes: { type: 'string', nullable: true },
+            petId: { type: 'string', format: 'uuid' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        VeterinaryVisit: {
+          type: 'object',
+          required: ['visitDate', 'reason', 'veterinarianName', 'petId'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            visitDate: { type: 'string', format: 'date-time' },
+            reason: { type: 'string' },
+            diagnosis: { type: 'string', nullable: true },
+            treatment: { type: 'string', nullable: true },
+            veterinarianName: { type: 'string' },
+            clinic: { type: 'string', nullable: true },
+            cost: { type: 'number', format: 'float', nullable: true },
+            notes: { type: 'string', nullable: true },
+            petId: { type: 'string', format: 'uuid' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Reminder: {
+          type: 'object',
+          required: ['title', 'dueDate', 'type', 'status', 'petId'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            title: { type: 'string' },
+            description: { type: 'string', nullable: true },
+            dueDate: { type: 'string', format: 'date-time' },
+            type: { 
+              type: 'string', 
+              enum: ['VACCINE', 'MEDICATION', 'VETERINARY_VISIT', 'DEWORMING', 'FLEA_TICK_TREATMENT', 'WEIGHT_CHECK', 'GROOMING', 'WALK', 'EXERCISE', 'OTHER'] 
+            },
+            status: { type: 'string', enum: ['PENDING', 'SENT', 'COMPLETED', 'CANCELLED'] },
+            relatedEntityId: { type: 'string', format: 'uuid', nullable: true },
+            petId: { type: 'string', format: 'uuid' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        WeightHistory: {
+          type: 'object',
+          required: ['weight', 'measurementDate', 'petId'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            weight: { type: 'number', format: 'float' },
+            measurementDate: { type: 'string', format: 'date' },
+            notes: { type: 'string', nullable: true },
+            petId: { type: 'string', format: 'uuid' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Allergy: {
+          type: 'object',
+          required: ['allergen', 'severity', 'petId'],
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            allergen: { type: 'string' },
+            severity: { type: 'string', enum: ['MILD', 'MODERATE', 'SEVERE'] },
+            symptoms: { type: 'string', nullable: true },
+            diagnosedDate: { type: 'string', format: 'date', nullable: true },
+            notes: { type: 'string', nullable: true },
+            petId: { type: 'string', format: 'uuid' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Error: {
+          type: 'object',
+          properties: {
+            message: { type: 'string' },
+            error: { type: 'string' },
+          },
+        },
+      },
+    },
+    tags: [
+      { name: 'Auth', description: 'Autenticação e registro de usuários' },
+      { name: 'Owners', description: 'Gerenciamento de donos de pets' },
+      { name: 'Pets', description: 'Gerenciamento de pets' },
+      { name: 'Vaccines', description: 'Gerenciamento de vacinas' },
+      { name: 'Medications', description: 'Gerenciamento de medicações' },
+      { name: 'Veterinary Visits', description: 'Gerenciamento de consultas veterinárias' },
+      { name: 'Reminders', description: 'Gerenciamento de lembretes e alertas' },
+      { name: 'Weight History', description: 'Histórico de peso dos pets' },
+      { name: 'Allergies', description: 'Gerenciamento de alergias' },
+      { name: 'Health', description: 'Health check e status da API' },
+    ],
+  },
+  apis: ['./src/infrastructure/api/server.ts', './src/infrastructure/api/routes/*.ts'],
+};
+
+export const swaggerSpec = swaggerJsdoc(options);

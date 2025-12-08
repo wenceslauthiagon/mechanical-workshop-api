@@ -1,6 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+<<<<<<< HEAD
   roots: ['<rootDir>/src', '<rootDir>/test'],
   testMatch: [
     '<rootDir>/test/**/*.spec.ts',
@@ -11,11 +12,18 @@ module.exports = {
       tsconfig: 'tsconfig.json',
       useESM: false,
     }],
+=======
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  moduleNameMapper: {
+    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+    '^@application/(.*)$': '<rootDir>/src/application/$1',
+    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+>>>>>>> origin/develop
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(@faker-js/faker)/)',
-  ],
   collectCoverageFrom: [
+<<<<<<< HEAD
     'src/**/*.{ts,js}',
     '!src/**/*.spec.ts',
     '!src/**/*.test.ts',
@@ -76,3 +84,12 @@ module.exports = {
     '^@prisma/client$': '<rootDir>/src/mocks/prisma-shim.ts',
   },
 };
+=======
+    'src/**/*.ts',
+    '!src/**/*.test.ts',
+    '!src/**/*.spec.ts',
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html'],
+};
+>>>>>>> origin/develop

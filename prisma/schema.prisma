@@ -1,11 +1,17 @@
+<<<<<<< HEAD
 // Mechanical Workshop Management System - Database Schema (SQLite version for testing)
 // Complete system for managing clients, vehicles, services, parts and service orders
+=======
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+>>>>>>> origin/develop
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
+<<<<<<< HEAD
   provider = "sqlite" 
   url      = env("DATABASE_URL")
 }
@@ -44,44 +50,66 @@ model Customer {
   id        String      @id @default(uuid())
   document  String      @unique // CPF or CNPJ
   type      CustomerType
-  name      String
-  email     String      @unique
-  phone     String
-  address   String
-  additionalInfo String? @map("additional_info")
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
+=======
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
 
+model Owner {
+  id        String   @id @default(uuid())
+>>>>>>> origin/develop
+  name      String
+  email     String   @unique
+  password  String
+  phone     String
+  address   String?
+  pets      Pet[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+<<<<<<< HEAD
   // Relations
   vehicles      Vehicle[]
   serviceOrders ServiceOrder[]
   budgets       Budget[]
 
   @@map("customers")
+=======
+  @@map("owners")
+>>>>>>> origin/develop
 }
 
-model Vehicle {
-  id           String   @id @default(uuid())
-  licensePlate String   @unique @map("license_plate")
-  customerId   String   @map("customer_id")
-  brand        String
-  model        String
-  year         Int
-  color        String
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+model Pet {
+  id              String             @id @default(uuid())
+  name            String
+  type            PetType
+  breed           String
+  gender          PetGender
+  birthDate       DateTime
+  weight          Float
+  color           String
+  microchipNumber String?
+  ownerId         String
+  owner           Owner              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  vaccines        Vaccine[]
+  medications     Medication[]
+  visits          VeterinaryVisit[]
+  reminders       Reminder[]
+  weightHistory   WeightHistory[]
+  allergies       Allergy[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
-  // Relations
-  customer      Customer       @relation(fields: [customerId], references: [id])
-  serviceOrders ServiceOrder[]
-
-  @@map("vehicles")
+  @@map("pets")
 }
 
-model Service {
-  id               String  @id @default(uuid())
+model Vaccine {
+  id               String        @id @default(uuid())
+  petId            String
+  pet              Pet           @relation(fields: [petId], references: [id], onDelete: Cascade)
   name             String
   description      String?
+<<<<<<< HEAD
   price            Decimal
   estimatedMinutes Int     @map("estimated_minutes")
   category         String
@@ -112,11 +140,232 @@ model Part {
   // Relations
   serviceOrderParts ServiceOrderPart[]
   budgetItems       BudgetItem[]
+=======
+  applicationDate  DateTime?
+  scheduledDate    DateTime
+  nextDoseDate     DateTime?
+  veterinarianName String?
+  clinicName       String?
+  batchNumber      String?
+  status           VaccineStatus
+  observations     String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
-  @@map("parts")
+  @@map("vaccines")
+}
+
+model Medication {
+  id           String              @id @default(uuid())
+  petId        String
+  pet          Pet                 @relation(fields: [petId], references: [id], onDelete: Cascade)
+  name         String
+  type         MedicationType
+  dosage       String
+  frequency    MedicationFrequency
+  startDate    DateTime
+  endDate      DateTime?
+  prescribedBy String?
+  reason       String
+  instructions String?
+  status       MedicationStatus
+  observations String?
+  doses        MedicationDose[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@map("medications")
+}
+>>>>>>> origin/develop
+
+model MedicationDose {
+  id               String      @id @default(uuid())
+  medicationId     String
+  medication       Medication  @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  scheduledTime    DateTime
+  administeredTime DateTime?
+  administered     Boolean     @default(false)
+  observations     String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@map("medication_doses")
+}
+
+model VeterinaryVisit {
+  id               String    @id @default(uuid())
+  petId            String
+  pet              Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  date             DateTime
+  type             VisitType
+  veterinarianName String
+  clinicName       String
+  reason           String
+  diagnosis        String?
+  treatment        String?
+  prescriptions    String?
+  examResults      String?
+  cost             Float?
+  nextVisitDate    DateTime?
+  observations     String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("veterinary_visits")
+}
+
+enum PetType {
+  DOG
+  CAT
+}
+
+enum PetGender {
+  MALE
+  FEMALE
+}
+
+enum VaccineStatus {
+  SCHEDULED
+  APPLIED
+  OVERDUE
+  CANCELED
+}
+
+enum MedicationFrequency {
+  ONCE
+  DAILY
+  TWICE_DAILY
+  THREE_TIMES_DAILY
+  WEEKLY
+  MONTHLY
+  AS_NEEDED
+}
+
+enum MedicationStatus {
+  ACTIVE
+  COMPLETED
+  SUSPENDED
+}
+
+enum VisitType {
+  ROUTINE_CHECKUP
+  VACCINATION
+  EMERGENCY
+  SURGERY
+  DENTAL
+  CONSULTATION
+  EXAM
+  OTHER
+}
+
+model Reminder {
+  id                 String         @id @default(uuid())
+  petId              String
+  pet                Pet            @relation(fields: [petId], references: [id], onDelete: Cascade)
+  type               ReminderType
+  title              String
+  description        String?
+  dueDate            DateTime
+  status             ReminderStatus
+  relatedEntityId    String?
+  notificationSent   Boolean        @default(false)
+  notificationSentAt DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@map("reminders")
+}
+
+model WeightHistory {
+  id              String   @id @default(uuid())
+  petId           String
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  weight          Float
+  measurementDate DateTime
+  observations    String?
+  recordedBy      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("weight_history")
+}
+
+model Allergy {
+  id            String          @id @default(uuid())
+  petId         String
+  pet           Pet             @relation(fields: [petId], references: [id], onDelete: Cascade)
+  allergen      String
+  type          AllergyType
+  severity      AllergySeverity
+  symptoms      String?
+  diagnosedDate DateTime?
+  diagnosedBy   String?
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@map("allergies")
+}
+
+enum ReminderType {
+  VACCINE
+  MEDICATION
+  VETERINARY_VISIT
+  DEWORMING
+  FLEA_TICK_TREATMENT
+  WEIGHT_CHECK
+  GROOMING
+  WALK
+  EXERCISE
+  OTHER
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  COMPLETED
+  CANCELED
+}
+
+enum AllergyType {
+  MEDICATION
+  FOOD
+  ENVIRONMENTAL
+  OTHER
+}
+
+enum AllergySeverity {
+  MILD
+  MODERATE
+  SEVERE
+  LIFE_THREATENING
+}
+
+enum MedicationType {
+  ANTIBIOTIC
+  ANTI_INFLAMMATORY
+  ANALGESIC
+  ANTIPARASITIC
+  FLEA_TICK_CONTROL
+  DEWORMER
+  HEARTWORM_PREVENTION
+  SUPPLEMENT
+  VACCINE
+  OTHER
+}
+
+enum OrderStatus {
+  RECEBIDA
+  DIAGNOSTICO
+  AGUARDANDO_APROVACAO
+  EXECUCAO
+  FINALIZADA
+  ENTREGUE
 }
 
 model ServiceOrder {
+<<<<<<< HEAD
   id                      String             @id @default(uuid())
   orderNumber             String             @unique @map("order_number")
   customerId              String             @map("customer_id")
@@ -268,3 +517,18 @@ model BudgetItem {
 
   @@map("budget_items")
 }
+=======
+  id           String      @id @default(uuid())
+  clientName   String
+  clientContact String
+  vehicle      Json
+  services     Json
+  parts        Json
+  status       OrderStatus @default(RECEBIDA)
+  isDeleted    Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("service_orders")
+}
+>>>>>>> origin/develop
