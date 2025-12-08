@@ -1,12 +1,15 @@
-<<<<<<< HEAD
-name: CI
+name: CI/CD
 
 on:
+  push:
+    branches: [ develop, main ]
   pull_request:
+    branches: [ develop, main ]
     types: [opened, synchronize, reopened]
 
 jobs:
   test:
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,31 +22,24 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test -- --coverage --runInBand
-        continue-on-error: true
       - name: Upload coverage
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage
-        if: always()
-=======
-name: CI/CD
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
   build:
+    name: Build (push only)
+    needs: test
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install dependencies
         run: npm ci
       - name: Run tests
@@ -59,4 +55,3 @@ jobs:
         uses: azure/k8s-deploy@v3
         with:
           manifests: 'k8s/*.yaml'
->>>>>>> origin/develop
