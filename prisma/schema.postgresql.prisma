@@ -1,0 +1,194 @@
+// Mechanical Workshop Management System - Database Schema
+// Complete system for managing clients, vehicles, services, parts and service orders
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" 
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum CustomerType {
+  PESSOA_FISICA
+  PESSOA_JURIDICA
+}
+
+enum ServiceOrderStatus {
+  RECEBIDA           // Recebida
+  EM_DIAGNOSTICO     // Em diagnóstico
+  AGUARDANDO_APROVACAO  // Aguardando aprovação
+  EM_EXECUCAO        // Em execução
+  FINALIZADA         // Finalizada
+  ENTREGUE           // Entregue
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+  CLIENT
+}
+
+// Models
+model Customer {
+  id        String      @id @default(uuid())
+  document  String      @unique // CPF or CNPJ
+  type      CustomerType
+  name      String
+  email     String      @unique
+  phone     String
+  address   String
+  additionalInfo String? @map("additional_info")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  vehicles      Vehicle[]
+  serviceOrders ServiceOrder[]
+
+  @@map("customers")
+}
+
+model Vehicle {
+  id           String   @id @default(uuid())
+  licensePlate String   @unique @map("license_plate")
+  customerId   String   @map("customer_id")
+  brand        String
+  model        String
+  year         Int
+  color        String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  customer      Customer       @relation(fields: [customerId], references: [id])
+  serviceOrders ServiceOrder[]
+
+  @@map("vehicles")
+}
+
+model Service {
+  id               String  @id @default(uuid())
+  name             String
+  description      String?
+  price            Decimal @db.Decimal(10, 2)
+  estimatedMinutes Int     @map("estimated_minutes")
+  category         String
+  isActive         Boolean @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  serviceOrderItems ServiceOrderItem[]
+
+  @@map("services")
+}
+
+model Part {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  partNumber  String? @unique @map("part_number")
+  price       Decimal @db.Decimal(10, 2)
+  stock       Int     @default(0)
+  minStock    Int     @default(0) @map("min_stock")
+  supplier    String?
+  isActive    Boolean @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  serviceOrderParts ServiceOrderPart[]
+
+  @@map("parts")
+}
+
+model ServiceOrder {
+  id                      String             @id @default(uuid())
+  orderNumber             String             @unique @map("order_number")
+  customerId              String             @map("customer_id")
+  vehicleId               String             @map("vehicle_id")
+  status                  ServiceOrderStatus @default(RECEBIDA)
+  description             String
+  totalServicePrice       Decimal            @default(0) @db.Decimal(10, 2) @map("total_service_price")
+  totalPartsPrice         Decimal            @default(0) @db.Decimal(10, 2) @map("total_parts_price")
+  totalPrice              Decimal            @default(0) @db.Decimal(10, 2) @map("total_price")
+  estimatedTimeHours      Decimal            @default(0) @db.Decimal(5, 2) @map("estimated_time_hours")
+  estimatedCompletionDate DateTime           @map("estimated_completion_date")
+  startedAt               DateTime?          @map("started_at")
+  completedAt             DateTime?          @map("completed_at")
+  deliveredAt             DateTime?          @map("delivered_at")
+  approvedAt              DateTime?          @map("approved_at")
+  createdAt               DateTime           @default(now()) @map("created_at")
+  updatedAt               DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  customer    Customer           @relation(fields: [customerId], references: [id])
+  vehicle     Vehicle            @relation(fields: [vehicleId], references: [id])
+  services    ServiceOrderItem[]
+  parts       ServiceOrderPart[]
+  statusHistory ServiceOrderStatusHistory[]
+
+  @@map("service_orders")
+}
+
+model ServiceOrderItem {
+  id             String  @id @default(uuid())
+  serviceOrderId String  @map("service_order_id")
+  serviceId      String  @map("service_id")
+  quantity       Int     @default(1)
+  price          Decimal @db.Decimal(10, 2)
+  totalPrice     Decimal @db.Decimal(10, 2) @map("total_price")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  service      Service      @relation(fields: [serviceId], references: [id])
+
+  @@map("service_order_items")
+}
+
+model ServiceOrderPart {
+  id             String  @id @default(uuid())
+  serviceOrderId String  @map("service_order_id")
+  partId         String  @map("part_id")
+  quantity       Int
+  price          Decimal @db.Decimal(10, 2)
+  totalPrice     Decimal @db.Decimal(10, 2) @map("total_price")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  part         Part         @relation(fields: [partId], references: [id])
+
+  @@map("service_order_parts")
+}
+
+model ServiceOrderStatusHistory {
+  id             String             @id @default(uuid())
+  serviceOrderId String             @map("service_order_id")
+  status         ServiceOrderStatus
+  notes          String?
+  changedBy      String?            @map("changed_by")
+  createdAt      DateTime           @default(now()) @map("created_at")
+
+  // Relations
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+
+  @@map("service_order_status_history")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(EMPLOYEE)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}

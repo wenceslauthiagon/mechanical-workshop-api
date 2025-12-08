@@ -1,3 +1,32 @@
+<<<<<<< HEAD
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test -- --coverage --runInBand
+        continue-on-error: true
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
+        if: always()
+=======
 name: CI/CD
 
 on:
@@ -30,3 +59,4 @@ jobs:
         uses: azure/k8s-deploy@v3
         with:
           manifests: 'k8s/*.yaml'
+>>>>>>> origin/develop

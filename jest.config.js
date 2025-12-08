@@ -1,6 +1,18 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+<<<<<<< HEAD
+  roots: ['<rootDir>/src', '<rootDir>/test'],
+  testMatch: [
+    '<rootDir>/test/**/*.spec.ts',
+    '<rootDir>/test/**/*.test.ts'
+  ],
+  transform: {
+    '^.+\\.(t|j)s$': ['ts-jest', {
+      tsconfig: 'tsconfig.json',
+      useESM: false,
+    }],
+=======
   roots: ['<rootDir>/src'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   moduleNameMapper: {
@@ -8,8 +20,71 @@ module.exports = {
     '^@application/(.*)$': '<rootDir>/src/application/$1',
     '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+>>>>>>> origin/develop
   },
   collectCoverageFrom: [
+<<<<<<< HEAD
+    'src/**/*.{ts,js}',
+    '!src/**/*.spec.ts',
+    '!src/**/*.test.ts',
+    '!src/**/*.d.ts',
+    '!src/main.ts',
+    '!src/**/*.interface.ts',
+    '!src/**/index.ts',
+  ],
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "<rootDir>/dist/",
+    "<rootDir>/logs/",
+    "<rootDir>/coverage/",
+    "<rootDir>/docs/",
+    "<rootDir>/scripts/",
+    "<rootDir>/prisma/",
+    "<rootDir>/src/main.ts",
+    "<rootDir>/src/app.module.ts",
+    "<rootDir>/src/app.controller.ts",
+    "<rootDir>/src/shared/config/",
+    "<rootDir>/src/shared/constants/",
+    "<rootDir>/src/shared/enums/",
+    "<rootDir>/src/shared/utils/",
+    "<rootDir>/src/shared/filters/",
+    "<rootDir>/src/shared/logger/",
+    "<rootDir>/src/shared/shared.module.ts",
+    "<rootDir>/src/shared/healthcheck/",
+    "<rootDir>/src/infrastructure/http/AxiosFactory.ts",
+    "<rootDir>/src/workshop/1-presentation/dtos/",
+    "<rootDir>/src/workshop/1-presentation/responses/",
+    "<rootDir>/src/workshop/4-infrastructure/",
+    "<rootDir>/src/workshop/workshop.module.ts",
+    "<rootDir>/src/auth/dto/",
+    "<rootDir>/src/auth/decorators/",
+    "<rootDir>/src/auth/validators/",
+    "<rootDir>/src/auth/auth.module.ts",
+    "<rootDir>/src/prisma/prisma.service.ts",
+    "<rootDir>/healthcheck.ts",
+    "<rootDir>/docker-entrypoint.sh"
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html'],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+  setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  rootDir: '.',
+  testTimeout: 30000,
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@test/(.*)$': '<rootDir>/test/$1',
+    '^@prisma/client$': '<rootDir>/src/mocks/prisma-shim.ts',
+  },
+};
+=======
     'src/**/*.ts',
     '!src/**/*.test.ts',
     '!src/**/*.spec.ts',
@@ -17,3 +92,4 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
 };
+>>>>>>> origin/develop

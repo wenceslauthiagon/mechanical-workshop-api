@@ -1,0 +1,78 @@
+// Constantes para notificações
+export const NOTIFICATION_CONSTANTS = {
+  EMAIL: {
+    ENABLED: true,
+    FROM_NAME: 'Oficina Mecânica',
+    FROM_EMAIL: process.env.SMTP_FROM_EMAIL || 'noreply@oficina.com',
+    SMTP: {
+      HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
+      PORT: parseInt(process.env.SMTP_PORT || '587'),
+      SECURE: process.env.SMTP_SECURE === 'true',
+      USER: process.env.SMTP_USER,
+      PASS: process.env.SMTP_PASS,
+    },
+  },
+  SMS: {
+    ENABLED: false,
+    PROVIDER: 'mock',
+    MOCK_DELAY: 100,
+  },
+  TEMPLATES: {
+    BUDGET_READY: 'Orçamento Disponível',
+    BUDGET_APPROVED: 'Orçamento Aprovado',
+    BUDGET_REJECTED: 'Orçamento Rejeitado',
+    BUDGET_EXPIRED: 'Orçamento Expirado',
+    SERVICE_ORDER_ASSIGNED: 'Nova Ordem de Serviço',
+    SERVICE_ORDER_STATUS: 'Atualização da Ordem de Serviço',
+  },
+  COMPANY: {
+    NAME: process.env.COMPANY_NAME || 'Oficina Mecânica',
+    PHONE: process.env.COMPANY_PHONE || '(11) 99999-9999',
+    EMAIL: process.env.COMPANY_EMAIL || 'contato@oficina.com',
+    ADDRESS: process.env.COMPANY_ADDRESS || 'Rua da Oficina, 123',
+    WEBSITE: process.env.COMPANY_WEBSITE || 'https://oficina.com',
+  },
+  URLS: {
+    BASE: process.env.APP_URL || 'http://localhost:3000',
+    PUBLIC_BUDGET: '/public/budgets',
+  },
+  MESSAGES: {
+    EMAIL_SENT_SUCCESS: 'Email enviado com sucesso',
+    EMAIL_SENT_ERROR: 'Falha ao enviar email',
+    SMS_SENT_SUCCESS: 'SMS enviado com sucesso',
+    SMS_SENT_ERROR: 'Falha ao enviar SMS',
+    CONNECTION_VERIFIED: 'Conexão verificada com sucesso',
+    CONNECTION_FAILED: 'Falha na verificação da conexão',
+    TRANSPORTER_INITIALIZED: 'Transportador de email inicializado com sucesso',
+    TRANSPORTER_FAILED: 'Falha ao inicializar transportador de email',
+    TRANSPORTER_NOT_INITIALIZED: 'Transportador de email não inicializado',
+    MOCK_SMS_PREFIX: '[MOCK SMS]',
+    MOCK_SMS_CONNECTION: 'Verificação de conexão - sempre retorna verdadeiro',
+    UNSUPPORTED_PROVIDER: 'Provedor não suportado',
+    BUDGET_READY_SUCCESS: 'Notificação de orçamento pronto enviada com sucesso',
+    BUDGET_READY_ERROR: 'Falha ao enviar notificação de orçamento pronto',
+    BUDGET_APPROVED_SUCCESS:
+      'Notificação de orçamento aprovado enviada com sucesso',
+    BUDGET_APPROVED_ERROR: 'Falha ao enviar notificação de orçamento aprovado',
+    BUDGET_REJECTED_SUCCESS:
+      'Notificação de orçamento rejeitado enviada com sucesso',
+    BUDGET_REJECTED_ERROR: 'Falha ao enviar notificação de orçamento rejeitado',
+    SERVICE_ORDER_SUCCESS: 'Notificação de status da OS enviada com sucesso',
+    SERVICE_ORDER_ERROR: 'Falha ao enviar notificação de status da OS',
+  },
+  STATUS_MESSAGES: {
+    RECEBIDA: 'Sua ordem de serviço foi recebida',
+    EM_DIAGNOSTICO: 'Seu veículo está em diagnóstico',
+    AGUARDANDO_APROVACAO: 'Aguardando sua aprovação do orçamento',
+    EM_EXECUCAO: 'Seu serviço está em execução',
+    FINALIZADA: 'Seu serviço foi finalizado - pronto para retirada',
+    ENTREGUE: 'Seu veículo foi entregue com sucesso',
+  },
+  ERROR_CODES: {
+    EMAIL_SEND_ERROR: 'EMAIL_SEND_ERROR',
+    SMS_SEND_ERROR: 'SMS_SEND_ERROR',
+    TEMPLATE_NOT_FOUND: 'TEMPLATE_NOT_FOUND',
+    INVALID_EMAIL: 'INVALID_EMAIL',
+    INVALID_PHONE: 'INVALID_PHONE',
+  },
+} as const;

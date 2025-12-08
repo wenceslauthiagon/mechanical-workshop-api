@@ -1,13 +1,21 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
+<<<<<<< HEAD
+  name: pet-management-api-hpa
+=======
   name: pet-management-hpa
   namespace: pet-management
+>>>>>>> origin/develop
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
+<<<<<<< HEAD
+    name: pet-management-api
+=======
     name: pet-management-app
+>>>>>>> origin/develop
   minReplicas: 2
   maxReplicas: 10
   metrics:
