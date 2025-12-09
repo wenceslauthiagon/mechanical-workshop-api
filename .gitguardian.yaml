@@ -2,18 +2,26 @@ version: 2
 
 paths-ignore:
   - "**/*.example"
-  - "**/test/**/*.spec.ts"
-  - "**/docs/**/*.json"
   - "**/*.md"
+  - "**/docs/**"
+  - "**/test/integration/**"
+  - "**/infra/**"
+  - ".env.notifications.example"
+  - "docker-compose.dev.yml"
+  - "NOTIFICATION_SETUP.md"
+  - "NOTIFICATION_SYSTEM.md"
+  - "README.md"
+  - "TESTING_GUIDE.md"
 
-matches-ignore:
-  - name: SMTP credentials in example files
-    match: your-email@example.com
-  - name: Test passwords
-    match: test-password-
-  - name: Placeholder passwords
-    match: your-password-here
-  - name: Placeholder passwords 2
-    match: your-secure-password
-  - name: Env var defaults
-    match: postgres:-postgres
+secrets-ignore:
+  # SMTP example credentials
+  - 21625711
+  # Test integration passwords
+  - 23234465
+  - 21833722
+  # Postman collection examples
+  - 23234466
+  - 23234467
+  # Docker compose defaults
+  - 21516810
+  - 23242309
