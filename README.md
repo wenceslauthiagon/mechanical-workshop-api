@@ -844,7 +844,7 @@ Content-Type: application/json
 
 {
   "email": "admin@workshop.com",
-  "password": "Admin@123"
+  "password": "YourPassword123!"
 }
 
 Response: {
@@ -861,7 +861,7 @@ Content-Type: application/json
 {
   "name": "John Doe",
   "email": "john@example.com",
-  "password": "SecurePass@123",
+  "password": "YourSecurePass456!",
   "role": "EMPLOYEE"
 }
 ```

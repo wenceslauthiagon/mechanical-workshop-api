@@ -1,0 +1,19 @@
+version: 2
+
+paths-ignore:
+  - "**/*.example"
+  - "**/test/**/*.spec.ts"
+  - "**/docs/**/*.json"
+  - "**/*.md"
+
+matches-ignore:
+  - name: SMTP credentials in example files
+    match: your-email@example.com
+  - name: Test passwords
+    match: test-password-
+  - name: Placeholder passwords
+    match: your-password-here
+  - name: Placeholder passwords 2
+    match: your-secure-password
+  - name: Env var defaults
+    match: postgres:-postgres

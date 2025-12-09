@@ -15,7 +15,7 @@ cp terraform.tfvars.example terraform.tfvars
 
 2. Edite `terraform.tfvars` com suas configurações:
 ```hcl
-database_password = "sua-senha-segura"
+database_password = "your-secure-password"
 jwt_secret        = "seu-jwt-secret-seguro"
 kubeconfig_path   = "~/.kube/config"
 kube_context      = "seu-contexto-k8s"

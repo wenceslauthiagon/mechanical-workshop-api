@@ -75,7 +75,7 @@ docker-compose -f docker-compose.dev.yml up -d
 # Criar admin
 npm run create:admin
 # Email: admin@example.com
-# Password: Admin@123
+# Password: YourPassword123!
 ```
 
 ### 2.2 Autenticação
@@ -86,7 +86,7 @@ TOKEN=$(curl -s -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@example.com",
-    "password": "Admin@123"
+    "password": "YourPassword123!"
   }' | jq -r '.accessToken')
 
 echo $TOKEN
