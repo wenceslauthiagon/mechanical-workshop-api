@@ -53,7 +53,8 @@ describe('Part Integration Tests', () => {
     await prisma.user.deleteMany();
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
 
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const testPassword = process.env.TEST_ADMIN_PASSWORD || 'test-password-123';
+    const hashedPassword = await bcrypt.hash(testPassword, 10);
     await prisma.user.upsert({
       where: { email: 'admin@test.com' },
       update: {},
@@ -69,7 +70,7 @@ describe('Part Integration Tests', () => {
       .post('/auth/login')
       .send({
         username: 'admin',
-        password: 'admin123',
+        password: testPassword,
       });
 
     authToken = loginResponse.body.access_token;

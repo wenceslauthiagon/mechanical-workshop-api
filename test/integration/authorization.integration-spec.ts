@@ -10,14 +10,14 @@ import { generateValidCPF } from '../utils/test-helpers';
 
 const mockAdmin = {
   username: 'admin_auth',
-  password: 'admin123',
+  password: process.env.TEST_ADMIN_PASSWORD || 'test-password-123',
   email: 'admin_auth@test.com',
   role: 'ADMIN' as const,
 };
 
 const mockEmployee = {
   username: 'employee_auth',
-  password: 'employee123',
+  password: process.env.TEST_EMPLOYEE_PASSWORD || 'test-password-456',
   email: 'employee_auth@test.com',
   role: 'EMPLOYEE' as const,
 };
