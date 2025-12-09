@@ -32,8 +32,8 @@ SMS_PROVIDER=mock
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=seu.email@gmail.com
-SMTP_PASS=sua_senha_app
+SMTP_USER=your-email@example.com
+SMTP_PASS=your-app-password
 
 # Empresa
 COMPANY_NAME="Sua Oficina"
