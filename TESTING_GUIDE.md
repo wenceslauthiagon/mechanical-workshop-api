@@ -1,10 +1,10 @@
 # Guia de Testes - Fase 2
 
-## 🎯 Objetivo
+## Objetivo
 
 Validar localmente todos os componentes da Fase 2 antes do deploy em produção.
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 ```bash
 # Verificar instalações
@@ -15,7 +15,7 @@ terraform version         # 1.6+
 node --version           # 20+
 ```
 
-## 1️⃣ Teste Docker Local
+## 1️ Teste Docker Local
 
 ### 1.1 Build da Imagem
 
@@ -64,7 +64,7 @@ docker run --rm mechanical-workshop-api:test ls -la /app
 # Deve ter: dist/, node_modules/
 ```
 
-## 2️⃣ Teste APIs Fase 2
+## 2️ Teste APIs Fase 2
 
 ### 2.1 Setup Inicial
 
@@ -178,7 +178,7 @@ curl -X PUT http://localhost:3000/api/public/budgets/$BUDGET_ID/approve \
   -H "Content-Type: application/json"
 ```
 
-## 3️⃣ Teste Kubernetes Local
+## 3️ Teste Kubernetes Local
 
 ### 3.1 Habilitar Kubernetes no Docker Desktop
 
@@ -309,7 +309,7 @@ kubectl delete namespace mechanical-workshop
 kubectl delete -f k8s/
 ```
 
-## 4️⃣ Teste Terraform Local
+## 4️ Teste Terraform Local
 
 ### 4.1 Setup
 
@@ -401,7 +401,7 @@ kubectl get all -n mechanical-workshop
 # Deve retornar: No resources found
 ```
 
-## 5️⃣ Teste CI/CD (Simulação Local)
+## 5️ Teste CI/CD (Simulação Local)
 
 ### 5.1 Simular Lint e Test
 
@@ -466,7 +466,7 @@ act push  # Simular push
 act push --secret-file .secrets
 ```
 
-## 6️⃣ Testes de Integração
+## 6️ Testes de Integração
 
 ### 6.1 Fluxo Completo
 
@@ -499,23 +499,23 @@ kubectl get hpa -n mechanical-workshop
 terraform destroy -auto-approve
 ```
 
-## 7️⃣ Checklist Final
+## 7️ Checklist Final
 
-### ✅ Docker
+### Docker
 - [ ] Build multi-stage funcional
 - [ ] Imagem < 300MB
 - [ ] Container roda como non-root
 - [ ] Docker compose sobe stack completa
 - [ ] Health check responde
 
-### ✅ APIs
+### APIs
 - [ ] Endpoint de prioridade ordena corretamente
 - [ ] Notificação de email funcional
 - [ ] Endpoint público de aprovação acessível
 - [ ] Paginação funciona
 - [ ] Autenticação protege rotas privadas
 
-### ✅ Kubernetes
+### Kubernetes
 - [ ] Namespace criado
 - [ ] ConfigMap e Secret aplicados
 - [ ] PostgreSQL e Redis com PVCs
@@ -525,27 +525,27 @@ terraform destroy -auto-approve
 - [ ] HPA configurado (3-10 pods)
 - [ ] Métricas disponíveis
 
-### ✅ Auto-scaling
+### Auto-scaling
 - [ ] HPA detecta métricas
 - [ ] Escala para cima sob carga
 - [ ] Escala para baixo após carga
 - [ ] Permanece no range 3-10
 
-### ✅ Terraform
+### Terraform
 - [ ] terraform validate passa
 - [ ] terraform plan mostra recursos corretos
 - [ ] terraform apply cria infra
 - [ ] Outputs exibidos corretamente
 - [ ] terraform destroy limpa tudo
 
-### ✅ CI/CD
+### CI/CD
 - [ ] Testes passam localmente
 - [ ] Linter sem erros
 - [ ] Coverage > 80%
 - [ ] Build Docker funciona
 - [ ] Deploy K8s atualiza imagem
 
-## 8️⃣ Troubleshooting
+## 8️ Troubleshooting
 
 ### Pods em CrashLoopBackOff
 
@@ -583,7 +583,7 @@ kubectl get pods -n mechanical-workshop
 kubectl port-forward pod/<pod-name> 8080:3000 -n mechanical-workshop
 ```
 
-## 9️⃣ Métricas de Sucesso
+## 9️ Métricas de Sucesso
 
 - ✅ Build Docker < 300MB
 - ✅ API responde < 100ms (sem carga)
@@ -601,11 +601,3 @@ kubectl port-forward pod/<pod-name> 8080:3000 -n mechanical-workshop
 - **PVCs**: Usar hostPath em ambiente local
 - **LoadBalancer**: Usa localhost no Docker Desktop
 - **Secrets**: NUNCA comitar arquivo terraform.tfvars
-
-## 📚 Próximos Passos
-
-1. Testar localmente seguindo este guia
-2. Gravar vídeo demonstrativo
-3. Fazer push das mudanças
-4. Aguardar CI/CD executar
-5. Validar deploy em produção
