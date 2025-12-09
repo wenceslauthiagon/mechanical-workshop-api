@@ -69,3 +69,75 @@ variable "redis_storage_size" {
   type        = string
   default     = "1Gi"
 }
+
+variable "provision_oci_cluster" {
+  description = "If true, enable OCI provider resources (OKE)."
+  type        = bool
+  default     = false
+}
+
+variable "oci_tenancy_ocid" {
+  description = "OCI tenancy OCID"
+  type        = string
+  default     = ""
+}
+
+variable "oci_user_ocid" {
+  description = "OCI user OCID"
+  type        = string
+  default     = ""
+}
+
+variable "oci_fingerprint" {
+  description = "OCI API key fingerprint"
+  type        = string
+  default     = ""
+}
+
+variable "oci_private_key_path" {
+  description = "Path to OCI API private key file (can be relative to working dir)"
+  type        = string
+  default     = "~/.oci/oci_api_key.pem"
+}
+
+variable "oci_region" {
+  description = "OCI region to provision resources"
+  type        = string
+  default     = "us-ashburn-1"
+}
+
+variable "oci_compartment_ocid" {
+  description = "OCI compartment OCID where resources will be created"
+  type        = string
+  default     = ""
+}
+
+variable "oci_vcn_cidr" {
+  description = "CIDR block for OCI VCN"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "oci_subnet_cidr" {
+  description = "CIDR block for OCI subnet"
+  type        = string
+  default     = "10.0.1.0/24"
+}
+
+variable "node_shape" {
+  description = "OCI compute shape for worker nodes"
+  type        = string
+  default     = "VM.Standard.E3.Flex"
+}
+
+variable "node_count" {
+  description = "Number of worker nodes in the node pool"
+  type        = number
+  default     = 3
+}
+
+variable "node_image_id" {
+  description = "OCI image OCID to use for worker nodes (region-specific)"
+  type        = string
+  default     = ""
+}
