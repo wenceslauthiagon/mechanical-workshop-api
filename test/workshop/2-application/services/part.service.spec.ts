@@ -36,8 +36,11 @@ describe('PartService', () => {
       update: jest.fn(),
       updateStock: jest.fn(),
       remove: jest.fn(),
+<<<<<<< HEAD
       findMany: jest.fn(),
       count: jest.fn(),
+=======
+>>>>>>> develop
     };
 
     const mockErrorHandler = {
@@ -207,6 +210,7 @@ describe('PartService', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated parts without filters', async () => {
       const mockParts = [createMockPart()];
@@ -237,6 +241,8 @@ describe('PartService', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return a part by id', async () => {
       const mockPart = createMockPart();

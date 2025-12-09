@@ -1,7 +1,11 @@
 apiVersion: v1
 kind: Namespace
 metadata:
+<<<<<<< HEAD
   name: mechanical-workshop
   labels:
     name: mechanical-workshop
     environment: production
+=======
+  name: pet-management
+>>>>>>> develop

@@ -80,6 +80,7 @@ describe('DefaultServiceOrderPolicy', () => {
 
       expect(result).toBe(false);
     });
+<<<<<<< HEAD
 
     it('TC0009 - Should return false for invalid status', () => {
       const result = policy.canTransition(
@@ -89,6 +90,8 @@ describe('DefaultServiceOrderPolicy', () => {
 
       expect(result).toBe(false);
     });
+=======
+>>>>>>> develop
   });
 
   describe('getValidTransitions', () => {
@@ -134,6 +137,7 @@ describe('DefaultServiceOrderPolicy', () => {
 
       expect(result).toEqual([]);
     });
+<<<<<<< HEAD
 
     it('TC0007 - Should return empty array for invalid status', () => {
       const result = policy.getValidTransitions(
@@ -142,5 +146,7 @@ describe('DefaultServiceOrderPolicy', () => {
 
       expect(result).toEqual([]);
     });
+=======
+>>>>>>> develop
   });
 });

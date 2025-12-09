@@ -57,8 +57,11 @@ describe('MechanicService', () => {
     const mockRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+<<<<<<< HEAD
       findMany: jest.fn(),
       count: jest.fn(),
+=======
+>>>>>>> develop
       findById: jest.fn(),
       findByEmail: jest.fn(),
       findAvailable: jest.fn(),
@@ -169,6 +172,7 @@ describe('MechanicService', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated mechanics', async () => {
       const mechanics = [mockMechanic];
@@ -195,6 +199,8 @@ describe('MechanicService', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return mechanic by id', async () => {
       mechanicRepository.findById.mockResolvedValue(mockMechanic);

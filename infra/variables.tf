@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 variable "kubeconfig_path" {
   description = "Path to kubeconfig file"
   type        = string
@@ -140,4 +141,9 @@ variable "node_image_id" {
   description = "OCI image OCID to use for worker nodes (region-specific)"
   type        = string
   default     = ""
+=======
+variable "region" {
+  type    = string
+  default = "us-east-1"
+>>>>>>> develop
 }

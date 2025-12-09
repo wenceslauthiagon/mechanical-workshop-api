@@ -8,7 +8,10 @@ import { ServiceOrderService } from '../../../../src/workshop/2-application/serv
 import { ErrorHandlerService } from '../../../../src/shared/services/error-handler.service';
 import { NotificationService } from '../../../../src/workshop/2-application/services/notification.service';
 import { MechanicService } from '../../../../src/workshop/2-application/services/mechanic.service';
+<<<<<<< HEAD
 import { EmailService } from '../../../../src/shared/services/email.service';
+=======
+>>>>>>> develop
 import { PrismaService } from '../../../../src/prisma/prisma.service';
 import { CreateServiceOrderDto } from '../../../../src/workshop/1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../../../src/workshop/1-presentation/dtos/service-order/update-service-order-status.dto';
@@ -138,10 +141,13 @@ describe('ServiceOrderService', () => {
       serviceOrder: {
         create: jest.fn(),
         findAll: jest.fn(),
+<<<<<<< HEAD
         findMany: jest.fn(),
         findManyWithPriority: jest.fn(),
         count: jest.fn(),
         countWithPriority: jest.fn(),
+=======
+>>>>>>> develop
         findById: jest.fn(),
         findByCustomerId: jest.fn(),
         findByOrderNumber: jest.fn(),
@@ -176,10 +182,13 @@ describe('ServiceOrderService', () => {
         markAsUnavailable: jest.fn(),
         releaseFromServiceOrder: jest.fn(),
       },
+<<<<<<< HEAD
       email: {
         sendStatusChangeNotification: jest.fn(),
         sendBudgetApprovalRequest: jest.fn(),
       },
+=======
+>>>>>>> develop
       prisma: {
         serviceOrderItem: { findMany: jest.fn() },
         serviceOrderPart: { findMany: jest.fn() },
@@ -200,7 +209,10 @@ describe('ServiceOrderService', () => {
         { provide: ErrorHandlerService, useValue: mockServices.errorHandler },
         { provide: NotificationService, useValue: mockServices.notification },
         { provide: MechanicService, useValue: mockServices.mechanic },
+<<<<<<< HEAD
         { provide: EmailService, useValue: mockServices.email },
+=======
+>>>>>>> develop
         { provide: PrismaService, useValue: mockServices.prisma },
       ],
     }).compile();
@@ -217,7 +229,10 @@ describe('ServiceOrderService', () => {
       errorHandler: module.get(ErrorHandlerService),
       notification: module.get(NotificationService),
       mechanic: module.get(MechanicService),
+<<<<<<< HEAD
       email: module.get(EmailService),
+=======
+>>>>>>> develop
       prisma: module.get(PrismaService),
     };
   });
@@ -342,6 +357,7 @@ describe('ServiceOrderService', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated service orders', async () => {
       const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
@@ -412,6 +428,8 @@ describe('ServiceOrderService', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return service order by id', async () => {
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
@@ -809,6 +827,7 @@ describe('ServiceOrderService', () => {
         ...mockServiceOrder,
         status: ServiceOrderStatus.EM_DIAGNOSTICO,
       };
+<<<<<<< HEAD
       const customerWithEmail = { ...mockCustomer, email: 'test@example.com' };
 
       repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
@@ -821,13 +840,25 @@ describe('ServiceOrderService', () => {
       );
       services.email.sendStatusChangeNotification.mockRejectedValue(
         new Error('Email failed'),
+=======
+      repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
+      repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
+      repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
+      services.notification.sendServiceOrderStatusNotification.mockRejectedValue(
+        new Error('Notification failed'),
+>>>>>>> develop
       );
       jest
         .spyOn(service, 'findById')
         .mockResolvedValue(mockServiceOrder as any);
 
+<<<<<<< HEAD
       const loggerWarnSpy = jest.spyOn(service['logger'], 'warn');
 
+=======
+>>>>>>> develop
       const result = await service.updateStatus(
         mockServiceOrder.id,
         aguardandoDto,
@@ -835,9 +866,12 @@ describe('ServiceOrderService', () => {
 
       expect(result).toBeDefined();
       expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
+<<<<<<< HEAD
       expect(loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Failed to send email notification'),
       );
+=======
+>>>>>>> develop
     });
 
     it('TC0003 - Should skip notification if customer or vehicle not found', async () => {
@@ -868,6 +902,7 @@ describe('ServiceOrderService', () => {
         services.notification.sendServiceOrderStatusNotification,
       ).not.toHaveBeenCalled();
     });
+<<<<<<< HEAD
 
     it('TC0004 - Should handle push notification error gracefully', async () => {
       const aguardandoDto = {
@@ -905,6 +940,8 @@ describe('ServiceOrderService', () => {
         expect.stringContaining('Failed to send push notification'),
       );
     });
+=======
+>>>>>>> develop
   });
 
   describe('validateStatusTransition', () => {

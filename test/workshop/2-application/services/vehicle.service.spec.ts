@@ -43,8 +43,11 @@ describe('VehicleService', () => {
     const mockVehicleRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+<<<<<<< HEAD
       findMany: jest.fn(),
       count: jest.fn(),
+=======
+>>>>>>> develop
       findById: jest.fn(),
       findByCustomerId: jest.fn(),
       findByPlate: jest.fn(),
@@ -192,6 +195,7 @@ describe('VehicleService', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated vehicles with customer data', async () => {
       const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
@@ -224,6 +228,8 @@ describe('VehicleService', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return vehicle by id with customer data', async () => {
       const mockVehicle = createMockVehicle();

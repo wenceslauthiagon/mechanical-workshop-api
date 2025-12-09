@@ -118,7 +118,10 @@ describe('BudgetController', () => {
     const mockBudgetService = {
       create: jest.fn(),
       findAll: jest.fn(),
+<<<<<<< HEAD
       findAllPaginated: jest.fn(),
+=======
+>>>>>>> develop
       findById: jest.fn(),
       findByServiceOrderId: jest.fn(),
       sendBudget: jest.fn(),
@@ -191,6 +194,7 @@ describe('BudgetController', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated budgets', async () => {
       const mockBudgets = [mockBudget, { ...mockBudget, id: uuidv4() }];
@@ -231,6 +235,8 @@ describe('BudgetController', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findOne', () => {
     it('TC0001 - Should return budget by ID', async () => {
       budgetService.findById.mockResolvedValue(mockBudget);

@@ -139,7 +139,11 @@ describe('ServiceOrderPricingDomainService', () => {
 
   describe('calculateEstimatedCompletionDate', () => {
     it('TC0001 - Should calculate completion date with default working hours', () => {
+<<<<<<< HEAD
       const startDate = new Date('2024-10-20T12:00:00Z');
+=======
+      const startDate = new Date('2024-10-20');
+>>>>>>> develop
       const estimatedMinutes = 480;
 
       const result = service.calculateEstimatedCompletionDate(
@@ -147,11 +151,19 @@ describe('ServiceOrderPricingDomainService', () => {
         estimatedMinutes,
       );
 
+<<<<<<< HEAD
       expect(result.getTime()).toBeGreaterThan(startDate.getTime());
     });
 
     it('TC0002 - Should calculate completion date with custom working hours', () => {
       const startDate = new Date('2024-10-20T12:00:00Z');
+=======
+      expect(result.getDate()).toBe(20);
+    });
+
+    it('TC0002 - Should calculate completion date with custom working hours', () => {
+      const startDate = new Date('2024-10-20');
+>>>>>>> develop
       const estimatedMinutes = 480;
       const workingHoursPerDay = 4;
 
@@ -161,11 +173,19 @@ describe('ServiceOrderPricingDomainService', () => {
         workingHoursPerDay,
       );
 
+<<<<<<< HEAD
       expect(result.getTime()).toBeGreaterThan(startDate.getTime());
     });
 
     it('TC0003 - Should round up days when minutes exceed working hours', () => {
       const startDate = new Date('2024-10-20T12:00:00Z');
+=======
+      expect(result.getDate()).toBe(21);
+    });
+
+    it('TC0003 - Should round up days when minutes exceed working hours', () => {
+      const startDate = new Date('2024-10-20');
+>>>>>>> develop
       const estimatedMinutes = 500;
       const workingHoursPerDay = 8;
 
@@ -175,7 +195,11 @@ describe('ServiceOrderPricingDomainService', () => {
         workingHoursPerDay,
       );
 
+<<<<<<< HEAD
       expect(result.getTime()).toBeGreaterThan(startDate.getTime());
+=======
+      expect(result.getDate()).toBe(21);
+>>>>>>> develop
     });
   });
 });

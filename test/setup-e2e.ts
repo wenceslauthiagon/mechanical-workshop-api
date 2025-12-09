@@ -6,6 +6,7 @@ const prisma = new PrismaClient({
       url: 'file:./test.db',
     },
   },
+<<<<<<< HEAD
   log: [],
 });
 
@@ -17,6 +18,11 @@ beforeAll(() => {
 
 afterAll(async () => {
   console.error = originalConsoleError;
+=======
+});
+
+afterAll(async () => {
+>>>>>>> develop
   await prisma.$disconnect();
 });
 

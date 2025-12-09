@@ -115,8 +115,11 @@ describe('BudgetService', () => {
       budget: {
         create: jest.fn(),
         findAll: jest.fn(),
+<<<<<<< HEAD
         findMany: jest.fn(),
         count: jest.fn(),
+=======
+>>>>>>> develop
         findById: jest.fn(),
         findByServiceOrderId: jest.fn(),
         findByCustomerId: jest.fn(),
@@ -339,6 +342,7 @@ describe('BudgetService', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated budgets', async () => {
       const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
@@ -365,6 +369,8 @@ describe('BudgetService', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return budget by id', async () => {
       repositories.budget.findById.mockResolvedValue(mockBudget);
@@ -499,6 +505,7 @@ describe('BudgetService', () => {
       );
       expect(services.errorHandler.handleError).toHaveBeenCalledWith(error);
     });
+<<<<<<< HEAD
 
     it('TC0005 - Should send budget even when customer is not found', async () => {
       const sentBudget = { ...mockBudget, status: BudgetStatus.ENVIADO };
@@ -513,6 +520,8 @@ describe('BudgetService', () => {
         services.notification.sendBudgetReadyNotification,
       ).not.toHaveBeenCalled();
     });
+=======
+>>>>>>> develop
   });
 
   describe('approveBudget', () => {
@@ -849,6 +858,7 @@ describe('BudgetService', () => {
   });
 
   describe('mapToEnrichedResponseDto', () => {
+<<<<<<< HEAD
     it('TC0001 - Should map budget with service items', async () => {
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
@@ -863,6 +873,9 @@ describe('BudgetService', () => {
     });
 
     it('TC0002 - Should map budget with part items', async () => {
+=======
+    it('TC0001 - Should map budget with part items', async () => {
+>>>>>>> develop
       const budgetWithPart = {
         ...mockBudget,
         items: [
@@ -886,11 +899,17 @@ describe('BudgetService', () => {
       const result = await service.findByIdWithRelations(mockBudget.id);
 
       expect(result.items[0].part).toBeDefined();
+<<<<<<< HEAD
       expect(result.items[0].part?.name).toBe(mockPart.name);
       expect(result.items[0].part?.partNumber).toBe(mockPart.partNumber);
     });
 
     it('TC0003 - Should handle missing customer data', async () => {
+=======
+    });
+
+    it('TC0002 - Should handle missing customer data', async () => {
+>>>>>>> develop
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.customer.findById.mockResolvedValue(null);
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
@@ -901,7 +920,11 @@ describe('BudgetService', () => {
       expect(result.customer.name).toBe('');
     });
 
+<<<<<<< HEAD
     it('TC0004 - Should handle missing service order data', async () => {
+=======
+    it('TC0003 - Should handle missing service order data', async () => {
+>>>>>>> develop
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.serviceOrder.findById.mockResolvedValue(null);
@@ -912,7 +935,11 @@ describe('BudgetService', () => {
       expect(result.serviceOrder.orderNumber).toBe('');
     });
 
+<<<<<<< HEAD
     it('TC0005 - Should handle missing service data in items', async () => {
+=======
+    it('TC0004 - Should handle missing service data in items', async () => {
+>>>>>>> develop
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
@@ -923,7 +950,11 @@ describe('BudgetService', () => {
       expect(result.items[0].service).toBeUndefined();
     });
 
+<<<<<<< HEAD
     it('TC0006 - Should handle missing part data in items', async () => {
+=======
+    it('TC0005 - Should handle missing part data in items', async () => {
+>>>>>>> develop
       const budgetWithPart = {
         ...mockBudget,
         items: [
@@ -949,7 +980,11 @@ describe('BudgetService', () => {
       expect(result.items[0].part).toBeUndefined();
     });
 
+<<<<<<< HEAD
     it('TC0007 - Should handle budget with empty items array', async () => {
+=======
+    it('TC0006 - Should handle budget with empty items array', async () => {
+>>>>>>> develop
       const budgetWithNoItems = { ...mockBudget, items: [] };
       repositories.budget.findById.mockResolvedValue(budgetWithNoItems);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
@@ -960,7 +995,11 @@ describe('BudgetService', () => {
       expect(result.items).toEqual([]);
     });
 
+<<<<<<< HEAD
     it('TC0008 - Should handle budget with null items', async () => {
+=======
+    it('TC0007 - Should handle budget with null items', async () => {
+>>>>>>> develop
       const budgetWithNullItems = { ...mockBudget, items: null };
       repositories.budget.findById.mockResolvedValue(budgetWithNullItems);
       repositories.customer.findById.mockResolvedValue(mockCustomer);

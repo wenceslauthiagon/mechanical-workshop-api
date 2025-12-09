@@ -50,8 +50,11 @@ describe('CustomerService', () => {
     const mockRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+<<<<<<< HEAD
       findMany: jest.fn(),
       count: jest.fn(),
+=======
+>>>>>>> develop
       findById: jest.fn(),
       findByEmail: jest.fn(),
       findByDocument: jest.fn(),
@@ -209,6 +212,7 @@ describe('CustomerService', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated customers', async () => {
       const customers = [mockCustomer];
@@ -238,6 +242,8 @@ describe('CustomerService', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return customer by id', async () => {
       customerRepository.findById.mockResolvedValue(mockCustomer);

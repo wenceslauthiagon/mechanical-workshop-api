@@ -55,8 +55,11 @@ describe('ServiceOrderController', () => {
     const mockServiceOrderService = {
       create: jest.fn(),
       findAll: jest.fn(),
+<<<<<<< HEAD
       findAllPaginated: jest.fn(),
       findAllPaginatedWithPriority: jest.fn(),
+=======
+>>>>>>> develop
       findById: jest.fn(),
       findByCustomer: jest.fn(),
       updateStatus: jest.fn(),
@@ -125,6 +128,7 @@ describe('ServiceOrderController', () => {
       expect(result).toEqual(mockServiceOrders);
     });
 
+<<<<<<< HEAD
     it('TC0002 - Should return paginated service orders when no customerId', async () => {
       const paginationDto = new PaginationDto();
       paginationDto.page = 1;
@@ -157,10 +161,18 @@ describe('ServiceOrderController', () => {
         paginationDto,
         mockCustomerId,
       );
+=======
+    it('TC0002 - Should return service orders by customer when customerId provided', async () => {
+      const mockServiceOrders = [mockServiceOrder];
+      serviceOrderService.findByCustomer.mockResolvedValue(mockServiceOrders);
+
+      const result = await controller.findAll(mockCustomerId);
+>>>>>>> develop
 
       expect(serviceOrderService.findByCustomer).toHaveBeenCalledWith(
         mockCustomerId,
       );
+<<<<<<< HEAD
       expect(result.data).toEqual(mockServiceOrders);
       expect(result.pagination.totalRecords).toBe(1);
     });
@@ -190,6 +202,9 @@ describe('ServiceOrderController', () => {
       ).toHaveBeenCalledWith(paginationDto);
       expect(result).toEqual(mockPaginatedResponse);
       expect(result.data).toEqual(mockServiceOrders);
+=======
+      expect(result).toEqual(mockServiceOrders);
+>>>>>>> develop
     });
   });
 

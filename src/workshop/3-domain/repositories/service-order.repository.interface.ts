@@ -18,6 +18,7 @@ export interface IServiceOrderRepository {
 
   findAll(): Promise<ServiceOrder[]>;
 
+<<<<<<< HEAD
   findMany(skip: number, take: number): Promise<ServiceOrder[]>;
 
   findManyWithPriority(skip: number, take: number): Promise<ServiceOrder[]>;
@@ -28,6 +29,10 @@ export interface IServiceOrderRepository {
 
   findById(id: string): Promise<ServiceOrder | null>;
 
+=======
+  findById(id: string): Promise<ServiceOrder | null>;
+
+>>>>>>> develop
   findByCustomerId(customerId: string): Promise<ServiceOrder[]>;
 
   updateStatus(

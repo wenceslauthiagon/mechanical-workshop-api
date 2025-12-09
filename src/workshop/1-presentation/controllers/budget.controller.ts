@@ -15,7 +15,10 @@ import { BudgetService } from '../../2-application/services/budget.service';
 import { CreateBudgetDto } from '../dtos/budget/create-budget.dto';
 import { BudgetResponseDto } from '../dtos/budget/budget-response.dto';
 import { BudgetWithRelationsResponseDto } from '../dtos/budget/budget-with-relations-response.dto';
+<<<<<<< HEAD
 import { PaginationDto, PaginatedResponseDto } from '../../../shared';
+=======
+>>>>>>> develop
 
 @ApiTags('Budgets')
 @Controller('budgets')

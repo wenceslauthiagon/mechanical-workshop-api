@@ -58,7 +58,10 @@ describe('UserService', () => {
         findUnique: jest
           .fn()
           .mockImplementation(() => Promise.resolve(mockUser)),
+<<<<<<< HEAD
         findFirst: jest.fn().mockImplementation(() => Promise.resolve(null)),
+=======
+>>>>>>> develop
         findMany: jest
           .fn()
           .mockImplementation(() => Promise.resolve([mockSafeUser])),
@@ -149,6 +152,7 @@ describe('UserService', () => {
         },
       });
     });
+<<<<<<< HEAD
 
     it('TC0003 - Should throw error when username already exists', async () => {
       const existingUser = { ...mockUser, username: mockUsername };
@@ -233,6 +237,8 @@ describe('UserService', () => {
         'Database error',
       );
     });
+=======
+>>>>>>> develop
   });
 
   describe('createFirstAdmin', () => {

@@ -32,8 +32,11 @@ describe('ServiceService', () => {
     const mockServiceRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+<<<<<<< HEAD
       findMany: jest.fn(),
       count: jest.fn(),
+=======
+>>>>>>> develop
       findById: jest.fn(),
       findByName: jest.fn(),
       findByCategory: jest.fn(),
@@ -190,6 +193,7 @@ describe('ServiceService', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated services without filters', async () => {
       const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
@@ -222,6 +226,8 @@ describe('ServiceService', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return service by id', async () => {
       const mockService = createMockService();

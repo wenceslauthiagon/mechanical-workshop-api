@@ -58,6 +58,7 @@ export class VehicleService {
       }),
     );
     return vehiclesWithCustomers;
+<<<<<<< HEAD
   }
 
   async findAllPaginated(
@@ -80,6 +81,8 @@ export class VehicleService {
     );
 
     return new PaginatedResponseDto(vehiclesWithCustomers, page, size, total);
+=======
+>>>>>>> develop
   }
 
   async findById(id: string): Promise<VehicleResponseDto> {

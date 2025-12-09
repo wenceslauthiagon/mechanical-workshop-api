@@ -1,6 +1,9 @@
 import { HttpStatus, Injectable, Logger, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
+<<<<<<< HEAD
 import { EmailService } from '../../../shared/services/email.service';
+=======
+>>>>>>> develop
 import { ServiceOrderStatus, ServiceOrder } from '@prisma/client';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../1-presentation/dtos/service-order/update-service-order-status.dto';
@@ -16,6 +19,7 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import {
   ERROR_MESSAGES,
   NOTES_MESSAGES,
+  NOTIFICATION_MESSAGES,
 } from '../../../shared/constants/messages.constants';
 import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 import { PaginationDto, PaginatedResponseDto } from '../../../shared';
@@ -37,7 +41,10 @@ export class ServiceOrderService {
     private readonly partRepository: IPartRepository,
     private readonly prisma: PrismaService,
     private readonly errorHandler: ErrorHandlerService,
+<<<<<<< HEAD
     private readonly emailService: EmailService,
+=======
+>>>>>>> develop
     private readonly notificationService: NotificationService,
     private readonly mechanicService: MechanicService,
   ) {}
@@ -193,6 +200,7 @@ export class ServiceOrderService {
       this.mapToResponseDto(serviceOrder),
     );
     return Promise.all(responsePromises);
+<<<<<<< HEAD
   }
 
   async findAllPaginated(
@@ -229,6 +237,8 @@ export class ServiceOrderService {
     const responseDtos = await Promise.all(responsePromises);
 
     return new PaginatedResponseDto(responseDtos, page, size, total);
+=======
+>>>>>>> develop
   }
 
   async findById(id: string): Promise<ServiceOrderResponseDto> {
@@ -282,7 +292,11 @@ export class ServiceOrderService {
         // Validate if there is a mechanic assigned to the service order
         if (!serviceOrder.mechanicId) {
           this.errorHandler.generateException(
+<<<<<<< HEAD
             ERROR_MESSAGES.MECHANIC_REQUIRED_FOR_EXECUTION,
+=======
+            'Para iniciar a execução, é necessário atrelar um mecânico à ordem de serviço.',
+>>>>>>> develop
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -293,7 +307,11 @@ export class ServiceOrderService {
         );
         if (!mechanic.isAvailable) {
           this.errorHandler.handleConflictError(
+<<<<<<< HEAD
             ERROR_MESSAGES.MECHANIC_BUSY_WITH_OTHER_ORDER,
+=======
+            'Mecânico já está ocupado executando outra ordem de serviço.',
+>>>>>>> develop
           );
         }
 
@@ -336,6 +354,7 @@ export class ServiceOrderService {
       notes: data.notes || `Status alterado para ${data.status}`,
     });
 
+<<<<<<< HEAD
     const customer = await this.customerRepository.findById(
       serviceOrder.customerId,
     );
@@ -347,6 +366,20 @@ export class ServiceOrderService {
       const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
 
       try {
+=======
+    // Send notification to customer
+    try {
+      const customer = await this.customerRepository.findById(
+        serviceOrder.customerId,
+      );
+      const vehicle = await this.vehicleRepository.findById(
+        serviceOrder.vehicleId,
+      );
+
+      if (customer && vehicle) {
+        const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
+
+>>>>>>> develop
         await this.notificationService.sendServiceOrderStatusNotification(
           id,
           serviceOrder.orderNumber,
@@ -356,6 +389,7 @@ export class ServiceOrderService {
           vehicleInfo,
           customer.phone,
         );
+<<<<<<< HEAD
       } catch (error) {
         this.logger.warn(`Failed to send push notification: ${error.message}`);
       }
@@ -375,6 +409,14 @@ export class ServiceOrderService {
           );
         }
       }
+=======
+      }
+    } catch (error) {
+      this.logger.error(
+        `${NOTIFICATION_MESSAGES.FAILED_TO_SEND_STATUS_NOTIFICATION} ${serviceOrder.orderNumber}`,
+        error,
+      );
+>>>>>>> develop
     }
 
     return this.findById(id);

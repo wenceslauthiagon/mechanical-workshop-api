@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+<<<<<<< HEAD
 import { PrismaClient, ServiceOrderStatus, UserRole } from '@prisma/client';
+=======
+import { ServiceOrderStatus, UserRole } from '../../src/mocks/prisma-shim';
+>>>>>>> develop
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -12,7 +16,10 @@ function generateValidCPF(): string {
     faker.number.int({ min: 0, max: 9 }),
   );
 
+<<<<<<< HEAD
   // Calculate first digit
+=======
+>>>>>>> develop
   let sum = 0;
   for (let i = 0; i < 9; i++) {
     sum += numbers[i] * (10 - i);
@@ -65,10 +72,16 @@ const mockData = {
   part: {
     name: faker.vehicle.bicycle(),
     description: faker.commerce.productDescription(),
+<<<<<<< HEAD
     partNumber: faker.string.alphanumeric(8).toUpperCase(),
     price: faker.commerce.price({ min: 10, max: 200, dec: 2 }),
     stock: faker.number.int({ min: 50, max: 200 }),
     minStock: faker.number.int({ min: 5, max: 20 }),
+=======
+    price: faker.number.int({ min: 10, max: 200 }).toString(),
+    stock: faker.number.int({ min: 50, max: 200 }),
+    minimumStock: faker.number.int({ min: 5, max: 20 }),
+>>>>>>> develop
     supplier: faker.company.name(),
   },
   serviceOrder: {
@@ -77,9 +90,19 @@ const mockData = {
   },
 };
 
+<<<<<<< HEAD
 describe('Service Order Integration Tests', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
+=======
+const ADMIN_USERNAME = faker.internet.username().toLowerCase();
+const ADMIN_PASSWORD = faker.internet.password();
+const ADMIN_EMAIL = faker.internet.email().toLowerCase();
+
+describe('Service Order Integration Tests', () => {
+  let app: INestApplication;
+  let prisma: PrismaService;
+>>>>>>> develop
   let authToken: string;
   let customerId: string;
   let vehicleId: string;
@@ -113,6 +136,7 @@ describe('Service Order Integration Tests', () => {
     await prisma.user.deleteMany();
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
 
+<<<<<<< HEAD
     const hashedPassword = await bcrypt.hash('admin123', 10);
     await prisma.user.upsert({
       where: { email: 'admin@test.com' },
@@ -120,6 +144,13 @@ describe('Service Order Integration Tests', () => {
       create: {
         username: 'admin',
         email: 'admin@test.com',
+=======
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+    await prisma.user.create({
+      data: {
+        username: ADMIN_USERNAME,
+        email: ADMIN_EMAIL,
+>>>>>>> develop
         passwordHash: hashedPassword,
         role: UserRole.ADMIN,
       },
@@ -127,7 +158,11 @@ describe('Service Order Integration Tests', () => {
 
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')
+<<<<<<< HEAD
       .send({ username: 'admin', password: 'admin123' });
+=======
+      .send({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD });
+>>>>>>> develop
 
     authToken = loginResponse.body.access_token;
 
@@ -297,7 +332,11 @@ describe('Service Order Integration Tests', () => {
 
     it('TC0013 - Should list all service orders', async () => {
       const response = await request(app.getHttpServer())
+<<<<<<< HEAD
         .get('/api/service-orders/all')
+=======
+        .get('/api/service-orders')
+>>>>>>> develop
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
@@ -311,10 +350,15 @@ describe('Service Order Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
+<<<<<<< HEAD
       expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('pagination');
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data[0].customerId).toBe(customerId);
+=======
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body[0].customerId).toBe(customerId);
+>>>>>>> develop
     });
   });
 

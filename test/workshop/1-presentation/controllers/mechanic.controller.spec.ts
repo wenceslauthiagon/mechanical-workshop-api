@@ -55,7 +55,10 @@ describe('MechanicController', () => {
     const mockMechanicService = {
       create: jest.fn(),
       findAll: jest.fn(),
+<<<<<<< HEAD
       findAllPaginated: jest.fn(),
+=======
+>>>>>>> develop
       findAvailable: jest.fn(),
       findBySpecialty: jest.fn(),
       findById: jest.fn(),
@@ -141,6 +144,7 @@ describe('MechanicController', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('findAllPaginated', () => {
     it('TC0001 - Should return paginated mechanics', async () => {
       const mockMechanics = [mockMechanic, { ...mockMechanic, id: uuidv4() }];
@@ -181,6 +185,8 @@ describe('MechanicController', () => {
     });
   });
 
+=======
+>>>>>>> develop
   describe('findAvailable', () => {
     it('TC0001 - Should return list of available mechanics', async () => {
       const availableMechanics = [mockMechanic];
