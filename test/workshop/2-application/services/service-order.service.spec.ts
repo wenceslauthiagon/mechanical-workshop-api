@@ -393,13 +393,10 @@ describe('ServiceOrderService', () => {
       expect(result.data).toHaveLength(1);
       expect(result.pagination.totalRecords).toBe(1);
       expect(result.pagination.page).toBe(0);
-      expect(repositories.serviceOrder.findManyWithPriority).toHaveBeenCalledWith(
-        0,
-        10,
-      );
       expect(
-        repositories.serviceOrder.countWithPriority,
-      ).toHaveBeenCalled();
+        repositories.serviceOrder.findManyWithPriority,
+      ).toHaveBeenCalledWith(0, 10);
+      expect(repositories.serviceOrder.countWithPriority).toHaveBeenCalled();
     });
 
     it('TC0002 - Should return empty paginated result with priority', async () => {
@@ -813,7 +810,7 @@ describe('ServiceOrderService', () => {
         status: ServiceOrderStatus.EM_DIAGNOSTICO,
       };
       const customerWithEmail = { ...mockCustomer, email: 'test@example.com' };
-      
+
       repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);

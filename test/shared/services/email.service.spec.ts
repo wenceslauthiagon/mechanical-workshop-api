@@ -190,11 +190,17 @@ describe('EmailService', () => {
     });
 
     it('TC0007 - Should send notification without orderLink', async () => {
-      const { orderLink, ...dataWithoutLink } = createMockStatusChangeData();
+      const data = {
+        customerName: faker.person.fullName(),
+        customerEmail: faker.internet.email(),
+        orderNumber: `OS-${faker.string.numeric(3)}`,
+        newStatus: ServiceOrderStatus.EM_EXECUCAO,
+        statusMessage: faker.lorem.sentence(),
+      };
 
       const sendEmailSpy = jest.spyOn(service, 'sendEmail');
 
-      const result = await service.sendStatusChangeNotification(dataWithoutLink);
+      const result = await service.sendStatusChangeNotification(data);
 
       expect(result).toBe(true);
       expect(sendEmailSpy).toHaveBeenCalledWith(
