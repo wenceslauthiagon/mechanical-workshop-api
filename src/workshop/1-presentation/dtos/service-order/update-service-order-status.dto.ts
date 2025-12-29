@@ -9,7 +9,7 @@ export class UpdateServiceOrderStatusDto {
     example: ServiceOrderStatus.EM_DIAGNOSTICO,
   })
   @IsEnum(ServiceOrderStatus)
-  status: ServiceOrderStatus;
+  status!: ServiceOrderStatus;
 
   @ApiProperty({
     description: 'Observações sobre a mudança de status',

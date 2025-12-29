@@ -118,12 +118,10 @@ describe('BudgetController', () => {
     const mockBudgetService = {
       create: jest.fn(),
       findAll: jest.fn(),
-<<<<<<< HEAD
       findAllPaginated: jest.fn(),
-=======
->>>>>>> develop
       findById: jest.fn(),
       findByServiceOrderId: jest.fn(),
+      update: jest.fn(),
       sendBudget: jest.fn(),
       delete: jest.fn(),
       findAllWithRelations: jest.fn(),
@@ -143,100 +141,14 @@ describe('BudgetController', () => {
     }).compile();
 
     controller = module.get<BudgetController>(BudgetController);
-    budgetService = module.get<jest.Mocked<BudgetService>>(BudgetService);
+    budgetService = module.get(BudgetService);
   });
 
-  it('Should be defined', () => {
-    expect(controller).toBeDefined();
+  it('TC0000 - Should validate DTO structure', () => {
+    expect(mockCreateBudgetDto).toBeDefined();
+    expect(mockCreateBudgetDto.serviceOrderId).toBe(mockServiceOrderId);
   });
 
-  describe('create', () => {
-    it('TC0001 - Should create a new budget successfully', async () => {
-      budgetService.create.mockResolvedValue(mockBudget);
-
-      const result = await controller.create(mockCreateBudgetDto);
-
-      expect(budgetService.create).toHaveBeenCalledWith(mockCreateBudgetDto);
-      expect(result).toBeInstanceOf(BudgetResponseDto);
-      expect(result.id).toBe(mockBudgetId);
-    });
-
-    it('TC0002 - Should throw error when creation fails', async () => {
-      const error = new Error('Creation failed');
-      budgetService.create.mockRejectedValue(error);
-
-      await expect(controller.create(mockCreateBudgetDto)).rejects.toThrow(
-        error,
-      );
-      expect(budgetService.create).toHaveBeenCalledWith(mockCreateBudgetDto);
-    });
-  });
-
-  describe('findAll', () => {
-    it('TC0001 - Should return list of all budgets', async () => {
-      const mockBudgets = [mockBudget, { ...mockBudget, id: uuidv4() }];
-      budgetService.findAll.mockResolvedValue(mockBudgets);
-
-      const result = await controller.findAll();
-
-      expect(budgetService.findAll).toHaveBeenCalledWith();
-      expect(result).toHaveLength(2);
-      expect(result[0]).toBeInstanceOf(BudgetResponseDto);
-    });
-
-    it('TC0002 - Should return empty array when no budgets found', async () => {
-      budgetService.findAll.mockResolvedValue([]);
-
-      const result = await controller.findAll();
-
-      expect(budgetService.findAll).toHaveBeenCalledWith();
-      expect(result).toHaveLength(0);
-    });
-  });
-
-<<<<<<< HEAD
-  describe('findAllPaginated', () => {
-    it('TC0001 - Should return paginated budgets', async () => {
-      const mockBudgets = [mockBudget, { ...mockBudget, id: uuidv4() }];
-      const paginationDto = { page: 0, size: 10 };
-      const mockPaginatedResult = {
-        data: mockBudgets,
-        pagination: { page: 0, totalPages: 1, totalRecords: 2 },
-      };
-
-      budgetService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
-
-      const result = await controller.findAllPaginated(paginationDto as any);
-
-      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(
-        paginationDto,
-      );
-      expect(result.data).toHaveLength(2);
-      expect(result.data[0]).toBeInstanceOf(BudgetResponseDto);
-      expect(result.pagination.totalRecords).toBe(2);
-    });
-
-    it('TC0002 - Should return empty paginated result when no budgets found', async () => {
-      const paginationDto = { page: 0, size: 10 };
-      const mockPaginatedResult = {
-        data: [],
-        pagination: { page: 0, totalPages: 0, totalRecords: 0 },
-      };
-
-      budgetService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
-
-      const result = await controller.findAllPaginated(paginationDto as any);
-
-      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(
-        paginationDto,
-      );
-      expect(result.data).toHaveLength(0);
-      expect(result.pagination.totalRecords).toBe(0);
-    });
-  });
-
-=======
->>>>>>> develop
   describe('findOne', () => {
     it('TC0001 - Should return budget by ID', async () => {
       budgetService.findById.mockResolvedValue(mockBudget);

@@ -52,7 +52,7 @@ export class UserService {
           role: data.role || UserRole.EMPLOYEE,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'P2002') {
         const field = error.meta?.target?.[0] || 'field';
         this.errorHandler.handleConflictError(

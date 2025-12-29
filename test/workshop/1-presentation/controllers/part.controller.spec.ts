@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
-import { Decimal } from '@prisma/client/runtime/library';
 
 import { PartController } from '../../../../src/workshop/1-presentation/controllers/part.controller';
 import { PartService } from '../../../../src/workshop/2-application/services/part.service';
@@ -21,11 +20,9 @@ describe('PartController', () => {
     name: faker.commerce.productName(),
     description: faker.lorem.sentence(),
     partNumber: mockPartNumber,
-    price: new Decimal(
-      faker.number.float({ min: 10, max: 500, fractionDigits: 2 }),
-    ),
+    price: faker.number.float({ min: 10, max: 1000, fractionDigits: 2 }),
     stock: faker.number.int({ min: 0, max: 200 }),
-    minStock: faker.number.int({ min: 5, max: 20 }),
+    minStock: faker.number.int({ min: 1, max: 50 }),
     supplier: mockSupplier,
     isActive: true,
     createdAt: faker.date.past(),
@@ -36,9 +33,8 @@ describe('PartController', () => {
     name: faker.commerce.productName(),
     description: faker.lorem.sentence(),
     partNumber: mockPartNumber,
-    price: faker.number
-      .float({ min: 10, max: 500, fractionDigits: 2 })
-      .toFixed(2),
+    price: Number(faker.number
+      .float({ min: 10, max: 500, fractionDigits: 2 }).toFixed(2)),
     stock: faker.number.int({ min: 0, max: 200 }),
     minStock: faker.number.int({ min: 5, max: 20 }),
     supplier: mockSupplier,
@@ -98,12 +94,12 @@ describe('PartController', () => {
       const createdPart = {
         ...mockPartData,
         name: mockCreatePartDto.name,
-        description: mockCreatePartDto.description || null,
-        partNumber: mockCreatePartDto.partNumber || null,
-        price: new Decimal(mockCreatePartDto.price),
+        description: mockCreatePartDto.description ,
+        partNumber: mockCreatePartDto.partNumber ,
+        price: mockCreatePartDto.price,
         stock: mockCreatePartDto.stock,
         minStock: mockCreatePartDto.minStock,
-        supplier: mockCreatePartDto.supplier || null,
+        supplier: mockCreatePartDto.supplier ,
       };
       partService.create.mockResolvedValue(createdPart);
 
@@ -189,7 +185,11 @@ describe('PartController', () => {
 
       const result = await partController.findAll(undefined, undefined, true);
 
-      expect(partService.findAll).toHaveBeenCalledWith({ lowStock: true });
+      expect(partService.findAll).toHaveBeenCalledWith({ 
+        supplier: undefined,
+        active: undefined,
+        lowStock: true 
+      });
       expect(result).toHaveLength(1);
     });
 
@@ -302,6 +302,8 @@ describe('PartController', () => {
       );
 
       expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
+        supplier: undefined,
+        active: undefined,
         lowStock: true,
       });
       expect(result.data).toHaveLength(1);
@@ -466,9 +468,9 @@ describe('PartController', () => {
       const updatedPart = {
         ...mockPartData,
         name: mockUpdatePartDto.name || mockPartData.name,
-        description: mockUpdatePartDto.description || null,
+        description: mockUpdatePartDto.description ,
         price: mockUpdatePartDto.price
-          ? new Decimal(mockUpdatePartDto.price)
+          ? parseFloat(mockUpdatePartDto.price)
           : mockPartData.price,
         stock: mockUpdatePartDto.stock || mockPartData.stock,
         minStock: mockUpdatePartDto.minStock || mockPartData.minStock,
@@ -610,3 +612,6 @@ describe('PartController', () => {
     });
   });
 });
+
+
+

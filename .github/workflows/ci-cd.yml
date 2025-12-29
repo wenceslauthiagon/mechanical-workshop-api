@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-name: CI/CD Pipeline
+﻿name: CI/CD Pipeline
 
 on:
   push:
@@ -322,62 +321,3 @@ jobs:
         run: |
           echo "Deployment failed!"
           exit 1
-=======
-name: CI/CD
-
-on:
-  push:
-    branches: [ develop, main ]
-  pull_request:
-    branches: [ develop, main ]
-    types: [opened, synchronize, reopened]
-
-jobs:
-  test:
-    name: Run tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run tests
-        run: npm test -- --coverage --runInBand
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: coverage
-
-  build:
-    name: Build (push only)
-    needs: test
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Install dependencies
-        run: npm ci
-      - name: Run tests
-        run: npm test --silent
-      - name: Build
-        run: npm run build
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
-        with:
-          push: false
-          tags: ghcr.io/${{ github.repository }}:latest
-      - name: Deploy to Kubernetes
-        uses: azure/k8s-deploy@v3
-        with:
-          manifests: 'k8s/*.yaml'
->>>>>>> develop

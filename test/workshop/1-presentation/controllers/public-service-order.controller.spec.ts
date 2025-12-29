@@ -89,11 +89,7 @@ describe('PublicServiceOrderController', () => {
     expect(serviceOrderService).toBeDefined();
   });
 
-<<<<<<< HEAD
   it('Should instantiate controller with service dependency', () => {
-=======
-  it('should instantiate controller with service dependency', () => {
->>>>>>> develop
     const mockService = {} as ServiceOrderService;
     const testController = new PublicServiceOrderController(mockService);
     expect(testController).toBeInstanceOf(PublicServiceOrderController);

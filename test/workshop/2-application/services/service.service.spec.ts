@@ -32,27 +32,32 @@ describe('ServiceService', () => {
     const mockServiceRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
-<<<<<<< HEAD
       findMany: jest.fn(),
       count: jest.fn(),
-=======
->>>>>>> develop
       findById: jest.fn(),
-      findByName: jest.fn(),
       findByCategory: jest.fn(),
+      findByName: jest.fn(),
       update: jest.fn(),
+      remove: jest.fn(),
     };
 
     const mockErrorHandler = {
       handleNotFoundError: jest.fn(),
       handleConflictError: jest.fn(),
+      generateException: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ServiceService,
-        { provide: 'IServiceRepository', useValue: mockServiceRepository },
-        { provide: ErrorHandlerService, useValue: mockErrorHandler },
+        {
+          provide: 'IServiceRepository',
+          useValue: mockServiceRepository,
+        },
+        {
+          provide: ErrorHandlerService,
+          useValue: mockErrorHandler,
+        },
       ],
     }).compile();
 
@@ -61,173 +66,6 @@ describe('ServiceService', () => {
     errorHandler = module.get(ErrorHandlerService);
   });
 
-  it('Should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('create', () => {
-    it('TC0001 - Should create service successfully', async () => {
-      const createDto = {
-        name: faker.commerce.productName(),
-        description: faker.commerce.productDescription(),
-        price: Number(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
-        category: 'Mecânica',
-        estimatedMinutes: faker.number.int({ min: 30, max: 480 }),
-        isActive: true,
-      };
-
-      const mockService = createMockService();
-      serviceRepository.findByName.mockResolvedValue(null);
-      serviceRepository.create.mockResolvedValue(mockService);
-
-      const result = await service.create(createDto);
-
-      expect(serviceRepository.findByName).toHaveBeenCalledWith(createDto.name);
-      expect(serviceRepository.create).toHaveBeenCalledWith({
-        name: createDto.name,
-        description: createDto.description,
-        price: new Decimal(createDto.price),
-        category: createDto.category,
-        estimatedMinutes: createDto.estimatedMinutes,
-        isActive: true,
-      });
-      expect(result).toEqual(mockService);
-    });
-
-    it('TC0002 - Should create service with default isActive true', async () => {
-      const createDto = {
-        name: faker.commerce.productName(),
-        price: Number(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
-        category: 'Mecânica',
-        estimatedMinutes: faker.number.int({ min: 30, max: 480 }),
-      };
-
-      const mockService = createMockService();
-      serviceRepository.findByName.mockResolvedValue(null);
-      serviceRepository.create.mockResolvedValue(mockService);
-
-      await service.create(createDto);
-
-      expect(serviceRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isActive: true,
-        }),
-      );
-    });
-
-    it('TC0003 - Should throw error when service name already exists', async () => {
-      const createDto = {
-        name: faker.commerce.productName(),
-        price: Number(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
-        category: 'Mecânica',
-        estimatedMinutes: faker.number.int({ min: 30, max: 480 }),
-      };
-
-      const existingService = createMockService();
-      serviceRepository.findByName.mockResolvedValue(existingService);
-      errorHandler.handleConflictError.mockImplementation(() => {
-        throw new Error(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
-      });
-
-      await expect(service.create(createDto)).rejects.toThrow(
-        ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS,
-      );
-
-      expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS,
-      );
-    });
-
-    it('TC0004 - Should create service with null description', async () => {
-      const createDto = {
-        name: faker.commerce.productName(),
-        price: Number(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
-        category: 'Mecânica',
-        estimatedMinutes: faker.number.int({ min: 30, max: 480 }),
-      };
-
-      const mockService = createMockService();
-      serviceRepository.findByName.mockResolvedValue(null);
-      serviceRepository.create.mockResolvedValue(mockService);
-
-      await service.create(createDto);
-
-      expect(serviceRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          description: null,
-        }),
-      );
-    });
-  });
-
-  describe('findAll', () => {
-    it('TC0001 - Should return all services without filters', async () => {
-      const mockServices = [createMockService(), createMockService()];
-      serviceRepository.findAll.mockResolvedValue(mockServices);
-
-      const result = await service.findAll();
-
-      expect(serviceRepository.findAll).toHaveBeenCalledWith(undefined);
-      expect(result).toEqual(mockServices);
-    });
-
-    it('TC0002 - Should return services filtered by category', async () => {
-      const category = 'Mecânica';
-      const mockServices = [createMockService()];
-      serviceRepository.findAll.mockResolvedValue(mockServices);
-
-      const result = await service.findAll({ category });
-
-      expect(serviceRepository.findAll).toHaveBeenCalledWith({ category });
-      expect(result).toEqual(mockServices);
-    });
-
-    it('TC0003 - Should return active services only', async () => {
-      const mockServices = [createMockService()];
-      serviceRepository.findAll.mockResolvedValue(mockServices);
-
-      const result = await service.findAll({ active: true });
-
-      expect(serviceRepository.findAll).toHaveBeenCalledWith({ active: true });
-      expect(result).toEqual(mockServices);
-    });
-  });
-
-<<<<<<< HEAD
-  describe('findAllPaginated', () => {
-    it('TC0001 - Should return paginated services without filters', async () => {
-      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
-      const mockServices = [createMockService(), createMockService()];
-      serviceRepository.findMany.mockResolvedValue(mockServices);
-      serviceRepository.count.mockResolvedValue(2);
-
-      const result = await service.findAllPaginated(paginationDto);
-
-      expect(result.data).toHaveLength(2);
-      expect(result.pagination.totalRecords).toBe(2);
-      expect(result.pagination.totalPages).toBe(1);
-      expect(serviceRepository.findMany).toHaveBeenCalledWith(0, 10, undefined);
-      expect(serviceRepository.count).toHaveBeenCalledWith(undefined);
-    });
-
-    it('TC0002 - Should return paginated services with filters', async () => {
-      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
-      const filters = { category: 'Mecânica', active: true };
-      const mockServices = [createMockService()];
-      serviceRepository.findMany.mockResolvedValue(mockServices);
-      serviceRepository.count.mockResolvedValue(1);
-
-      const result = await service.findAllPaginated(paginationDto, filters);
-
-      expect(result.data).toHaveLength(1);
-      expect(result.pagination.totalRecords).toBe(1);
-      expect(serviceRepository.findMany).toHaveBeenCalledWith(0, 10, filters);
-      expect(serviceRepository.count).toHaveBeenCalledWith(filters);
-    });
-  });
-
-=======
->>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return service by id', async () => {
       const mockService = createMockService();

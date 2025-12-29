@@ -26,7 +26,7 @@ export class EmailService {
       this.logger.log(`Sending email to ${options.to}: ${options.subject}`);
       this.logger.debug(`Email content: ${options.text}`);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to send email: ${error.message}`, error.stack);
       return false;
     }

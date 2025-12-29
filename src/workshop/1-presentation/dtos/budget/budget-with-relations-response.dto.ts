@@ -6,13 +6,13 @@ export class BudgetItemResponseDto {
     description: 'ID único do item do orçamento',
     example: '550e8400-e29b-41d4-a716-446655440003',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'Tipo do item (SERVICE ou PART)',
     example: 'SERVICE',
   })
-  type: 'SERVICE' | 'PART';
+  type!: 'SERVICE' | 'PART';
 
   @ApiProperty({
     description: 'ID do serviço (se aplicável)',
@@ -32,25 +32,25 @@ export class BudgetItemResponseDto {
     description: 'Descrição do item',
     example: 'Troca de óleo do motor',
   })
-  description: string;
+  description!: string;
 
   @ApiProperty({
     description: 'Quantidade',
     example: 1,
   })
-  quantity: number;
+  quantity!: number;
 
   @ApiProperty({
     description: 'Preço unitário',
     example: 150.0,
   })
-  unitPrice: number;
+  unitPrice!: number;
 
   @ApiProperty({
     description: 'Preço total do item',
     example: 150.0,
   })
-  total: number;
+  total!: number;
 
   @ApiProperty({
     description: 'Dados do serviço relacionado (quando aplicável)',
@@ -78,73 +78,73 @@ export class BudgetWithRelationsResponseDto {
     description: 'ID único do orçamento',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'ID da ordem de serviço',
     example: '550e8400-e29b-41d4-a716-446655440001',
   })
-  serviceOrderId: string;
+  serviceOrderId!: string;
 
   @ApiProperty({
     description: 'ID do cliente',
     example: '550e8400-e29b-41d4-a716-446655440002',
   })
-  customerId: string;
+  customerId!: string;
 
   @ApiProperty({
     description: 'Subtotal do orçamento',
     example: 1500.0,
   })
-  subtotal: number;
+  subtotal!: number;
 
   @ApiProperty({
     description: 'Valor dos impostos',
     example: 150.0,
   })
-  taxes: number;
+  taxes!: number;
 
   @ApiProperty({
     description: 'Valor do desconto',
     example: 50.0,
   })
-  discount: number;
+  discount!: number;
 
   @ApiProperty({
     description: 'Valor total do orçamento',
     example: 1600.0,
   })
-  total: number;
+  total!: number;
 
   @ApiProperty({
     description: 'Data de validade do orçamento',
     example: '2023-10-28T10:00:00Z',
   })
-  validUntil: Date;
+  validUntil!: Date;
 
   @ApiProperty({
     description: 'Status do orçamento',
     enum: BudgetStatus,
     example: BudgetStatus.ENVIADO,
   })
-  status: BudgetStatus;
+  status!: BudgetStatus;
 
   @ApiProperty({
     description: 'Data de criação',
     example: '2023-10-13T10:00:00Z',
   })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({
     description: 'Data de última atualização',
     example: '2023-10-13T11:30:00Z',
   })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @ApiProperty({
     description: 'Dados atualizados do cliente',
   })
-  customer: {
+  customer!: {
     id: string;
     name: string;
     document: string;
@@ -155,7 +155,7 @@ export class BudgetWithRelationsResponseDto {
   @ApiProperty({
     description: 'Dados atualizados da ordem de serviço',
   })
-  serviceOrder: {
+  serviceOrder!: {
     id: string;
     orderNumber: string;
     status: string;
@@ -166,5 +166,5 @@ export class BudgetWithRelationsResponseDto {
     description: 'Itens do orçamento com dados relacionados atualizados',
     type: [BudgetItemResponseDto],
   })
-  items: BudgetItemResponseDto[];
+  items!: BudgetItemResponseDto[];
 }

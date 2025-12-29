@@ -146,7 +146,7 @@ describe('ServiceOrderAggregate', () => {
         totalPrice: new Money(200),
       });
 
-      expect(so.totalServicePrice.amount).toBe(300);
+      expect(so.totalServicePrice.amount.toNumber()).toBe(300);
     });
   });
 
@@ -168,7 +168,7 @@ describe('ServiceOrderAggregate', () => {
         totalPrice: new Money(150),
       });
 
-      expect(so.totalPartsPrice.amount).toBe(250);
+      expect(so.totalPartsPrice.amount.toNumber()).toBe(250);
     });
   });
 
@@ -186,7 +186,7 @@ describe('ServiceOrderAggregate', () => {
       so.addService(mockServiceItem);
       so.addPart(mockPartItem);
 
-      expect(so.totalPrice.amount).toBe(200);
+      expect(so.totalPrice.amount.toNumber()).toBe(200);
     });
   });
 
@@ -488,3 +488,6 @@ describe('ServiceOrderAggregate', () => {
     });
   });
 });
+
+
+

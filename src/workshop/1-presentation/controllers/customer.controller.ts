@@ -184,7 +184,7 @@ export class CustomerController {
       additionalInfo: customer.additionalInfo,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
-      vehicles: customer.vehicles?.map((vehicle) => ({
+      vehicles: customer.vehicles?.map((vehicle: any) => ({
         id: vehicle.id,
         licensePlate: vehicle.licensePlate,
         brand: vehicle.brand,

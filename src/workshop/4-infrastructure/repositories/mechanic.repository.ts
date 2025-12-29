@@ -64,7 +64,6 @@ export class MechanicRepository implements IMechanicRepository {
     );
 
     return mechanicsWithStats;
-<<<<<<< HEAD
   }
 
   async findMany(skip: number, take: number): Promise<MechanicWithStats[]> {
@@ -105,8 +104,6 @@ export class MechanicRepository implements IMechanicRepository {
 
   async count(): Promise<number> {
     return this.prisma.mechanic.count();
-=======
->>>>>>> develop
   }
 
   async findById(id: string): Promise<MechanicWithStats | null> {

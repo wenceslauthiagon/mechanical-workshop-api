@@ -122,7 +122,7 @@ export class AuthController {
     status: 401,
     description: 'Token inválido ou expirado',
   })
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: any) {
     const { passwordHash, ...user } = req.user;
     void passwordHash;
     return user;

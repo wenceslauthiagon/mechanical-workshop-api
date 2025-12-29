@@ -1,6 +1,5 @@
 # Pet Management API
 
-<<<<<<< HEAD
 [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
@@ -86,9 +85,6 @@ Este projeto foi desenvolvido como parte do **Tech Challenge - Fase 2**, impleme
 - Estatísticas de desempenho por serviço
 - Tempo de execução e precisão de orçamentos
 - Health checks
-=======
-API RESTful para gerenciamento de pets (cães e gatos) construída com **Clean Architecture**, **TypeScript** e princípios **SOLID**.
->>>>>>> develop
 
 ### ✅ Notificações (Fase 2)
 - Sistema de notificação por email
@@ -167,7 +163,6 @@ src/
     └── services/       # Serviços compartilhados (ex: ErrorHandler)
 ```
 
-<<<<<<< HEAD
 ---
 
 ## ☸️ Kubernetes & Orquestração
@@ -436,9 +431,6 @@ jobs:
 ---
 
 ## � ANTES DE COMEÇAR (OBRIGATÓRIO)
-=======
-### Princípios Aplicados
->>>>>>> develop
 
 - ✅ **Clean Code**: Código limpo, legível e bem organizado
 - ✅ **Clean Architecture**: Separação de camadas e dependências
@@ -524,7 +516,6 @@ npm run prisma:migrate
 npm run prisma:generate
 ```
 
-<<<<<<< HEAD
 =======
 6. **Inicie o servidor**
 ```bash
@@ -659,9 +650,6 @@ For detailed information, see [Testing Strategy Documentation](./docs/TESTING_ST
 
 ```bash
 <<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> develop
 # Unit tests
 npm test
 
@@ -692,7 +680,6 @@ make test-cov
 
 # Run integration tests
 docker-compose exec app npm run test:e2e
-<<<<<<< HEAD
 ```
 
 ### Coverage Requirements
@@ -721,46 +708,6 @@ describe('ServiceName Unit Tests', () => {
     });
   });
 });
-=======
->>>>>>> develop
-```
-
-### Coverage Requirements
-
-| Layer | Target | Purpose |
-|-------|--------|---------|
-| Domain (3-domain) | 100% | Core business logic |
-| Application (2-application) | 90%+ | Orchestration |
-| Presentation (1-presentation) | 80%+ | Controllers |
-| Infrastructure (4-infrastructure) | Integration only | External dependencies |
-
-### Test Naming Convention
-
-```typescript
-describe('ServiceName Unit Tests', () => {
-  describe('TC001 - Feature group', () => {
-    it('TC001 - Should do something specific', () => {
-      // Arrange
-      const input = {...};
-      
-      // Act
-      const result = service.method(input);
-      
-      // Assert
-      expect(result).toBeDefined();
-    });
-  });
-});
-=======
-# Executar todos os testes
-npm test
-
-# Executar com watch mode
-npm run test:watch
-
-# Coverage
-npm run test -- --coverage
->>>>>>> origin/develop
 ```
 
 ## 📦 Scripts Disponíveis
@@ -853,7 +800,6 @@ Isso facilita:
 
 Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests.
 
-<<<<<<< HEAD
 ---
 
 ## 📚 Documentação da API
@@ -1196,9 +1142,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ---
 
 ## 📝 Licença
-=======
-## 📄 Licença
->>>>>>> develop
 
 MIT
 

@@ -28,7 +28,7 @@ export class PartService {
       }
     }
 
-    return this.partRepository.create({
+    const partFromDb = await this.partRepository.create({
       name: data.name,
       description: data.description ?? null,
       partNumber: data.partNumber ?? null,
@@ -38,6 +38,12 @@ export class PartService {
       supplier: data.supplier ?? null,
       isActive: true,
     });
+    
+    return {
+      ...partFromDb,
+      description: partFromDb.description ?? undefined,
+      supplier: partFromDb.supplier ?? undefined,
+    } as PartBase;
   }
 
   async findAll(filters?: {
@@ -45,7 +51,12 @@ export class PartService {
     active?: boolean;
     lowStock?: boolean;
   }): Promise<PartBase[]> {
-    return this.partRepository.findAll(filters);
+    const parts = await this.partRepository.findAll(filters);
+    return parts.map(part => ({
+      ...part,
+      description: part.description ?? undefined,
+      supplier: part.supplier ?? undefined,
+    }));
   }
 
   async findAllPaginated(
@@ -65,8 +76,14 @@ export class PartService {
       this.partRepository.count(filters),
     ]);
 
+    const mappedParts = parts.map(part => ({
+      ...part,
+      description: part.description ?? undefined,
+      supplier: part.supplier ?? undefined,
+    }));
+
     return new PaginatedResponseDto(
-      parts,
+      mappedParts,
       paginationDto.page || 0,
       paginationDto.size || 10,
       total,
@@ -78,7 +95,11 @@ export class PartService {
     if (!part) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.PART_NOT_FOUND);
     }
-    return part;
+    return {
+      ...part,
+      description: part.description ?? undefined,
+      supplier: part.supplier ?? undefined,
+    };
   }
 
   async findByPartNumber(partNumber: string): Promise<PartBase> {
@@ -86,15 +107,29 @@ export class PartService {
     if (!part) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.PART_NOT_FOUND);
     }
-    return part;
+    return {
+      ...part,
+      description: part.description ?? undefined,
+      supplier: part.supplier ?? undefined,
+    };
   }
 
   async findBySupplier(supplier: string): Promise<PartBase[]> {
-    return this.partRepository.findBySupplier(supplier);
+    const parts = await this.partRepository.findBySupplier(supplier);
+    return parts.map(part => ({
+      ...part,
+      description: part.description ?? undefined,
+      supplier: part.supplier ?? undefined,
+    }));
   }
 
   async findLowStock(): Promise<PartBase[]> {
-    return this.partRepository.findLowStock();
+    const parts = await this.partRepository.findLowStock();
+    return parts.map(part => ({
+      ...part,
+      description: part.description ?? undefined,
+      supplier: part.supplier ?? undefined,
+    }));
   }
 
   async update(id: string, data: UpdatePartDto): Promise<PartBase> {
@@ -138,7 +173,12 @@ export class PartService {
       updateData.supplier = data.supplier;
     }
 
-    return this.partRepository.update(id, updateData);
+    const updatedPart = await this.partRepository.update(id, updateData);
+    return {
+      ...updatedPart,
+      description: updatedPart.description ?? undefined,
+      supplier: updatedPart.supplier ?? undefined,
+    };
   }
 
   async updateStock(id: string, quantity: number): Promise<PartBase> {
@@ -152,7 +192,12 @@ export class PartService {
       this.errorHandler.handleConflictError(ERROR_MESSAGES.INSUFFICIENT_STOCK);
     }
 
-    return this.partRepository.update(id, { stock: newStock });
+    const updatedPart = await this.partRepository.update(id, { stock: newStock });
+    return {
+      ...updatedPart,
+      description: updatedPart.description ?? undefined,
+      supplier: updatedPart.supplier ?? undefined,
+    };
   }
 
   async remove(id: string): Promise<PartBase> {
@@ -161,6 +206,11 @@ export class PartService {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.PART_NOT_FOUND);
     }
 
-    return this.partRepository.update(id, { isActive: false });
+    const updatedPart = await this.partRepository.update(id, { isActive: false });
+    return {
+      ...updatedPart,
+      description: updatedPart.description ?? undefined,
+      supplier: updatedPart.supplier ?? undefined,
+    };
   }
 }

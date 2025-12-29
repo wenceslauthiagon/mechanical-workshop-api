@@ -20,9 +20,9 @@ describe('ServiceOrderPricingDomainService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.subtotalServices.amount).toBe(250);
-      expect(result.subtotalParts.amount).toBe(0);
-      expect(result.subtotal.amount).toBe(250);
+      expect(result.subtotalServices.amount.toNumber()).toBe(250);
+      expect(result.subtotalParts.amount.toNumber()).toBe(0);
+      expect(result.subtotal.amount.toNumber()).toBe(250);
     });
 
     it('TC0002 - Should calculate subtotal for parts only', () => {
@@ -36,9 +36,9 @@ describe('ServiceOrderPricingDomainService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.subtotalServices.amount).toBe(0);
-      expect(result.subtotalParts.amount).toBe(280);
-      expect(result.subtotal.amount).toBe(280);
+      expect(result.subtotalServices.amount.toNumber()).toBe(0);
+      expect(result.subtotalParts.amount.toNumber()).toBe(280);
+      expect(result.subtotal.amount.toNumber()).toBe(280);
     });
 
     it('TC0003 - Should calculate subtotal for services and parts', () => {
@@ -49,9 +49,9 @@ describe('ServiceOrderPricingDomainService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.subtotalServices.amount).toBe(100);
-      expect(result.subtotalParts.amount).toBe(100);
-      expect(result.subtotal.amount).toBe(200);
+      expect(result.subtotalServices.amount.toNumber()).toBe(100);
+      expect(result.subtotalParts.amount.toNumber()).toBe(100);
+      expect(result.subtotal.amount.toNumber()).toBe(200);
     });
 
     it('TC0004 - Should apply discount when percentage is provided', () => {
@@ -63,8 +63,8 @@ describe('ServiceOrderPricingDomainService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.discountAmount.amount).toBe(10);
-      expect(result.totalAmount.amount).toBe(90);
+      expect(result.discountAmount.amount.toNumber()).toBe(10);
+      expect(result.totalAmount.amount.toNumber()).toBe(90);
     });
 
     it('TC0005 - Should not apply discount when percentage is not provided', () => {
@@ -75,7 +75,7 @@ describe('ServiceOrderPricingDomainService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.discountAmount.amount).toBe(0);
+      expect(result.discountAmount.amount.toNumber()).toBe(0);
     });
 
     it('TC0006 - Should apply tax when percentage is provided', () => {
@@ -87,8 +87,8 @@ describe('ServiceOrderPricingDomainService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.taxAmount.amount).toBe(10);
-      expect(result.totalAmount.amount).toBe(110);
+      expect(result.taxAmount.amount.toNumber()).toBe(10);
+      expect(result.totalAmount.amount.toNumber()).toBe(110);
     });
 
     it('TC0007 - Should not apply tax when percentage is not provided', () => {
@@ -99,7 +99,7 @@ describe('ServiceOrderPricingDomainService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.taxAmount.amount).toBe(0);
+      expect(result.taxAmount.amount.toNumber()).toBe(0);
     });
 
     it('TC0008 - Should apply discount and tax correctly', () => {
@@ -112,9 +112,9 @@ describe('ServiceOrderPricingDomainService', () => {
 
       const result = service.calculate(input);
 
-      expect(result.discountAmount.amount).toBe(10);
-      expect(result.taxAmount.amount).toBe(9);
-      expect(result.totalAmount.amount).toBe(99);
+      expect(result.discountAmount.amount.toNumber()).toBe(10);
+      expect(result.taxAmount.amount.toNumber()).toBe(9);
+      expect(result.totalAmount.amount.toNumber()).toBe(99);
     });
   });
 
@@ -139,11 +139,7 @@ describe('ServiceOrderPricingDomainService', () => {
 
   describe('calculateEstimatedCompletionDate', () => {
     it('TC0001 - Should calculate completion date with default working hours', () => {
-<<<<<<< HEAD
       const startDate = new Date('2024-10-20T12:00:00Z');
-=======
-      const startDate = new Date('2024-10-20');
->>>>>>> develop
       const estimatedMinutes = 480;
 
       const result = service.calculateEstimatedCompletionDate(
@@ -151,19 +147,11 @@ describe('ServiceOrderPricingDomainService', () => {
         estimatedMinutes,
       );
 
-<<<<<<< HEAD
       expect(result.getTime()).toBeGreaterThan(startDate.getTime());
     });
 
     it('TC0002 - Should calculate completion date with custom working hours', () => {
       const startDate = new Date('2024-10-20T12:00:00Z');
-=======
-      expect(result.getDate()).toBe(20);
-    });
-
-    it('TC0002 - Should calculate completion date with custom working hours', () => {
-      const startDate = new Date('2024-10-20');
->>>>>>> develop
       const estimatedMinutes = 480;
       const workingHoursPerDay = 4;
 
@@ -173,19 +161,11 @@ describe('ServiceOrderPricingDomainService', () => {
         workingHoursPerDay,
       );
 
-<<<<<<< HEAD
       expect(result.getTime()).toBeGreaterThan(startDate.getTime());
     });
 
     it('TC0003 - Should round up days when minutes exceed working hours', () => {
       const startDate = new Date('2024-10-20T12:00:00Z');
-=======
-      expect(result.getDate()).toBe(21);
-    });
-
-    it('TC0003 - Should round up days when minutes exceed working hours', () => {
-      const startDate = new Date('2024-10-20');
->>>>>>> develop
       const estimatedMinutes = 500;
       const workingHoursPerDay = 8;
 
@@ -195,11 +175,8 @@ describe('ServiceOrderPricingDomainService', () => {
         workingHoursPerDay,
       );
 
-<<<<<<< HEAD
       expect(result.getTime()).toBeGreaterThan(startDate.getTime());
-=======
-      expect(result.getDate()).toBe(21);
->>>>>>> develop
     });
   });
 });
+

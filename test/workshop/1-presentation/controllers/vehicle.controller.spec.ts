@@ -18,25 +18,18 @@ describe('VehicleController', () => {
 
   const mockVehicleData: VehicleResponseDto = {
     id: mockVehicleId,
-    licensePlate: mockLicensePlate,
+    plate: mockLicensePlate,
     brand: faker.vehicle.manufacturer(),
     model: faker.vehicle.model(),
     year: faker.date.past().getFullYear(),
     color: faker.vehicle.color(),
     customerId: mockCustomerId,
-    customer: {
-      id: mockCustomerId,
-      name: faker.person.fullName(),
-      document: faker.string.numeric(11),
-      email: faker.internet.email(),
-      phone: faker.phone.number(),
-    },
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
   };
 
   const mockCreateVehicleDto: CreateVehicleDto = {
-    licensePlate: 'XYZ-5678',
+    plate: 'XYZ-5678',
     brand: faker.vehicle.manufacturer(),
     model: faker.vehicle.model(),
     year: faker.date.past().getFullYear(),

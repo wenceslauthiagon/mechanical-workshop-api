@@ -15,10 +15,7 @@ import { ErrorHandlerService } from '../../../shared/services/error-handler.serv
 import { NotificationService } from './notification.service';
 import { BUDGET_CONSTANTS } from '../../../shared/constants/budget.constants';
 import { BudgetWithRelationsResponseDto } from '../../1-presentation/dtos/budget/budget-with-relations-response.dto';
-<<<<<<< HEAD
 import { PaginationDto, PaginatedResponseDto } from '../../../shared';
-=======
->>>>>>> develop
 
 @Injectable()
 export class BudgetService {

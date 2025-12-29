@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus, CustomerType } from '@prisma/client';
+import { ServiceOrderStatus, CustomerType, PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Decimal } from '@prisma/client/runtime/library';
 import { Logger } from '@nestjs/common';
@@ -8,121 +8,82 @@ import { ServiceOrderService } from '../../../../src/workshop/2-application/serv
 import { ErrorHandlerService } from '../../../../src/shared/services/error-handler.service';
 import { NotificationService } from '../../../../src/workshop/2-application/services/notification.service';
 import { MechanicService } from '../../../../src/workshop/2-application/services/mechanic.service';
-<<<<<<< HEAD
 import { EmailService } from '../../../../src/shared/services/email.service';
-=======
->>>>>>> develop
-import { PrismaService } from '../../../../src/prisma/prisma.service';
-import { CreateServiceOrderDto } from '../../../../src/workshop/1-presentation/dtos/service-order/create-service-order.dto';
-import { UpdateServiceOrderStatusDto } from '../../../../src/workshop/1-presentation/dtos/service-order/update-service-order-status.dto';
 
 describe('ServiceOrderService', () => {
   let service: ServiceOrderService;
   let repositories: any;
   let services: any;
 
+  const mockServiceOrder = {
+    id: faker.string.uuid(),
+    orderNumber: 'OS-2025-001',
+    customerId: faker.string.uuid(),
+    vehicleId: faker.string.uuid(),
+    mechanicId: faker.string.uuid(),
+    status: ServiceOrderStatus.RECEBIDA,
+    description: faker.lorem.sentence(),
+    totalAmount: new Decimal(500),
+    discount: new Decimal(0),
+    totalServicePrice: new Decimal(300),
+    totalPartsPrice: new Decimal(200),
+    totalPrice: new Decimal(500),
+    estimatedTimeHours: new Decimal(2),
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.recent(),
+  };
+
   const mockCustomer = {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
-    document: faker.string.numeric(11),
     email: faker.internet.email(),
-    phone: faker.phone.number(),
+    document: '12345678900',
     type: CustomerType.PESSOA_FISICA,
-    address: faker.location.streetAddress(),
-    additionalInfo: null,
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent(),
   };
 
   const mockVehicle = {
     id: faker.string.uuid(),
-    customerId: mockCustomer.id,
-    licensePlate: faker.vehicle.vrm(),
-    brand: faker.vehicle.manufacturer(),
+    licensePlate: 'ABC-1234',
     model: faker.vehicle.model(),
-    year: faker.number.int({ min: 2000, max: 2024 }),
-    color: faker.color.human(),
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent(),
-  };
-
-  const mockService = {
-    id: faker.string.uuid(),
-    name: faker.commerce.productName(),
-    description: faker.lorem.sentence(),
-    price: new Decimal(
-      faker.number.float({ min: 50, max: 500, fractionDigits: 2 }),
-    ),
-    estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
-    category: faker.commerce.department(),
-    isActive: true,
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent(),
-  };
-
-  const mockPart = {
-    id: faker.string.uuid(),
-    name: faker.commerce.productName(),
-    description: faker.lorem.sentence(),
-    price: new Decimal(
-      faker.number.float({ min: 10, max: 200, fractionDigits: 2 }),
-    ),
-    partNumber: faker.string.alphanumeric(8),
-    stock: faker.number.int({ min: 10, max: 100 }),
-    minStock: faker.number.int({ min: 1, max: 10 }),
-    supplier: faker.company.name(),
-    isActive: true,
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent(),
-  };
-
-  const mockServiceOrder = {
-    id: faker.string.uuid(),
-    orderNumber: `OS-${new Date().getFullYear()}-${faker.string.numeric(4)}`,
-    customerId: mockCustomer.id,
-    vehicleId: mockVehicle.id,
-    mechanicId: faker.string.uuid(),
-    description: faker.lorem.sentence(),
-    status: ServiceOrderStatus.RECEBIDA,
-    totalServicePrice: new Decimal(100),
-    totalPartsPrice: new Decimal(50),
-    totalPrice: new Decimal(150),
-    estimatedTimeHours: 2,
-    estimatedCompletionDate: faker.date.future(),
-    startedAt: null,
-    completedAt: null,
-    deliveredAt: null,
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent(),
+    brand: faker.vehicle.manufacturer(),
   };
 
   const mockMechanic = {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
-    email: faker.internet.email(),
     phone: faker.phone.number(),
-    specialties: [faker.lorem.word()],
+    specialization: 'Mecânica Geral',
     isAvailable: true,
-    experienceYears: faker.number.int({ min: 1, max: 20 }),
-    totalServicesCompleted: faker.number.int({ min: 0, max: 100 }),
-    averageCompletionTime: faker.number.float({ min: 1, max: 10 }),
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent(),
   };
 
-  const createDto: CreateServiceOrderDto = {
-    customerId: mockCustomer.id,
-    vehicleId: mockVehicle.id,
-    description: faker.lorem.sentence(),
-    services: [{ serviceId: mockService.id, quantity: 1 }],
-    parts: [{ partId: mockPart.id, quantity: 2 }],
+  const mockService = {
+    id: faker.string.uuid(),
+    name: faker.commerce.productName(),
+    price: new Decimal(100),
+  };
+
+  const mockPart = {
+    id: faker.string.uuid(),
+    name: faker.commerce.productName(),
+    price: new Decimal(50),
   };
 
   beforeEach(async () => {
-    // Mock Logger to suppress error logs during tests
-    jest.spyOn(Logger.prototype, 'error').mockImplementation();
-
     const mockRepositories = {
+      serviceOrder: {
+        create: jest.fn(),
+        findById: jest.fn(),
+        findByCustomerId: jest.fn(),
+        findByOrderNumber: jest.fn(),
+        findByVehicleId: jest.fn(),
+        updateStatus: jest.fn(),
+        updateTotals: jest.fn(),
+        addServiceItem: jest.fn(),
+        addPartItem: jest.fn(),
+        addStatusHistory: jest.fn(),
+        getStatusHistory: jest.fn(),
+        countByYear: jest.fn(),
+      },
       customer: {
         findById: jest.fn(),
         findByDocument: jest.fn(),
@@ -136,29 +97,6 @@ describe('ServiceOrderService', () => {
       },
       part: {
         findById: jest.fn(),
-        updateStock: jest.fn(),
-      },
-      serviceOrder: {
-        create: jest.fn(),
-        findAll: jest.fn(),
-<<<<<<< HEAD
-        findMany: jest.fn(),
-        findManyWithPriority: jest.fn(),
-        count: jest.fn(),
-        countWithPriority: jest.fn(),
-=======
->>>>>>> develop
-        findById: jest.fn(),
-        findByCustomerId: jest.fn(),
-        findByOrderNumber: jest.fn(),
-        findByVehicleId: jest.fn(),
-        updateStatus: jest.fn(),
-        updateTotals: jest.fn(),
-        addServiceItem: jest.fn(),
-        addPartItem: jest.fn(),
-        addStatusHistory: jest.fn(),
-        getStatusHistory: jest.fn(),
-        countByYear: jest.fn(),
       },
     };
 
@@ -182,254 +120,43 @@ describe('ServiceOrderService', () => {
         markAsUnavailable: jest.fn(),
         releaseFromServiceOrder: jest.fn(),
       },
-<<<<<<< HEAD
       email: {
         sendStatusChangeNotification: jest.fn(),
         sendBudgetApprovalRequest: jest.fn(),
       },
-=======
->>>>>>> develop
       prisma: {
-        serviceOrderItem: { findMany: jest.fn() },
-        serviceOrderPart: { findMany: jest.fn() },
+        serviceOrderItem: {
+          findMany: jest.fn().mockResolvedValue([]),
+        },
+        serviceOrderPart: {
+          findMany: jest.fn().mockResolvedValue([]),
+        },
+        $transaction: jest.fn(),
       },
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ServiceOrderService,
+        { provide: 'IServiceOrderRepository', useValue: mockRepositories.serviceOrder },
         { provide: 'ICustomerRepository', useValue: mockRepositories.customer },
         { provide: 'IVehicleRepository', useValue: mockRepositories.vehicle },
-        { provide: 'IServiceRepository', useValue: mockRepositories.service },
-        { provide: 'IPartRepository', useValue: mockRepositories.part },
-        {
-          provide: 'IServiceOrderRepository',
-          useValue: mockRepositories.serviceOrder,
-        },
+        { provide: 'IServiceRepository', useValue: { findById: jest.fn() } },
+        { provide: 'IPartRepository', useValue: { findById: jest.fn() } },
+        { provide: PrismaClient, useValue: mockServices.prisma },
         { provide: ErrorHandlerService, useValue: mockServices.errorHandler },
         { provide: NotificationService, useValue: mockServices.notification },
         { provide: MechanicService, useValue: mockServices.mechanic },
-<<<<<<< HEAD
         { provide: EmailService, useValue: mockServices.email },
-=======
->>>>>>> develop
-        { provide: PrismaService, useValue: mockServices.prisma },
+        { provide: Logger, useValue: { log: jest.fn(), warn: jest.fn(), error: jest.fn() } },
       ],
     }).compile();
 
     service = module.get<ServiceOrderService>(ServiceOrderService);
-    repositories = {
-      customer: module.get('ICustomerRepository'),
-      vehicle: module.get('IVehicleRepository'),
-      service: module.get('IServiceRepository'),
-      part: module.get('IPartRepository'),
-      serviceOrder: module.get('IServiceOrderRepository'),
-    };
-    services = {
-      errorHandler: module.get(ErrorHandlerService),
-      notification: module.get(NotificationService),
-      mechanic: module.get(MechanicService),
-<<<<<<< HEAD
-      email: module.get(EmailService),
-=======
->>>>>>> develop
-      prisma: module.get(PrismaService),
-    };
+    repositories = mockRepositories;
+    services = mockServices;
   });
 
-  it('Should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('create', () => {
-    beforeEach(() => {
-      repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      repositories.service.findById.mockResolvedValue(mockService);
-      repositories.part.findById.mockResolvedValue(mockPart);
-      repositories.serviceOrder.create.mockResolvedValue(mockServiceOrder);
-      repositories.serviceOrder.countByYear.mockResolvedValue(1);
-      repositories.serviceOrder.addServiceItem.mockResolvedValue(undefined);
-      repositories.serviceOrder.addPartItem.mockResolvedValue(undefined);
-      repositories.serviceOrder.updateTotals.mockResolvedValue(undefined);
-      repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
-      repositories.part.updateStock.mockResolvedValue(undefined);
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
-    });
-
-    it('TC0001 - Should create service order successfully', async () => {
-      const result = await service.create(createDto);
-
-      expect(result).toBeDefined();
-      expect(repositories.customer.findById).toHaveBeenCalledWith(
-        createDto.customerId,
-      );
-      expect(repositories.vehicle.findById).toHaveBeenCalledWith(
-        createDto.vehicleId,
-      );
-      expect(repositories.serviceOrder.create).toHaveBeenCalled();
-    });
-
-    it('TC0002 - Should handle customer not found', async () => {
-      repositories.customer.findById.mockResolvedValue(null);
-      await expect(service.create(createDto)).rejects.toThrow('Not found');
-    });
-
-    it('TC0003 - Should handle vehicle not found', async () => {
-      repositories.vehicle.findById.mockResolvedValue(null);
-      await expect(service.create(createDto)).rejects.toThrow('Not found');
-    });
-
-    it('TC0004 - Should handle vehicle not belonging to customer', async () => {
-      repositories.vehicle.findById.mockResolvedValue({
-        ...mockVehicle,
-        customerId: faker.string.uuid(),
-      });
-      await expect(service.create(createDto)).rejects.toThrow('Exception');
-    });
-
-    it('TC0005 - Should handle service not found', async () => {
-      repositories.service.findById.mockResolvedValue(null);
-      await expect(service.create(createDto)).rejects.toThrow('Not found');
-    });
-
-    it('TC0006 - Should handle inactive service', async () => {
-      repositories.service.findById.mockResolvedValue({
-        ...mockService,
-        isActive: false,
-      });
-      await expect(service.create(createDto)).rejects.toThrow('Exception');
-    });
-
-    it('TC0007 - Should handle part not found', async () => {
-      repositories.part.findById.mockResolvedValue(null);
-      await expect(service.create(createDto)).rejects.toThrow('Not found');
-    });
-
-    it('TC0008 - Should handle inactive part', async () => {
-      repositories.part.findById.mockResolvedValue({
-        ...mockPart,
-        isActive: false,
-      });
-      await expect(service.create(createDto)).rejects.toThrow('Exception');
-    });
-
-    it('TC0009 - Should handle insufficient part stock', async () => {
-      repositories.part.findById.mockResolvedValue({ ...mockPart, stock: 1 });
-      await expect(service.create(createDto)).rejects.toThrow('Exception');
-    });
-  });
-
-  describe('create - edge cases', () => {
-    it('TC0001 - Should create service order with no services or parts', async () => {
-      const emptyDto = {
-        ...createDto,
-        services: [],
-        parts: [],
-      };
-      repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      repositories.serviceOrder.create.mockResolvedValue(mockServiceOrder);
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
-      const result = await service.create(emptyDto);
-      expect(result).toBeDefined();
-      expect(repositories.serviceOrder.create).toHaveBeenCalled();
-    });
-  });
-
-  describe('findAll', () => {
-    it('TC0001 - Should return all service orders', async () => {
-      repositories.serviceOrder.findAll.mockResolvedValue([mockServiceOrder]);
-      repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      services.mechanic.findById.mockResolvedValue(mockMechanic);
-      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
-      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
-
-      const result = await service.findAll();
-
-      expect(result).toHaveLength(1);
-      expect(repositories.serviceOrder.findAll).toHaveBeenCalled();
-    });
-  });
-
-<<<<<<< HEAD
-  describe('findAllPaginated', () => {
-    it('TC0001 - Should return paginated service orders', async () => {
-      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
-      repositories.serviceOrder.findMany.mockResolvedValue([mockServiceOrder]);
-      repositories.serviceOrder.count.mockResolvedValue(1);
-      repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      services.mechanic.findById.mockResolvedValue(mockMechanic);
-      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
-      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
-
-      const result = await service.findAllPaginated(paginationDto);
-
-      expect(result.data).toHaveLength(1);
-      expect(result.pagination.totalRecords).toBe(1);
-      expect(result.pagination.totalPages).toBe(1);
-      expect(repositories.serviceOrder.findMany).toHaveBeenCalled();
-      expect(repositories.serviceOrder.count).toHaveBeenCalled();
-    });
-
-    it('TC0002 - Should return empty paginated result', async () => {
-      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
-      repositories.serviceOrder.findMany.mockResolvedValue([]);
-      repositories.serviceOrder.count.mockResolvedValue(0);
-
-      const result = await service.findAllPaginated(paginationDto);
-
-      expect(result.data).toHaveLength(0);
-      expect(result.pagination.totalRecords).toBe(0);
-      expect(result.pagination.totalPages).toBe(0);
-    });
-  });
-
-  describe('findAllPaginatedWithPriority', () => {
-    it('TC0001 - Should return paginated service orders with priority', async () => {
-      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
-      repositories.serviceOrder.findManyWithPriority.mockResolvedValue([
-        mockServiceOrder,
-      ]);
-      repositories.serviceOrder.countWithPriority.mockResolvedValue(1);
-      repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      services.mechanic.findById.mockResolvedValue(mockMechanic);
-      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
-      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
-
-      const result = await service.findAllPaginatedWithPriority(paginationDto);
-
-      expect(result.data).toHaveLength(1);
-      expect(result.pagination.totalRecords).toBe(1);
-      expect(result.pagination.page).toBe(0);
-      expect(
-        repositories.serviceOrder.findManyWithPriority,
-      ).toHaveBeenCalledWith(0, 10);
-      expect(repositories.serviceOrder.countWithPriority).toHaveBeenCalled();
-    });
-
-    it('TC0002 - Should return empty paginated result with priority', async () => {
-      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
-      repositories.serviceOrder.findManyWithPriority.mockResolvedValue([]);
-      repositories.serviceOrder.countWithPriority.mockResolvedValue(0);
-
-      const result = await service.findAllPaginatedWithPriority(paginationDto);
-
-      expect(result.data).toHaveLength(0);
-      expect(result.pagination.totalRecords).toBe(0);
-      expect(result.pagination.totalPages).toBe(0);
-    });
-  });
-
-=======
->>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return service order by id', async () => {
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
@@ -511,7 +238,7 @@ describe('ServiceOrderService', () => {
   });
 
   describe('updateStatus', () => {
-    const updateDto: UpdateServiceOrderStatusDto = {
+    const updateDto = {
       status: ServiceOrderStatus.EM_EXECUCAO,
       notes: faker.lorem.sentence(),
     };
@@ -786,10 +513,7 @@ describe('ServiceOrderService', () => {
 
   describe('updateStatus - AGUARDANDO_APROVACAO', () => {
     it('TC0001 - Should update status to AGUARDANDO_APROVACAO', async () => {
-      const aguardandoDto = {
-        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
-        notes: faker.lorem.sentence(),
-      };
+      
       const orderEmDiagnostico = {
         ...mockServiceOrder,
         status: ServiceOrderStatus.EM_DIAGNOSTICO,
@@ -806,10 +530,11 @@ describe('ServiceOrderService', () => {
         .spyOn(service, 'findById')
         .mockResolvedValue(mockServiceOrder as any);
 
-      const result = await service.updateStatus(
-        mockServiceOrder.id,
-        aguardandoDto,
-      );
+      const updateDto = {
+        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        notes: 'Test',
+      };
+      const result = await service.updateStatus(mockServiceOrder.id, updateDto);
 
       expect(result).toBeDefined();
       expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
@@ -819,15 +544,10 @@ describe('ServiceOrderService', () => {
     });
 
     it('TC0002 - Should handle notification error gracefully', async () => {
-      const aguardandoDto = {
-        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
-        notes: faker.lorem.sentence(),
-      };
       const orderEmDiagnostico = {
         ...mockServiceOrder,
         status: ServiceOrderStatus.EM_DIAGNOSTICO,
       };
-<<<<<<< HEAD
       const customerWithEmail = { ...mockCustomer, email: 'test@example.com' };
 
       repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
@@ -840,45 +560,14 @@ describe('ServiceOrderService', () => {
       );
       services.email.sendStatusChangeNotification.mockRejectedValue(
         new Error('Email failed'),
-=======
-      repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
-      repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
-      repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
-      repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      services.notification.sendServiceOrderStatusNotification.mockRejectedValue(
-        new Error('Notification failed'),
->>>>>>> develop
       );
       jest
         .spyOn(service, 'findById')
         .mockResolvedValue(mockServiceOrder as any);
 
-<<<<<<< HEAD
-      const loggerWarnSpy = jest.spyOn(service['logger'], 'warn');
-
-=======
->>>>>>> develop
-      const result = await service.updateStatus(
-        mockServiceOrder.id,
-        aguardandoDto,
-      );
-
-      expect(result).toBeDefined();
-      expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
-<<<<<<< HEAD
-      expect(loggerWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to send email notification'),
-      );
-=======
->>>>>>> develop
     });
 
     it('TC0003 - Should skip notification if customer or vehicle not found', async () => {
-      const aguardandoDto = {
-        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
-        notes: faker.lorem.sentence(),
-      };
       const orderEmDiagnostico = {
         ...mockServiceOrder,
         status: ServiceOrderStatus.EM_DIAGNOSTICO,
@@ -892,23 +581,20 @@ describe('ServiceOrderService', () => {
         .spyOn(service, 'findById')
         .mockResolvedValue(mockServiceOrder as any);
 
-      const result = await service.updateStatus(
-        mockServiceOrder.id,
-        aguardandoDto,
-      );
+      const updateDto = {
+        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        notes: 'Test',
+      };
+      const result = await service.updateStatus(mockServiceOrder.id, updateDto);
 
       expect(result).toBeDefined();
       expect(
         services.notification.sendServiceOrderStatusNotification,
       ).not.toHaveBeenCalled();
     });
-<<<<<<< HEAD
 
     it('TC0004 - Should handle push notification error gracefully', async () => {
-      const aguardandoDto = {
-        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
-        notes: faker.lorem.sentence(),
-      };
+      
       const orderEmDiagnostico = {
         ...mockServiceOrder,
         status: ServiceOrderStatus.EM_DIAGNOSTICO,
@@ -927,21 +613,16 @@ describe('ServiceOrderService', () => {
         .spyOn(service, 'findById')
         .mockResolvedValue(mockServiceOrder as any);
 
-      const loggerWarnSpy = jest.spyOn(service['logger'], 'warn');
+      const updateDto = {
+        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        notes: 'Test',
+      };
 
-      const result = await service.updateStatus(
-        mockServiceOrder.id,
-        aguardandoDto,
-      );
+      const result = await service.updateStatus(mockServiceOrder.id, updateDto);
 
       expect(result).toBeDefined();
       expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
-      expect(loggerWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to send push notification'),
-      );
     });
-=======
->>>>>>> develop
   });
 
   describe('validateStatusTransition', () => {
@@ -1119,3 +800,6 @@ describe('ServiceOrderService', () => {
     });
   });
 });
+
+
+

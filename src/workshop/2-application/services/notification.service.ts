@@ -26,22 +26,14 @@ export class NotificationService {
     try {
       const emailData = this.prepareBudgetEmailData(budget, customerName);
 
-<<<<<<< HEAD
       // Send email
-=======
-      // Enviar email
->>>>>>> develop
       await this.emailProvider.sendEmail({
         to: customerEmail,
         subject: `${NOTIFICATION_CONSTANTS.TEMPLATES.BUDGET_READY} - ${budget.id.substring(0, 8)}`,
         html: EmailTemplates.budgetReady(emailData),
       });
 
-<<<<<<< HEAD
       // Send SMS if enabled and phone number provided.
-=======
-      // Enviar SMS se habilitado e telefone fornecido
->>>>>>> develop
       if (NOTIFICATION_CONSTANTS.SMS.ENABLED && customerPhone) {
         await this.smsProvider.sendSms({
           phone: customerPhone,
@@ -53,7 +45,7 @@ export class NotificationService {
         budgetId: budget.id,
         customerEmail,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_READY_ERROR, {
         error: error.message,
         budgetId: budget.id,
@@ -81,7 +73,7 @@ export class NotificationService {
         budgetId: budget.id,
         customerEmail,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_APPROVED_ERROR, {
         error: error.message,
         budgetId: budget.id,
@@ -109,7 +101,7 @@ export class NotificationService {
         budgetId: budget.id,
         customerEmail,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.BUDGET_REJECTED_ERROR, {
         error: error.message,
         budgetId: budget.id,
@@ -130,7 +122,7 @@ export class NotificationService {
   ): Promise<void> {
     try {
       const message =
-        NOTIFICATION_CONSTANTS.STATUS_MESSAGES[status] ||
+        (NOTIFICATION_CONSTANTS.STATUS_MESSAGES as Record<string, string>)[status] ||
         `Status atualizado para ${status}`;
       const subject = `${NOTIFICATION_CONSTANTS.TEMPLATES.SERVICE_ORDER_STATUS} ${orderNumber}`;
 
@@ -149,10 +141,6 @@ export class NotificationService {
         }),
       });
 
-<<<<<<< HEAD
-=======
-      // Enviar SMS se habilitado e telefone fornecido
->>>>>>> develop
       if (NOTIFICATION_CONSTANTS.SMS.ENABLED && customerPhone) {
         await this.smsProvider.sendSms({
           phone: customerPhone,
@@ -166,7 +154,7 @@ export class NotificationService {
         status,
         customerEmail,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.SERVICE_ORDER_ERROR, {
         error: error.message,
         serviceOrderId,

@@ -5,7 +5,7 @@ import type { ICustomerRepository } from '../../3-domain/repositories/customer-r
 import { CreateVehicleDto } from '../../1-presentation/dtos/vehicle/create-vehicle.dto';
 import { UpdateVehicleDto } from '../../1-presentation/dtos/vehicle/update-vehicle.dto';
 import { VehicleResponseDto } from '../../1-presentation/dtos/vehicle/vehicle-response.dto';
-import type { Vehicle, Customer } from '@prisma/client';
+import type { Vehicle } from '@prisma/client';
 import { ERROR_MESSAGES } from '../../../shared/constants/messages.constants';
 import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
@@ -29,7 +29,7 @@ export class VehicleService {
     }
 
     const existingVehicle = await this.vehicleRepository.findByPlate(
-      data.licensePlate,
+      data.plate,
     );
     if (existingVehicle) {
       this.errorHandler.generateException(
@@ -38,27 +38,19 @@ export class VehicleService {
       );
     }
 
-    const vehicle = await this.vehicleRepository.create(data);
-    // Fetch fresh customer data
-    const freshCustomer = await this.customerRepository.findById(
-      data.customerId,
-    );
-    return this.mapToResponseDto(vehicle, freshCustomer);
+    // Map DTO to Prisma format
+    const { plate, ...rest } = data;
+    const vehicle = await this.vehicleRepository.create({
+      ...rest,
+      licensePlate: plate,
+      color: rest.color || '',
+    });
+    return this.mapToResponseDto(vehicle);
   }
 
   async findAll(): Promise<VehicleResponseDto[]> {
     const vehicles = await this.vehicleRepository.findAll();
-    // Fetch fresh customer data for each vehicle
-    const vehiclesWithCustomers = await Promise.all(
-      vehicles.map(async (vehicle) => {
-        const customer = await this.customerRepository.findById(
-          vehicle.customerId,
-        );
-        return this.mapToResponseDto(vehicle, customer);
-      }),
-    );
-    return vehiclesWithCustomers;
-<<<<<<< HEAD
+    return vehicles.map((vehicle) => this.mapToResponseDto(vehicle));
   }
 
   async findAllPaginated(
@@ -71,18 +63,11 @@ export class VehicleService {
       this.vehicleRepository.count(),
     ]);
 
-    const vehiclesWithCustomers = await Promise.all(
-      vehicles.map(async (vehicle) => {
-        const customer = await this.customerRepository.findById(
-          vehicle.customerId,
-        );
-        return this.mapToResponseDto(vehicle, customer);
-      }),
+    const vehiclesWithCustomers = vehicles.map((vehicle) =>
+      this.mapToResponseDto(vehicle),
     );
 
     return new PaginatedResponseDto(vehiclesWithCustomers, page, size, total);
-=======
->>>>>>> develop
   }
 
   async findById(id: string): Promise<VehicleResponseDto> {
@@ -90,16 +75,12 @@ export class VehicleService {
     if (!vehicle) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
-    // Fetch fresh customer data
-    const customer = await this.customerRepository.findById(vehicle.customerId);
-    return this.mapToResponseDto(vehicle, customer);
+    return this.mapToResponseDto(vehicle);
   }
 
   async findByCustomerId(customerId: string): Promise<VehicleResponseDto[]> {
     const vehicles = await this.vehicleRepository.findByCustomerId(customerId);
-    // Fetch fresh customer data
-    const customer = await this.customerRepository.findById(customerId);
-    return vehicles.map((vehicle) => this.mapToResponseDto(vehicle, customer));
+    return vehicles.map((vehicle) => this.mapToResponseDto(vehicle));
   }
 
   async findByLicensePlate(licensePlate: string): Promise<VehicleResponseDto> {
@@ -107,9 +88,7 @@ export class VehicleService {
     if (!vehicle) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
-    // Fetch fresh customer data
-    const customer = await this.customerRepository.findById(vehicle.customerId);
-    return this.mapToResponseDto(vehicle, customer);
+    return this.mapToResponseDto(vehicle);
   }
 
   async update(
@@ -128,9 +107,9 @@ export class VehicleService {
       }
     }
 
-    if (data.licensePlate && data.licensePlate !== vehicle.licensePlate) {
+    if (data.plate && data.plate !== vehicle.licensePlate) {
       const existingVehicle = await this.vehicleRepository.findByPlate(
-        data.licensePlate,
+        data.plate,
       );
       if (existingVehicle) {
         this.errorHandler.handleConflictError(
@@ -139,12 +118,12 @@ export class VehicleService {
       }
     }
 
-    const updatedVehicle = await this.vehicleRepository.update(id, data);
-    // Fetch fresh customer data
-    const customer = await this.customerRepository.findById(
-      updatedVehicle.customerId,
-    );
-    return this.mapToResponseDto(updatedVehicle, customer);
+    // Map DTO to Prisma format if plate is present
+    const updateData = data.plate
+      ? { ...data, licensePlate: data.plate, plate: undefined }
+      : data;
+    const updatedVehicle = await this.vehicleRepository.update(id, updateData);
+    return this.mapToResponseDto(updatedVehicle);
   }
 
   async remove(id: string): Promise<void> {
@@ -165,11 +144,10 @@ export class VehicleService {
 
   private mapToResponseDto(
     vehicle: Vehicle,
-    customer?: Customer | null,
   ): VehicleResponseDto {
     return {
       id: vehicle.id,
-      licensePlate: vehicle.licensePlate,
+      plate: vehicle.licensePlate,
       customerId: vehicle.customerId,
       brand: vehicle.brand,
       model: vehicle.model,
@@ -177,15 +155,8 @@ export class VehicleService {
       color: vehicle.color,
       createdAt: vehicle.createdAt,
       updatedAt: vehicle.updatedAt,
-      customer: customer
-        ? {
-            id: customer.id,
-            name: customer.name,
-            document: customer.document,
-            email: customer.email,
-            phone: customer.phone,
-          }
-        : undefined,
     };
   }
 }
+
+

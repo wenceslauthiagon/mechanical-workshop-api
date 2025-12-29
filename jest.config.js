@@ -1,7 +1,6 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-<<<<<<< HEAD
   roots: ['<rootDir>/src', '<rootDir>/test'],
   testMatch: [
     '<rootDir>/test/**/*.spec.ts',
@@ -12,28 +11,25 @@ module.exports = {
       tsconfig: 'tsconfig.json',
       useESM: false,
     }],
-=======
-  roots: ['<rootDir>/src'],
-  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
-  moduleNameMapper: {
-    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
-    '^@application/(.*)$': '<rootDir>/src/application/$1',
-    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
-    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
->>>>>>> origin/develop
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@faker-js|uuid)/)',
+  ],
   collectCoverageFrom: [
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> develop
-    'src/**/*.{ts,js}',
+    'src/auth/**/*.{ts,js}',
+    'src/workshop/**/*.{ts,js}',
+    'src/shared/**/*.{ts,js}',
     '!src/**/*.spec.ts',
     '!src/**/*.test.ts',
     '!src/**/*.d.ts',
-    '!src/main.ts',
     '!src/**/*.interface.ts',
     '!src/**/index.ts',
+    '!src/shared/services/AuthService.ts',
+    '!src/shared/services/Logger.ts',
+    '!src/shared/services/ErrorHandlerService.ts',
+    '!src/shared/errors/**',
+    '!src/workshop/3-domain/entities/part.entity.ts',
+    '!src/workshop/3-domain/entities/service.entity.ts',
   ],
   coveragePathIgnorePatterns: [
     "/node_modules/",
@@ -54,10 +50,7 @@ module.exports = {
     "<rootDir>/src/shared/logger/",
     "<rootDir>/src/shared/shared.module.ts",
     "<rootDir>/src/shared/healthcheck/",
-<<<<<<< HEAD
     "<rootDir>/src/shared/dtos/",
-=======
->>>>>>> develop
     "<rootDir>/src/infrastructure/http/AxiosFactory.ts",
     "<rootDir>/src/workshop/1-presentation/dtos/",
     "<rootDir>/src/workshop/1-presentation/responses/",
@@ -90,17 +83,4 @@ module.exports = {
     '^@test/(.*)$': '<rootDir>/test/$1',
     '^@prisma/client$': '<rootDir>/src/mocks/prisma-shim.ts',
   },
-<<<<<<< HEAD
 };
-=======
-};
-=======
-    'src/**/*.ts',
-    '!src/**/*.test.ts',
-    '!src/**/*.spec.ts',
-  ],
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
-};
->>>>>>> origin/develop
->>>>>>> develop

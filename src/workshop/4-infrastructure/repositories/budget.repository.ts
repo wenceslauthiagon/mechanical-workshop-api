@@ -255,7 +255,6 @@ export class BudgetRepository implements IBudgetRepository {
     );
 
     return budgetsWithItems;
-<<<<<<< HEAD
   }
 
   async findMany(skip: number, take: number): Promise<Budget[]> {
@@ -280,8 +279,6 @@ export class BudgetRepository implements IBudgetRepository {
 
   async count(): Promise<number> {
     return this.prisma.budget.count();
-=======
->>>>>>> develop
   }
 
   async findExpired(): Promise<Budget[]> {

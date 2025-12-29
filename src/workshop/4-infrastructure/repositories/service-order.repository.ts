@@ -33,7 +33,6 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   async findAll() {
     return this.prisma.serviceOrder.findMany({
       orderBy: { createdAt: 'desc' },
-<<<<<<< HEAD
     });
   }
 
@@ -59,8 +58,6 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
           notIn: [ServiceOrderStatus.FINALIZADA, ServiceOrderStatus.ENTREGUE],
         },
       },
-=======
->>>>>>> develop
     });
 
     const sortedOrders = orders

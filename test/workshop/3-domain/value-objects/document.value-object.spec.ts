@@ -85,7 +85,7 @@ describe('Document', () => {
     it('TC0001 - Should format CPF correctly', () => {
       const document = new Document('52998224725');
 
-      const result = document.formatted;
+      const result = document.getFormatted();
 
       expect(result).toBe('529.982.247-25');
     });
@@ -93,7 +93,7 @@ describe('Document', () => {
     it('TC0002 - Should format CNPJ correctly', () => {
       const document = new Document('11222333000181');
 
-      const result = document.formatted;
+      const result = document.getFormatted();
 
       expect(result).toBe('11.222.333/0001-81');
     });

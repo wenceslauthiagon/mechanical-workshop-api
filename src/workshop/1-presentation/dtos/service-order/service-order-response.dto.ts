@@ -6,108 +6,108 @@ export class ServiceOrderResponseDto {
     description: 'ID único da ordem de serviço',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'Número da ordem de serviço',
     example: 'OS-2025-001',
   })
-  orderNumber: string;
+  orderNumber!: string;
 
   @ApiProperty({
     description: 'ID do cliente',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  customerId: string;
+  customerId!: string;
 
   @ApiProperty({
     description: 'ID do veículo',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  vehicleId: string;
+  vehicleId!: string;
 
   @ApiProperty({
     description: 'Status atual da ordem de serviço',
     enum: ServiceOrderStatus,
     example: ServiceOrderStatus.RECEBIDA,
   })
-  status: ServiceOrderStatus;
+  status!: ServiceOrderStatus;
 
   @ApiProperty({
     description: 'Descrição dos serviços solicitados',
     example: 'Troca de óleo e filtro, verificação de freios',
   })
-  description: string;
+  description!: string;
 
   @ApiProperty({
     description: 'Preço total dos serviços',
     example: '150.00',
   })
-  totalServicePrice: string;
+  totalServicePrice!: string;
 
   @ApiProperty({
     description: 'Preço total das peças',
     example: '75.50',
   })
-  totalPartsPrice: string;
+  totalPartsPrice!: string;
 
   @ApiProperty({
     description: 'Preço total da ordem de serviço',
     example: '225.50',
   })
-  totalPrice: string;
+  totalPrice!: string;
 
   @ApiProperty({
     description: 'Tempo estimado em horas',
     example: '2.5',
   })
-  estimatedTimeHours: string;
+  estimatedTimeHours!: string;
 
   @ApiProperty({
     description: 'Data estimada de conclusão',
     example: '2025-10-15T14:00:00.000Z',
   })
-  estimatedCompletionDate: Date;
+  estimatedCompletionDate!: Date;
 
   @ApiProperty({
     description: 'Data de início dos trabalhos',
     example: '2025-10-08T09:00:00.000Z',
     nullable: true,
   })
-  startedAt: Date | null;
+  startedAt!: Date | null;
 
   @ApiProperty({
     description: 'Data de conclusão dos trabalhos',
     example: '2025-10-10T16:00:00.000Z',
     nullable: true,
   })
-  completedAt: Date | null;
+  completedAt!: Date | null;
 
   @ApiProperty({
     description: 'Data de entrega ao cliente',
     example: '2025-10-11T10:00:00.000Z',
     nullable: true,
   })
-  deliveredAt: Date | null;
+  deliveredAt!: Date | null;
 
   @ApiProperty({
     description: 'Data de aprovação do orçamento',
     example: '2025-10-09T11:00:00.000Z',
     nullable: true,
   })
-  approvedAt: Date | null;
+  approvedAt!: Date | null;
 
   @ApiProperty({
     description: 'Data de criação',
     example: '2025-10-08T08:00:00.000Z',
   })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({
     description: 'Data de última atualização',
     example: '2025-10-08T08:30:00.000Z',
   })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @ApiProperty({
     description: 'Dados do cliente',
@@ -167,7 +167,7 @@ export class ServiceOrderResponseDto {
       },
     },
   })
-  services: Array<{
+  services!: Array<{
     id: string;
     serviceId: string;
     quantity: number;
@@ -202,7 +202,7 @@ export class ServiceOrderResponseDto {
       },
     },
   })
-  parts: Array<{
+  parts!: Array<{
     id: string;
     partId: string;
     quantity: number;

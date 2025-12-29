@@ -189,8 +189,8 @@ export class EmailTemplates {
       ENTREGUE: '🚗',
     };
 
-    const color = statusColors[data.status] || '#6c757d';
-    const icon = statusIcons[data.status] || '📋';
+    const color = (statusColors as Record<string, string>)[data.status] || '#6c757d';
+    const icon = (statusIcons as Record<string, string>)[data.status] || '🔔';
 
     return `
 <!DOCTYPE html>

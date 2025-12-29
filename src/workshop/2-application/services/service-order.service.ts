@@ -1,9 +1,6 @@
 import { HttpStatus, Injectable, Logger, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
-<<<<<<< HEAD
 import { EmailService } from '../../../shared/services/email.service';
-=======
->>>>>>> develop
 import { ServiceOrderStatus, ServiceOrder } from '@prisma/client';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../1-presentation/dtos/service-order/update-service-order-status.dto';
@@ -15,13 +12,11 @@ import type { IServiceRepository } from '../../3-domain/repositories/service-rep
 import type { IPartRepository } from '../../3-domain/repositories/part-repository.interface';
 import { NotificationService } from './notification.service';
 import { MechanicService } from './mechanic.service';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaClient } from '@prisma/client';
 import {
   ERROR_MESSAGES,
   NOTES_MESSAGES,
-  NOTIFICATION_MESSAGES,
 } from '../../../shared/constants/messages.constants';
-import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
@@ -39,12 +34,9 @@ export class ServiceOrderService {
     private readonly serviceRepository: IServiceRepository,
     @Inject('IPartRepository')
     private readonly partRepository: IPartRepository,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaClient,
     private readonly errorHandler: ErrorHandlerService,
-<<<<<<< HEAD
     private readonly emailService: EmailService,
-=======
->>>>>>> develop
     private readonly notificationService: NotificationService,
     private readonly mechanicService: MechanicService,
   ) {}
@@ -73,12 +65,12 @@ export class ServiceOrderService {
         );
         if (!service) {
           this.errorHandler.handleNotFoundError(
-            `Serviço ${serviceItem.serviceId} não encontrado`,
+            `Servi+�o ${serviceItem.serviceId} n+�o encontrado`,
           );
         }
         if (!service.isActive) {
           this.errorHandler.generateException(
-            `Serviço ${service.name} não está ativo`,
+            `Servi+�o ${service.name} n+�o est+� ativo`,
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -101,7 +93,7 @@ export class ServiceOrderService {
         }
         if (part.stock < partItem.quantity) {
           this.errorHandler.generateException(
-            `${ERROR_MESSAGES.INSUFFICIENT_STOCK_FOR_PART} ${part.name}. Disponível: ${part.stock}, Solicitado: ${partItem.quantity}`,
+            `${ERROR_MESSAGES.INSUFFICIENT_STOCK_FOR_PART} ${part.name}. Dispon+�vel: ${part.stock}, Solicitado: ${partItem.quantity}`,
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -200,7 +192,6 @@ export class ServiceOrderService {
       this.mapToResponseDto(serviceOrder),
     );
     return Promise.all(responsePromises);
-<<<<<<< HEAD
   }
 
   async findAllPaginated(
@@ -237,8 +228,6 @@ export class ServiceOrderService {
     const responseDtos = await Promise.all(responsePromises);
 
     return new PaginatedResponseDto(responseDtos, page, size, total);
-=======
->>>>>>> develop
   }
 
   async findById(id: string): Promise<ServiceOrderResponseDto> {
@@ -292,11 +281,7 @@ export class ServiceOrderService {
         // Validate if there is a mechanic assigned to the service order
         if (!serviceOrder.mechanicId) {
           this.errorHandler.generateException(
-<<<<<<< HEAD
             ERROR_MESSAGES.MECHANIC_REQUIRED_FOR_EXECUTION,
-=======
-            'Para iniciar a execução, é necessário atrelar um mecânico à ordem de serviço.',
->>>>>>> develop
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -307,11 +292,7 @@ export class ServiceOrderService {
         );
         if (!mechanic.isAvailable) {
           this.errorHandler.handleConflictError(
-<<<<<<< HEAD
             ERROR_MESSAGES.MECHANIC_BUSY_WITH_OTHER_ORDER,
-=======
-            'Mecânico já está ocupado executando outra ordem de serviço.',
->>>>>>> develop
           );
         }
 
@@ -354,7 +335,6 @@ export class ServiceOrderService {
       notes: data.notes || `Status alterado para ${data.status}`,
     });
 
-<<<<<<< HEAD
     const customer = await this.customerRepository.findById(
       serviceOrder.customerId,
     );
@@ -366,20 +346,6 @@ export class ServiceOrderService {
       const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
 
       try {
-=======
-    // Send notification to customer
-    try {
-      const customer = await this.customerRepository.findById(
-        serviceOrder.customerId,
-      );
-      const vehicle = await this.vehicleRepository.findById(
-        serviceOrder.vehicleId,
-      );
-
-      if (customer && vehicle) {
-        const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
-
->>>>>>> develop
         await this.notificationService.sendServiceOrderStatusNotification(
           id,
           serviceOrder.orderNumber,
@@ -389,8 +355,7 @@ export class ServiceOrderService {
           vehicleInfo,
           customer.phone,
         );
-<<<<<<< HEAD
-      } catch (error) {
+      } catch (error: any) {
         this.logger.warn(`Failed to send push notification: ${error.message}`);
       }
 
@@ -403,20 +368,12 @@ export class ServiceOrderService {
             newStatus: data.status,
             statusMessage: data.notes || `Status alterado para ${data.status}`,
           });
-        } catch (error) {
+        } catch (error: any) {
           this.logger.warn(
             `Failed to send email notification: ${error.message}`,
           );
         }
       }
-=======
-      }
-    } catch (error) {
-      this.logger.error(
-        `${NOTIFICATION_MESSAGES.FAILED_TO_SEND_STATUS_NOTIFICATION} ${serviceOrder.orderNumber}`,
-        error,
-      );
->>>>>>> develop
     }
 
     return this.findById(id);
@@ -515,10 +472,7 @@ export class ServiceOrderService {
   private async generateOrderNumber(): Promise<string> {
     const year = new Date().getFullYear();
     const count = await this.serviceOrderRepository.countByYear(year);
-    return `OS-${year}-${String(count + 1).padStart(
-      APP_CONSTANTS.ORDER_NUMBER_PADDING,
-      APP_CONSTANTS.ORDER_NUMBER_PAD_CHAR,
-    )}`;
+    return `OS-${year}-${String(count + 1).padStart(6, '0')}`;
   }
 
   private validateStatusTransition(
@@ -543,7 +497,7 @@ export class ServiceOrderService {
     const allowedTransitions = validTransitions[currentStatus] || [];
     if (!allowedTransitions.includes(newStatus)) {
       this.errorHandler.generateException(
-        `Transição de status inválida: ${currentStatus} → ${newStatus}. Transições permitidas: ${allowedTransitions.join(', ')}`,
+        `Transi+�+�o de status inv+�lida: ${currentStatus} G�� ${newStatus}. Transi+�+�es permitidas: ${allowedTransitions.join(', ')}`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -573,7 +527,7 @@ export class ServiceOrderService {
 
     // Fetch related services and parts
     const services = await Promise.all(
-      serviceItems.map(async (item) => {
+      serviceItems.map(async (item: any) => {
         const service = await this.serviceRepository.findById(item.serviceId);
         return {
           id: item.id,
@@ -591,7 +545,7 @@ export class ServiceOrderService {
     );
 
     const parts = await Promise.all(
-      partItems.map(async (item) => {
+      partItems.map(async (item: any) => {
         const part = await this.partRepository.findById(item.partId);
         return {
           id: item.id,

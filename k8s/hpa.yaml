@@ -1,22 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-<<<<<<< HEAD
   name: workshop-api-hpa
   namespace: mechanical-workshop
-=======
-<<<<<<< HEAD
-  name: pet-management-api-hpa
-=======
-  name: pet-management-hpa
-  namespace: pet-management
->>>>>>> origin/develop
 >>>>>>> develop
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-<<<<<<< HEAD
     name: workshop-api
   minReplicas: 3
   maxReplicas: 10
@@ -50,12 +41,6 @@ spec:
         value: 2
         periodSeconds: 30
       selectPolicy: Max
-=======
-<<<<<<< HEAD
-    name: pet-management-api
-=======
-    name: pet-management-app
->>>>>>> origin/develop
   minReplicas: 2
   maxReplicas: 10
   metrics:

@@ -8,7 +8,6 @@ export interface IServiceRepository {
     category?: string;
     active?: boolean;
   }): Promise<Service[]>;
-<<<<<<< HEAD
   findMany(
     skip: number,
     take: number,
@@ -18,8 +17,6 @@ export interface IServiceRepository {
     },
   ): Promise<Service[]>;
   count(filters?: { category?: string; active?: boolean }): Promise<number>;
-=======
->>>>>>> develop
   findById(id: string): Promise<Service | null>;
   findByName(name: string): Promise<Service | null>;
   findByCategory(category: string): Promise<Service[]>;

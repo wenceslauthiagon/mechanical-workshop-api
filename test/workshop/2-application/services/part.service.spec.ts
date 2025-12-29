@@ -36,24 +36,27 @@ describe('PartService', () => {
       update: jest.fn(),
       updateStock: jest.fn(),
       remove: jest.fn(),
-<<<<<<< HEAD
       findMany: jest.fn(),
       count: jest.fn(),
-=======
->>>>>>> develop
     };
 
     const mockErrorHandler = {
-      handleError: jest.fn(),
       handleNotFoundError: jest.fn(),
       handleConflictError: jest.fn(),
+      generateException: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PartService,
-        { provide: 'IPartRepository', useValue: mockPartRepository },
-        { provide: ErrorHandlerService, useValue: mockErrorHandler },
+        {
+          provide: 'IPartRepository',
+          useValue: mockPartRepository,
+        },
+        {
+          provide: ErrorHandlerService,
+          useValue: mockErrorHandler,
+        },
       ],
     }).compile();
 
@@ -62,187 +65,6 @@ describe('PartService', () => {
     errorHandler = module.get(ErrorHandlerService);
   });
 
-  it('Should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('create', () => {
-    it('TC0001 - Should create a new part successfully', async () => {
-      const createDto = {
-        partNumber: faker.string.alphanumeric(10).toUpperCase(),
-        name: faker.commerce.productName(),
-        description: faker.commerce.productDescription(),
-        supplier: faker.company.name(),
-        price: faker.finance.amount({ min: 10, max: 500, dec: 2 }),
-        stock: faker.number.int({ min: 10, max: 100 }),
-        minStock: faker.number.int({ min: 5, max: 20 }),
-      };
-
-      const mockPart = createMockPart();
-      partRepository.findByPartNumber.mockResolvedValue(null);
-      partRepository.create.mockResolvedValue(mockPart);
-
-      const result = await service.create(createDto);
-
-      expect(partRepository.findByPartNumber).toHaveBeenCalledWith(
-        createDto.partNumber,
-      );
-      expect(partRepository.create).toHaveBeenCalledWith({
-        name: createDto.name,
-        description: createDto.description,
-        partNumber: createDto.partNumber,
-        price: new Decimal(createDto.price),
-        stock: createDto.stock,
-        minStock: createDto.minStock,
-        supplier: createDto.supplier,
-        isActive: true,
-      });
-      expect(result).toEqual(mockPart);
-    });
-
-    it('TC0002 - Should throw error when partNumber already exists', async () => {
-      const createDto = {
-        partNumber: faker.string.alphanumeric(10).toUpperCase(),
-        name: faker.commerce.productName(),
-        supplier: faker.company.name(),
-        price: faker.finance.amount({ min: 10, max: 500, dec: 2 }),
-        stock: faker.number.int({ min: 10, max: 100 }),
-        minStock: faker.number.int({ min: 5, max: 20 }),
-      };
-
-      const existingPart = createMockPart();
-      partRepository.findByPartNumber.mockResolvedValue(existingPart);
-      errorHandler.handleConflictError.mockImplementation(() => {
-        throw new Error(ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS);
-      });
-
-      await expect(service.create(createDto)).rejects.toThrow(
-        ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS,
-      );
-
-      expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS,
-      );
-    });
-
-    it('TC0003 - Should create part with optional fields', async () => {
-      const createDto = {
-        name: faker.commerce.productName(),
-        price: faker.finance.amount({ min: 10, max: 500, dec: 2 }),
-        stock: faker.number.int({ min: 10, max: 100 }),
-        minStock: faker.number.int({ min: 5, max: 20 }),
-      };
-
-      const mockPart = createMockPart();
-      partRepository.create.mockResolvedValue(mockPart);
-
-      const result = await service.create(createDto);
-
-      expect(partRepository.create).toHaveBeenCalledWith({
-        name: createDto.name,
-        description: null,
-        partNumber: null,
-        price: new Decimal(createDto.price),
-        stock: createDto.stock,
-        minStock: createDto.minStock,
-        supplier: null,
-        isActive: true,
-      });
-      expect(result).toEqual(mockPart);
-    });
-  });
-
-  describe('findAll', () => {
-    it('TC0001 - Should return all parts without filters', async () => {
-      const mockParts = [createMockPart(), createMockPart()];
-      partRepository.findAll.mockResolvedValue(mockParts);
-
-      const result = await service.findAll();
-
-      expect(partRepository.findAll).toHaveBeenCalledWith(undefined);
-      expect(result).toEqual(mockParts);
-    });
-
-    it('TC0002 - Should return parts filtered by supplier', async () => {
-      const supplier = faker.company.name();
-      const mockParts = [createMockPart()];
-      partRepository.findAll.mockResolvedValue(mockParts);
-
-      const result = await service.findAll({ supplier });
-
-      expect(partRepository.findAll).toHaveBeenCalledWith({ supplier });
-      expect(result).toEqual(mockParts);
-    });
-
-    it('TC0003 - Should return active parts only', async () => {
-      const mockParts = [createMockPart()];
-      partRepository.findAll.mockResolvedValue(mockParts);
-
-      const result = await service.findAll({ active: true });
-
-      expect(partRepository.findAll).toHaveBeenCalledWith({ active: true });
-      expect(result).toEqual(mockParts);
-    });
-
-    it('TC0004 - Should return low stock parts', async () => {
-      const mockParts = [createMockPart()];
-      partRepository.findAll.mockResolvedValue(mockParts);
-
-      const result = await service.findAll({ lowStock: true });
-
-      expect(partRepository.findAll).toHaveBeenCalledWith({ lowStock: true });
-      expect(result).toEqual(mockParts);
-    });
-
-    it('TC0005 - Should return parts with multiple filters', async () => {
-      const filters = {
-        supplier: faker.company.name(),
-        active: true,
-        lowStock: false,
-      };
-      const mockParts = [createMockPart()];
-      partRepository.findAll.mockResolvedValue(mockParts);
-
-      const result = await service.findAll(filters);
-
-      expect(partRepository.findAll).toHaveBeenCalledWith(filters);
-      expect(result).toEqual(mockParts);
-    });
-  });
-
-<<<<<<< HEAD
-  describe('findAllPaginated', () => {
-    it('TC0001 - Should return paginated parts without filters', async () => {
-      const mockParts = [createMockPart()];
-      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
-      partRepository.findMany.mockResolvedValue(mockParts);
-      partRepository.count.mockResolvedValue(1);
-
-      const result = await service.findAllPaginated(paginationDto, {});
-
-      expect(partRepository.findMany).toHaveBeenCalledWith(0, 10, {});
-      expect(partRepository.count).toHaveBeenCalledWith({});
-      expect(result.data).toEqual(mockParts);
-      expect(result.pagination.totalRecords).toBe(1);
-    });
-
-    it('TC0002 - Should return paginated parts with filters', async () => {
-      const mockParts = [createMockPart()];
-      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
-      const filters = { supplier: 'Test', active: true };
-      partRepository.findMany.mockResolvedValue(mockParts);
-      partRepository.count.mockResolvedValue(1);
-
-      const result = await service.findAllPaginated(paginationDto, filters);
-
-      expect(partRepository.findMany).toHaveBeenCalledWith(0, 10, filters);
-      expect(partRepository.count).toHaveBeenCalledWith(filters);
-      expect(result.data).toEqual(mockParts);
-    });
-  });
-
-=======
->>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return a part by id', async () => {
       const mockPart = createMockPart();

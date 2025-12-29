@@ -5,21 +5,21 @@ describe('Money', () => {
     it('TC0001 - Should create money with default currency', () => {
       const money = new Money(100);
 
-      expect(money.amount).toBe(100);
+      expect(money.amount.toNumber()).toBe(100);
       expect(money.currency).toBe('BRL');
     });
 
     it('TC0002 - Should create money with specified currency', () => {
       const money = new Money(100, 'USD');
 
-      expect(money.amount).toBe(100);
+      expect(money.amount.toNumber()).toBe(100);
       expect(money.currency).toBe('USD');
     });
 
     it('TC0003 - Should round amount to 2 decimal places', () => {
       const money = new Money(100.999);
 
-      expect(money.amount).toBe(101);
+      expect(money.amount.toNumber()).toBe(101);
     });
 
     it('TC0004 - Should throw error for negative amount', () => {
@@ -37,26 +37,26 @@ describe('Money', () => {
     it('TC0001 - Should format BRL correctly', () => {
       const money = new Money(100, 'BRL');
 
-      const result = money.formatted;
+      const result = money.toString();
 
       expect(result).toContain('100');
-      expect(result).toContain('R$');
+      expect(result).toContain('BRL');
     });
 
     it('TC0002 - Should format USD correctly', () => {
       const money = new Money(100, 'USD');
 
-      const result = money.formatted;
+      const result = money.toString();
 
-      expect(result).toBe('$100.00');
+      expect(result).toBe('USD 100.00');
     });
 
     it('TC0003 - Should format EUR correctly', () => {
       const money = new Money(100, 'EUR');
 
-      const result = money.formatted;
+      const result = money.toString();
 
-      expect(result).toBe('€100.00');
+      expect(result).toBe('EUR 100.00');
     });
   });
 
@@ -67,7 +67,7 @@ describe('Money', () => {
 
       const result = money1.add(money2);
 
-      expect(result.amount).toBe(150);
+      expect(result.amount.toNumber()).toBe(150);
     });
 
     it('TC0002 - Should throw error when adding different currencies', () => {
@@ -87,7 +87,7 @@ describe('Money', () => {
 
       const result = money1.subtract(money2);
 
-      expect(result.amount).toBe(70);
+      expect(result.amount.toNumber()).toBe(70);
     });
 
     it('TC0002 - Should throw error when subtracting different currencies', () => {
@@ -106,7 +106,7 @@ describe('Money', () => {
 
       const result = money.multiply(2);
 
-      expect(result.amount).toBe(200);
+      expect(result.amount.toNumber()).toBe(200);
     });
 
     it('TC0002 - Should throw error for negative factor', () => {
@@ -124,7 +124,7 @@ describe('Money', () => {
 
       const result = money.divide(2);
 
-      expect(result.amount).toBe(50);
+      expect(result.amount.toNumber()).toBe(50);
     });
 
     it('TC0002 - Should throw error for zero divisor', () => {
@@ -233,7 +233,8 @@ describe('Money', () => {
 
       const result = money.toString();
 
-      expect(result).toBe('100 BRL');
+      expect(result).toBe('BRL 100.00');
     });
   });
 });
+

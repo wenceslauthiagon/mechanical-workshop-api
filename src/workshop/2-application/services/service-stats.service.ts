@@ -2,8 +2,6 @@ import { Injectable, Inject } from '@nestjs/common';
 import type { IServiceOrderRepository } from '../../3-domain/repositories/service-order.repository.interface';
 import type { IServiceRepository } from '../../3-domain/repositories/service-repository.interface';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
-import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 
 export interface ServiceExecutionStats {
   serviceId: string;
@@ -29,7 +27,6 @@ export class ServiceStatsService {
     @Inject('IServiceRepository')
     private readonly serviceRepository: IServiceRepository,
     private readonly prisma: PrismaService,
-    private readonly errorHandler: ErrorHandlerService,
   ) {}
 
   async getServiceExecutionStats(): Promise<ServiceExecutionStats[]> {
@@ -55,7 +52,7 @@ export class ServiceStatsService {
       const executionTimeMs =
         order.completedAt.getTime() - order.startedAt.getTime();
       const executionTimeHours =
-        executionTimeMs / APP_CONSTANTS.MS_TO_HOURS_DIVISOR;
+        executionTimeMs / 3600000;
 
       // Fetch service items for this order
       const serviceItems = await this.prisma.serviceOrderItem.findMany({
@@ -107,10 +104,10 @@ export class ServiceStatsService {
         averageEstimatedHours > 0
           ? Math.max(
               0,
-              APP_CONSTANTS.PERCENTAGE_MAX -
+              100 -
                 (Math.abs(averageExecutionHours - averageEstimatedHours) /
                   averageEstimatedHours) *
-                  APP_CONSTANTS.PERCENTAGE_MAX,
+                  100,
             )
           : 0;
 
@@ -152,7 +149,7 @@ export class ServiceStatsService {
       const executionTimeMs =
         order.completedAt.getTime() - order.startedAt.getTime();
       const executionTimeHours =
-        executionTimeMs / APP_CONSTANTS.MS_TO_HOURS_DIVISOR;
+        executionTimeMs / 3600000;
 
       totalExecutionTime += executionTimeHours;
       totalEstimatedTime += Number(order.estimatedTimeHours);
@@ -165,10 +162,10 @@ export class ServiceStatsService {
       averageEstimatedTime > 0
         ? Math.max(
             0,
-            APP_CONSTANTS.PERCENTAGE_MAX -
+            100 -
               (Math.abs(averageExecutionTime - averageEstimatedTime) /
                 averageEstimatedTime) *
-                APP_CONSTANTS.PERCENTAGE_MAX,
+                100,
           )
         : 0;
 
@@ -185,5 +182,29 @@ export class ServiceStatsService {
   ): Promise<ServiceExecutionStats | null> {
     const stats = await this.getServiceExecutionStats();
     return stats.find((stat) => stat.serviceId === serviceId) || null;
+  }
+
+  async getServiceStats(startDate?: string, endDate?: string): Promise<any> {
+    const start = startDate ? new Date(startDate) : undefined;
+    const end = endDate ? new Date(endDate) : undefined;
+
+    const stats = await this.getServiceExecutionStats();
+    const overall = await this.getOverallStats();
+
+    return {
+      period: {
+        startDate: start,
+        endDate: end,
+      },
+      overall,
+      services: stats,
+    };
+  }
+
+  async getTopServices(limit: number = 10): Promise<ServiceExecutionStats[]> {
+    const stats = await this.getServiceExecutionStats();
+    return stats
+      .sort((a, b) => b.totalCompletedOrders - a.totalCompletedOrders)
+      .slice(0, limit);
   }
 }

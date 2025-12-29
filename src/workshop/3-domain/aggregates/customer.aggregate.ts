@@ -145,6 +145,6 @@ export class CustomerAggregate {
   }
 
   getDocumentFormatted(): string {
-    return this._document.formatted;
+    return this._document.getFormatted();
   }
 }

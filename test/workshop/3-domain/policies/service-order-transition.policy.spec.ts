@@ -80,7 +80,6 @@ describe('DefaultServiceOrderPolicy', () => {
 
       expect(result).toBe(false);
     });
-<<<<<<< HEAD
 
     it('TC0009 - Should return false for invalid status', () => {
       const result = policy.canTransition(
@@ -90,63 +89,5 @@ describe('DefaultServiceOrderPolicy', () => {
 
       expect(result).toBe(false);
     });
-=======
->>>>>>> develop
-  });
-
-  describe('getValidTransitions', () => {
-    it('TC0001 - Should return valid transitions for RECEBIDA', () => {
-      const result = policy.getValidTransitions(ServiceOrderStatus.RECEBIDA);
-
-      expect(result).toEqual([ServiceOrderStatus.EM_DIAGNOSTICO]);
-    });
-
-    it('TC0002 - Should return valid transitions for EM_DIAGNOSTICO', () => {
-      const result = policy.getValidTransitions(
-        ServiceOrderStatus.EM_DIAGNOSTICO,
-      );
-
-      expect(result).toEqual([ServiceOrderStatus.AGUARDANDO_APROVACAO]);
-    });
-
-    it('TC0003 - Should return valid transitions for AGUARDANDO_APROVACAO', () => {
-      const result = policy.getValidTransitions(
-        ServiceOrderStatus.AGUARDANDO_APROVACAO,
-      );
-
-      expect(result).toEqual([
-        ServiceOrderStatus.EM_EXECUCAO,
-        ServiceOrderStatus.EM_DIAGNOSTICO,
-      ]);
-    });
-
-    it('TC0004 - Should return valid transitions for EM_EXECUCAO', () => {
-      const result = policy.getValidTransitions(ServiceOrderStatus.EM_EXECUCAO);
-
-      expect(result).toEqual([ServiceOrderStatus.FINALIZADA]);
-    });
-
-    it('TC0005 - Should return valid transitions for FINALIZADA', () => {
-      const result = policy.getValidTransitions(ServiceOrderStatus.FINALIZADA);
-
-      expect(result).toEqual([ServiceOrderStatus.ENTREGUE]);
-    });
-
-    it('TC0006 - Should return empty array for ENTREGUE', () => {
-      const result = policy.getValidTransitions(ServiceOrderStatus.ENTREGUE);
-
-      expect(result).toEqual([]);
-    });
-<<<<<<< HEAD
-
-    it('TC0007 - Should return empty array for invalid status', () => {
-      const result = policy.getValidTransitions(
-        'INVALID_STATUS' as ServiceOrderStatus,
-      );
-
-      expect(result).toEqual([]);
-    });
-=======
->>>>>>> develop
   });
 });

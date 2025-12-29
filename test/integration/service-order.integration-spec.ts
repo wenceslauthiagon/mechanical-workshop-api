@@ -1,10 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-<<<<<<< HEAD
 import { PrismaClient, ServiceOrderStatus, UserRole } from '@prisma/client';
-=======
-import { ServiceOrderStatus, UserRole } from '../../src/mocks/prisma-shim';
->>>>>>> develop
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -16,72 +12,7 @@ function generateValidCPF(): string {
     faker.number.int({ min: 0, max: 9 }),
   );
 
-<<<<<<< HEAD
   // Calculate first digit
-=======
->>>>>>> develop
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    sum += numbers[i] * (10 - i);
-  }
-  let remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  numbers.push(remainder);
-
-  // Calculate second digit
-  sum = 0;
-  for (let i = 0; i < 10; i++) {
-    sum += numbers[i] * (11 - i);
-  }
-  remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  numbers.push(remainder);
-
-  const cpf = numbers.join('');
-  return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-}
-
-// Mock data
-const mockData = {
-  customer: {
-    document: generateValidCPF(),
-    type: 'PESSOA_FISICA' as const,
-    name: faker.person.fullName(),
-    email: faker.internet.email(),
-    phone: `11${faker.string.numeric(9)}`,
-    address: faker.location.streetAddress(),
-  },
-  vehicle: {
-    licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
-    brand: faker.vehicle.manufacturer(),
-    model: faker.vehicle.model(),
-    year: faker.number.int({ min: 2000, max: 2024 }),
-    color: faker.vehicle.color(),
-  },
-  service: {
-    name: faker.commerce.productName(),
-    description: faker.commerce.productDescription(),
-    price: faker.number.int({ min: 50, max: 500 }),
-    estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
-    category: faker.helpers.arrayElement([
-      'Manutenção',
-      'Reparo',
-      'Diagnóstico',
-    ]),
-  },
-  part: {
-    name: faker.vehicle.bicycle(),
-    description: faker.commerce.productDescription(),
-<<<<<<< HEAD
-    partNumber: faker.string.alphanumeric(8).toUpperCase(),
-    price: faker.commerce.price({ min: 10, max: 200, dec: 2 }),
-    stock: faker.number.int({ min: 50, max: 200 }),
-    minStock: faker.number.int({ min: 5, max: 20 }),
-=======
-    price: faker.number.int({ min: 10, max: 200 }).toString(),
-    stock: faker.number.int({ min: 50, max: 200 }),
-    minimumStock: faker.number.int({ min: 5, max: 20 }),
->>>>>>> develop
     supplier: faker.company.name(),
   },
   serviceOrder: {
@@ -90,19 +21,9 @@ const mockData = {
   },
 };
 
-<<<<<<< HEAD
 describe('Service Order Integration Tests', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
-=======
-const ADMIN_USERNAME = faker.internet.username().toLowerCase();
-const ADMIN_PASSWORD = faker.internet.password();
-const ADMIN_EMAIL = faker.internet.email().toLowerCase();
-
-describe('Service Order Integration Tests', () => {
-  let app: INestApplication;
-  let prisma: PrismaService;
->>>>>>> develop
   let authToken: string;
   let customerId: string;
   let vehicleId: string;
@@ -136,7 +57,6 @@ describe('Service Order Integration Tests', () => {
     await prisma.user.deleteMany();
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
 
-<<<<<<< HEAD
     const hashedPassword = await bcrypt.hash('admin123', 10);
     await prisma.user.upsert({
       where: { email: 'admin@test.com' },
@@ -144,13 +64,6 @@ describe('Service Order Integration Tests', () => {
       create: {
         username: 'admin',
         email: 'admin@test.com',
-=======
-    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
-    await prisma.user.create({
-      data: {
-        username: ADMIN_USERNAME,
-        email: ADMIN_EMAIL,
->>>>>>> develop
         passwordHash: hashedPassword,
         role: UserRole.ADMIN,
       },
@@ -158,11 +71,7 @@ describe('Service Order Integration Tests', () => {
 
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')
-<<<<<<< HEAD
       .send({ username: 'admin', password: 'admin123' });
-=======
-      .send({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD });
->>>>>>> develop
 
     authToken = loginResponse.body.access_token;
 
@@ -332,11 +241,7 @@ describe('Service Order Integration Tests', () => {
 
     it('TC0013 - Should list all service orders', async () => {
       const response = await request(app.getHttpServer())
-<<<<<<< HEAD
         .get('/api/service-orders/all')
-=======
-        .get('/api/service-orders')
->>>>>>> develop
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
@@ -350,15 +255,10 @@ describe('Service Order Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-<<<<<<< HEAD
       expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('pagination');
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data[0].customerId).toBe(customerId);
-=======
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body[0].customerId).toBe(customerId);
->>>>>>> develop
     });
   });
 

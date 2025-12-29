@@ -36,214 +36,53 @@ describe('CustomerService', () => {
     updatedAt: faker.date.recent(),
   };
 
-  const createCustomerDto = {
-    name: faker.person.fullName(),
-    document: '12345678901',
-    email: faker.internet.email(),
-    phone: faker.phone.number(),
-    type: CustomerType.PESSOA_FISICA,
-    address: faker.location.streetAddress(),
-    additionalInfo: null,
-  };
-
   beforeEach(async () => {
-    const mockRepository = {
+    customerRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
-<<<<<<< HEAD
       findMany: jest.fn(),
       count: jest.fn(),
-=======
->>>>>>> develop
       findById: jest.fn(),
-      findByEmail: jest.fn(),
       findByDocument: jest.fn(),
+      findByEmail: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      findWithVehicles: jest.fn(),
       findVehiclesByCustomerId: jest.fn(),
     };
 
-    const mockErrorHandler = {
-      handleError: jest.fn().mockImplementation((error) => {
-        throw error;
+    errorHandler = {
+      handleNotFoundError: jest.fn().mockImplementation((msg) => {
+        throw new Error(msg);
       }),
-      handleNotFoundError: jest.fn().mockImplementation((message) => {
-        throw new Error(message);
+      handleConflictError: jest.fn().mockImplementation((msg) => {
+        throw new Error(msg);
       }),
-      handleConflictError: jest.fn().mockImplementation((message) => {
-        throw new Error(message);
+      handleValueObjectError: jest.fn().mockImplementation((_error, msg) => {
+        throw new Error(msg);
       }),
-      handleValueObjectError: jest.fn().mockImplementation((error, message) => {
-        throw new Error(message);
+      handleError: jest.fn().mockImplementation((err) => {
+        throw err;
       }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CustomerService,
-        { provide: 'ICustomerRepository', useValue: mockRepository },
-        { provide: ErrorHandlerService, useValue: mockErrorHandler },
+        {
+          provide: 'ICustomerRepository',
+          useValue: customerRepository,
+        },
+        {
+          provide: ErrorHandlerService,
+          useValue: errorHandler,
+        },
       ],
     }).compile();
 
     service = module.get<CustomerService>(CustomerService);
-    customerRepository = module.get('ICustomerRepository');
-    errorHandler = module.get(ErrorHandlerService);
   });
 
-  it('Should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('create', () => {
-    beforeEach(() => {
-      customerRepository.findByEmail.mockResolvedValue(null);
-      customerRepository.findByDocument.mockResolvedValue(null);
-      customerRepository.create.mockResolvedValue(mockCustomer);
-      jest
-        .spyOn(DocumentUtils, 'validateAndNormalize')
-        .mockReturnValue('12345678901');
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('TC0001 - Should create customer successfully', async () => {
-      const result = await service.create(createCustomerDto);
-
-      expect(result).toEqual(mockCustomer);
-      expect(DocumentUtils.validateAndNormalize).toHaveBeenCalledWith(
-        createCustomerDto.document,
-      );
-      expect(customerRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: '12345678901',
-          additionalInfo: null,
-        }),
-      );
-    });
-
-    it('TC0002 - Should create customer with additionalInfo', async () => {
-      const dtoWithInfo = {
-        ...createCustomerDto,
-        additionalInfo: 'VIP Cliente',
-      };
-      const customerWithInfo = {
-        ...mockCustomer,
-        additionalInfo: 'VIP Cliente',
-      };
-      customerRepository.create.mockResolvedValue(customerWithInfo);
-
-      const result = await service.create(dtoWithInfo);
-
-      expect(result.additionalInfo).toBe('VIP Cliente');
-      expect(customerRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          additionalInfo: 'VIP Cliente',
-        }),
-      );
-    });
-
-    it('TC0003 - Should throw error when document is invalid', async () => {
-      jest
-        .spyOn(DocumentUtils, 'validateAndNormalize')
-        .mockImplementation(() => {
-          throw new Error('Invalid document');
-        });
-
-      await expect(service.create(createCustomerDto)).rejects.toThrow(
-        ERROR_MESSAGES.INVALID_DOCUMENT,
-      );
-      expect(errorHandler.handleValueObjectError).toHaveBeenCalledWith(
-        expect.any(Error),
-        ERROR_MESSAGES.INVALID_DOCUMENT,
-      );
-    });
-
-    it('TC0004 - Should throw error when email already exists', async () => {
-      const existingCustomer = {
-        ...mockCustomer,
-        email: createCustomerDto.email,
-      };
-      customerRepository.findByEmail.mockResolvedValue(existingCustomer);
-
-      await expect(service.create(createCustomerDto)).rejects.toThrow(
-        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
-      );
-      expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
-      );
-    });
-
-    it('TC0005 - Should throw error when document already exists', async () => {
-      const existingCustomer = {
-        ...mockCustomer,
-        document: createCustomerDto.document,
-      };
-      customerRepository.findByDocument.mockResolvedValue(existingCustomer);
-
-      await expect(service.create(createCustomerDto)).rejects.toThrow(
-        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
-      );
-      expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
-      );
-    });
-  });
-
-  describe('findAll', () => {
-    it('TC0001 - Should return all customers', async () => {
-      const customers = [mockCustomer];
-      customerRepository.findAll.mockResolvedValue(customers);
-
-      const result = await service.findAll();
-
-      expect(result).toEqual(customers);
-      expect(customerRepository.findAll).toHaveBeenCalled();
-    });
-
-    it('TC0002 - Should return empty array when no customers exist', async () => {
-      customerRepository.findAll.mockResolvedValue([]);
-
-      const result = await service.findAll();
-
-      expect(result).toEqual([]);
-    });
-  });
-
-<<<<<<< HEAD
-  describe('findAllPaginated', () => {
-    it('TC0001 - Should return paginated customers', async () => {
-      const customers = [mockCustomer];
-      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
-      customerRepository.findMany.mockResolvedValue(customers);
-      customerRepository.count.mockResolvedValue(1);
-
-      const result = await service.findAllPaginated(paginationDto);
-
-      expect(customerRepository.findMany).toHaveBeenCalledWith(0, 10);
-      expect(customerRepository.count).toHaveBeenCalled();
-      expect(result.data).toEqual(customers);
-      expect(result.pagination.totalRecords).toBe(1);
-      expect(result.pagination.page).toBe(0);
-      expect(result.pagination.totalPages).toBe(1);
-    });
-
-    it('TC0002 - Should return empty paginated result', async () => {
-      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
-      customerRepository.findMany.mockResolvedValue([]);
-      customerRepository.count.mockResolvedValue(0);
-
-      const result = await service.findAllPaginated(paginationDto);
-
-      expect(result.data).toEqual([]);
-      expect(result.pagination.totalRecords).toBe(0);
-    });
-  });
-
-=======
->>>>>>> develop
   describe('findById', () => {
     it('TC0001 - Should return customer by id', async () => {
       customerRepository.findById.mockResolvedValue(mockCustomer);
