@@ -6,13 +6,33 @@ import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
 import * as bcrypt from 'bcryptjs';
 import { faker } from '@faker-js/faker/locale/pt_BR';
+import { generateValidCPF } from '../utils/test-helpers';
 
-function generateValidCPF(): string {
-  const numbers = Array.from({ length: 9 }, () =>
-    faker.number.int({ min: 0, max: 9 }),
-  );
-
-  // Calculate first digit
+const testData = {
+  customer: {
+    name: faker.person.fullName(),
+    document: generateValidCPF(),
+    email: faker.internet.email(),
+    phone: faker.phone.number(),
+  },
+  vehicle: {
+    licensePlate: 'ABC1234',
+    model: faker.vehicle.model(),
+    brand: faker.vehicle.manufacturer(),
+    year: faker.number.int({ min: 2000, max: 2024 }),
+    color: faker.vehicle.color(),
+  },
+  service: {
+    name: faker.commerce.productName(),
+    description: faker.commerce.productDescription(),
+    estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
+    price: parseFloat(faker.commerce.price({ min: 50, max: 500 })),
+  },
+  part: {
+    name: faker.commerce.productName(),
+    description: faker.commerce.productDescription(),
+    price: parseFloat(faker.commerce.price({ min: 10, max: 200 })),
+    stock: faker.number.int({ min: 1, max: 100 }),
     supplier: faker.company.name(),
   },
   serviceOrder: {
