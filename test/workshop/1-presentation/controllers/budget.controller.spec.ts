@@ -149,6 +149,52 @@ describe('BudgetController', () => {
     expect(mockCreateBudgetDto.serviceOrderId).toBe(mockServiceOrderId);
   });
 
+  describe('create', () => {
+    it('TC0001 - Should create budget successfully', async () => {
+      budgetService.create.mockResolvedValue(mockBudget);
+
+      const result = await controller.create(mockCreateBudgetDto);
+
+      expect(budgetService.create).toHaveBeenCalledWith(mockCreateBudgetDto);
+      expect(result).toBeInstanceOf(BudgetResponseDto);
+      expect(result.id).toBe(mockBudgetId);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated budgets', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      const mockPaginatedResult = {
+        data: [mockBudget],
+        pagination: {
+          page: 0,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      budgetService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await controller.findAllPaginated(paginationDto);
+
+      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toBeInstanceOf(BudgetResponseDto);
+    });
+  });
+
+  describe('findAll', () => {
+    it('TC0001 - Should return all budgets', async () => {
+      const mockBudgets = [mockBudget];
+      budgetService.findAll.mockResolvedValue(mockBudgets);
+
+      const result = await controller.findAll();
+
+      expect(budgetService.findAll).toHaveBeenCalled();
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBeInstanceOf(BudgetResponseDto);
+    });
+  });
+
   describe('findOne', () => {
     it('TC0001 - Should return budget by ID', async () => {
       budgetService.findById.mockResolvedValue(mockBudget);

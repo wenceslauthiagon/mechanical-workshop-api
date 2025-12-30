@@ -102,4 +102,14 @@ describe('LicensePlate', () => {
       expect(result).toBe('ABC1234');
     });
   });
+
+  describe('getValue', () => {
+    it('TC0001 - Should return normalized plate value', () => {
+      const licensePlate = new LicensePlate('ABC-1234');
+
+      const result = licensePlate.getValue();
+
+      expect(result).toBe('ABC1234');
+    });
+  });
 });

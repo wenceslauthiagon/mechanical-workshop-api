@@ -102,6 +102,68 @@ describe('MechanicService', () => {
     service = module.get<MechanicService>(MechanicService);
   });
 
+  describe('create', () => {
+    it('TC0001 - Should create mechanic successfully', async () => {
+      mechanicRepository.findByEmail.mockResolvedValue(null);
+      mechanicRepository.create.mockResolvedValue(mockMechanic);
+      mechanicRepository.findById.mockResolvedValue(mockMechanic);
+
+      const result = await service.create(createMechanicDto);
+
+      expect(result).toEqual(mockMechanic);
+      expect(mechanicRepository.findByEmail).toHaveBeenCalledWith(createMechanicDto.email);
+      expect(mechanicRepository.create).toHaveBeenCalledWith(createMechanicDto);
+      expect(mechanicRepository.findById).toHaveBeenCalledWith(mockMechanic.id);
+    });
+
+    it('TC0002 - Should throw error for duplicate email', async () => {
+      mechanicRepository.findByEmail.mockResolvedValue(mockMechanic);
+
+      await expect(service.create(createMechanicDto)).rejects.toThrow(
+        MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS,
+      );
+      expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
+        MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS,
+      );
+    });
+
+    it('TC0003 - Should handle database error during creation', async () => {
+      mechanicRepository.findByEmail.mockResolvedValue(null);
+      const dbError = new Error('Database error');
+      mechanicRepository.create.mockRejectedValue(dbError);
+
+      await expect(service.create(createMechanicDto)).rejects.toThrow(dbError);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(dbError);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated mechanics', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 10, take: 10 };
+      const mechanics = [mockMechanic, mockMechanic2];
+      const total = 2;
+
+      mechanicRepository.findMany.mockResolvedValue(mechanics);
+      mechanicRepository.count.mockResolvedValue(total);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toEqual(mechanics);
+      expect(result.pagination.totalRecords).toBe(total);
+      expect(mechanicRepository.findMany).toHaveBeenCalledWith(10, 10);
+      expect(mechanicRepository.count).toHaveBeenCalled();
+    });
+
+    it('TC0002 - Should handle errors during pagination', async () => {
+      const error = new Error('Database error');
+      const paginationDto = { page: 1, size: 10, skip: 10, take: 10 };
+      mechanicRepository.findMany.mockRejectedValue(error);
+
+      await expect(service.findAllPaginated(paginationDto)).rejects.toThrow(error);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(error);
+    });
+  });
+
   describe('findById', () => {
     it('TC0001 - Should return mechanic by id', async () => {
       mechanicRepository.findById.mockResolvedValue(mockMechanic);

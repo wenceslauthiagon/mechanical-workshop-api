@@ -60,12 +60,16 @@ describe('ServiceOrderService', () => {
     id: faker.string.uuid(),
     name: faker.commerce.productName(),
     price: new Decimal(100),
+    isActive: true,
+    estimatedMinutes: 60,
   };
 
   const mockPart = {
     id: faker.string.uuid(),
     name: faker.commerce.productName(),
     price: new Decimal(50),
+    isActive: true,
+    stock: 10,
   };
 
   beforeEach(async () => {
@@ -73,6 +77,7 @@ describe('ServiceOrderService', () => {
       serviceOrder: {
         create: jest.fn(),
         findById: jest.fn(),
+        findAll: jest.fn(),
         findByCustomerId: jest.fn(),
         findByOrderNumber: jest.fn(),
         findByVehicleId: jest.fn(),
@@ -83,6 +88,10 @@ describe('ServiceOrderService', () => {
         addStatusHistory: jest.fn(),
         getStatusHistory: jest.fn(),
         countByYear: jest.fn(),
+        findMany: jest.fn(),
+        count: jest.fn(),
+        findManyWithPriority: jest.fn(),
+        countWithPriority: jest.fn(),
       },
       customer: {
         findById: jest.fn(),
@@ -94,9 +103,12 @@ describe('ServiceOrderService', () => {
       },
       service: {
         findById: jest.fn(),
+        findAll: jest.fn(),
       },
       part: {
         findById: jest.fn(),
+        updateStock: jest.fn(),
+        findAll: jest.fn(),
       },
     };
 
@@ -141,8 +153,8 @@ describe('ServiceOrderService', () => {
         { provide: 'IServiceOrderRepository', useValue: mockRepositories.serviceOrder },
         { provide: 'ICustomerRepository', useValue: mockRepositories.customer },
         { provide: 'IVehicleRepository', useValue: mockRepositories.vehicle },
-        { provide: 'IServiceRepository', useValue: { findById: jest.fn() } },
-        { provide: 'IPartRepository', useValue: { findById: jest.fn() } },
+        { provide: 'IServiceRepository', useValue: mockRepositories.service },
+        { provide: 'IPartRepository', useValue: mockRepositories.part },
         { provide: PrismaClient, useValue: mockServices.prisma },
         { provide: ErrorHandlerService, useValue: mockServices.errorHandler },
         { provide: NotificationService, useValue: mockServices.notification },
@@ -155,6 +167,138 @@ describe('ServiceOrderService', () => {
     service = module.get<ServiceOrderService>(ServiceOrderService);
     repositories = mockRepositories;
     services = mockServices;
+  });
+
+  describe('create', () => {
+    const createDto = {
+      customerId: mockCustomer.id,
+      vehicleId: mockVehicle.id,
+      description: faker.lorem.sentence(),
+      services: [{ serviceId: mockService.id, quantity: 2 }],
+      parts: [{ partId: mockPart.id, quantity: 3 }],
+    };
+
+    it('TC0002 - Should throw error when customer not found', async () => {
+      repositories.customer.findById.mockResolvedValue(null);
+
+      await expect(service.create(createDto)).rejects.toThrow('Not found');
+      expect(services.errorHandler.handleNotFoundError).toHaveBeenCalled();
+    });
+
+    it('TC0003 - Should throw error when vehicle not found', async () => {
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue(null);
+
+      await expect(service.create(createDto)).rejects.toThrow('Not found');
+      expect(services.errorHandler.handleNotFoundError).toHaveBeenCalled();
+    });
+
+    it('TC0004 - Should throw error when vehicle does not belong to customer', async () => {
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: 'different-id' });
+
+      await expect(service.create(createDto)).rejects.toThrow('Exception');
+      expect(services.errorHandler.generateException).toHaveBeenCalled();
+    });
+
+    it('TC0005 - Should throw error when service not found', async () => {
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.service.findById.mockResolvedValue(null);
+
+      await expect(service.create(createDto)).rejects.toThrow('Not found');
+      expect(services.errorHandler.handleNotFoundError).toHaveBeenCalled();
+    });
+
+    it('TC0006 - Should throw error when service is inactive', async () => {
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.service.findById.mockResolvedValue({ ...mockService, isActive: false });
+
+      await expect(service.create(createDto)).rejects.toThrow();
+    });
+
+    it('TC0007 - Should throw error when part not found', async () => {
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.service.findById.mockResolvedValue(mockService);
+      repositories.part.findById.mockResolvedValue(null);
+
+      await expect(service.create(createDto)).rejects.toThrow('Not found');
+      expect(services.errorHandler.handleNotFoundError).toHaveBeenCalled();
+    });
+
+    it('TC0008 - Should throw error when part is inactive', async () => {
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.service.findById.mockResolvedValue(mockService);
+      repositories.part.findById.mockResolvedValue({ ...mockPart, isActive: false });
+
+      await expect(service.create(createDto)).rejects.toThrow();
+    });
+
+    it('TC0009 - Should throw error when insufficient stock for part', async () => {
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.service.findById.mockResolvedValue(mockService);
+      repositories.part.findById.mockResolvedValue({ ...mockPart, stock: 1 });
+
+      await expect(service.create(createDto)).rejects.toThrow();
+    });
+
+    it('TC0010 - Should create service order with services and parts successfully', async () => {
+      const simpleCreateDto = {
+        customerId: mockCustomer.id,
+        vehicleId: mockVehicle.id,
+        description: faker.lorem.sentence(),
+        services: [{ serviceId: mockService.id, quantity: 1 }],
+        parts: [{ partId: mockPart.id, quantity: 2 }],
+      };
+      
+      // Clear previous mocks
+      repositories.customer.findById.mockClear();
+      repositories.vehicle.findById.mockClear();
+      repositories.service.findById.mockClear();
+      repositories.part.findById.mockClear();
+      
+      // Setup mocks for create flow
+      repositories.customer.findById
+        .mockResolvedValueOnce(mockCustomer)  // create validation
+        .mockResolvedValue(mockCustomer);     // findById after create
+      
+      repositories.vehicle.findById
+        .mockResolvedValueOnce({ ...mockVehicle, customerId: mockCustomer.id })  // create validation
+        .mockResolvedValue(mockVehicle);  // findById after create
+      
+      // Service findById called twice: validation + item creation
+      repositories.service.findById
+        .mockImplementation(() => Promise.resolve(mockService));
+      
+      // Part findById called twice: validation + item creation  
+      repositories.part.findById
+        .mockImplementation(() => Promise.resolve({ ...mockPart, stock: 10, isActive: true }));
+      
+      repositories.serviceOrder.countByYear.mockResolvedValue(0);
+      repositories.serviceOrder.create.mockResolvedValue(mockServiceOrder);
+      repositories.serviceOrder.addServiceItem.mockResolvedValue(undefined);
+      repositories.serviceOrder.addPartItem.mockResolvedValue(undefined);
+      repositories.part.updateStock.mockResolvedValue(undefined);
+      repositories.serviceOrder.updateTotals.mockResolvedValue(undefined);
+      repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
+      repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
+      services.mechanic.findById.mockResolvedValue(mockMechanic);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
+
+      const result = await service.create(simpleCreateDto);
+
+      expect(result).toBeDefined();
+      expect(repositories.serviceOrder.addServiceItem).toHaveBeenCalled();
+      expect(repositories.serviceOrder.addPartItem).toHaveBeenCalled();
+      expect(repositories.part.updateStock).toHaveBeenCalled();
+      expect(repositories.serviceOrder.updateTotals).toHaveBeenCalled();
+      expect(repositories.serviceOrder.addStatusHistory).toHaveBeenCalled();
+    });
   });
 
   describe('findById', () => {
@@ -412,7 +556,51 @@ describe('ServiceOrderService', () => {
       ).rejects.toThrow('Not found');
     });
   });
+  describe('findAll', () => {
+    it('TC0001 - Should return all service orders', async () => {
+      repositories.serviceOrder.findAll.mockResolvedValue([mockServiceOrder]);
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
+      services.mechanic.findById.mockResolvedValue(mockMechanic);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
 
+      const result = await service.findAll();
+
+      expect(result).toHaveLength(1);
+      expect(repositories.serviceOrder.findAll).toHaveBeenCalled();
+    });
+
+    it('TC0002 - Should return empty array when no orders', async () => {
+      repositories.serviceOrder.findAll.mockResolvedValue([]);
+
+      const result = await service.findAll();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('findByVehiclePlate', () => {
+    it('TC0001 - Should return service orders by vehicle plate', async () => {
+      repositories.vehicle.findByPlate.mockResolvedValue(mockVehicle);
+      repositories.serviceOrder.findByVehicleId.mockResolvedValue([mockServiceOrder]);
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      services.mechanic.findById.mockResolvedValue(mockMechanic);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
+
+      const result = await service.findByVehiclePlate('ABC-1234');
+
+      expect(result).toHaveLength(1);
+      expect(repositories.vehicle.findByPlate).toHaveBeenCalledWith('ABC-1234');
+    });
+
+    it('TC0002 - Should handle vehicle not found', async () => {
+      repositories.vehicle.findByPlate.mockResolvedValue(null);
+
+      await expect(service.findByVehiclePlate('XYZ-9999')).rejects.toThrow('Not found');
+    });
+  });
   describe('findByOrderNumber', () => {
     it('TC0001 - Should find service order by order number', async () => {
       repositories.serviceOrder.findByOrderNumber.mockResolvedValue(
@@ -797,6 +985,70 @@ describe('ServiceOrderService', () => {
       const result = await service.findById(mockServiceOrder.id);
       expect(result.services).toEqual([]);
       expect(result.parts).toEqual([]);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated service orders', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      repositories.serviceOrder.findMany.mockResolvedValue([mockServiceOrder]);
+      repositories.serviceOrder.count.mockResolvedValue(1);
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
+      services.mechanic.findById.mockResolvedValue(mockMechanic);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result).toBeDefined();
+      expect(result.data).toHaveLength(1);
+      expect(result.pagination.totalRecords).toBe(1);
+      expect(repositories.serviceOrder.findMany).toHaveBeenCalledWith(0, 10);
+    });
+
+    it('TC0002 - Should return empty paginated result when no orders', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      repositories.serviceOrder.findMany.mockResolvedValue([]);
+      repositories.serviceOrder.count.mockResolvedValue(0);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result).toBeDefined();
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
+    });
+  });
+
+  describe('findAllPaginatedWithPriority', () => {
+    it('TC0001 - Should return paginated service orders with priority', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      repositories.serviceOrder.findManyWithPriority.mockResolvedValue([mockServiceOrder]);
+      repositories.serviceOrder.countWithPriority.mockResolvedValue(1);
+      repositories.customer.findById.mockResolvedValue(mockCustomer);
+      repositories.vehicle.findById.mockResolvedValue(mockVehicle);
+      services.mechanic.findById.mockResolvedValue(mockMechanic);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
+
+      const result = await service.findAllPaginatedWithPriority(paginationDto);
+
+      expect(result).toBeDefined();
+      expect(result.data).toHaveLength(1);
+      expect(result.pagination.totalRecords).toBe(1);
+      expect(repositories.serviceOrder.findManyWithPriority).toHaveBeenCalledWith(0, 10);
+    });
+
+    it('TC0002 - Should return empty paginated result with priority when no orders', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      repositories.serviceOrder.findManyWithPriority.mockResolvedValue([]);
+      repositories.serviceOrder.countWithPriority.mockResolvedValue(0);
+
+      const result = await service.findAllPaginatedWithPriority(paginationDto);
+
+      expect(result).toBeDefined();
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
     });
   });
 });

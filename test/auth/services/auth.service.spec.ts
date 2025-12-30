@@ -166,7 +166,64 @@ describe('AuthService', () => {
       expect(result.id).toBe(createdUser.id);
     });
   });
+
+  describe('validateJwtPayload', () => {
+    it('TC0001 - Should validate JWT payload and return user', async () => {
+      const payload = {
+        sub: mockUser.id,
+        username: mockUser.username,
+        role: mockUser.role,
+      };
+
+      prismaService.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await service.validateJwtPayload(payload);
+
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: payload.sub },
+      });
+      expect(result).toBeDefined();
+      expect(result).not.toBeNull();
+      if (result) {
+        expect(result.id).toBe(mockUser.id);
+        expect(result.username).toBe(mockUser.username);
+        expect((result as any).passwordHash).toBeUndefined();
+      }
+    });
+
+    it('TC0002 - Should return null when user not found', async () => {
+      const payload = {
+        sub: faker.string.uuid(),
+        username: mockUser.username,
+        role: mockUser.role,
+      };
+
+      prismaService.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.validateJwtPayload(payload);
+
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: payload.sub },
+      });
+      expect(result).toBeNull();
+    });
+
+    it('TC0003 - Should return null when user is not active', async () => {
+      const inactiveUser = { ...mockUser, isActive: false };
+      const payload = {
+        sub: mockUser.id,
+        username: mockUser.username,
+        role: mockUser.role,
+      };
+
+      prismaService.user.findUnique.mockResolvedValue(inactiveUser);
+
+      const result = await service.validateJwtPayload(payload);
+
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: payload.sub },
+      });
+      expect(result).toBeNull();
+    });
+  });
 });
-
-
-

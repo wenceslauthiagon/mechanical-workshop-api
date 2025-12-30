@@ -31,6 +31,7 @@ describe('ServiceOrderCreatedEvent', () => {
     expect(event.eventId).toBeDefined();
     expect(event.occurredOn).toBeInstanceOf(Date);
     expect(event.eventVersion).toBe(1);
+    expect(event.getEventName()).toBe('ServiceOrderCreated');
   });
 });
 
@@ -58,6 +59,7 @@ describe('ServiceOrderStatusChangedEvent', () => {
     expect(event.eventId).toBeDefined();
     expect(event.occurredOn).toBeInstanceOf(Date);
     expect(event.eventVersion).toBe(1);
+    expect(event.getEventName()).toBe('ServiceOrderStatusChanged');
   });
 
   it('TC0002 - Should create event without notes', () => {
@@ -109,6 +111,7 @@ describe('ServiceOrderCompletedEvent', () => {
     expect(event.eventId).toBeDefined();
     expect(event.occurredOn).toBeInstanceOf(Date);
     expect(event.eventVersion).toBe(1);
+    expect(event.getEventName()).toBe('ServiceOrderCompleted');
   });
 });
 
@@ -133,5 +136,6 @@ describe('ServiceOrderDeliveredEvent', () => {
     expect(event.eventId).toBeDefined();
     expect(event.occurredOn).toBeInstanceOf(Date);
     expect(event.eventVersion).toBe(1);
+    expect(event.getEventName()).toBe('ServiceOrderDelivered');
   });
 });

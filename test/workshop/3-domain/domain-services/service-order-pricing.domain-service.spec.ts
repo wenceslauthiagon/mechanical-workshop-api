@@ -178,5 +178,123 @@ describe('ServiceOrderPricingDomainService', () => {
       expect(result.getTime()).toBeGreaterThan(startDate.getTime());
     });
   });
-});
 
+  describe('Legacy methods', () => {
+    describe('calculateTotalServicePrice', () => {
+      it('TC0001 - Should calculate total service price', () => {
+        const services = [
+          { price: 100, quantity: 2 },
+          { price: 50, quantity: 3 },
+        ];
+
+        const result = service.calculateTotalServicePrice(services);
+
+        expect(result.amount.toNumber()).toBe(350);
+      });
+
+      it('TC0002 - Should return zero for empty services', () => {
+        const result = service.calculateTotalServicePrice([]);
+
+        expect(result.amount.toNumber()).toBe(0);
+      });
+    });
+
+    describe('calculateTotalPartsPrice', () => {
+      it('TC0001 - Should calculate total parts price', () => {
+        const parts = [
+          { price: 80, quantity: 2 },
+          { price: 40, quantity: 1 },
+        ];
+
+        const result = service.calculateTotalPartsPrice(parts);
+
+        expect(result.amount.toNumber()).toBe(200);
+      });
+
+      it('TC0002 - Should return zero for empty parts', () => {
+        const result = service.calculateTotalPartsPrice([]);
+
+        expect(result.amount.toNumber()).toBe(0);
+      });
+    });
+
+    describe('calculateTotalPrice', () => {
+      it('TC0001 - Should calculate total price from service and parts', () => {
+        const servicePrice = new Money(100);
+        const partsPrice = new Money(50);
+
+        const result = service.calculateTotalPrice(servicePrice, partsPrice);
+
+        expect(result.amount.toNumber()).toBe(150);
+      });
+    });
+
+    describe('applyDiscount', () => {
+      it('TC0001 - Should apply discount correctly', () => {
+        const totalPrice = new Money(100);
+
+        const result = service.applyDiscount(totalPrice, 10);
+
+        expect(result.amount.toNumber()).toBe(90);
+      });
+
+      it('TC0002 - Should throw error for negative discount', () => {
+        const totalPrice = new Money(100);
+
+        expect(() => service.applyDiscount(totalPrice, -10)).toThrow(
+          'Discount percentage must be between 0 and 100',
+        );
+      });
+
+      it('TC0003 - Should throw error for discount greater than 100', () => {
+        const totalPrice = new Money(100);
+
+        expect(() => service.applyDiscount(totalPrice, 110)).toThrow(
+          'Discount percentage must be between 0 and 100',
+        );
+      });
+
+      it('TC0004 - Should handle 0% discount', () => {
+        const totalPrice = new Money(100);
+
+        const result = service.applyDiscount(totalPrice, 0);
+
+        expect(result.amount.toNumber()).toBe(100);
+      });
+
+      it('TC0005 - Should handle 100% discount', () => {
+        const totalPrice = new Money(100);
+
+        const result = service.applyDiscount(totalPrice, 100);
+
+        expect(result.amount.toNumber()).toBe(0);
+      });
+    });
+
+    describe('calculateTax', () => {
+      it('TC0001 - Should calculate tax correctly', () => {
+        const totalPrice = new Money(100);
+
+        const result = service.calculateTax(totalPrice, 10);
+
+        expect(result.amount.toNumber()).toBe(10);
+      });
+
+      it('TC0002 - Should throw error for negative tax', () => {
+        const totalPrice = new Money(100);
+
+        expect(() => service.calculateTax(totalPrice, -10)).toThrow(
+          'Tax percentage cannot be negative',
+        );
+      });
+
+      it('TC0003 - Should handle 0% tax', () => {
+        const totalPrice = new Money(100);
+
+        const result = service.calculateTax(totalPrice, 0);
+
+        expect(result.amount.toNumber()).toBe(0);
+      });
+    });
+  });
+});

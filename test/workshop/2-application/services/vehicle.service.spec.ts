@@ -68,6 +68,9 @@ describe('VehicleService', () => {
       handleConflictError: jest.fn().mockImplementation((msg) => {
         throw new Error(msg);
       }),
+      generateException: jest.fn().mockImplementation((message) => {
+        throw new Error(message);
+      }),
       handleError: jest.fn().mockImplementation((err) => {
         throw err;
       }),
@@ -92,6 +95,95 @@ describe('VehicleService', () => {
     }).compile();
 
     service = module.get<VehicleService>(VehicleService);
+  });
+
+  describe('create', () => {
+    it('TC0001 - Should create vehicle successfully', async () => {
+      const mockCustomer = createMockCustomer();
+      const createDto = {
+        customerId: mockCustomer.id,
+        plate: 'ABC-1234',
+        brand: 'Toyota',
+        model: 'Corolla',
+        year: 2020,
+        color: 'Preto',
+      };
+      const mockVehicle = createMockVehicle();
+      customerRepository.findById.mockResolvedValue(mockCustomer);
+      vehicleRepository.findByPlate.mockResolvedValue(null);
+      vehicleRepository.create.mockResolvedValue(mockVehicle);
+
+      const result = await service.create(createDto);
+
+      expect(customerRepository.findById).toHaveBeenCalledWith(mockCustomer.id);
+      expect(vehicleRepository.findByPlate).toHaveBeenCalledWith(createDto.plate);
+      expect(vehicleRepository.create).toHaveBeenCalled();
+      expect(result).toBeDefined();
+    });
+
+    it('TC0002 - Should throw error when customer not found', async () => {
+      const createDto = {
+        customerId: faker.string.uuid(),
+        plate: 'ABC-1234',
+        brand: 'Toyota',
+        model: 'Corolla',
+        year: 2020,
+      };
+      customerRepository.findById.mockResolvedValue(null);
+
+      await expect(service.create(createDto)).rejects.toThrow(
+        ERROR_MESSAGES.CLIENT_NOT_FOUND,
+      );
+    });
+
+    it('TC0003 - Should throw error for duplicate plate', async () => {
+      const mockCustomer = createMockCustomer();
+      const existingVehicle = createMockVehicle();
+      const createDto = {
+        customerId: mockCustomer.id,
+        plate: 'ABC-1234',
+        brand: 'Toyota',
+        model: 'Corolla',
+        year: 2020,
+      };
+      customerRepository.findById.mockResolvedValue(mockCustomer);
+      vehicleRepository.findByPlate.mockResolvedValue(existingVehicle);
+
+      await expect(service.create(createDto)).rejects.toThrow(
+        ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS,
+      );
+    });
+  });
+
+  describe('findAll', () => {
+    it('TC0001 - Should return all vehicles', async () => {
+      const mockVehicles = [createMockVehicle(), createMockVehicle()];
+      const mockCustomer = createMockCustomer();
+      vehicleRepository.findAll.mockResolvedValue(mockVehicles);
+      customerRepository.findById.mockResolvedValue(mockCustomer);
+
+      const result = await service.findAll();
+
+      expect(vehicleRepository.findAll).toHaveBeenCalled();
+      expect(result).toHaveLength(2);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated vehicles', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      const mockVehicles = [createMockVehicle(), createMockVehicle()];
+      const mockCustomer = createMockCustomer();
+      vehicleRepository.findMany.mockResolvedValue(mockVehicles);
+      vehicleRepository.count.mockResolvedValue(2);
+      customerRepository.findById.mockResolvedValue(mockCustomer);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(vehicleRepository.findMany).toHaveBeenCalledWith(0, 10);
+      expect(vehicleRepository.count).toHaveBeenCalled();
+      expect(result.data).toHaveLength(2);
+    });
   });
 
   describe('findById', () => {

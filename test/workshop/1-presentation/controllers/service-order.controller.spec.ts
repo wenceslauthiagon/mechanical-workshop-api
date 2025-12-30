@@ -69,6 +69,69 @@ describe('ServiceOrderController', () => {
     serviceOrderService = module.get(ServiceOrderService);
   });
 
+  describe('create', () => {
+    it('TC0001 - Should create service order successfully', async () => {
+      const createDto = {
+        customerId: mockCustomerId,
+        vehicleId: mockVehicleId,
+        description: faker.lorem.sentence(),
+        services: [],
+        parts: [],
+      };
+      serviceOrderService.create.mockResolvedValue(mockServiceOrder);
+
+      const result = await controller.create(createDto);
+
+      expect(serviceOrderService.create).toHaveBeenCalledWith(createDto);
+      expect(result).toEqual(mockServiceOrder);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated service orders', async () => {
+      const paginationDto = new PaginationDto();
+      paginationDto.page = 0;
+      paginationDto.size = 10;
+      const mockPaginatedResponse = {
+        data: [mockServiceOrder],
+        pagination: {
+          page: 0,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      serviceOrderService.findAllPaginated.mockResolvedValue(mockPaginatedResponse);
+
+      const result = await controller.findAllPaginated(paginationDto);
+
+      expect(serviceOrderService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result).toEqual(mockPaginatedResponse);
+    });
+
+    it('TC0002 - Should filter by customerId when provided', async () => {
+      const paginationDto = new PaginationDto();
+      const mockServiceOrders = [mockServiceOrder];
+      serviceOrderService.findByCustomer.mockResolvedValue(mockServiceOrders);
+
+      const result = await controller.findAllPaginated(paginationDto, mockCustomerId);
+
+      expect(serviceOrderService.findByCustomer).toHaveBeenCalledWith(mockCustomerId);
+      expect(result.data).toEqual(mockServiceOrders);
+    });
+  });
+
+  describe('findAll', () => {
+    it('TC0001 - Should return all service orders', async () => {
+      const mockServiceOrders = [mockServiceOrder];
+      serviceOrderService.findAll.mockResolvedValue(mockServiceOrders);
+
+      const result = await controller.findAll();
+
+      expect(serviceOrderService.findAll).toHaveBeenCalled();
+      expect(result).toEqual(mockServiceOrders);
+    });
+  });
+
   describe('findAllWithPriority', () => {
     it('TC0001 - Should return service orders with priority ordering', async () => {
       const paginationDto = new PaginationDto();

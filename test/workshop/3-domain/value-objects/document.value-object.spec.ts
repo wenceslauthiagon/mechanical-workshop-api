@@ -128,4 +128,50 @@ describe('Document', () => {
       expect(result).toBe('52998224725');
     });
   });
+
+  describe('getValue', () => {
+    it('TC0001 - Should return document value', () => {
+      const document = new Document('52998224725');
+
+      const result = document.getValue();
+
+      expect(result).toBe('52998224725');
+    });
+  });
+
+  describe('isCPF', () => {
+    it('TC0001 - Should return true for CPF', () => {
+      const document = new Document('52998224725');
+
+      const result = document.isCPF();
+
+      expect(result).toBe(true);
+    });
+
+    it('TC0002 - Should return false for CNPJ', () => {
+      const document = new Document('11222333000181');
+
+      const result = document.isCPF();
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isCNPJ', () => {
+    it('TC0001 - Should return true for CNPJ', () => {
+      const document = new Document('11222333000181');
+
+      const result = document.isCNPJ();
+
+      expect(result).toBe(true);
+    });
+
+    it('TC0002 - Should return false for CPF', () => {
+      const document = new Document('52998224725');
+
+      const result = document.isCNPJ();
+
+      expect(result).toBe(false);
+    });
+  });
 });

@@ -83,6 +83,114 @@ describe('CustomerService', () => {
     service = module.get<CustomerService>(CustomerService);
   });
 
+  describe('create', () => {
+    it('TC0001 - Should create customer successfully', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: '123.456.789-01',
+        email: mockCustomer.email,
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
+      };
+
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
+      customerRepository.findByEmail.mockResolvedValue(null);
+      customerRepository.findByDocument.mockResolvedValue(null);
+      customerRepository.create.mockResolvedValue(mockCustomer);
+
+      const result = await service.create(createDto);
+
+      expect(result).toEqual(mockCustomer);
+      expect(DocumentUtils.validateAndNormalize).toHaveBeenCalledWith('123.456.789-01');
+      expect(customerRepository.findByEmail).toHaveBeenCalledWith(createDto.email);
+      expect(customerRepository.findByDocument).toHaveBeenCalledWith('12345678901');
+      expect(customerRepository.create).toHaveBeenCalled();
+    });
+
+    it('TC0002 - Should throw error for invalid document', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: 'invalid-document',
+        email: mockCustomer.email,
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
+      };
+
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockImplementation(() => {
+        throw new Error('Invalid document');
+      });
+
+      await expect(service.create(createDto)).rejects.toThrow(
+        ERROR_MESSAGES.INVALID_DOCUMENT,
+      );
+      expect(errorHandler.handleValueObjectError).toHaveBeenCalled();
+    });
+
+    it('TC0003 - Should throw error for duplicate email', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: '123.456.789-01',
+        email: mockCustomer.email,
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
+      };
+
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
+      customerRepository.findByEmail.mockResolvedValue(mockCustomer);
+
+      await expect(service.create(createDto)).rejects.toThrow(
+        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+      );
+      expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
+        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+      );
+    });
+
+    it('TC0004 - Should throw error for duplicate document', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: '123.456.789-01',
+        email: 'newemail@example.com',
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
+      };
+
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
+      customerRepository.findByEmail.mockResolvedValue(null);
+      customerRepository.findByDocument.mockResolvedValue(mockCustomer);
+
+      await expect(service.create(createDto)).rejects.toThrow(
+        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
+      );
+      expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
+        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
+      );
+    });
+
+    it('TC0005 - Should handle database error during creation', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: '123.456.789-01',
+        email: mockCustomer.email,
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
+      };
+
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
+      customerRepository.findByEmail.mockResolvedValue(null);
+      customerRepository.findByDocument.mockResolvedValue(null);
+      const dbError = new Error('Database error');
+      customerRepository.create.mockRejectedValue(dbError);
+
+      await expect(service.create(createDto)).rejects.toThrow(dbError);
+    });
+  });
+
   describe('findById', () => {
     it('TC0001 - Should return customer by id', async () => {
       customerRepository.findById.mockResolvedValue(mockCustomer);

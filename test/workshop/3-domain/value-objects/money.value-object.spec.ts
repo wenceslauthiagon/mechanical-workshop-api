@@ -236,5 +236,60 @@ describe('Money', () => {
       expect(result).toBe('BRL 100.00');
     });
   });
+
+  describe('getAmount', () => {
+    it('TC0001 - Should return amount as Decimal', () => {
+      const money = new Money(100);
+
+      const result = money.getAmount();
+
+      expect(result.toNumber()).toBe(100);
+    });
+  });
+
+  describe('getCurrency', () => {
+    it('TC0001 - Should return currency', () => {
+      const money = new Money(100, 'USD');
+
+      const result = money.getCurrency();
+
+      expect(result).toBe('USD');
+    });
+  });
+
+  describe('toNumber', () => {
+    it('TC0001 - Should convert amount to number', () => {
+      const money = new Money(100.5);
+
+      const result = money.toNumber();
+
+      expect(result).toBe(101);
+    });
+  });
+
+  describe('Multiple currency support', () => {
+    it('TC0001 - Should create money with EUR', () => {
+      const money = new Money(100, 'EUR');
+
+      expect(money.currency).toBe('EUR');
+      expect(money.amount.toNumber()).toBe(100);
+    });
+
+    it('TC0002 - Should multiply with decimal result', () => {
+      const money = new Money(100);
+
+      const result = money.multiply(1.5);
+
+      expect(result.amount.toNumber()).toBe(150);
+    });
+
+    it('TC0003 - Should divide with decimal result', () => {
+      const money = new Money(100);
+
+      const result = money.divide(3);
+
+      expect(result.amount.toNumber()).toBe(33);
+    });
+  });
 });
 

@@ -86,6 +86,52 @@ describe('MechanicController', () => {
     expect(mockCreateMechanicDto.name).toBeDefined();
   });
 
+  describe('create', () => {
+    it('TC0001 - Should create mechanic successfully', async () => {
+      mechanicService.create.mockResolvedValue(mockMechanic);
+
+      const result = await controller.create(mockCreateMechanicDto);
+
+      expect(mechanicService.create).toHaveBeenCalledWith(mockCreateMechanicDto);
+      expect(result).toBeInstanceOf(MechanicResponseDto);
+      expect(result.id).toBe(mockMechanicId);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated mechanics', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      const mockPaginatedResult = {
+        data: [mockMechanic],
+        pagination: {
+          page: 0,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      mechanicService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await controller.findAllPaginated(paginationDto);
+
+      expect(mechanicService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toBeInstanceOf(MechanicResponseDto);
+    });
+  });
+
+  describe('findAll', () => {
+    it('TC0001 - Should return all mechanics', async () => {
+      const mockMechanics = [mockMechanic];
+      mechanicService.findAll.mockResolvedValue(mockMechanics);
+
+      const result = await controller.findAll();
+
+      expect(mechanicService.findAll).toHaveBeenCalled();
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBeInstanceOf(MechanicResponseDto);
+    });
+  });
+
   describe('findAvailable', () => {
     it('TC0001 - Should return list of available mechanics', async () => {
       const availableMechanics = [mockMechanic];

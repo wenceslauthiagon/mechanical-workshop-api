@@ -64,4 +64,14 @@ describe('Email', () => {
       expect(result).toBe('user@example.com');
     });
   });
+
+  describe('getValue', () => {
+    it('TC0001 - Should return email value', () => {
+      const email = new Email('user@example.com');
+
+      const result = email.getValue();
+
+      expect(result).toBe('user@example.com');
+    });
+  });
 });

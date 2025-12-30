@@ -66,6 +66,84 @@ describe('ServiceService', () => {
     errorHandler = module.get(ErrorHandlerService);
   });
 
+  describe('create', () => {
+    it('TC0001 - Should create service successfully', async () => {
+      const createDto = {
+        name: faker.commerce.productName(),
+        description: faker.commerce.productDescription(),
+        price: 150,
+        category: 'Mecânica',
+        estimatedMinutes: 120,
+        isActive: true,
+      };
+      const mockService = createMockService();
+      serviceRepository.findByName.mockResolvedValue(null);
+      serviceRepository.create.mockResolvedValue(mockService);
+
+      const result = await service.create(createDto);
+
+      expect(serviceRepository.findByName).toHaveBeenCalledWith(createDto.name);
+      expect(serviceRepository.create).toHaveBeenCalled();
+      expect(result).toBeDefined();
+    });
+
+    it('TC0002 - Should throw error for duplicate service name', async () => {
+      const createDto = {
+        name: 'Duplicate Service',
+        price: 150,
+        category: 'Mecânica',
+        estimatedMinutes: 120,
+      };
+      const existingService = createMockService();
+      serviceRepository.findByName.mockResolvedValue(existingService);
+      errorHandler.handleConflictError.mockImplementation(() => {
+        throw new Error(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
+      });
+
+      await expect(service.create(createDto)).rejects.toThrow(
+        ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS,
+      );
+    });
+  });
+
+  describe('findAll', () => {
+    it('TC0001 - Should return all services', async () => {
+      const mockServices = [createMockService(), createMockService()];
+      serviceRepository.findAll.mockResolvedValue(mockServices);
+
+      const result = await service.findAll();
+
+      expect(serviceRepository.findAll).toHaveBeenCalled();
+      expect(result).toHaveLength(2);
+    });
+
+    it('TC0002 - Should return services with filters', async () => {
+      const mockServices = [createMockService()];
+      const filters = { category: 'Mecânica', active: true };
+      serviceRepository.findAll.mockResolvedValue(mockServices);
+
+      const result = await service.findAll(filters);
+
+      expect(serviceRepository.findAll).toHaveBeenCalledWith(filters);
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated services', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      const mockServices = [createMockService(), createMockService()];
+      serviceRepository.findMany.mockResolvedValue(mockServices);
+      serviceRepository.count.mockResolvedValue(2);
+
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(serviceRepository.findMany).toHaveBeenCalledWith(0, 10, undefined);
+      expect(serviceRepository.count).toHaveBeenCalled();
+      expect(result.data).toHaveLength(2);
+    });
+  });
+
   describe('findById', () => {
     it('TC0001 - Should return service by id', async () => {
       const mockService = createMockService();

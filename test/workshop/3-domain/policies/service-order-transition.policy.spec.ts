@@ -90,4 +90,53 @@ describe('DefaultServiceOrderPolicy', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('getValidTransitions', () => {
+    it('TC0001 - Should return valid transitions for RECEBIDA status', () => {
+      const result = policy.getValidTransitions(ServiceOrderStatus.RECEBIDA);
+
+      expect(result).toEqual([ServiceOrderStatus.EM_DIAGNOSTICO]);
+    });
+
+    it('TC0002 - Should return valid transitions for EM_DIAGNOSTICO status', () => {
+      const result = policy.getValidTransitions(
+        ServiceOrderStatus.EM_DIAGNOSTICO,
+      );
+
+      expect(result).toEqual([ServiceOrderStatus.AGUARDANDO_APROVACAO]);
+    });
+
+    it('TC0003 - Should return valid transitions for AGUARDANDO_APROVACAO status', () => {
+      const result = policy.getValidTransitions(
+        ServiceOrderStatus.AGUARDANDO_APROVACAO,
+      );
+
+      expect(result).toEqual([
+        ServiceOrderStatus.EM_EXECUCAO,
+        ServiceOrderStatus.EM_DIAGNOSTICO,
+      ]);
+    });
+
+    it('TC0004 - Should return valid transitions for EM_EXECUCAO status', () => {
+      const result = policy.getValidTransitions(
+        ServiceOrderStatus.EM_EXECUCAO,
+      );
+
+      expect(result).toEqual([ServiceOrderStatus.FINALIZADA]);
+    });
+
+    it('TC0005 - Should return valid transitions for FINALIZADA status', () => {
+      const result = policy.getValidTransitions(
+        ServiceOrderStatus.FINALIZADA,
+      );
+
+      expect(result).toEqual([ServiceOrderStatus.ENTREGUE]);
+    });
+
+    it('TC0006 - Should return empty array for ENTREGUE status', () => {
+      const result = policy.getValidTransitions(ServiceOrderStatus.ENTREGUE);
+
+      expect(result).toEqual([]);
+    });
+  });
 });
