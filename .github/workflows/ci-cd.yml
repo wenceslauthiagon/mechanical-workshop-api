@@ -60,7 +60,9 @@ jobs:
         run: cp prisma/schema.postgresql.prisma prisma/schema.prisma
 
       - name: Generate Prisma Client
-        run: npx prisma generate
+        env:
+          PRISMA_GENERATE_SKIP_AUTOINSTALL: false
+        run: npx prisma generate --generator client
 
       - name: Run migrations
         env:
