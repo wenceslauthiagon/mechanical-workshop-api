@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
-import { CustomerType } from '@prisma/client';
 
 import { CustomerController } from '../../../../src/workshop/1-presentation/controllers/customer.controller';
 import { CustomerService } from '../../../../src/workshop/2-application/services/customer.service';

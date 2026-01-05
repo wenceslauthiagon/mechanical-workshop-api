@@ -2,7 +2,6 @@ import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 import { AuthService } from '../../../src/auth/services/auth.service';

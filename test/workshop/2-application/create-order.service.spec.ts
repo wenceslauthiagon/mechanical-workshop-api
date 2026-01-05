@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { CustomerType } from '@prisma/client';
 import { CreateOrderService } from '../../../src/workshop/2-application/create-order.service';
 import { ErrorHandlerService } from '../../../src/shared/services/error-handler.service';
 import { CreateCustomerDto } from '../../../src/workshop/1-presentation/dtos/customer/create-customer.dto';

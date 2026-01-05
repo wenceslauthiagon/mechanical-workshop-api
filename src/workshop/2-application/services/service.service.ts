@@ -1,6 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
-import { Decimal } from '@prisma/client/runtime/library';
 import type { IServiceRepository } from '../../3-domain/repositories/service-repository.interface';
 import { CreateServiceDto } from '../../1-presentation/dtos/service/create-service.dto';
 import { UpdateServiceDto } from '../../1-presentation/dtos/service/update-service.dto';
@@ -27,7 +26,7 @@ export class ServiceService {
     return this.serviceRepository.create({
       name: data.name,
       description: data.description ?? null,
-      price: new Decimal(data.price),
+      price: parseFloat(data.price.toString()),
       category: data.category,
       estimatedMinutes: data.estimatedMinutes,
       isActive: data.isActive ?? true,
@@ -97,7 +96,7 @@ export class ServiceService {
     const updateData = {
       name: data.name,
       description: data.description ?? null,
-      price: data.price ? new Decimal(data.price) : undefined,
+      price: data.price ? parseFloat(data.price.toString()) : undefined,
       category: data.category,
       estimatedMinutes: data.estimatedMinutes,
       isActive: data.isActive,

@@ -29,7 +29,7 @@ export class ServiceEntity implements Service {
     this.id = data.id;
     this.name = data.name;
     this.description = data.description;
-    this.price = data.price;
+    this.price = typeof data.price === 'number' ? data.price : data.price.toNumber();
     this.estimatedMinutes = data.estimatedMinutes;
     this.category = data.category;
     this.isActive = data.isActive;

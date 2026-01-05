@@ -21,7 +21,10 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { Public } from '../decorators/public.decorator';
+// import { GetUser } from '../decorators/get-user.decorator'; // Not used yet
+// import { User } from '@prisma/client'; // Not used
+import { UserRole } from '../../shared/enums';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -32,6 +35,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Login do usuário',
@@ -68,6 +72,7 @@ export class AuthController {
   }
 
   @Post('users/first-admin')
+  @Public()
   @ApiOperation({
     summary: 'Criar primeiro usuário admin',
     description:
@@ -156,3 +161,4 @@ export class AuthController {
     return userData;
   }
 }
+

@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { ServiceOrderStatus } from '@prisma/client';
 
 import { PublicServiceOrderController } from '../../../../src/workshop/1-presentation/controllers/public-service-order.controller';
 import { ServiceOrderService } from '../../../../src/workshop/2-application/services/service-order.service';

@@ -52,14 +52,11 @@ describe('Public Service Order Integration Tests', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     await prisma.$executeRaw`PRAGMA foreign_keys = OFF;`;
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.part.deleteMany();
     await prisma.service.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.customer.deleteMany();
     await prisma.user.deleteMany();
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;

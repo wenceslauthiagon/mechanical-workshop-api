@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { UserRole } from '@prisma/client';
 
 import { RolesGuard } from '../../../src/auth/guards/roles.guard';
 

@@ -1,6 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
-import { Decimal } from '@prisma/client/runtime/library';
 import type { IPartRepository } from '../../3-domain/repositories/part-repository.interface';
 import { CreatePartDto } from '../../1-presentation/dtos/part/create-part.dto';
 import { UpdatePartDto } from '../../1-presentation/dtos/part/update-part.dto';
@@ -32,7 +31,7 @@ export class PartService {
       name: data.name,
       description: data.description ?? null,
       partNumber: data.partNumber ?? null,
-      price: new Decimal(data.price),
+      price: parseFloat(data.price.toString()),
       stock: data.stock,
       minStock: data.minStock,
       supplier: data.supplier ?? null,
@@ -161,7 +160,7 @@ export class PartService {
       updateData.partNumber = data.partNumber;
     }
     if (Object.prototype.hasOwnProperty.call(data, 'price') && data.price) {
-      updateData.price = new Decimal(data.price);
+      updateData.price = parseFloat(data.price.toString());
     }
     if (Object.prototype.hasOwnProperty.call(data, 'stock')) {
       updateData.stock = data.stock;

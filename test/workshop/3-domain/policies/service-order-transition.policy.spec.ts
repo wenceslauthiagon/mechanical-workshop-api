@@ -1,4 +1,3 @@
-import { ServiceOrderStatus } from '@prisma/client';
 import { DefaultServiceOrderPolicy } from '../../../../src/workshop/3-domain/policies/service-order-transition.policy';
 
 describe('DefaultServiceOrderPolicy', () => {

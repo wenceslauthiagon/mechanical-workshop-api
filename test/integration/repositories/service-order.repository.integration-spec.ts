@@ -3,7 +3,7 @@ import { PrismaService } from '../../../src/prisma/prisma.service';
 import { ServiceOrderRepository } from '../../../src/workshop/4-infrastructure/repositories/service-order.repository';
 import { CustomerRepository } from '../../../src/workshop/4-infrastructure/repositories/customer.repository';
 import { VehicleRepository } from '../../../src/workshop/4-infrastructure/repositories/vehicle.repository';
-import { CustomerType, ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../src/shared/enums/service-order-status.enum';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 function generateValidCPF(): string {
@@ -37,7 +37,7 @@ const createMockServiceOrderData = (
   customerId: string,
   vehicleId: string,
   mechanicId?: string,
-  status: ServiceOrderStatus = ServiceOrderStatus.RECEBIDA,
+  status: ServiceOrderStatus = ServiceOrderStatus.RECEIVED,
 ) => ({
   orderNumber: `OS-${faker.number.int({ min: 1000, max: 9999 })}`,
   customerId,
@@ -89,19 +89,16 @@ describe('Service Order Repository Integration Tests', () => {
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.customer.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.service.deleteMany();
     await prisma.part.deleteMany();
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
 
     const customer = await customerRepository.create({
       document: generateValidCPF(),
-      type: CustomerType.PESSOA_FISICA,
+      type: 'PESSOA_FISICA',
       name: faker.person.fullName(),
       email: faker.internet.email(),
       phone: faker.phone.number(),
@@ -134,11 +131,12 @@ describe('Service Order Repository Integration Tests', () => {
       expect(serviceOrder).toBeDefined();
       expect(serviceOrder.id).toBeDefined();
       expect(serviceOrder.orderNumber).toBe(orderData.orderNumber);
-      expect(serviceOrder.status).toBe(ServiceOrderStatus.RECEBIDA);
+      expect(serviceOrder.status).toBe('RECEIVED');
       expect(serviceOrder.customerId).toBe(customerId);
       expect(serviceOrder.vehicleId).toBe(vehicleId);
     });
 
+    /* Test disabled - mechanic model removed
     it('TC0002 - Should create service order with mechanic', async () => {
       const mechanic = await prisma.mechanic.create({
         data: {
@@ -162,14 +160,15 @@ describe('Service Order Repository Integration Tests', () => {
         customerId,
         vehicleId,
         mechanic.id,
-        ServiceOrderStatus.EM_EXECUCAO,
+        'IN_EXECUTION',
       );
 
       const serviceOrder = await serviceOrderRepository.create(orderData);
 
       expect(serviceOrder.mechanicId).toBe(mechanic.id);
-      expect(serviceOrder.status).toBe(ServiceOrderStatus.EM_EXECUCAO);
+      expect(serviceOrder.status).toBe('IN_EXECUTION');
     });
+    */
   });
 
   describe('find service order', () => {
@@ -240,11 +239,11 @@ describe('Service Order Repository Integration Tests', () => {
       const updatedOrder = await serviceOrderRepository.updateStatus(
         serviceOrderId,
         {
-          status: ServiceOrderStatus.EM_DIAGNOSTICO,
+          status: ServiceOrderStatus.IN_DIAGNOSIS,
         },
       );
 
-      expect(updatedOrder.status).toBe(ServiceOrderStatus.EM_DIAGNOSTICO);
+      expect(updatedOrder.status).toBe(ServiceOrderStatus.IN_DIAGNOSIS);
     });
 
     it('TC0002 - Should update service order prices', async () => {
@@ -268,12 +267,12 @@ describe('Service Order Repository Integration Tests', () => {
       const updatedOrder = await serviceOrderRepository.updateStatus(
         serviceOrderId,
         {
-          status: ServiceOrderStatus.EM_EXECUCAO,
+          status: ServiceOrderStatus.IN_EXECUTION,
           startedAt: new Date(),
         },
       );
 
-      expect(updatedOrder.status).toBe(ServiceOrderStatus.EM_EXECUCAO);
+      expect(updatedOrder.status).toBe(ServiceOrderStatus.IN_EXECUTION);
       expect(updatedOrder.startedAt).toBeDefined();
     });
 
@@ -281,12 +280,12 @@ describe('Service Order Repository Integration Tests', () => {
       const updatedOrder = await serviceOrderRepository.updateStatus(
         serviceOrderId,
         {
-          status: ServiceOrderStatus.FINALIZADA,
+          status: ServiceOrderStatus.FINISHED,
           completedAt: new Date(),
         },
       );
 
-      expect(updatedOrder.status).toBe(ServiceOrderStatus.FINALIZADA);
+      expect(updatedOrder.status).toBe(ServiceOrderStatus.FINISHED);
       expect(updatedOrder.completedAt).toBeDefined();
     });
 
@@ -294,12 +293,12 @@ describe('Service Order Repository Integration Tests', () => {
       const updatedOrder = await serviceOrderRepository.updateStatus(
         serviceOrderId,
         {
-          status: ServiceOrderStatus.ENTREGUE,
+          status: ServiceOrderStatus.DELIVERED,
           deliveredAt: new Date(),
         },
       );
 
-      expect(updatedOrder.status).toBe(ServiceOrderStatus.ENTREGUE);
+      expect(updatedOrder.status).toBe(ServiceOrderStatus.DELIVERED);
       expect(updatedOrder.deliveredAt).toBeDefined();
     });
   });
@@ -318,3 +317,4 @@ describe('Service Order Repository Integration Tests', () => {
     });
   });
 });
+

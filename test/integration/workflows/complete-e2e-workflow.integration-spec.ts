@@ -82,14 +82,13 @@ describe('Complete E2E Workflow Integration Tests', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     await prisma.$executeRaw`PRAGMA foreign_keys = OFF;`;
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
+    await prisma.serviceOrderStatusHistory.deleteMany();
+    await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.part.deleteMany();
     await prisma.service.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.customer.deleteMany();
     await prisma.user.deleteMany();
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
@@ -198,7 +197,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
       expect(response.body.vehicleId).toBe(vehicleId);
-      expect(response.body.status).toBe('RECEBIDA');
+      expect(response.body.status).toBe('RECEIVED');
       expect(response.body.services).toHaveLength(1);
       expect(response.body.parts).toHaveLength(1);
       serviceOrderId = response.body.id;
@@ -213,11 +212,11 @@ describe('Complete E2E Workflow Integration Tests', () => {
       expect(response.body.stock).toBe(mockPart.stock - 4);
     });
 
-    it('TC0008 - Should update service order to EM_DIAGNOSTICO', async () => {
+    it('TC0008 - Should update service order to IN_DIAGNOSIS', async () => {
       await request(app.getHttpServer())
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ status: 'EM_DIAGNOSTICO' })
+        .send({ status: 'IN_DIAGNOSIS' })
         .expect(200);
     });
 
@@ -225,7 +224,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
       await request(app.getHttpServer())
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ status: 'AGUARDANDO_APROVACAO' })
+        .send({ status: 'AWAITING_APPROVAL' })
         .expect(200);
 
       const createResponse = await request(app.getHttpServer())
@@ -264,13 +263,13 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .expect(200);
     });
 
-    it('TC0010 - Should verify service order status changed to AGUARDANDO_APROVACAO', async () => {
+    it('TC0010 - Should verify service order status changed to AWAITING_APPROVAL', async () => {
       const response = await request(app.getHttpServer())
         .get(`/api/service-orders/${serviceOrderId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.status).toBe('AGUARDANDO_APROVACAO');
+      expect(response.body.status).toBe('AWAITING_APPROVAL');
     });
 
     it('TC0011 - Should allow customer to view budget via public API', async () => {
@@ -301,13 +300,13 @@ describe('Complete E2E Workflow Integration Tests', () => {
       expect(response.body.status).toBe('APROVADO');
     });
 
-    it('TC0014 - Should verify service order status changed to EM_EXECUCAO', async () => {
+    it('TC0014 - Should verify service order status changed to IN_EXECUTION', async () => {
       const response = await request(app.getHttpServer())
         .get(`/api/service-orders/${serviceOrderId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.status).toBe('EM_EXECUCAO');
+      expect(response.body.status).toBe('IN_EXECUTION');
     });
 
     it('TC0015 - Should assign mechanic to service order', async () => {
@@ -326,22 +325,22 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.status).toBe('EM_EXECUCAO');
+      expect(response.body.status).toBe('IN_EXECUTION');
     });
 
-    it('TC0016 - Should update service order to FINALIZADA', async () => {
+    it('TC0016 - Should update service order to FINISHED', async () => {
       await request(app.getHttpServer())
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ status: 'FINALIZADA' })
+        .send({ status: 'FINISHED' })
         .expect(200);
     });
 
-    it('TC0017 - Should update service order to ENTREGUE', async () => {
+    it('TC0017 - Should update service order to DELIVERED', async () => {
       await request(app.getHttpServer())
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ status: 'ENTREGUE' })
+        .send({ status: 'DELIVERED' })
         .expect(200);
     });
 
@@ -352,12 +351,12 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .expect(200);
 
       expect(response.body).toHaveLength(6);
-      expect(response.body[0].status).toBe('RECEBIDA');
-      expect(response.body[1].status).toBe('EM_DIAGNOSTICO');
-      expect(response.body[2].status).toBe('AGUARDANDO_APROVACAO');
-      expect(response.body[3].status).toBe('EM_EXECUCAO');
-      expect(response.body[4].status).toBe('FINALIZADA');
-      expect(response.body[5].status).toBe('ENTREGUE');
+      expect(response.body[0].status).toBe('RECEIVED');
+      expect(response.body[1].status).toBe('IN_DIAGNOSIS');
+      expect(response.body[2].status).toBe('AWAITING_APPROVAL');
+      expect(response.body[3].status).toBe('IN_EXECUTION');
+      expect(response.body[4].status).toBe('FINISHED');
+      expect(response.body[5].status).toBe('DELIVERED');
     });
 
     it('TC0019 - Should verify customer can view completed order', async () => {
@@ -367,7 +366,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .expect(200);
 
       expect(response.body.id).toBe(serviceOrderId);
-      expect(response.body.status).toBe('ENTREGUE');
+      expect(response.body.status).toBe('DELIVERED');
     });
 
     it('TC0020 - Should verify overall statistics updated', async () => {
@@ -427,13 +426,13 @@ describe('Complete E2E Workflow Integration Tests', () => {
       await request(app.getHttpServer())
         .patch(`/api/service-orders/${rejectionServiceOrderId}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ status: 'EM_DIAGNOSTICO' })
+        .send({ status: 'IN_DIAGNOSIS' })
         .expect(200);
 
       await request(app.getHttpServer())
         .patch(`/api/service-orders/${rejectionServiceOrderId}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ status: 'AGUARDANDO_APROVACAO' })
+        .send({ status: 'AWAITING_APPROVAL' })
         .expect(200);
 
       const budgetResponse = await request(app.getHttpServer())
@@ -478,13 +477,14 @@ describe('Complete E2E Workflow Integration Tests', () => {
       expect(response.body.status).toBe('REJEITADO');
     });
 
-    it('TC0004 - Should verify service order status remains AGUARDANDO_APROVACAO after rejection', async () => {
+    it('TC0004 - Should verify service order status remains AWAITING_APPROVAL after rejection', async () => {
       const response = await request(app.getHttpServer())
         .get(`/api/service-orders/${rejectionServiceOrderId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.status).toBe('AGUARDANDO_APROVACAO');
+      expect(response.body.status).toBe('AWAITING_APPROVAL');
     });
   });
 });
+

@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
-import { ServiceOrderStatus } from '@prisma/client';
 
 import { ServiceOrderController } from '../../../../src/workshop/1-presentation/controllers/service-order.controller';
 import { ServiceOrderService } from '../../../../src/workshop/2-application/services/service-order.service';

@@ -98,6 +98,15 @@ export class MechanicService {
     }
   }
 
+  async checkAvailability(mechanicId: string): Promise<boolean> {
+    try {
+      const mechanic = await this.findById(mechanicId);
+      return mechanic.isAvailable;
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
   async update(
     id: string,
     data: UpdateMechanicData,

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+// import { PrismaService } from '../prisma/prisma.service'; // Now provided by SharedModule
 import { SharedModule } from '../shared/shared.module';
 import { ServiceOrderController } from './1-presentation/controllers/service-order.controller';
 import { VehicleController } from './1-presentation/controllers/vehicle.controller';
@@ -47,7 +47,7 @@ import { MockSmsProvider } from './4-infrastructure/providers/sms/mock-sms.provi
     PublicBudgetController,
   ],
   providers: [
-    PrismaService,
+    // PrismaService, // Now provided by SharedModule
     NotificationService,
     {
       provide: 'ICustomerRepository',
@@ -103,6 +103,7 @@ import { MockSmsProvider } from './4-infrastructure/providers/sms/mock-sms.provi
     ServiceService,
     PartService,
     MechanicService,
+    BudgetService,
   ],
 })
 export class WorkshopModule {}

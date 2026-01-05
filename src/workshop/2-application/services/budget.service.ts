@@ -200,7 +200,7 @@ export class BudgetService {
 
       // Update service order status and set approvedAt
       await this.serviceOrderRepository.updateStatus(budget.serviceOrderId, {
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
         approvedAt: new Date(),
         startedAt: new Date(),
       });
@@ -208,7 +208,7 @@ export class BudgetService {
       // Add status history entry
       await this.serviceOrderRepository.addStatusHistory({
         serviceOrderId: budget.serviceOrderId,
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
         notes: 'Orçamento aprovado pelo cliente - execução iniciada',
       });
 

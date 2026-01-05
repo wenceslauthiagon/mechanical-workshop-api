@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { CustomerType, ServiceOrderStatus } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 import { BudgetService } from '../../../../src/workshop/2-application/services/budget.service';

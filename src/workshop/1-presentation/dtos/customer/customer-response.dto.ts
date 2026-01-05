@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CustomerType } from '@prisma/client';
+import { CustomerType } from '../../../../shared/enums';
 
 export class CustomerResponseDto {
   @ApiProperty({ description: 'ID do cliente' })

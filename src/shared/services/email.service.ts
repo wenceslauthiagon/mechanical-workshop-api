@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ServiceOrderStatus } from '@prisma/client';
 
 export interface EmailOptions {
   to: string;
@@ -12,7 +11,7 @@ export interface StatusChangeEmailData {
   customerName: string;
   customerEmail: string;
   orderNumber: string;
-  newStatus: ServiceOrderStatus;
+  newStatus: string; // RECEIVED, IN_DIAGNOSIS, AWAITING_APPROVAL, IN_EXECUTION, FINISHED, DELIVERED
   statusMessage: string;
   orderLink?: string;
 }
@@ -35,14 +34,13 @@ export class EmailService {
   async sendStatusChangeNotification(
     data: StatusChangeEmailData,
   ): Promise<boolean> {
-    const statusMessages = {
-      [ServiceOrderStatus.RECEBIDA]: 'recebida e aguardando diagnóstico',
-      [ServiceOrderStatus.EM_DIAGNOSTICO]: 'em diagnóstico',
-      [ServiceOrderStatus.AGUARDANDO_APROVACAO]:
-        'aguardando sua aprovação do orçamento',
-      [ServiceOrderStatus.EM_EXECUCAO]: 'em execução',
-      [ServiceOrderStatus.FINALIZADA]: 'finalizada',
-      [ServiceOrderStatus.ENTREGUE]: 'entregue',
+    const statusMessages: Record<string, string> = {
+      RECEIVED: 'recebida e aguardando diagnóstico',
+      IN_DIAGNOSIS: 'em diagnóstico',
+      AWAITING_APPROVAL: 'aguardando sua aprovação do orçamento',
+      IN_EXECUTION: 'em execução',
+      FINISHED: 'finalizada',
+      DELIVERED: 'entregue',
     };
 
     const subject = `Atualização da Ordem de Serviço ${data.orderNumber}`;

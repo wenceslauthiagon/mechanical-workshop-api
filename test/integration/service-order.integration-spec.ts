@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient, ServiceOrderStatus, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -66,10 +66,7 @@ describe('Service Order Integration Tests', () => {
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrder.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.customer.deleteMany();
     await prisma.service.deleteMany();
@@ -85,7 +82,7 @@ describe('Service Order Integration Tests', () => {
         username: 'admin',
         email: 'admin@test.com',
         passwordHash: hashedPassword,
-        role: UserRole.ADMIN,
+        role: 'ADMIN',
       },
     });
 
@@ -112,11 +109,11 @@ describe('Service Order Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/api/customers')
         .set('Authorization', `Bearer ${authToken}`)
-        .send(mockData.customer);
+        .send(testData.customer);
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.name).toBe(mockData.customer.name);
+      expect(response.body.name).toBe(testData.customer.name);
       customerId = response.body.id;
     });
 
@@ -124,11 +121,11 @@ describe('Service Order Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/api/vehicles')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ ...mockData.vehicle, customerId });
+        .send({ ...testData.vehicle, customerId });
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.licensePlate).toBe(mockData.vehicle.licensePlate);
+      expect(response.body.licensePlate).toBe(testData.vehicle.licensePlate);
       vehicleId = response.body.id;
     });
 
@@ -136,7 +133,7 @@ describe('Service Order Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/api/services')
         .set('Authorization', `Bearer ${authToken}`)
-        .send(mockData.service);
+        .send(testData.service);
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
@@ -147,7 +144,7 @@ describe('Service Order Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/api/parts')
         .set('Authorization', `Bearer ${authToken}`)
-        .send(mockData.part);
+        .send(testData.part);
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
@@ -161,14 +158,14 @@ describe('Service Order Integration Tests', () => {
         .send({
           customerId,
           vehicleId,
-          description: mockData.serviceOrder.description,
+          description: testData.serviceOrder.description,
           services: [{ serviceId, quantity: 1 }],
           parts: [{ partId, quantity: 2 }],
         });
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.status).toBe(ServiceOrderStatus.RECEBIDA);
+      expect(response.body.status).toBe('RECEBIDA');
       expect(response.body).toHaveProperty('orderNumber');
       serviceOrderId = response.body.id;
     });
@@ -178,12 +175,12 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: ServiceOrderStatus.EM_DIAGNOSTICO,
-          notes: mockData.serviceOrder.notes,
+          status: 'EM_DIAGNOSTICO',
+          notes: testData.serviceOrder.notes,
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe(ServiceOrderStatus.EM_DIAGNOSTICO);
+      expect(response.body.status).toBe('EM_DIAGNOSTICO');
     });
 
     it('TC0007 - Should update service order status to AGUARDANDO_APROVACAO', async () => {
@@ -191,13 +188,13 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
-          notes: mockData.serviceOrder.notes,
+          status: 'AGUARDANDO_APROVACAO',
+          notes: testData.serviceOrder.notes,
         });
 
       expect(response.status).toBe(200);
       expect(response.body.status).toBe(
-        ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        'AGUARDANDO_APROVACAO',
       );
     });
 
@@ -208,7 +205,7 @@ describe('Service Order Integration Tests', () => {
         .send();
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe(ServiceOrderStatus.EM_EXECUCAO);
+      expect(response.body.status).toBe('EM_EXECUCAO');
     });
 
     it('TC0009 - Should update service order status to FINALIZADA', async () => {
@@ -216,12 +213,12 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: ServiceOrderStatus.FINALIZADA,
-          notes: mockData.serviceOrder.notes,
+          status: 'FINALIZADA',
+          notes: testData.serviceOrder.notes,
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe(ServiceOrderStatus.FINALIZADA);
+      expect(response.body.status).toBe('FINALIZADA');
     });
 
     it('TC0010 - Should update service order status to ENTREGUE', async () => {
@@ -229,12 +226,12 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: ServiceOrderStatus.ENTREGUE,
-          notes: mockData.serviceOrder.notes,
+          status: 'ENTREGUE',
+          notes: testData.serviceOrder.notes,
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe(ServiceOrderStatus.ENTREGUE);
+      expect(response.body.status).toBe('ENTREGUE');
     });
 
     it('TC0011 - Should get service order by ID', async () => {
@@ -244,7 +241,7 @@ describe('Service Order Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(serviceOrderId);
-      expect(response.body.status).toBe(ServiceOrderStatus.ENTREGUE);
+      expect(response.body.status).toBe('ENTREGUE');
       expect(response.body).toHaveProperty('customer');
       expect(response.body).toHaveProperty('vehicle');
     });
@@ -301,7 +298,7 @@ describe('Service Order Integration Tests', () => {
         .send({
           customerId: '00000000-0000-0000-0000-000000000000',
           vehicleId: vehicleId,
-          description: mockData.serviceOrder.description,
+          description: testData.serviceOrder.description,
         });
 
       expect(response.status).toBe(404);
@@ -328,7 +325,7 @@ describe('Service Order Integration Tests', () => {
         .send({
           customerId: otherCustomerId,
           vehicleId: vehicleId,
-          description: mockData.serviceOrder.description,
+          description: testData.serviceOrder.description,
         });
 
       expect(response.status).toBe(400);
@@ -341,7 +338,7 @@ describe('Service Order Integration Tests', () => {
         .send({
           customerId: customerId,
           vehicleId: vehicleId,
-          description: mockData.serviceOrder.description,
+          description: testData.serviceOrder.description,
         });
 
       const newOrderId = orderResponse.body.id;
@@ -350,7 +347,7 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${newOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: ServiceOrderStatus.FINALIZADA,
+          status: 'FINALIZADA',
         });
 
       expect(response.status).toBe(400);

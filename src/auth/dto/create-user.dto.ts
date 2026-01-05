@@ -1,6 +1,8 @@
-import { IsNotEmpty, IsString, IsEmail, IsEnum, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, IsEnum, MinLength, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
+// import { User } from '@prisma/client'; // Not used
+import { UserRole } from '../../shared/enums';
+import { PasswordMatchValidator } from '../validators/password-match.validator';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'Nome de usuário' })
@@ -17,6 +19,7 @@ export class CreateUserDto {
   @ApiProperty({ description: 'Confirmação da senha' })
   @IsNotEmpty()
   @IsString()
+  @Validate(PasswordMatchValidator)
   confirmPassword!: string;
 
   @ApiProperty({ description: 'Email do usuário' })
@@ -29,3 +32,4 @@ export class CreateUserDto {
   @IsEnum(UserRole)
   role!: UserRole;
 }
+

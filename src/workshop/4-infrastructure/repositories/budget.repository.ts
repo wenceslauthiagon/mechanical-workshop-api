@@ -154,12 +154,14 @@ export class BudgetRepository implements IBudgetRepository {
           where: { id },
         });
         if (existingBudget) {
+          const subtotal = typeof existingBudget.subtotal === 'number' 
+            ? existingBudget.subtotal 
+            : existingBudget.subtotal;
+          const taxes = typeof existingBudget.taxes === 'number' 
+            ? existingBudget.taxes 
+            : existingBudget.taxes;
           updateData.total = Number(
-            (
-              existingBudget.subtotal.toNumber() +
-              existingBudget.taxes.toNumber() -
-              data.discount
-            ).toFixed(2),
+            (subtotal + taxes - data.discount).toFixed(2),
           );
         }
       }

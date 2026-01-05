@@ -32,12 +32,12 @@ export class PartEntity implements Part {
   constructor(data: Part) {
     this.id = data.id;
     this.name = data.name;
-    this.code = data.code;
-    this.description = data.description;
-    this.price = data.price;
-    this.stockQuantity = data.stockQuantity;
-    this.minStockLevel = data.minStockLevel;
-    this.supplier = data.supplier;
+    this.partNumber = data.partNumber;
+    this.description = data.description ?? undefined;
+    this.price = typeof data.price === 'number' ? data.price : data.price.toNumber();
+    this.stock = data.stock;
+    this.minStock = data.minStock;
+    this.supplier = data.supplier ?? undefined;
     this.isActive = data.isActive;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;

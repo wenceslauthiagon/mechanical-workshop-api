@@ -28,16 +28,17 @@ export class MockSmsProvider implements ISmsProvider {
         `${NOTIFICATION_CONSTANTS.MESSAGES.MOCK_SMS_PREFIX} ${NOTIFICATION_CONSTANTS.MESSAGES.SMS_SENT_SUCCESS} to ${data.phone}`,
       );
     } catch (error) {
+      const err = error as Error;
       this.logger.error(
         `${NOTIFICATION_CONSTANTS.MESSAGES.MOCK_SMS_PREFIX} ${NOTIFICATION_CONSTANTS.MESSAGES.SMS_SENT_ERROR} to ${data.phone}`,
         {
-          error: error.message,
+          error: err.message,
           phone: data.phone,
           message: data.message,
         },
       );
       throw new Error(
-        `${NOTIFICATION_CONSTANTS.MESSAGES.SMS_SENT_ERROR}: ${error.message}`,
+        `${NOTIFICATION_CONSTANTS.MESSAGES.SMS_SENT_ERROR}: ${err.message}`,
       );
     }
   }

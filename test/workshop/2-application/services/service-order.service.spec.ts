@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus, CustomerType, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Decimal } from '@prisma/client/runtime/library';
 import { Logger } from '@nestjs/common';

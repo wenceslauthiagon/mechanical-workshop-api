@@ -131,6 +131,13 @@ export class ErrorHandlerService {
   }
 
   /**
+   * Utilitário para erros de regra de negócio (400)
+   */
+  handleBusinessRuleError(message: string): never {
+    this.generateException(message, this.statusCodes.BadRequest);
+  }
+
+  /**
    * Verifica se é um erro de constraint do Prisma
    */
   private isPrismaConstraintError(error: any): boolean {
@@ -159,7 +166,7 @@ export class ErrorHandlerService {
       return 'Já existe um veículo com esta placa';
     }
     if (error?.message?.includes('email')) {
-      return 'Já existe um usuário com este email';
+      return ERROR_MESSAGES.EMAIL_ALREADY_EXISTS;
     }
     if (error?.message?.includes('username')) {
       return 'Já existe um usuário com este nome de usuário';

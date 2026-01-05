@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../shared/enums';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
 import {
@@ -45,14 +45,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINALIZADA &&
-            so.status !== ServiceOrderStatus.ENTREGUE,
+            so.status !== ServiceOrderStatus.FINISHED &&
+            so.status !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINALIZADA ||
-            so.status === ServiceOrderStatus.ENTREGUE,
+            so.status === ServiceOrderStatus.FINISHED ||
+            so.status === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -81,14 +81,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINALIZADA &&
-            so.status !== ServiceOrderStatus.ENTREGUE,
+            so.status !== ServiceOrderStatus.FINISHED &&
+            so.status !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINALIZADA ||
-            so.status === ServiceOrderStatus.ENTREGUE,
+            so.status === ServiceOrderStatus.FINISHED ||
+            so.status === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -119,14 +119,14 @@ export class MechanicRepository implements IMechanicRepository {
 
     const activeServiceOrders = serviceOrders.filter(
       (so) =>
-        so.status !== ServiceOrderStatus.FINALIZADA &&
-        so.status !== ServiceOrderStatus.ENTREGUE,
+        so.status !== ServiceOrderStatus.FINISHED &&
+        so.status !== ServiceOrderStatus.DELIVERED,
     ).length;
 
     const completedServiceOrders = serviceOrders.filter(
       (so) =>
-        so.status === ServiceOrderStatus.FINALIZADA ||
-        so.status === ServiceOrderStatus.ENTREGUE,
+        so.status === ServiceOrderStatus.FINISHED ||
+        so.status === ServiceOrderStatus.DELIVERED,
     ).length;
 
     return {
@@ -161,14 +161,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINALIZADA &&
-            so.status !== ServiceOrderStatus.ENTREGUE,
+            so.status !== ServiceOrderStatus.FINISHED &&
+            so.status !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINALIZADA ||
-            so.status === ServiceOrderStatus.ENTREGUE,
+            so.status === ServiceOrderStatus.FINISHED ||
+            so.status === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -207,14 +207,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINALIZADA &&
-            so.status !== ServiceOrderStatus.ENTREGUE,
+            so.status !== ServiceOrderStatus.FINISHED &&
+            so.status !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINALIZADA ||
-            so.status === ServiceOrderStatus.ENTREGUE,
+            so.status === ServiceOrderStatus.FINISHED ||
+            so.status === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -304,14 +304,14 @@ export class MechanicRepository implements IMechanicRepository {
 
     const activeOrders = serviceOrders.filter(
       (so) =>
-        so.status !== ServiceOrderStatus.FINALIZADA &&
-        so.status !== ServiceOrderStatus.ENTREGUE,
+        so.status !== ServiceOrderStatus.FINISHED &&
+        so.status !== ServiceOrderStatus.DELIVERED,
     ).length;
 
     const completedThisMonth = serviceOrders.filter(
       (so) =>
-        (so.status === ServiceOrderStatus.FINALIZADA ||
-          so.status === ServiceOrderStatus.ENTREGUE) &&
+        (so.status === ServiceOrderStatus.FINISHED ||
+          so.status === ServiceOrderStatus.DELIVERED) &&
         so.completedAt &&
         so.completedAt >= startOfMonth,
     ).length;
@@ -383,3 +383,5 @@ export class MechanicRepository implements IMechanicRepository {
     };
   }
 }
+
+

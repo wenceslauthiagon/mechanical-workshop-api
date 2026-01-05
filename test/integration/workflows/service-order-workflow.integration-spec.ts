@@ -45,14 +45,11 @@ describe('Service Order Complete Workflow Integration Tests', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     await prisma.$executeRaw`PRAGMA foreign_keys = OFF;`;
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.part.deleteMany();
     await prisma.service.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.customer.deleteMany();
     await prisma.user.deleteMany();
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
@@ -202,7 +199,7 @@ describe('Service Order Complete Workflow Integration Tests', () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('orderNumber');
-      expect(response.body.status).toBe('RECEBIDA');
+      expect(response.body.status).toBe('RECEIVED');
       expect(response.body.services).toHaveLength(1);
       expect(response.body.parts).toHaveLength(1);
 
@@ -210,28 +207,28 @@ describe('Service Order Complete Workflow Integration Tests', () => {
       orderNumber = response.body.orderNumber;
     });
 
-    it('TC0007 - Should update status from RECEBIDA to EM_DIAGNOSTICO', async () => {
+    it('TC0007 - Should update status from RECEIVED to IN_DIAGNOSIS', async () => {
       const response = await request(app.getHttpServer())
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'EM_DIAGNOSTICO',
+          status: 'IN_DIAGNOSIS',
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('EM_DIAGNOSTICO');
+      expect(response.body.status).toBe('IN_DIAGNOSIS');
     });
 
-    it('TC0008 - Should update status from EM_DIAGNOSTICO to AGUARDANDO_APROVACAO', async () => {
+    it('TC0008 - Should update status from IN_DIAGNOSIS to AWAITING_APPROVAL', async () => {
       const response = await request(app.getHttpServer())
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'AGUARDANDO_APROVACAO',
+          status: 'AWAITING_APPROVAL',
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('AGUARDANDO_APROVACAO');
+      expect(response.body.status).toBe('AWAITING_APPROVAL');
     });
 
     it('TC0009 - Should approve service order', async () => {
@@ -240,39 +237,39 @@ describe('Service Order Complete Workflow Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('EM_EXECUCAO');
+      expect(response.body.status).toBe('IN_EXECUTION');
     });
 
     it('TC0010 - Should verify mechanic availability (skipped - no mechanic assignment in current implementation)', async () => {
       expect(true).toBe(true);
     });
 
-    it('TC0011 - Should update status from EM_EXECUCAO to FINALIZADA', async () => {
+    it('TC0011 - Should update status from IN_EXECUTION to FINISHED', async () => {
       const response = await request(app.getHttpServer())
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'FINALIZADA',
+          status: 'FINISHED',
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('FINALIZADA');
+      expect(response.body.status).toBe('FINISHED');
     });
 
     it('TC0012 - Should verify mechanic availability after completion (skipped)', async () => {
       expect(true).toBe(true);
     });
 
-    it('TC0013 - Should update status from FINALIZADA to ENTREGUE', async () => {
+    it('TC0013 - Should update status from FINISHED to DELIVERED', async () => {
       const response = await request(app.getHttpServer())
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'ENTREGUE',
+          status: 'DELIVERED',
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('ENTREGUE');
+      expect(response.body.status).toBe('DELIVERED');
     });
 
     it('TC0014 - Should retrieve complete service order with all data', async () => {
@@ -283,7 +280,7 @@ describe('Service Order Complete Workflow Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(serviceOrderId);
       expect(response.body.orderNumber).toBe(orderNumber);
-      expect(response.body.status).toBe('ENTREGUE');
+      expect(response.body.status).toBe('DELIVERED');
       expect(response.body.customer).toHaveProperty('id', customerId);
       expect(response.body.vehicle).toHaveProperty('id', vehicleId);
       expect(response.body.services).toHaveLength(1);
@@ -300,12 +297,12 @@ describe('Service Order Complete Workflow Integration Tests', () => {
       expect(response.body.length).toBeGreaterThanOrEqual(5);
 
       const statuses = response.body.map((h: any) => h.status);
-      expect(statuses).toContain('RECEBIDA');
-      expect(statuses).toContain('EM_DIAGNOSTICO');
-      expect(statuses).toContain('AGUARDANDO_APROVACAO');
-      expect(statuses).toContain('EM_EXECUCAO');
-      expect(statuses).toContain('FINALIZADA');
-      expect(statuses).toContain('ENTREGUE');
+      expect(statuses).toContain('RECEIVED');
+      expect(statuses).toContain('IN_DIAGNOSIS');
+      expect(statuses).toContain('AWAITING_APPROVAL');
+      expect(statuses).toContain('IN_EXECUTION');
+      expect(statuses).toContain('FINISHED');
+      expect(statuses).toContain('DELIVERED');
     });
 
     it('TC0016 - Should find service order by order number via public API', async () => {
@@ -315,7 +312,7 @@ describe('Service Order Complete Workflow Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.orderNumber).toBe(orderNumber);
-      expect(response.body.status).toBe('ENTREGUE');
+      expect(response.body.status).toBe('DELIVERED');
     });
   });
 
@@ -375,13 +372,13 @@ describe('Service Order Complete Workflow Integration Tests', () => {
         .patch(`/api/service-orders/${osResponse.body.id}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'FINALIZADA',
+          status: 'FINISHED',
         });
 
       expect(invalidResponse.status).toBe(400);
     });
 
-    it('TC0002 - Should not approve order without AGUARDANDO_APROVACAO status', async () => {
+    it('TC0002 - Should not approve order without AWAITING_APPROVAL status', async () => {
       const customer = {
         document: generateValidCPF(),
         type: 'PESSOA_FISICA' as const,
@@ -488,3 +485,4 @@ describe('Service Order Complete Workflow Integration Tests', () => {
     });
   });
 });
+

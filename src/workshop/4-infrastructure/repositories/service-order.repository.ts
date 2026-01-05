@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../shared/enums';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { IServiceOrderRepository } from 'src/workshop/3-domain/repositories/service-order.repository.interface';
+import { IServiceOrderRepository } from '../../3-domain/repositories/service-order.repository.interface';
 
 @Injectable()
 export class ServiceOrderRepository implements IServiceOrderRepository {
@@ -45,17 +45,17 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   }
 
   async findManyWithPriority(skip: number, take: number) {
-    const statusPriority = {
-      [ServiceOrderStatus.EM_EXECUCAO]: 1,
-      [ServiceOrderStatus.AGUARDANDO_APROVACAO]: 2,
-      [ServiceOrderStatus.EM_DIAGNOSTICO]: 3,
-      [ServiceOrderStatus.RECEBIDA]: 4,
+    const statusPriority: Record<string, number> = {
+      [ServiceOrderStatus.IN_EXECUTION]: 1,
+      [ServiceOrderStatus.AWAITING_APPROVAL]: 2,
+      [ServiceOrderStatus.IN_DIAGNOSIS]: 3,
+      [ServiceOrderStatus.RECEIVED]: 4,
     };
 
     const orders = await this.prisma.serviceOrder.findMany({
       where: {
         status: {
-          notIn: [ServiceOrderStatus.FINALIZADA, ServiceOrderStatus.ENTREGUE],
+          notIn: [ServiceOrderStatus.FINISHED, ServiceOrderStatus.DELIVERED],
         },
       },
     });
@@ -76,7 +76,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     return this.prisma.serviceOrder.count({
       where: {
         status: {
-          notIn: [ServiceOrderStatus.FINALIZADA, ServiceOrderStatus.ENTREGUE],
+          notIn: [ServiceOrderStatus.FINISHED, ServiceOrderStatus.DELIVERED],
         },
       },
     });
@@ -104,7 +104,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   async updateStatus(
     id: string,
     data: {
-      status: ServiceOrderStatus;
+      status: string; // Changed to string for SQLite compatibility
       startedAt?: Date;
       completedAt?: Date;
       deliveredAt?: Date;
@@ -177,7 +177,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
 
   async addStatusHistory(data: {
     serviceOrderId: string;
-    status: ServiceOrderStatus;
+    status: string; // Changed to string for SQLite compatibility
     notes?: string;
     changedBy?: string;
   }) {
@@ -228,7 +228,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     return this.prisma.serviceOrder.findMany({
       where: {
         status: {
-          in: [ServiceOrderStatus.FINALIZADA, ServiceOrderStatus.ENTREGUE],
+          in: [ServiceOrderStatus.FINISHED, ServiceOrderStatus.DELIVERED],
         },
         startedAt: { not: null },
         completedAt: { not: null },

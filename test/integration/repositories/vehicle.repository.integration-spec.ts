@@ -51,12 +51,9 @@ describe('Vehicle Repository Integration Tests', () => {
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.customer.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.service.deleteMany();
     await prisma.part.deleteMany();
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');

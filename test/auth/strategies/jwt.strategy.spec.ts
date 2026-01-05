@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { UserRole } from '@prisma/client';
 
 import { JwtStrategy } from '../../../src/auth/strategies/jwt.strategy';
 import { AuthService } from '../../../src/auth/services/auth.service';

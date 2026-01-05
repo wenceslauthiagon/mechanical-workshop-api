@@ -10,32 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
-enum CustomerType {
-  PESSOA_FISICA
-  PESSOA_JURIDICA
-}
-
-enum ServiceOrderStatus {
-  RECEIVED           // Recebida
-  IN_DIAGNOSIS       // Em diagnóstico
-  AWAITING_APPROVAL  // Aguardando aprovação
-  IN_EXECUTION       // Em execução
-  FINISHED           // Finalizada
-  DELIVERED          // Entregue
-}
-
-enum UserRole {
-  ADMIN
-  EMPLOYEE
-  CLIENT
-}
-
 // Models
 model Customer {
   id        String      @id @default(uuid())
   document  String      @unique // CPF or CNPJ
-  type      CustomerType
+  type      String // PESSOA_FISICA or PESSOA_JURIDICA
   name      String
   email     String      @unique
   phone     String
@@ -73,7 +52,7 @@ model Service {
   id               String  @id @default(uuid())
   name             String
   description      String?
-  price            Real // SQLite uses Real instead of Decimal
+  price            Float
   estimatedMinutes Int     @map("estimated_minutes")
   category         String
   isActive         Boolean @default(true) @map("is_active")
@@ -91,7 +70,7 @@ model Part {
   name        String
   description String?
   partNumber  String? @unique @map("part_number")
-  price       Real // SQLite uses Real instead of Decimal
+  price       Float
   stock       Int     @default(0)
   minStock    Int     @default(0) @map("min_stock")
   supplier    String?
@@ -110,12 +89,13 @@ model ServiceOrder {
   orderNumber             String             @unique @map("order_number")
   customerId              String             @map("customer_id")
   vehicleId               String             @map("vehicle_id")
-  status                  ServiceOrderStatus @default(RECEIVED)
+  mechanicId              String?            @map("mechanic_id")
+  status                  String             @default("RECEIVED") // RECEIVED, IN_DIAGNOSIS, AWAITING_APPROVAL, IN_EXECUTION, FINISHED, DELIVERED
   description             String
-  totalServicePrice       Real               @default(0) @map("total_service_price")
-  totalPartsPrice         Real               @default(0) @map("total_parts_price")
-  totalPrice              Real               @default(0) @map("total_price")
-  estimatedTimeHours      Real               @default(0) @map("estimated_time_hours")
+  totalServicePrice       Float              @default(0) @map("total_service_price")
+  totalPartsPrice         Float              @default(0) @map("total_parts_price")
+  totalPrice              Float              @default(0) @map("total_price")
+  estimatedTimeHours      Float              @default(0) @map("estimated_time_hours")
   estimatedCompletionDate DateTime           @map("estimated_completion_date")
   startedAt               DateTime?          @map("started_at")
   completedAt             DateTime?          @map("completed_at")
@@ -127,6 +107,7 @@ model ServiceOrder {
   // Relations
   customer    Customer           @relation(fields: [customerId], references: [id])
   vehicle     Vehicle            @relation(fields: [vehicleId], references: [id])
+  mechanic    Mechanic?          @relation(fields: [mechanicId], references: [id])
   services    ServiceOrderItem[]
   parts       ServiceOrderPart[]
   statusHistory ServiceOrderStatusHistory[]
@@ -139,8 +120,8 @@ model ServiceOrderItem {
   serviceOrderId String  @map("service_order_id")
   serviceId      String  @map("service_id")
   quantity       Int     @default(1)
-  price          Real
-  totalPrice     Real @map("total_price")
+  price          Float
+  totalPrice     Float @map("total_price")
   createdAt      DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -155,8 +136,8 @@ model ServiceOrderPart {
   serviceOrderId String  @map("service_order_id")
   partId         String  @map("part_id")
   quantity       Int
-  price          Real
-  totalPrice     Real @map("total_price")
+  price          Float
+  totalPrice     Float @map("total_price")
   createdAt      DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -169,7 +150,7 @@ model ServiceOrderPart {
 model ServiceOrderStatusHistory {
   id             String             @id @default(uuid())
   serviceOrderId String             @map("service_order_id")
-  status         ServiceOrderStatus
+  status         String // RECEIVED, IN_DIAGNOSIS, AWAITING_APPROVAL, IN_EXECUTION, FINISHED, DELIVERED
   notes          String?
   changedBy      String?            @map("changed_by")
   createdAt      DateTime           @default(now()) @map("created_at")
@@ -185,10 +166,68 @@ model User {
   username     String   @unique
   email        String   @unique
   passwordHash String   @map("password_hash")
-  role         UserRole @default(EMPLOYEE)
+  role         String   @default("EMPLOYEE") // ADMIN, EMPLOYEE, CLIENT
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model Mechanic {
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @unique
+  phone           String?
+  specialties     String   // JSON array stored as string
+  isActive        Boolean  @default(true) @map("is_active")
+  isAvailable     Boolean  @default(true) @map("is_available")
+  experienceYears Int      @default(0) @map("experience_years")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  serviceOrders ServiceOrder[]
+
+  @@map("mechanics")
+}
+
+model Budget {
+  id             String   @id @default(uuid())
+  serviceOrderId String   @map("service_order_id")
+  customerId     String   @map("customer_id")
+  subtotal       Float
+  taxes          Float
+  discount       Float
+  total          Float
+  validUntil     DateTime @map("valid_until")
+  status         String   @default("RASCUNHO") // RASCUNHO, ENVIADO, APROVADO, REJEITADO
+  sentAt         DateTime? @map("sent_at")
+  approvedAt     DateTime? @map("approved_at")
+  rejectedAt     DateTime? @map("rejected_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  items BudgetItem[]
+
+  @@map("budgets")
+}
+
+model BudgetItem {
+  id          String   @id @default(uuid())
+  budgetId    String   @map("budget_id")
+  type        String   // SERVICE or PART
+  serviceId   String?  @map("service_id")
+  partId      String?  @map("part_id")
+  description String
+  quantity    Int
+  unitPrice   Float    @map("unit_price")
+  total       Float
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@map("budget_items")
 }

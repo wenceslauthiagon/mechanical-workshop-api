@@ -1,4 +1,3 @@
-import { ServiceOrderStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 import {

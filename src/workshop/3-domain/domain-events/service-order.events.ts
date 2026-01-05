@@ -1,5 +1,5 @@
 import { BaseDomainEvent } from './base-domain-event';
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../shared/enums';
 
 export class ServiceOrderCreatedEvent extends BaseDomainEvent {
   constructor(

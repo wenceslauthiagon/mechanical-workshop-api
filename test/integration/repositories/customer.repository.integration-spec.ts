@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { CustomerRepository } from '../../../src/workshop/4-infrastructure/repositories/customer.repository';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { CustomerType } from '@prisma/client';
 
 describe('Customer Repository Integration Tests', () => {
   let repository: CustomerRepository;
@@ -27,12 +26,9 @@ describe('Customer Repository Integration Tests', () => {
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.customer.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.service.deleteMany();
     await prisma.part.deleteMany();
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
@@ -46,7 +42,7 @@ describe('Customer Repository Integration Tests', () => {
     it('TC0001 - Should create a new customer with valid data', async () => {
       const customerData = {
         document: '52998224725',
-        type: CustomerType.PESSOA_FISICA,
+        type: 'PESSOA_FISICA',
         name: faker.person.fullName(),
         email: faker.internet.email(),
         phone: faker.phone.number(),
@@ -66,7 +62,7 @@ describe('Customer Repository Integration Tests', () => {
     it('TC0002 - Should create customer with additional info', async () => {
       const customerData = {
         document: '44451959007',
-        type: CustomerType.PESSOA_FISICA,
+        type: 'PESSOA_FISICA',
         name: faker.person.fullName(),
         email: faker.internet.email(),
         phone: faker.phone.number(),
@@ -82,7 +78,7 @@ describe('Customer Repository Integration Tests', () => {
     it('TC0003 - Should create juridical person customer', async () => {
       const customerData = {
         document: '11222333000181',
-        type: CustomerType.PESSOA_JURIDICA,
+        type: 'PESSOA_JURIDICA',
         name: 'Empresa Teste LTDA',
         email: faker.internet.email(),
         phone: faker.phone.number(),
@@ -92,7 +88,7 @@ describe('Customer Repository Integration Tests', () => {
 
       const customer = await repository.create(customerData);
 
-      expect(customer.type).toBe(CustomerType.PESSOA_JURIDICA);
+      expect(customer.type).toBe('PESSOA_JURIDICA');
       expect(customer.document).toBe('11222333000181');
     });
   });
@@ -105,7 +101,7 @@ describe('Customer Repository Integration Tests', () => {
     beforeAll(async () => {
       const customer = await repository.create({
         document: customerDocument,
-        type: CustomerType.PESSOA_FISICA,
+        type: 'PESSOA_FISICA',
         name: 'Test Customer',
         email: customerEmail,
         phone: '11999999999',
@@ -159,7 +155,7 @@ describe('Customer Repository Integration Tests', () => {
     beforeAll(async () => {
       const customer = await repository.create({
         document: '06990590000123',
-        type: CustomerType.PESSOA_JURIDICA,
+        type: 'PESSOA_JURIDICA',
         name: 'Update Test Company',
         email: 'update@test.com',
         phone: '11888888888',
@@ -210,7 +206,7 @@ describe('Customer Repository Integration Tests', () => {
     it('TC0001 - Should delete customer by ID', async () => {
       const customer = await repository.create({
         document: '33344455566',
-        type: CustomerType.PESSOA_FISICA,
+        type: 'PESSOA_FISICA',
         name: 'Delete Test',
         email: 'delete@test.com',
         phone: '11555555555',

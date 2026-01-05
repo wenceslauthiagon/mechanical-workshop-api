@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { User, UserRole } from '@prisma/client';
+import { User } from '@prisma/client';
+import { UserRole } from '../../shared/enums';
 import * as bcrypt from 'bcryptjs';
 import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
 import { ErrorHandlerService } from '../../shared/services/error-handler.service';

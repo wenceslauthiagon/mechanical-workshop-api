@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../../shared/enums';
 
 export class ServiceOrderResponseDto {
   @ApiProperty({
@@ -29,9 +29,9 @@ export class ServiceOrderResponseDto {
   @ApiProperty({
     description: 'Status atual da ordem de serviço',
     enum: ServiceOrderStatus,
-    example: ServiceOrderStatus.RECEBIDA,
+    example: ServiceOrderStatus.RECEIVED,
   })
-  status!: ServiceOrderStatus;
+  status!: string; // Changed from ServiceOrderStatus enum to string for SQLite compatibility
 
   @ApiProperty({
     description: 'Descrição dos serviços solicitados',
@@ -140,8 +140,8 @@ export class ServiceOrderResponseDto {
   mechanic?: {
     id: string;
     name: string;
-    specialty: string;
-    phone: string;
+    specialties: string;
+    phone: string | null;
     isAvailable: boolean;
   } | null;
 

@@ -1,4 +1,4 @@
-import { CustomerType } from '@prisma/client';
+import { CustomerType } from '../../../shared/enums';
 import { Email, Document } from '../value-objects';
 
 export interface CustomerAddress {

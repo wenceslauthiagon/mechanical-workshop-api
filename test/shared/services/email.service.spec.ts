@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { ServiceOrderStatus } from '@prisma/client';
 import { EmailService } from '../../../src/shared/services/email.service';
 
 describe('EmailService', () => {

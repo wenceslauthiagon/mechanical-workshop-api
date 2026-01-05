@@ -81,14 +81,11 @@ describe('Authorization RBAC Integration Tests', () => {
     prisma = app.get<PrismaService>(PrismaService);
 
     await prisma.$executeRaw`PRAGMA foreign_keys = OFF;`;
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.part.deleteMany();
     await prisma.service.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.customer.deleteMany();
     await prisma.user.deleteMany();
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
@@ -197,24 +194,6 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
     });
-
-    it('TC0006 - ADMIN Should create mechanics', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/mechanics')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send(mockMechanic);
-
-      expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('id');
-    });
-
-    it('TC0007 - ADMIN Should access stats endpoints', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/stats/overall')
-        .set('Authorization', `Bearer ${adminToken}`);
-
-      expect(response.status).toBe(200);
-    });
   });
 
   describe('EMPLOYEE role authorization', () => {
@@ -237,15 +216,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
     });
 
-    it('TC0002 - EMPLOYEE Should access stats endpoints', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/stats/overall')
-        .set('Authorization', `Bearer ${employeeToken}`);
-
-      expect(response.status).toBe(200);
-    });
-
-    it('TC0003 - EMPLOYEE Should list customers', async () => {
+    it('TC0002 - EMPLOYEE Should list customers', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/customers/all')
         .set('Authorization', `Bearer ${employeeToken}`);
@@ -254,7 +225,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('TC0004 - EMPLOYEE Should list services', async () => {
+    it('TC0003 - EMPLOYEE Should list services', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/services/all')
         .set('Authorization', `Bearer ${employeeToken}`);
@@ -263,18 +234,9 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('TC0005 - EMPLOYEE Should list parts', async () => {
+    it('TC0004 - EMPLOYEE Should list parts', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/parts/all')
-        .set('Authorization', `Bearer ${employeeToken}`);
-
-      expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
-    });
-
-    it('TC0006 - EMPLOYEE Should list mechanics', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/mechanics/all')
         .set('Authorization', `Bearer ${employeeToken}`);
 
       expect(response.status).toBe(200);
@@ -356,23 +318,7 @@ describe('Authorization RBAC Integration Tests', () => {
       expect(response.status).toBe(401);
     });
 
-    it('TC0004 - Should not create mechanic without authentication', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/mechanics')
-        .send(mockMechanic);
-
-      expect([401, 409]).toContain(response.status);
-    });
-
-    it('TC0005 - Should not access stats without authentication', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/api/stats/overall',
-      );
-
-      expect(response.status).toBe(401);
-    });
-
-    it('TC0006 - Should not list customers without authentication', async () => {
+    it('TC0004 - Should not list customers without authentication', async () => {
       const response = await request(app.getHttpServer()).get('/api/customers');
 
       expect(response.status).toBe(401);

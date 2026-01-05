@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { CustomerType } from '@prisma/client';
 import { CustomerService } from '../../../../src/workshop/2-application/services/customer.service';
 import { ErrorHandlerService } from '../../../../src/shared/services/error-handler.service';
 import { ERROR_MESSAGES } from '../../../../src/shared/constants/messages.constants';

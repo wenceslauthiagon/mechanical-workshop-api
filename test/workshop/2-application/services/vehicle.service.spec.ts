@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { CustomerType } from '@prisma/client';
 import { VehicleService } from '../../../../src/workshop/2-application/services/vehicle.service';
 import { IVehicleRepository } from '../../../../src/workshop/3-domain/repositories/vehicle-repository.interface';
 import { ICustomerRepository } from '../../../../src/workshop/3-domain/repositories/customer-repository.interface';
