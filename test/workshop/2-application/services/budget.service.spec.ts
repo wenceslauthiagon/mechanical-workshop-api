@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ServiceOrderStatus } from '../../../../src/shared/enums';
+import { CustomerType } from '../../../../src/shared/enums/customer-type.enum';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Decimal } from '@prisma/client/runtime/library';
 

@@ -5,6 +5,7 @@ import {
   ServiceOrderCompletedEvent,
   ServiceOrderDeliveredEvent,
 } from '../../../../src/workshop/3-domain/domain-events/service-order.events';
+import { ServiceOrderStatus } from '../../../../src/shared/enums';
 
 describe('ServiceOrderCreatedEvent', () => {
   it('TC0001 - Should create event with all required properties', () => {

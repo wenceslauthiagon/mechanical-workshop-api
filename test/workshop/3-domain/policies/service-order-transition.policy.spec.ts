@@ -1,4 +1,5 @@
 import { DefaultServiceOrderPolicy } from '../../../../src/workshop/3-domain/policies/service-order-transition.policy';
+import { ServiceOrderStatus } from '../../../../src/shared/enums';
 
 describe('DefaultServiceOrderPolicy', () => {
   let policy: DefaultServiceOrderPolicy;

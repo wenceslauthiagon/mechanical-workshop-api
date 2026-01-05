@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ServiceOrderStatus } from '../../../../src/shared/enums';
 import { Logger } from '@nestjs/common';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { EmailService } from '../../../src/shared/services/email.service';

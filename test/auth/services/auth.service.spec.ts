@@ -118,23 +118,30 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('TC0001 - Should login successfully', async () => {
+      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      jest.spyOn(mockedBcrypt, 'compare').mockResolvedValue(true as never);
       jwtService.sign.mockReturnValue(mockToken);
 
-      const userObj = {
-        id: mockUser.id,
+      const loginDto = {
         username: mockUser.username,
-        role: mockUser.role,
+        password: mockPassword,
       };
-      const result = await service.login(userObj);
+      const result = await service.login(loginDto);
 
       expect(jwtService.sign).toHaveBeenCalledWith({
-        username: userObj.username,
-        sub: userObj.id,
-        role: userObj.role,
+        username: mockUser.username,
+        sub: mockUser.id,
+        role: mockUser.role,
       });
 
       expect(result).toEqual({
         access_token: mockToken,
+        user: {
+          id: mockUser.id,
+          username: mockUser.username,
+          email: mockUser.email,
+          role: mockUser.role,
+        },
       });
     });
   });

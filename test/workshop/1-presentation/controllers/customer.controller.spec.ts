@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
+import { ServiceOrderStatus } from '../../../../src/shared/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
+import { ServiceOrderStatus } from '../../../../src/shared/enums';
 
 import { CustomerAggregate } from '../../../../src/workshop/3-domain/aggregates/customer.aggregate';
 

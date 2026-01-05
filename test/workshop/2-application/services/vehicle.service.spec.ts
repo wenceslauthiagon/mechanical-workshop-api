@@ -5,6 +5,7 @@ import { IVehicleRepository } from '../../../../src/workshop/3-domain/repositori
 import { ICustomerRepository } from '../../../../src/workshop/3-domain/repositories/customer-repository.interface';
 import { ErrorHandlerService } from '../../../../src/shared/services/error-handler.service';
 import { ERROR_MESSAGES } from '../../../../src/shared/constants/messages.constants';
+import { CustomerType } from '../../../../src/shared/enums/customer-type.enum';
 
 describe('VehicleService', () => {
   let service: VehicleService;
