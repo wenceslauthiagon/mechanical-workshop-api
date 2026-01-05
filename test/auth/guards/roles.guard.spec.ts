@@ -4,6 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 import { RolesGuard } from '../../../src/auth/guards/roles.guard';
+import { UserRole } from '../../../src/shared/enums/user-role.enum';
 
 describe('RolesGuard', () => {
   let guard: RolesGuard;

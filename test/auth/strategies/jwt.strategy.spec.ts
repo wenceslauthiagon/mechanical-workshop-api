@@ -5,6 +5,7 @@ import { faker } from '@faker-js/faker/locale/pt_BR';
 import { JwtStrategy } from '../../../src/auth/strategies/jwt.strategy';
 import { AuthService } from '../../../src/auth/services/auth.service';
 import { ErrorHandlerService } from '../../../src/shared/services/error-handler.service';
+import { UserRole } from '../../../src/shared/enums/user-role.enum';
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;

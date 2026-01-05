@@ -7,6 +7,7 @@ import { AuthService } from '../../../src/auth/services/auth.service';
 import { UserService } from '../../../src/auth/services/user.service';
 import { LoginDto } from '../../../src/auth/dto/login.dto';
 import { CreateUserDto } from '../../../src/auth/dto/create-user.dto';
+import { UserRole } from '../../../src/shared/enums/user-role.enum';
 
 describe('AuthController', () => {
   let controller: AuthController;

@@ -6,6 +6,7 @@ import * as bcrypt from 'bcryptjs';
 
 import { AuthService } from '../../../src/auth/services/auth.service';
 import { PrismaService } from '../../../src/prisma/prisma.service';
+import { UserRole } from '../../../src/shared/enums/user-role.enum';
 
 // Mock bcrypt
 jest.mock('bcryptjs');
