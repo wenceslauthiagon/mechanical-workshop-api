@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import type { IPartRepository } from '../../3-domain/repositories/part-repository.interface';
 import { CreatePartDto } from '../../1-presentation/dtos/part/create-part.dto';
@@ -31,7 +32,7 @@ export class PartService {
       name: data.name,
       description: data.description ?? null,
       partNumber: data.partNumber ?? null,
-      price: parseFloat(data.price.toString()),
+      price: new Prisma.Decimal(data.price.toString()),
       stock: data.stock,
       minStock: data.minStock,
       supplier: data.supplier ?? null,

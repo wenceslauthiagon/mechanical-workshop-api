@@ -378,7 +378,7 @@ export class ServiceOrderService {
       );
     }
 
-    if (serviceOrder.status !== ServiceOrderStatus.AWAITING_APPROVAL) {
+    if (serviceOrder.status as string !== ServiceOrderStatus.AWAITING_APPROVAL) {
       this.errorHandler.generateException(
         ERROR_MESSAGES.SERVICE_ORDER_NOT_AWAITING_APPROVAL,
         HttpStatus.BAD_REQUEST,

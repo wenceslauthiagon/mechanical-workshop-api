@@ -18,12 +18,12 @@ enum CustomerType {
 }
 
 enum ServiceOrderStatus {
-  RECEBIDA           // Recebida
-  EM_DIAGNOSTICO     // Em diagnóstico
-  AGUARDANDO_APROVACAO  // Aguardando aprovação
-  EM_EXECUCAO        // Em execução
-  FINALIZADA         // Finalizada
-  ENTREGUE           // Entregue
+  RECEIVED           // Recebida
+  IN_DIAGNOSIS       // Em diagnóstico
+  AWAITING_APPROVAL  // Aguardando aprovação
+  IN_EXECUTION       // Em execução
+  FINISHED           // Finalizada
+  DELIVERED          // Entregue
 }
 
 enum UserRole {

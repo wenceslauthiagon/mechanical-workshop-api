@@ -45,14 +45,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINISHED &&
-            so.status !== ServiceOrderStatus.DELIVERED,
+            (so.status as string) !== ServiceOrderStatus.FINISHED &&
+            (so.status as string) !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINISHED ||
-            so.status === ServiceOrderStatus.DELIVERED,
+            (so.status as string) === ServiceOrderStatus.FINISHED ||
+            (so.status as string) === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -81,14 +81,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINISHED &&
-            so.status !== ServiceOrderStatus.DELIVERED,
+            (so.status as string) !== ServiceOrderStatus.FINISHED &&
+            (so.status as string) !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINISHED ||
-            so.status === ServiceOrderStatus.DELIVERED,
+            (so.status as string) === ServiceOrderStatus.FINISHED ||
+            (so.status as string) === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -119,14 +119,14 @@ export class MechanicRepository implements IMechanicRepository {
 
     const activeServiceOrders = serviceOrders.filter(
       (so) =>
-        so.status !== ServiceOrderStatus.FINISHED &&
-        so.status !== ServiceOrderStatus.DELIVERED,
+        (so.status as string) !== ServiceOrderStatus.FINISHED &&
+        (so.status as string) !== ServiceOrderStatus.DELIVERED,
     ).length;
 
     const completedServiceOrders = serviceOrders.filter(
       (so) =>
-        so.status === ServiceOrderStatus.FINISHED ||
-        so.status === ServiceOrderStatus.DELIVERED,
+        (so.status as string) === ServiceOrderStatus.FINISHED ||
+        (so.status as string) === ServiceOrderStatus.DELIVERED,
     ).length;
 
     return {
@@ -161,14 +161,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINISHED &&
-            so.status !== ServiceOrderStatus.DELIVERED,
+            (so.status as string) !== ServiceOrderStatus.FINISHED &&
+            (so.status as string) !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINISHED ||
-            so.status === ServiceOrderStatus.DELIVERED,
+            (so.status as string) === ServiceOrderStatus.FINISHED ||
+            (so.status as string) === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -207,14 +207,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINISHED &&
-            so.status !== ServiceOrderStatus.DELIVERED,
+            (so.status as string) !== ServiceOrderStatus.FINISHED &&
+            (so.status as string) !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINISHED ||
-            so.status === ServiceOrderStatus.DELIVERED,
+            (so.status as string) === ServiceOrderStatus.FINISHED ||
+            (so.status as string) === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -304,14 +304,14 @@ export class MechanicRepository implements IMechanicRepository {
 
     const activeOrders = serviceOrders.filter(
       (so) =>
-        so.status !== ServiceOrderStatus.FINISHED &&
-        so.status !== ServiceOrderStatus.DELIVERED,
+        (so.status as string) !== ServiceOrderStatus.FINISHED &&
+        (so.status as string) !== ServiceOrderStatus.DELIVERED,
     ).length;
 
     const completedThisMonth = serviceOrders.filter(
       (so) =>
-        (so.status === ServiceOrderStatus.FINISHED ||
-          so.status === ServiceOrderStatus.DELIVERED) &&
+        ((so.status as string) === ServiceOrderStatus.FINISHED ||
+          (so.status as string) === ServiceOrderStatus.DELIVERED) &&
         so.completedAt &&
         so.completedAt >= startOfMonth,
     ).length;

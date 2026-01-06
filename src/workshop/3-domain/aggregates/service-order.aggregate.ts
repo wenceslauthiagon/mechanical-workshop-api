@@ -211,21 +211,21 @@ export class ServiceOrderAggregate {
   }
 
   startExecution(): void {
-    if (this._status !== ServiceOrderStatus.AWAITING_APPROVAL) {
+    if ((this._status as string) !== ServiceOrderStatus.AWAITING_APPROVAL) {
       throw new Error('Só é possível iniciar execução de ordens aprovadas');
     }
     this.changeStatus(ServiceOrderStatus.IN_EXECUTION, 'Execução iniciada');
   }
 
   finish(): void {
-    if (this._status !== ServiceOrderStatus.IN_EXECUTION) {
+    if ((this._status as string) !== ServiceOrderStatus.IN_EXECUTION) {
       throw new Error('Só é possível finalizar ordens em execução');
     }
     this.changeStatus(ServiceOrderStatus.FINISHED, 'Serviço finalizado');
   }
 
   deliver(): void {
-    if (this._status !== ServiceOrderStatus.FINISHED) {
+    if ((this._status as string) !== ServiceOrderStatus.FINISHED) {
       throw new Error('Só é possível entregar ordens finalizadas');
     }
     this.changeStatus(
@@ -235,7 +235,7 @@ export class ServiceOrderAggregate {
   }
 
   private ensureCanBeModified(): void {
-    if (this._status === ServiceOrderStatus.DELIVERED) {
+    if ((this._status as string) === ServiceOrderStatus.DELIVERED) {
       throw new Error(
         'Não é possível modificar ordens de serviço já entregues',
       );

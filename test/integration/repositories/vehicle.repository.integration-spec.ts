@@ -314,7 +314,7 @@ describe('Vehicle Repository Integration Tests', () => {
           orderNumber: 'SO-001',
           customerId: testCustomerId,
           vehicleId: vehicleWithOrderId,
-          status: 'RECEIVED',
+          status: ServiceOrderStatus.RECEIVED,
           description: 'Test order',
           estimatedCompletionDate: new Date(),
         },
