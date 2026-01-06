@@ -112,7 +112,7 @@ model ServiceOrder {
   customerId              String             @map("customer_id")
   vehicleId               String             @map("vehicle_id")
   mechanicId              String?            @map("mechanic_id")
-  status                  ServiceOrderStatus @default(RECEBIDA)
+  status                  ServiceOrderStatus @default(RECEIVED)
   description             String
   totalServicePrice       Decimal            @default(0) @db.Decimal(10, 2) @map("total_service_price")
   totalPartsPrice         Decimal            @default(0) @db.Decimal(10, 2) @map("total_parts_price")
