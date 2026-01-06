@@ -103,6 +103,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./docker/Dockerfile
           push: true
           tags: |
             ghcr.io/creative-ia/mechanical-workshop-api:${{ steps.set-tag.outputs.tag }}
