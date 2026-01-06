@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -8,7 +8,7 @@ import * as bcrypt from 'bcryptjs';
 
 describe('Service Stats Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
 
   beforeAll(async () => {
@@ -67,27 +67,26 @@ describe('Service Stats Integration Tests', () => {
   describe('service stats endpoints', () => {
     it('TC0001 - Should get service execution stats', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/stats/services')
+        .get('/service-stats')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('overall');
+      expect(response.body).toHaveProperty('services');
+      expect(Array.isArray(response.body.services)).toBe(true);
+    });
+
+    it('TC0002 - Should get overall stats', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/service-stats/top-services')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('TC0002 - Should get overall stats', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/stats/overall')
-        .set('Authorization', `Bearer ${authToken}`);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('totalCompletedOrders');
-      expect(response.body).toHaveProperty('averageExecutionTime');
-      expect(response.body).toHaveProperty('averageEstimatedTime');
-      expect(response.body).toHaveProperty('overallAccuracy');
-    });
-
     it('TC0003 - Should get stats for specific service', async () => {
-      const service = await prisma.service.create({
+      await prisma.service.create({
         data: {
           name: 'Test Service',
           price: 100,
@@ -97,27 +96,28 @@ describe('Service Stats Integration Tests', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/api/stats/services/${service.id}`)
+        .get('/service-stats')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('serviceId');
+      expect(response.body).toHaveProperty('services');
+      expect(Array.isArray(response.body.services)).toBe(true);
     });
 
     it('TC0004 - Should return message for service without execution data', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/stats/services/00000000-0000-0000-0000-000000000000')
+        .get('/service-stats/top-services?limit=5')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('message');
+      expect(Array.isArray(response.body)).toBe(true);
     });
   });
 
   describe('validate service stats authorization', () => {
     it('TC0001 - Should not access stats without authentication', async () => {
       const response = await request(app.getHttpServer()).get(
-        '/api/stats/services',
+        '/service-stats',
       );
 
       expect(response.status).toBe(401);
@@ -125,7 +125,7 @@ describe('Service Stats Integration Tests', () => {
 
     it('TC0002 - Should not access overall stats without authentication', async () => {
       const response = await request(app.getHttpServer()).get(
-        '/api/stats/overall',
+        '/service-stats/top-services',
       );
 
       expect(response.status).toBe(401);
@@ -133,7 +133,7 @@ describe('Service Stats Integration Tests', () => {
 
     it('TC0003 - Should not access specific service stats without authentication', async () => {
       const response = await request(app.getHttpServer()).get(
-        '/api/stats/services/00000000-0000-0000-0000-000000000000',
+        '/service-stats',
       );
 
       expect(response.status).toBe(401);

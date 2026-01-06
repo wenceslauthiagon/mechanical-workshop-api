@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -23,7 +23,7 @@ const mockEmployee = {
 
 describe('Auth Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let adminToken: string;
   let employeeToken: string;
 

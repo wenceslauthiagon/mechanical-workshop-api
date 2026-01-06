@@ -45,7 +45,7 @@ describe('PublicBudgetController', () => {
     discount: 0,
     total: 1100,
     validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-    status: BudgetStatus.ENVIADO,
+    status: BudgetStatus.SENT,
     sentAt: faker.date.recent(),
     approvedAt: undefined,
     rejectedAt: undefined,
@@ -55,14 +55,14 @@ describe('PublicBudgetController', () => {
 
   const mockApprovedBudget = {
     ...mockBudget,
-    status: BudgetStatus.APROVADO,
+    status: BudgetStatus.APPROVED,
     approvedAt: new Date(),
     rejectedAt: undefined,
   };
 
   const mockRejectedBudget = {
     ...mockBudget,
-    status: BudgetStatus.REJEITADO,
+    status: BudgetStatus.REJECTED,
     approvedAt: undefined,
     rejectedAt: new Date(),
   };
@@ -70,7 +70,7 @@ describe('PublicBudgetController', () => {
   const mockExpiredBudget = {
     ...mockBudget,
     validUntil: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-    status: BudgetStatus.EXPIRADO,
+    status: BudgetStatus.EXPIRED,
     approvedAt: undefined,
     rejectedAt: undefined,
   };
@@ -117,7 +117,7 @@ describe('PublicBudgetController', () => {
       expect(budgetService.findById).toHaveBeenCalledWith(mockBudgetId);
       expect(result).toBeInstanceOf(BudgetResponseDto);
       expect(result.id).toBe(mockBudgetId);
-      expect(result.status).toBe(BudgetStatus.ENVIADO);
+      expect(result.status).toBe(BudgetStatus.SENT);
     });
 
     it('TC0002 - Should throw error when budget not found', async () => {
@@ -137,7 +137,7 @@ describe('PublicBudgetController', () => {
 
       expect(budgetService.approveBudget).toHaveBeenCalledWith(mockBudgetId);
       expect(result.budget).toBeInstanceOf(BudgetResponseDto);
-      expect(result.budget.status).toBe(BudgetStatus.APROVADO);
+      expect(result.budget.status).toBe(BudgetStatus.APPROVED);
       expect(result.message).toBe(BUDGET_CONSTANTS.MESSAGES.APPROVED_SUCCESS);
     });
 
@@ -160,7 +160,7 @@ describe('PublicBudgetController', () => {
 
       expect(budgetService.rejectBudget).toHaveBeenCalledWith(mockBudgetId);
       expect(result.budget).toBeInstanceOf(BudgetResponseDto);
-      expect(result.budget.status).toBe(BudgetStatus.REJEITADO);
+      expect(result.budget.status).toBe(BudgetStatus.REJECTED);
       expect(result.message).toBe(BUDGET_CONSTANTS.MESSAGES.REJECTED_SUCCESS);
     });
 
@@ -183,7 +183,7 @@ describe('PublicBudgetController', () => {
 
       expect(budgetService.findById).toHaveBeenCalledWith(mockBudgetId);
       expect(result.id).toBe(mockBudgetId);
-      expect(result.status).toBe(BudgetStatus.ENVIADO);
+      expect(result.status).toBe(BudgetStatus.SENT);
       expect(result.isExpired).toBe(false);
       expect(result.canApprove).toBe(true);
       expect(result.canReject).toBe(true);
@@ -208,7 +208,7 @@ describe('PublicBudgetController', () => {
 
       expect(budgetService.findById).toHaveBeenCalledWith(mockBudgetId);
       expect(result.id).toBe(mockBudgetId);
-      expect(result.status).toBe(BudgetStatus.APROVADO);
+      expect(result.status).toBe(BudgetStatus.APPROVED);
       expect(result.canApprove).toBe(false);
       expect(result.canReject).toBe(false);
     });
@@ -228,7 +228,7 @@ describe('PublicBudgetController', () => {
 
       const result = await controller.getBudgetStatus(mockBudgetId);
 
-      expect(result.status).toBe(BudgetStatus.REJEITADO);
+      expect(result.status).toBe(BudgetStatus.REJECTED);
       expect(result.canApprove).toBe(false);
       expect(result.canReject).toBe(false);
     });

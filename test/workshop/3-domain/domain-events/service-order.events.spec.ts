@@ -5,7 +5,7 @@ import {
   ServiceOrderCompletedEvent,
   ServiceOrderDeliveredEvent,
 } from '../../../../src/workshop/3-domain/domain-events/service-order.events';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
+import { ServiceOrderStatus } from '../../../../src/shared/enums/service-order-status.enum';
 
 describe('ServiceOrderCreatedEvent', () => {
   it('TC0001 - Should create event with all required properties', () => {
@@ -39,8 +39,8 @@ describe('ServiceOrderStatusChangedEvent', () => {
   it('TC0001 - Should create event with all required properties and notes', () => {
     const serviceOrderId = faker.string.uuid();
     const orderNumber = 'OS-2024-001';
-    const previousStatus = ServiceOrderStatus.RECEBIDA;
-    const newStatus = ServiceOrderStatus.EM_EXECUCAO;
+    const previousStatus = ServiceOrderStatus.RECEIVED;
+    const newStatus = ServiceOrderStatus.IN_EXECUTION;
     const notes = faker.lorem.sentence();
 
     const event = new ServiceOrderStatusChangedEvent(
@@ -65,8 +65,8 @@ describe('ServiceOrderStatusChangedEvent', () => {
   it('TC0002 - Should create event without notes', () => {
     const serviceOrderId = faker.string.uuid();
     const orderNumber = 'OS-2024-001';
-    const previousStatus = ServiceOrderStatus.RECEBIDA;
-    const newStatus = ServiceOrderStatus.EM_EXECUCAO;
+    const previousStatus = ServiceOrderStatus.RECEIVED;
+    const newStatus = ServiceOrderStatus.IN_EXECUTION;
 
     const event = new ServiceOrderStatusChangedEvent(
       serviceOrderId,

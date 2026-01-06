@@ -46,7 +46,7 @@ describe('BudgetController', () => {
     discount: 0,
     total: 1100,
     validUntil: faker.date.future(),
-    status: BudgetStatus.RASCUNHO,
+    status: BudgetStatus.DRAFT,
     sentAt: undefined,
     approvedAt: undefined,
     rejectedAt: undefined,
@@ -56,7 +56,7 @@ describe('BudgetController', () => {
 
   const mockSentBudget = {
     ...mockBudget,
-    status: BudgetStatus.ENVIADO,
+    status: BudgetStatus.SENT,
     sentAt: new Date(),
   };
 
@@ -95,7 +95,7 @@ describe('BudgetController', () => {
     discount: 0,
     total: 1100,
     validUntil: faker.date.future(),
-    status: BudgetStatus.RASCUNHO,
+    status: BudgetStatus.DRAFT,
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     customer: {
@@ -249,7 +249,7 @@ describe('BudgetController', () => {
 
       expect(budgetService.sendBudget).toHaveBeenCalledWith(mockBudgetId);
       expect(result).toBeInstanceOf(BudgetResponseDto);
-      expect(result.status).toBe(BudgetStatus.ENVIADO);
+      expect(result.status).toBe(BudgetStatus.SENT);
     });
 
     it('TC0002 - Should throw error when sending fails', async () => {

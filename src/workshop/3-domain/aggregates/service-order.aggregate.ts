@@ -1,4 +1,4 @@
-import { ServiceOrderStatus } from '../../../shared/enums';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 import { Money } from '../value-objects';
 
 export interface ServiceOrderItem {

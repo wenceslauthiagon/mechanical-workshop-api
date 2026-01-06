@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -18,7 +18,7 @@ const mockCustomer = {
 };
 
 const mockVehicle = {
-  licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+  plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
   brand: faker.vehicle.manufacturer(),
   model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
   year: faker.number.int({ min: 2000, max: 2024 }),
@@ -27,7 +27,7 @@ const mockVehicle = {
 
 describe('Public Service Order Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
   let customerId: string;
   let vehicleId: string;
@@ -87,6 +87,9 @@ describe('Public Service Order Integration Tests', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .send(mockCustomer);
 
+    if (customerResponse.status !== 201) {
+      throw new Error(`Failed to create customer: ${customerResponse.status} - ${JSON.stringify(customerResponse.body)}`);
+    }
     customerId = customerResponse.body.id;
 
     const vehicleResponse = await request(app.getHttpServer())
@@ -97,6 +100,9 @@ describe('Public Service Order Integration Tests', () => {
         customerId: customerId,
       });
 
+    if (vehicleResponse.status !== 201) {
+      throw new Error(`Failed to create vehicle: ${vehicleResponse.status} - ${JSON.stringify(vehicleResponse.body)}`);
+    }
     vehicleId = vehicleResponse.body.id;
 
     const serviceOrderResponse = await request(app.getHttpServer())
@@ -106,14 +112,18 @@ describe('Public Service Order Integration Tests', () => {
         customerId: customerId,
         vehicleId: vehicleId,
         description: faker.lorem.sentence(),
+        services: [],
+        parts: [],
       });
 
+    if (serviceOrderResponse.status !== 201) {
+      throw new Error(`Failed to create service order: ${serviceOrderResponse.status} - ${JSON.stringify(serviceOrderResponse.body)}`);
+    }
     serviceOrderId = serviceOrderResponse.body.id;
     orderNumber = serviceOrderResponse.body.orderNumber;
 
     if (!serviceOrderId || !orderNumber) {
-      console.log('Service Order Response:', serviceOrderResponse.body);
-      console.log('Status:', serviceOrderResponse.status);
+      throw new Error('Service order created but missing id or orderNumber');
     }
   });
 
@@ -152,7 +162,7 @@ describe('Public Service Order Integration Tests', () => {
 
     it('TC0003 - Should find service orders by vehicle license plate without authentication', async () => {
       const response = await request(app.getHttpServer()).get(
-        `/public/service-orders/vehicle/${mockVehicle.licensePlate}`,
+        `/public/service-orders/vehicle/${mockVehicle.plate}`,
       );
 
       expect(response.status).toBe(200);
@@ -161,7 +171,7 @@ describe('Public Service Order Integration Tests', () => {
       expect(response.body[0]).toHaveProperty('id', serviceOrderId);
       expect(response.body[0]).toHaveProperty('orderNumber', orderNumber);
       expect(response.body[0].vehicle.licensePlate).toBe(
-        mockVehicle.licensePlate,
+        mockVehicle.plate,
       );
     });
   });

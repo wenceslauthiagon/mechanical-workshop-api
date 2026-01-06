@@ -17,7 +17,8 @@ export class AuthService {
     });
 
     if (user && (await bcrypt.compare(password, user.passwordHash))) {
-      const { passwordHash: _, ...result } = user;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { passwordHash, ...result } = user;
       return result;
     }
 
@@ -50,7 +51,8 @@ export class AuthService {
       },
     });
 
-    const { passwordHash: _, ...result } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash, ...result } = user;
     return result;
   }
 }

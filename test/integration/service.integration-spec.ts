@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -13,16 +13,16 @@ const mockService = {
   price: parseFloat(faker.commerce.price({ min: 50, max: 500, dec: 2 })),
   estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
   category: faker.helpers.arrayElement([
-    'Manutenção Preventiva',
-    'Manutenção Corretiva',
-    'Elétrica',
-    'Mecânica',
+    'ManutenÃ§Ã£o Preventiva',
+    'ManutenÃ§Ã£o Corretiva',
+    'ElÃ©trica',
+    'MecÃ¢nica',
   ]),
 };
 
 describe('Service Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
   let serviceId: string;
 
@@ -173,7 +173,7 @@ describe('Service Integration Tests', () => {
         name: faker.commerce.productName(),
         price: parseFloat(faker.commerce.price({ min: 50, max: 500, dec: 2 })),
         estimatedMinutes: faker.number.int({ min: 30, max: 180 }),
-        category: 'Elétrica',
+        category: 'ElÃ©trica',
       };
 
       const createResponse = await request(app.getHttpServer())

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { ServiceOrderStatus } from '../../../shared/enums';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
 import {

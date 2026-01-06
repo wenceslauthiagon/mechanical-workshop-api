@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -36,7 +36,7 @@ const mockService = {
   description: faker.commerce.productDescription(),
   price: faker.number.float({ min: 50, max: 500, fractionDigits: 2 }),
   estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
-  category: 'Manutenção Preventiva',
+  category: 'ManutenÃ§Ã£o Preventiva',
 };
 
 const mockPart = {
@@ -49,17 +49,18 @@ const mockPart = {
   supplier: faker.company.name(),
 };
 
-const mockMechanic = {
-  name: faker.person.fullName(),
-  email: faker.internet.email(),
-  phone: `11${faker.string.numeric(9)}`,
-  specialties: ['Motor', 'Freios', 'Suspensão'],
-  experienceYears: faker.number.int({ min: 1, max: 30 }),
-};
+// Mechanic mock for future tests
+// const mockMechanic = {
+//   name: faker.person.fullName(),
+//   email: faker.internet.email(),
+//   phone: `11${faker.string.numeric(9)}`,
+//   specialties: ['Motor', 'Freios', 'Suspensão'],
+//   experienceYears: faker.number.int({ min: 1, max: 30 }),
+// };
 
 describe('Authorization RBAC Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let adminToken: string;
   let employeeToken: string;
 

@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
+import { ServiceOrderStatus } from '../../../../src/shared/enums/service-order-status.enum';
 
 import {
   ServiceOrderAggregate,
@@ -40,7 +40,7 @@ describe('ServiceOrderAggregate', () => {
       );
 
       expect(serviceOrder.id).toBe(id);
-      expect(serviceOrder.status).toBe(ServiceOrderStatus.RECEBIDA);
+      expect(serviceOrder.status).toBe(ServiceOrderStatus.RECEIVED);
       expect(serviceOrder.statusHistory).toHaveLength(1);
       expect(serviceOrder.createdAt).toBeInstanceOf(Date);
     });
@@ -53,7 +53,7 @@ describe('ServiceOrderAggregate', () => {
         orderNumber: 'OS-1234',
         customerId: faker.string.uuid(),
         vehicleId: faker.string.uuid(),
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
         description: faker.lorem.sentence(),
         reportedIssue: faker.lorem.sentence(),
         diagnosticNotes: null,
@@ -84,7 +84,7 @@ describe('ServiceOrderAggregate', () => {
         ],
         statusHistory: [
           {
-            status: ServiceOrderStatus.RECEBIDA,
+            status: ServiceOrderStatus.RECEIVED,
             createdAt: new Date(),
             notes: 'Criada',
           },
@@ -104,7 +104,7 @@ describe('ServiceOrderAggregate', () => {
         orderNumber: 'OS-1234',
         customerId: faker.string.uuid(),
         vehicleId: faker.string.uuid(),
-        status: ServiceOrderStatus.RECEBIDA,
+        status: ServiceOrderStatus.RECEIVED,
         description: faker.lorem.sentence(),
         reportedIssue: faker.lorem.sentence(),
         diagnosticNotes: null,
@@ -233,11 +233,11 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      so.changeStatus(ServiceOrderStatus.EM_DIAGNOSTICO);
-      so.changeStatus(ServiceOrderStatus.AGUARDANDO_APROVACAO);
-      so.changeStatus(ServiceOrderStatus.EM_EXECUCAO);
-      so.changeStatus(ServiceOrderStatus.FINALIZADA);
-      so.changeStatus(ServiceOrderStatus.ENTREGUE);
+      so.changeStatus(ServiceOrderStatus.IN_DIAGNOSIS);
+      so.changeStatus(ServiceOrderStatus.AWAITING_APPROVAL);
+      so.changeStatus(ServiceOrderStatus.IN_EXECUTION);
+      so.changeStatus(ServiceOrderStatus.FINISHED);
+      so.changeStatus(ServiceOrderStatus.DELIVERED);
 
       expect(() => so.addService(mockServiceItem)).toThrow(
         'Não é possível modificar ordens de serviço já entregues',
@@ -327,11 +327,11 @@ describe('ServiceOrderAggregate', () => {
       );
 
       so.changeStatus(
-        ServiceOrderStatus.EM_DIAGNOSTICO,
+        ServiceOrderStatus.IN_DIAGNOSIS,
         'Iniciando diagnóstico',
       );
 
-      expect(so.status).toBe(ServiceOrderStatus.EM_DIAGNOSTICO);
+      expect(so.status).toBe(ServiceOrderStatus.IN_DIAGNOSIS);
       expect(so.statusHistory[1].notes).toBe('Iniciando diagnóstico');
     });
 
@@ -345,7 +345,7 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      so.changeStatus(ServiceOrderStatus.EM_DIAGNOSTICO);
+      so.changeStatus(ServiceOrderStatus.IN_DIAGNOSIS);
 
       expect(so.statusHistory[1].notes).toContain('Status alterado');
     });
@@ -360,7 +360,7 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      expect(() => so.changeStatus(ServiceOrderStatus.FINALIZADA)).toThrow(
+      expect(() => so.changeStatus(ServiceOrderStatus.FINISHED)).toThrow(
         'Transição de status inválida',
       );
     });
@@ -375,11 +375,11 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      so.changeStatus(ServiceOrderStatus.EM_DIAGNOSTICO);
-      so.changeStatus(ServiceOrderStatus.AGUARDANDO_APROVACAO);
-      so.changeStatus(ServiceOrderStatus.EM_DIAGNOSTICO);
+      so.changeStatus(ServiceOrderStatus.IN_DIAGNOSIS);
+      so.changeStatus(ServiceOrderStatus.AWAITING_APPROVAL);
+      so.changeStatus(ServiceOrderStatus.IN_DIAGNOSIS);
 
-      expect(so.status).toBe(ServiceOrderStatus.EM_DIAGNOSTICO);
+      expect(so.status).toBe(ServiceOrderStatus.IN_DIAGNOSIS);
     });
   });
 
@@ -394,11 +394,11 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      so.changeStatus(ServiceOrderStatus.EM_DIAGNOSTICO);
-      so.changeStatus(ServiceOrderStatus.AGUARDANDO_APROVACAO);
+      so.changeStatus(ServiceOrderStatus.IN_DIAGNOSIS);
+      so.changeStatus(ServiceOrderStatus.AWAITING_APPROVAL);
       so.startExecution();
 
-      expect(so.status).toBe(ServiceOrderStatus.EM_EXECUCAO);
+      expect(so.status).toBe(ServiceOrderStatus.IN_EXECUTION);
     });
 
     it('TC0002 - Should throw error when not AGUARDANDO_APROVACAO', () => {
@@ -428,12 +428,12 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      so.changeStatus(ServiceOrderStatus.EM_DIAGNOSTICO);
-      so.changeStatus(ServiceOrderStatus.AGUARDANDO_APROVACAO);
-      so.changeStatus(ServiceOrderStatus.EM_EXECUCAO);
+      so.changeStatus(ServiceOrderStatus.IN_DIAGNOSIS);
+      so.changeStatus(ServiceOrderStatus.AWAITING_APPROVAL);
+      so.changeStatus(ServiceOrderStatus.IN_EXECUTION);
       so.finish();
 
-      expect(so.status).toBe(ServiceOrderStatus.FINALIZADA);
+      expect(so.status).toBe(ServiceOrderStatus.FINISHED);
     });
 
     it('TC0002 - Should throw error when not EM_EXECUCAO', () => {
@@ -463,13 +463,13 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      so.changeStatus(ServiceOrderStatus.EM_DIAGNOSTICO);
-      so.changeStatus(ServiceOrderStatus.AGUARDANDO_APROVACAO);
-      so.changeStatus(ServiceOrderStatus.EM_EXECUCAO);
-      so.changeStatus(ServiceOrderStatus.FINALIZADA);
+      so.changeStatus(ServiceOrderStatus.IN_DIAGNOSIS);
+      so.changeStatus(ServiceOrderStatus.AWAITING_APPROVAL);
+      so.changeStatus(ServiceOrderStatus.IN_EXECUTION);
+      so.changeStatus(ServiceOrderStatus.FINISHED);
       so.deliver();
 
-      expect(so.status).toBe(ServiceOrderStatus.ENTREGUE);
+      expect(so.status).toBe(ServiceOrderStatus.DELIVERED);
     });
 
     it('TC0002 - Should throw error when not FINALIZADA', () => {

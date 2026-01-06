@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, IsEmail, IsEnum, MinLength, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 // import { User } from '@prisma/client'; // Not used
-import { UserRole } from '../../shared/enums';
+import { UserRole } from '../../shared/enums/user-role.enum';
 import { PasswordMatchValidator } from '../validators/password-match.validator';
 
 export class CreateUserDto {

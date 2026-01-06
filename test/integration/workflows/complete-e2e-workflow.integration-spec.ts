@@ -18,7 +18,7 @@ const mockCustomer = {
 };
 
 const mockVehicle = {
-  licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+  plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
   model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
   brand: faker.vehicle.manufacturer(),
   year: faker.number.int({ min: 2015, max: 2024 }),
@@ -95,8 +95,11 @@ describe('Complete E2E Workflow Integration Tests', () => {
 
     const hashedPassword = await bcrypt.hash('Admin@1234', 10);
     await prisma.user.upsert({
-      where: { email: 'admin@test.com' },
-      update: {},
+      where: { username: 'admin' },
+      update: {
+        passwordHash: hashedPassword,
+        email: 'admin@workshop.com',
+      },
       create: {
         username: 'admin',
         passwordHash: hashedPassword,
@@ -110,6 +113,11 @@ describe('Complete E2E Workflow Integration Tests', () => {
       .send({ username: 'admin', password: 'Admin@1234' });
 
     adminToken = loginResponse.body.access_token;
+
+    if (!adminToken) {
+      console.error('Login failed:', loginResponse.body);
+      throw new Error('Failed to get admin token');
+    }
   });
 
   afterAll(async () => {
@@ -140,7 +148,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('id');
-      expect(response.body.licensePlate).toBe(mockVehicle.licensePlate);
+      expect(response.body.plate).toBe(mockVehicle.plate);
       expect(response.body.customerId).toBe(customerId);
       vehicleId = response.body.id;
     });
@@ -278,7 +286,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .expect(200);
 
       expect(response.body.id).toBe(budgetId);
-      expect(response.body.status).toBe('ENVIADO');
+      expect(response.body.status).toBe('SENT');
       expect(response.body.customerId).toBe(customerId);
     });
 
@@ -287,7 +295,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .put(`/public/budgets/${budgetId}/approve`)
         .expect(200);
 
-      expect(response.body.budget.status).toBe('APROVADO');
+      expect(response.body.budget.status).toBe('APPROVED');
       expect(response.body.message).toBeDefined();
     });
 
@@ -297,7 +305,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.status).toBe('APROVADO');
+      expect(response.body.status).toBe('APPROVED');
     });
 
     it('TC0014 - Should verify service order status changed to IN_EXECUTION', async () => {
@@ -404,7 +412,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           ...mockVehicle,
-          licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+          plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
           customerId: rejectionCustomerId,
         })
         .expect(201);
@@ -474,7 +482,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.status).toBe('REJEITADO');
+      expect(response.body.status).toBe('REJECTED');
     });
 
     it('TC0004 - Should verify service order status remains AWAITING_APPROVAL after rejection', async () => {

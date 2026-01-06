@@ -53,7 +53,7 @@ export class BudgetResponseDto {
   @ApiProperty({
     description: 'Status do orçamento',
     enum: BudgetStatus,
-    example: BudgetStatus.ENVIADO,
+    example: BudgetStatus.SENT,
   })
   status: BudgetStatus;
 

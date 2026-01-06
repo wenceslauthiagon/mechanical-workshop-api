@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CustomerType } from '../../../../src/shared/enums/customer-type.enum';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CustomerController } from '../../../../src/workshop/1-presentation/controllers/customer.controller';

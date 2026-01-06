@@ -1,5 +1,5 @@
 import type { ServiceOrder } from '@prisma/client';
-import { ServiceOrderStatus } from '../../../shared/enums';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 
 export interface CreateServiceOrderData {
   orderNumber: string;

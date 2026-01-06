@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ServiceOrderStatus } from '../../../shared/enums';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { IServiceOrderRepository } from '../../3-domain/repositories/service-order.repository.interface';
 

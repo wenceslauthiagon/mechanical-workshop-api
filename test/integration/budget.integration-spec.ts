@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -10,7 +10,7 @@ import { generateValidCPF } from '../utils/test-helpers';
 
 describe('Budget Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
   let customerId: string;
   let vehicleId: string;
@@ -86,7 +86,7 @@ describe('Budget Integration Tests', () => {
       .post('/api/vehicles')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+        plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         customerId: customerId,
         brand: faker.vehicle.manufacturer(),
         model: faker.vehicle.model() || 'Test Model',
@@ -103,10 +103,14 @@ describe('Budget Integration Tests', () => {
         customerId: customerId,
         vehicleId: vehicleId,
         description: faker.lorem.sentence(),
+        services: [],
+        parts: [],
       });
 
     if (serviceOrderResponse.status !== 201) {
-      console.log('Service Order creation failed:', serviceOrderResponse.body);
+      throw new Error(
+        `Failed to create service order: ${serviceOrderResponse.status} - ${JSON.stringify(serviceOrderResponse.body)}`
+      );
     }
 
     serviceOrderId = serviceOrderResponse.body.id;
@@ -153,7 +157,7 @@ describe('Budget Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body.serviceOrderId).toBe(serviceOrderId);
       expect(response.body.customerId).toBe(customerId);
-      expect(response.body.status).toBe('RASCUNHO');
+      expect(response.body.status).toBe('DRAFT');
 
       budgetId = response.body.id;
     });
@@ -195,7 +199,7 @@ describe('Budget Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('ENVIADO');
+      expect(response.body.status).toBe('SENT');
     });
   });
 
@@ -207,7 +211,7 @@ describe('Budget Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(budgetId);
-      expect(response.body.status).toBe('ENVIADO');
+      expect(response.body.status).toBe('SENT');
     });
 
     it('TC0002 - Should check budget status', async () => {
@@ -217,7 +221,7 @@ describe('Budget Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(budgetId);
-      expect(response.body.status).toBe('ENVIADO');
+      expect(response.body.status).toBe('SENT');
       expect(response.body).toHaveProperty('validUntil');
       expect(response.body).toHaveProperty('isExpired');
       expect(response.body).toHaveProperty('canApprove');
@@ -230,7 +234,7 @@ describe('Budget Integration Tests', () => {
       );
 
       expect(response.status).toBe(200);
-      expect(response.body.budget.status).toBe('APROVADO');
+      expect(response.body.budget.status).toBe('APPROVED');
       expect(response.body).toHaveProperty('message');
     });
   });
@@ -338,6 +342,8 @@ describe('Budget Integration Tests', () => {
           customerId: customerId,
           vehicleId: vehicleId,
           description: 'Test service order for delete budget',
+          services: [],
+          parts: [],
         });
 
       const newServiceOrderId = newServiceOrderResponse.body.id;

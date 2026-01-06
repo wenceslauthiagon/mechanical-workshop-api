@@ -115,7 +115,7 @@ describe('Budget Workflow Integration Tests', () => {
 
     it('TC0002 - Should create vehicle for customer', async () => {
       const vehicle = {
-        licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+        plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         brand: faker.vehicle.manufacturer(),
         model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
         year: faker.number.int({ min: 2015, max: 2024 }),
@@ -158,6 +158,8 @@ describe('Budget Workflow Integration Tests', () => {
         customerId: customerId,
         vehicleId: vehicleId,
         description: faker.lorem.sentence(),
+        services: [],
+        parts: [],
       };
 
       const response = await request(app.getHttpServer())
@@ -202,7 +204,7 @@ describe('Budget Workflow Integration Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.status).toBe('RASCUNHO');
+      expect(response.body.status).toBe('DRAFT');
       expect(response.body.serviceOrderId).toBe(serviceOrderId);
       budgetId = response.body.id;
     });
@@ -222,7 +224,7 @@ describe('Budget Workflow Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('ENVIADO');
+      expect(response.body.status).toBe('SENT');
     });
 
     it('TC0009 - Should approve budget via public API', async () => {
@@ -231,7 +233,7 @@ describe('Budget Workflow Integration Tests', () => {
       );
 
       expect(response.status).toBe(200);
-      expect(response.body.budget.status).toBe('APROVADO');
+      expect(response.body.budget.status).toBe('APPROVED');
       expect(response.body).toHaveProperty('message');
     });
 
@@ -241,7 +243,7 @@ describe('Budget Workflow Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('EM_EXECUCAO');
+      expect(response.body.status).toBe('IN_EXECUTION');
     });
 
     it('TC0011 - Should access budget via public API', async () => {
@@ -251,7 +253,7 @@ describe('Budget Workflow Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(budgetId);
-      expect(response.body.status).toBe('APROVADO');
+      expect(response.body.status).toBe('APPROVED');
     });
   });
 
@@ -279,7 +281,7 @@ describe('Budget Workflow Integration Tests', () => {
       rejectionCustomerId = customerResponse.body.id;
 
       const vehicle = {
-        licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+        plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         brand: faker.vehicle.manufacturer(),
         model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
         year: 2020,
@@ -298,6 +300,8 @@ describe('Budget Workflow Integration Tests', () => {
         customerId: rejectionCustomerId,
         vehicleId: rejectionVehicleId,
         description: faker.lorem.sentence(),
+        services: [],
+        parts: [],
       };
 
       const osResponse = await request(app.getHttpServer())
@@ -347,7 +351,7 @@ describe('Budget Workflow Integration Tests', () => {
       );
 
       expect(response.status).toBe(200);
-      expect(response.body.budget.status).toBe('REJEITADO');
+      expect(response.body.budget.status).toBe('REJECTED');
       expect(response.body).toHaveProperty('message');
     });
 
@@ -357,7 +361,7 @@ describe('Budget Workflow Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('RECEBIDA');
+      expect(response.body.status).toBe('RECEIVED');
     });
   });
 

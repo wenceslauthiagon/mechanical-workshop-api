@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -11,13 +11,13 @@ const mockMechanic = {
   name: faker.person.fullName(),
   email: faker.internet.email(),
   phone: `11${faker.string.numeric(9)}`,
-  specialties: ['Motor', 'Freios', 'Suspensão'],
+  specialties: ['Motor', 'Freios', 'SuspensÃ£o'],
   experienceYears: faker.number.int({ min: 1, max: 30 }),
 };
 
 describe('Mechanic Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
   let mechanicId: string;
 
@@ -191,7 +191,7 @@ describe('Mechanic Integration Tests', () => {
         name: faker.person.fullName(),
         email: faker.internet.email(),
         phone: `11${faker.string.numeric(9)}`,
-        specialties: ['Elétrica'],
+        specialties: ['ElÃ©trica'],
         experienceYears: faker.number.int({ min: 1, max: 10 }),
       };
 

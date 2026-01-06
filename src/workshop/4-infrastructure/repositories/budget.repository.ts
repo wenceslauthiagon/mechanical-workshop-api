@@ -37,7 +37,7 @@ export class BudgetRepository implements IBudgetRepository {
         discount: 0,
         total,
         validUntil,
-        status: BudgetStatus.RASCUNHO,
+        status: BudgetStatus.DRAFT,
         items: {
           create: data.items.map((item) => ({
             type: item.type,
@@ -211,11 +211,11 @@ export class BudgetRepository implements IBudgetRepository {
   async updateStatus(id: string, status: BudgetStatus): Promise<Budget> {
     const updateData: any = { status };
 
-    if (status === BudgetStatus.ENVIADO) {
+    if (status === BudgetStatus.SENT) {
       updateData.sentAt = new Date();
-    } else if (status === BudgetStatus.APROVADO) {
+    } else if (status === BudgetStatus.APPROVED) {
       updateData.approvedAt = new Date();
-    } else if (status === BudgetStatus.REJEITADO) {
+    } else if (status === BudgetStatus.REJECTED) {
       updateData.rejectedAt = new Date();
     }
 
@@ -291,7 +291,7 @@ export class BudgetRepository implements IBudgetRepository {
           lt: now,
         },
         status: {
-          not: BudgetStatus.EXPIRADO,
+          not: BudgetStatus.EXPIRED,
         },
       },
     });
@@ -312,7 +312,7 @@ export class BudgetRepository implements IBudgetRepository {
   async markAsExpired(id: string): Promise<Budget> {
     const budget = await this.prisma.budget.update({
       where: { id },
-      data: { status: BudgetStatus.EXPIRADO },
+      data: { status: BudgetStatus.EXPIRED },
       include: {
         items: true,
       },

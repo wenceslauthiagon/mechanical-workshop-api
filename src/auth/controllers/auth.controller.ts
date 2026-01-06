@@ -24,7 +24,7 @@ import { Roles } from '../decorators/roles.decorator';
 import { Public } from '../decorators/public.decorator';
 // import { GetUser } from '../decorators/get-user.decorator'; // Not used yet
 // import { User } from '@prisma/client'; // Not used
-import { UserRole } from '../../shared/enums';
+import { UserRole } from '../../shared/enums/user-role.enum';
 
 @ApiTags('Auth')
 @Controller('auth')

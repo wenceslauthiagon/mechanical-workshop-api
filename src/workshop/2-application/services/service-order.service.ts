@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, Logger, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { EmailService } from '../../../shared/services/email.service';
 import { ServiceOrder } from '@prisma/client';
-import { ServiceOrderStatus } from '../../../shared/enums';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../1-presentation/dtos/service-order/update-service-order-status.dto';
 import { ServiceOrderResponseDto } from '../../1-presentation/dtos/service-order/service-order-response.dto';

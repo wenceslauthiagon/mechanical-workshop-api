@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -18,7 +18,7 @@ const mockCustomer = {
 };
 
 const mockVehicle = {
-  licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+  plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
   brand: faker.vehicle.manufacturer(),
   model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
   year: faker.number.int({ min: 2000, max: 2024 }),
@@ -27,7 +27,7 @@ const mockVehicle = {
 
 describe('Vehicle Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
   let customerId: string;
   let vehicleId: string;
@@ -104,7 +104,7 @@ describe('Vehicle Integration Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.licensePlate).toBe(mockVehicle.licensePlate);
+      expect(response.body.plate).toBe(mockVehicle.plate);
       expect(response.body.brand).toBe(mockVehicle.brand);
       expect(response.body.model).toBe(mockVehicle.model);
       expect(response.body.year).toBe(mockVehicle.year);
@@ -130,7 +130,7 @@ describe('Vehicle Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(vehicleId);
-      expect(response.body.licensePlate).toBe(mockVehicle.licensePlate);
+      expect(response.body.plate).toBe(mockVehicle.plate);
     });
 
     it('TC0004 - Should get vehicles by customer', async () => {
@@ -146,11 +146,11 @@ describe('Vehicle Integration Tests', () => {
 
     it('TC0005 - Should get vehicle by license plate', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/api/vehicles/plate/${mockVehicle.licensePlate}`)
+        .get(`/api/vehicles/plate/${mockVehicle.plate}`)
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.licensePlate).toBe(mockVehicle.licensePlate);
+      expect(response.body.plate).toBe(mockVehicle.plate);
       expect(response.body.id).toBe(vehicleId);
     });
 
@@ -176,7 +176,7 @@ describe('Vehicle Integration Tests', () => {
       const uniquePlate = `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`;
 
       const newVehicle = {
-        licensePlate: uniquePlate,
+        plate: uniquePlate,
         customerId: customerId,
         brand: faker.vehicle.manufacturer(),
         model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
@@ -234,7 +234,7 @@ describe('Vehicle Integration Tests', () => {
         .post('/api/vehicles')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          licensePlate: 'INVALID',
+          plate: 'INVALID',
           customerId: customerId,
           brand: faker.vehicle.manufacturer(),
           model: faker.vehicle.model(),
@@ -250,7 +250,7 @@ describe('Vehicle Integration Tests', () => {
         .post('/api/vehicles')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+          plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
           customerId: '00000000-0000-0000-0000-000000000000',
           brand: faker.vehicle.manufacturer(),
           model: faker.vehicle.model(),
@@ -267,7 +267,7 @@ describe('Vehicle Integration Tests', () => {
         .post('/api/vehicles')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+          plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
           customerId: customerId,
           brand: faker.vehicle.manufacturer(),
           model: faker.vehicle.model(),
@@ -304,7 +304,7 @@ describe('Vehicle Integration Tests', () => {
 
     it('TC0008 - Should not update vehicle with duplicate license plate', async () => {
       const anotherVehicle = {
-        licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+        plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         customerId: customerId,
         brand: faker.vehicle.manufacturer(),
         model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
@@ -323,7 +323,7 @@ describe('Vehicle Integration Tests', () => {
         .patch(`/api/vehicles/${createResponse.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          licensePlate: mockVehicle.licensePlate,
+          plate: mockVehicle.plate,
         });
 
       expect(updateResponse.status).toBe(409);

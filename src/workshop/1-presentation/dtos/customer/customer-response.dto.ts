@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CustomerType } from '../../../../shared/enums';
+import { CustomerType } from '../../../../shared/enums/customer-type.enum';
 
 export class CustomerResponseDto {
   @ApiProperty({ description: 'ID do cliente' })

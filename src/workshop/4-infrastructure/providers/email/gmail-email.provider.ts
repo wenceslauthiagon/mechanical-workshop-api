@@ -41,6 +41,14 @@ export class GmailEmailProvider implements IEmailProvider {
   }
 
   async sendEmail(data: EmailData): Promise<void> {
+    // Skip sending real emails in test environment
+    if (process.env.NODE_ENV === 'test') {
+      this.logger.log(
+        `[TEST MODE] Would send email to ${data.to}: ${data.subject}`,
+      );
+      return;
+    }
+
     try {
       if (!this.transporter) {
         throw new Error(
@@ -84,6 +92,12 @@ export class GmailEmailProvider implements IEmailProvider {
   }
 
   async verifyConnection(): Promise<boolean> {
+    // Always return true in test environment
+    if (process.env.NODE_ENV === 'test') {
+      this.logger.log('[TEST MODE] Email connection verification skipped');
+      return true;
+    }
+
     try {
       if (!this.transporter) {
         return false;

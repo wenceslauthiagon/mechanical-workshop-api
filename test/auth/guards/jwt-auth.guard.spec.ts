@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
 import { ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 import { JwtAuthGuard } from '../../../src/auth/guards/jwt-auth.guard';
@@ -32,12 +32,20 @@ describe('JwtAuthGuard', () => {
       handleConflictError: jest.fn(),
     };
 
+    const mockReflector = {
+      getAllAndOverride: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         JwtAuthGuard,
         {
           provide: ErrorHandlerService,
           useValue: mockErrorHandler,
+        },
+        {
+          provide: Reflector,
+          useValue: mockReflector,
         },
       ],
     }).compile();
@@ -53,7 +61,8 @@ describe('JwtAuthGuard', () => {
   });
 
   it('Should instantiate with service dependency', () => {
-    const testGuard = new JwtAuthGuard(errorHandler);
+    const mockReflector = new Reflector();
+    const testGuard = new JwtAuthGuard(errorHandler, mockReflector);
     expect(testGuard).toBeDefined();
   });
 

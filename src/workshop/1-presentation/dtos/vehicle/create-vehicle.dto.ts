@@ -4,6 +4,8 @@ import {
   IsInt,
   IsOptional,
   Matches,
+  Min,
+  Max,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -29,6 +31,10 @@ export class CreateVehicleDto {
   @ApiProperty({ description: 'Ano do veículo' })
   @IsNotEmpty()
   @IsInt()
+  @Min(1900, { message: 'Ano do veículo deve ser maior ou igual a 1900' })
+  @Max(new Date().getFullYear() + 1, {
+    message: `Ano do veículo não pode ser maior que ${new Date().getFullYear() + 1}`,
+  })
   year!: number;
 
   @ApiPropertyOptional({ description: 'Cor do veículo' })

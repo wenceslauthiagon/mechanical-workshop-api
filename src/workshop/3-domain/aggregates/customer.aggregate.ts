@@ -1,4 +1,4 @@
-import { CustomerType } from '../../../shared/enums';
+import { CustomerType } from '../../../shared/enums/customer-type.enum';
 import { Email, Document } from '../value-objects';
 
 export interface CustomerAddress {

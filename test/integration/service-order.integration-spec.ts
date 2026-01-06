@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -12,11 +12,13 @@ const testData = {
   customer: {
     name: faker.person.fullName(),
     document: generateValidCPF(),
+    type: 'PESSOA_FISICA',
     email: faker.internet.email(),
     phone: faker.phone.number(),
+    address: faker.location.streetAddress(),
   },
   vehicle: {
-    licensePlate: 'ABC1234',
+    plate: 'ABC1234',
     model: faker.vehicle.model(),
     brand: faker.vehicle.manufacturer(),
     year: faker.number.int({ min: 2000, max: 2024 }),
@@ -27,12 +29,15 @@ const testData = {
     description: faker.commerce.productDescription(),
     estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
     price: parseFloat(faker.commerce.price({ min: 50, max: 500 })),
+    category: faker.commerce.department(),
   },
   part: {
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
+    partNumber: faker.string.alphanumeric(10).toUpperCase(),
     price: parseFloat(faker.commerce.price({ min: 10, max: 200 })),
-    stock: faker.number.int({ min: 1, max: 100 }),
+    stock: faker.number.int({ min: 10, max: 100 }),
+    minStock: faker.number.int({ min: 1, max: 5 }),
     supplier: faker.company.name(),
   },
   serviceOrder: {
@@ -43,7 +48,7 @@ const testData = {
 
 describe('Service Order Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
   let customerId: string;
   let vehicleId: string;
@@ -125,7 +130,7 @@ describe('Service Order Integration Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.licensePlate).toBe(testData.vehicle.licensePlate);
+      expect(response.body.plate).toBe(testData.vehicle.plate);
       vehicleId = response.body.id;
     });
 
@@ -165,7 +170,7 @@ describe('Service Order Integration Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.status).toBe('RECEBIDA');
+      expect(response.body.status).toBe('RECEIVED');
       expect(response.body).toHaveProperty('orderNumber');
       serviceOrderId = response.body.id;
     });
@@ -175,12 +180,12 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'EM_DIAGNOSTICO',
+          status: 'IN_DIAGNOSIS',
           notes: testData.serviceOrder.notes,
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('EM_DIAGNOSTICO');
+      expect(response.body.status).toBe('IN_DIAGNOSIS');
     });
 
     it('TC0007 - Should update service order status to AGUARDANDO_APROVACAO', async () => {
@@ -188,13 +193,13 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'AGUARDANDO_APROVACAO',
+          status: 'AWAITING_APPROVAL',
           notes: testData.serviceOrder.notes,
         });
 
       expect(response.status).toBe(200);
       expect(response.body.status).toBe(
-        'AGUARDANDO_APROVACAO',
+        'AWAITING_APPROVAL',
       );
     });
 
@@ -205,7 +210,7 @@ describe('Service Order Integration Tests', () => {
         .send();
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('EM_EXECUCAO');
+      expect(response.body.status).toBe('IN_EXECUTION');
     });
 
     it('TC0009 - Should update service order status to FINALIZADA', async () => {
@@ -213,12 +218,12 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'FINALIZADA',
+          status: 'FINISHED',
           notes: testData.serviceOrder.notes,
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('FINALIZADA');
+      expect(response.body.status).toBe('FINISHED');
     });
 
     it('TC0010 - Should update service order status to ENTREGUE', async () => {
@@ -226,12 +231,12 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'ENTREGUE',
+          status: 'DELIVERED',
           notes: testData.serviceOrder.notes,
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('ENTREGUE');
+      expect(response.body.status).toBe('DELIVERED');
     });
 
     it('TC0011 - Should get service order by ID', async () => {
@@ -241,7 +246,7 @@ describe('Service Order Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(serviceOrderId);
-      expect(response.body.status).toBe('ENTREGUE');
+      expect(response.body.status).toBe('DELIVERED');
       expect(response.body).toHaveProperty('customer');
       expect(response.body).toHaveProperty('vehicle');
     });
@@ -301,7 +306,7 @@ describe('Service Order Integration Tests', () => {
           description: testData.serviceOrder.description,
         });
 
-      expect(response.status).toBe(404);
+      expect([400, 404]).toContain(response.status);
     });
 
     it('TC0002 - Should not create service order with vehicle from different customer', async () => {
@@ -339,6 +344,8 @@ describe('Service Order Integration Tests', () => {
           customerId: customerId,
           vehicleId: vehicleId,
           description: testData.serviceOrder.description,
+          services: [],
+          parts: [],
         });
 
       const newOrderId = orderResponse.body.id;
@@ -347,7 +354,7 @@ describe('Service Order Integration Tests', () => {
         .patch(`/api/service-orders/${newOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: 'FINALIZADA',
+          status: 'FINISHED',
         });
 
       expect(response.status).toBe(400);

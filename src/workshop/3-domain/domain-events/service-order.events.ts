@@ -1,5 +1,5 @@
 import { BaseDomainEvent } from './base-domain-event';
-import { ServiceOrderStatus } from '../../../shared/enums';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 
 export class ServiceOrderCreatedEvent extends BaseDomainEvent {
   constructor(

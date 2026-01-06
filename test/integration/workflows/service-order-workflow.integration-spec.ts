@@ -103,7 +103,7 @@ describe('Service Order Complete Workflow Integration Tests', () => {
 
     it('TC0002 - Should create vehicle for customer', async () => {
       const vehicle = {
-        licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+        plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         brand: faker.vehicle.manufacturer(),
         model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
         year: faker.number.int({ min: 2015, max: 2024 }),
@@ -344,7 +344,7 @@ describe('Service Order Complete Workflow Integration Tests', () => {
         .send(customer);
 
       const vehicle = {
-        licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+        plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         brand: faker.vehicle.manufacturer(),
         model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
         year: 2020,
@@ -394,7 +394,7 @@ describe('Service Order Complete Workflow Integration Tests', () => {
         .send(customer);
 
       const vehicle = {
-        licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+        plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         brand: faker.vehicle.manufacturer(),
         model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
         year: 2020,
@@ -426,11 +426,24 @@ describe('Service Order Complete Workflow Integration Tests', () => {
     });
 
     it('TC0003 - Should verify part stock is reduced after service order creation', async () => {
-      const initialStockResponse = await request(app.getHttpServer())
-        .get(`/api/parts/${partId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+      // Create a new part specifically for this test to avoid interference
+      const testPart = {
+        name: `Test Part ${faker.string.uuid()}`,
+        description: faker.commerce.productDescription(),
+        partNumber: faker.string.alphanumeric(8).toUpperCase(),
+        price: faker.commerce.price({ min: 10, max: 500, dec: 2 }),
+        stock: 100,
+        minStock: 10,
+        supplier: faker.company.name(),
+      };
 
-      const initialStock = initialStockResponse.body.stock;
+      const partResponse = await request(app.getHttpServer())
+        .post('/api/parts')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(testPart);
+
+      const testPartId = partResponse.body.id;
+      const initialStock = testPart.stock;
 
       const customer = {
         document: generateValidCPF(),
@@ -447,7 +460,7 @@ describe('Service Order Complete Workflow Integration Tests', () => {
         .send(customer);
 
       const vehicle = {
-        licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+        plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
         brand: faker.vehicle.manufacturer(),
         model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
         year: 2020,
@@ -464,9 +477,10 @@ describe('Service Order Complete Workflow Integration Tests', () => {
         customerId: customerResponse.body.id,
         vehicleId: vehicleResponse.body.id,
         description: faker.lorem.sentence(),
+        services: [],
         parts: [
           {
-            partId: partId,
+            partId: testPartId,
             quantity: 3,
           },
         ],
@@ -478,7 +492,7 @@ describe('Service Order Complete Workflow Integration Tests', () => {
         .send(serviceOrder);
 
       const finalStockResponse = await request(app.getHttpServer())
-        .get(`/api/parts/${partId}`)
+        .get(`/api/parts/${testPartId}`)
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(finalStockResponse.body.stock).toBe(initialStock - 3);

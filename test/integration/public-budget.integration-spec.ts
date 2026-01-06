@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -10,7 +10,7 @@ import { generateValidCPF } from '../utils/test-helpers';
 
 describe('Public Budget Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
   let customerId: string;
   let vehicleId: string;
@@ -86,7 +86,7 @@ describe('Public Budget Integration Tests', () => {
     customerId = customerResponse.body.id;
 
     const vehicle = {
-      licensePlate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
+      plate: `${faker.string.alpha({ length: 3, casing: 'upper' })}-${faker.string.numeric(4)}`,
       brand: faker.vehicle.manufacturer(),
       model: (faker.vehicle.model() || 'Model').padEnd(2, 'X'),
       year: faker.number.int({ min: 2015, max: 2024 }),
@@ -105,6 +105,8 @@ describe('Public Budget Integration Tests', () => {
       customerId: customerId,
       vehicleId: vehicleId,
       description: faker.lorem.sentence(),
+      services: [],
+      parts: [],
     };
 
     const osResponse = await request(app.getHttpServer())
@@ -164,7 +166,7 @@ describe('Public Budget Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('id', sentBudgetId);
-      expect(response.body.status).toBe('ENVIADO');
+      expect(response.body.status).toBe('SENT');
       expect(response.body).toHaveProperty('customerId');
       expect(response.body).toHaveProperty('serviceOrderId');
     });
@@ -231,6 +233,8 @@ describe('Public Budget Integration Tests', () => {
         customerId: customerId,
         vehicleId: vehicleId,
         description: faker.lorem.sentence(),
+        services: [],
+        parts: [],
       };
 
       const osResponse = await request(app.getHttpServer())
@@ -276,7 +280,7 @@ describe('Public Budget Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('budget');
       expect(response.body).toHaveProperty('message');
-      expect(response.body.budget.status).toBe('APROVADO');
+      expect(response.body.budget.status).toBe('APPROVED');
       expect(response.body.budget.id).toBe(approvalBudgetId);
     });
 
@@ -286,7 +290,7 @@ describe('Public Budget Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('EM_EXECUCAO');
+      expect(response.body.status).toBe('IN_EXECUTION');
     });
 
     it('TC0003 - Should not approve already approved budget', async () => {
@@ -317,6 +321,8 @@ describe('Public Budget Integration Tests', () => {
         customerId: customerId,
         vehicleId: vehicleId,
         description: faker.lorem.sentence(),
+        services: [],
+        parts: [],
       };
 
       const osResponse = await request(app.getHttpServer())
@@ -362,7 +368,7 @@ describe('Public Budget Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('budget');
       expect(response.body).toHaveProperty('message');
-      expect(response.body.budget.status).toBe('REJEITADO');
+      expect(response.body.budget.status).toBe('REJECTED');
       expect(response.body.budget.id).toBe(rejectionBudgetId);
     });
 
@@ -372,7 +378,7 @@ describe('Public Budget Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('RECEBIDA');
+      expect(response.body.status).toBe('RECEIVED');
     });
 
     it('TC0003 - Should not reject already rejected budget', async () => {

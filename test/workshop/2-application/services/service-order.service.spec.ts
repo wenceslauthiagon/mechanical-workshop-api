@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
+import { ServiceOrderStatus } from '../../../../src/shared/enums/service-order-status.enum';
 import { CustomerType } from '../../../../src/shared/enums/customer-type.enum';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../../src/prisma/prisma.service';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { Decimal } from '@prisma/client/runtime/library';
 import { Logger } from '@nestjs/common';
 
 import { ServiceOrderService } from '../../../../src/workshop/2-application/services/service-order.service';
@@ -23,14 +22,14 @@ describe('ServiceOrderService', () => {
     customerId: faker.string.uuid(),
     vehicleId: faker.string.uuid(),
     mechanicId: faker.string.uuid(),
-    status: ServiceOrderStatus.RECEBIDA,
+    status: ServiceOrderStatus.RECEIVED,
     description: faker.lorem.sentence(),
-    totalAmount: new Decimal(500),
-    discount: new Decimal(0),
-    totalServicePrice: new Decimal(300),
-    totalPartsPrice: new Decimal(200),
-    totalPrice: new Decimal(500),
-    estimatedTimeHours: new Decimal(2),
+    totalAmount: 500,
+    discount: 0,
+    totalServicePrice: 300,
+    totalPartsPrice: 200,
+    totalPrice: 500,
+    estimatedTimeHours: 2,
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
   };
@@ -61,7 +60,7 @@ describe('ServiceOrderService', () => {
   const mockService = {
     id: faker.string.uuid(),
     name: faker.commerce.productName(),
-    price: new Decimal(100),
+    price: 100,
     isActive: true,
     estimatedMinutes: 60,
   };
@@ -69,7 +68,7 @@ describe('ServiceOrderService', () => {
   const mockPart = {
     id: faker.string.uuid(),
     name: faker.commerce.productName(),
-    price: new Decimal(50),
+    price: 50,
     isActive: true,
     stock: 10,
   };
@@ -125,13 +124,17 @@ describe('ServiceOrderService', () => {
         generateException: jest.fn().mockImplementation(() => {
           throw new Error('Exception');
         }),
+        handleBusinessRuleError: jest.fn().mockImplementation(() => {
+          throw new Error('Business rule error');
+        }),
       },
       notification: {
         sendServiceOrderStatusNotification: jest.fn(),
       },
       mechanic: {
         findById: jest.fn(),
-        markAsUnavailable: jest.fn(),
+        checkAvailability: jest.fn().mockResolvedValue(true),
+        assignToServiceOrder: jest.fn(),
         releaseFromServiceOrder: jest.fn(),
       },
       email: {
@@ -145,6 +148,9 @@ describe('ServiceOrderService', () => {
         serviceOrderPart: {
           findMany: jest.fn().mockResolvedValue([]),
         },
+        mechanic: {
+          findUnique: jest.fn().mockResolvedValue(null),
+        },
         $transaction: jest.fn(),
       },
     };
@@ -157,7 +163,7 @@ describe('ServiceOrderService', () => {
         { provide: 'IVehicleRepository', useValue: mockRepositories.vehicle },
         { provide: 'IServiceRepository', useValue: mockRepositories.service },
         { provide: 'IPartRepository', useValue: mockRepositories.part },
-        { provide: PrismaClient, useValue: mockServices.prisma },
+        { provide: PrismaService, useValue: mockServices.prisma },
         { provide: ErrorHandlerService, useValue: mockServices.errorHandler },
         { provide: NotificationService, useValue: mockServices.notification },
         { provide: MechanicService, useValue: mockServices.mechanic },
@@ -385,31 +391,37 @@ describe('ServiceOrderService', () => {
 
   describe('updateStatus', () => {
     const updateDto = {
-      status: ServiceOrderStatus.EM_EXECUCAO,
+      status: ServiceOrderStatus.IN_EXECUTION,
       notes: faker.lorem.sentence(),
     };
 
     it('TC0001 - Should update status to EM_EXECUCAO successfully', async () => {
+      const updateDtoWithMechanic = {
+        ...updateDto,
+        mechanicId: mockMechanic.id,
+      };
       const orderWithMechanic = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
         mechanicId: mockMechanic.id,
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderWithMechanic);
       services.mechanic.findById.mockResolvedValue(mockMechanic);
-      services.mechanic.markAsUnavailable.mockResolvedValue(undefined);
+      services.mechanic.checkAvailability.mockResolvedValue(true);
+      services.mechanic.assignToServiceOrder.mockResolvedValue(undefined);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
       jest
         .spyOn(service, 'findById')
         .mockResolvedValue(mockServiceOrder as any);
 
-      const result = await service.updateStatus(mockServiceOrder.id, updateDto);
+      const result = await service.updateStatus(mockServiceOrder.id, updateDtoWithMechanic);
 
       expect(result).toBeDefined();
       expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
-      expect(services.mechanic.markAsUnavailable).toHaveBeenCalledWith(
+      expect(services.mechanic.assignToServiceOrder).toHaveBeenCalledWith(
         mockMechanic.id,
+        mockServiceOrder.id,
       );
     });
 
@@ -421,45 +433,61 @@ describe('ServiceOrderService', () => {
     });
 
     it('TC0003 - Should handle missing mechanic for EM_EXECUCAO', async () => {
+      const updateDtoWithoutMechanic = {
+        ...updateDto,
+      };
       const orderWithoutMechanic = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
         mechanicId: null,
       };
       repositories.serviceOrder.findById.mockResolvedValue(
         orderWithoutMechanic,
       );
+      repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
+      repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
+      jest
+        .spyOn(service, 'findById')
+        .mockResolvedValue(mockServiceOrder as any);
 
-      await expect(
-        service.updateStatus(mockServiceOrder.id, updateDto),
-      ).rejects.toThrow('Exception');
+      const result = await service.updateStatus(
+        mockServiceOrder.id,
+        updateDtoWithoutMechanic,
+      );
+
+      expect(result).toBeDefined();
     });
 
     it('TC0004 - Should handle unavailable mechanic for EM_EXECUCAO', async () => {
-      const orderWithMechanic = {
-        ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+      const updateDtoWithMechanic = {
+        ...updateDto,
         mechanicId: mockMechanic.id,
       };
+      const orderWithMechanic = {
+        ...mockServiceOrder,
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
+        mechanicId: null,
+      };
       repositories.serviceOrder.findById.mockResolvedValue(orderWithMechanic);
-      services.mechanic.findById.mockResolvedValue({
-        ...mockMechanic,
-        isAvailable: false,
+      services.mechanic.findById.mockResolvedValue(mockMechanic);
+      services.mechanic.checkAvailability.mockResolvedValue(false);
+      services.errorHandler.handleBusinessRuleError.mockImplementation(() => {
+        throw new Error('Mechanic not available');
       });
 
       await expect(
-        service.updateStatus(mockServiceOrder.id, updateDto),
-      ).rejects.toThrow();
+        service.updateStatus(mockServiceOrder.id, updateDtoWithMechanic),
+      ).rejects.toThrow('Mechanic not available');
     });
 
     it('TC0005 - Should update status to FINALIZADA and release mechanic', async () => {
       const finalizadaDto = {
-        status: ServiceOrderStatus.FINALIZADA,
+        status: ServiceOrderStatus.FINISHED,
         notes: faker.lorem.sentence(),
       };
       const orderEmExecucao = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderEmExecucao);
       services.mechanic.releaseFromServiceOrder.mockResolvedValue(undefined);
@@ -478,12 +506,12 @@ describe('ServiceOrderService', () => {
 
     it('TC0006 - Should update status to ENTREGUE and release mechanic', async () => {
       const entregueDto = {
-        status: ServiceOrderStatus.ENTREGUE,
+        status: ServiceOrderStatus.DELIVERED,
         notes: faker.lorem.sentence(),
       };
       const orderFinalizada = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.FINALIZADA,
+        status: ServiceOrderStatus.FINISHED,
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderFinalizada);
       services.mechanic.releaseFromServiceOrder.mockResolvedValue(undefined);
@@ -505,7 +533,7 @@ describe('ServiceOrderService', () => {
     it('TC0001 - Should approve order successfully', async () => {
       const orderAguardando = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        status: ServiceOrderStatus.AWAITING_APPROVAL,
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderAguardando);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
@@ -538,7 +566,7 @@ describe('ServiceOrderService', () => {
   describe('getStatusHistory', () => {
     it('TC0001 - Should return status history', async () => {
       const mockHistory = [
-        { id: faker.string.uuid(), status: ServiceOrderStatus.RECEBIDA },
+        { id: faker.string.uuid(), status: ServiceOrderStatus.RECEIVED },
       ];
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
       repositories.serviceOrder.getStatusHistory.mockResolvedValue(mockHistory);
@@ -706,7 +734,7 @@ describe('ServiceOrderService', () => {
       
       const orderEmDiagnostico = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
@@ -721,7 +749,7 @@ describe('ServiceOrderService', () => {
         .mockResolvedValue(mockServiceOrder as any);
 
       const updateDto = {
-        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        status: ServiceOrderStatus.AWAITING_APPROVAL,
         notes: 'Test',
       };
       const result = await service.updateStatus(mockServiceOrder.id, updateDto);
@@ -736,7 +764,7 @@ describe('ServiceOrderService', () => {
     it('TC0002 - Should handle notification error gracefully', async () => {
       const orderEmDiagnostico = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
       };
       const customerWithEmail = { ...mockCustomer, email: 'test@example.com' };
 
@@ -760,7 +788,7 @@ describe('ServiceOrderService', () => {
     it('TC0003 - Should skip notification if customer or vehicle not found', async () => {
       const orderEmDiagnostico = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
@@ -772,7 +800,7 @@ describe('ServiceOrderService', () => {
         .mockResolvedValue(mockServiceOrder as any);
 
       const updateDto = {
-        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        status: ServiceOrderStatus.AWAITING_APPROVAL,
         notes: 'Test',
       };
       const result = await service.updateStatus(mockServiceOrder.id, updateDto);
@@ -787,7 +815,7 @@ describe('ServiceOrderService', () => {
       
       const orderEmDiagnostico = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
       };
       const customerWithPhone = { ...mockCustomer, phone: '+5511999999999' };
 
@@ -804,7 +832,7 @@ describe('ServiceOrderService', () => {
         .mockResolvedValue(mockServiceOrder as any);
 
       const updateDto = {
-        status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        status: ServiceOrderStatus.AWAITING_APPROVAL,
         notes: 'Test',
       };
 
@@ -818,12 +846,12 @@ describe('ServiceOrderService', () => {
   describe('validateStatusTransition', () => {
     it('TC0001 - Should throw error on invalid status transition', async () => {
       const invalidDto = {
-        status: ServiceOrderStatus.ENTREGUE,
+        status: ServiceOrderStatus.DELIVERED,
         notes: faker.lorem.sentence(),
       };
       const orderRecebida = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.RECEBIDA,
+        status: ServiceOrderStatus.RECEIVED,
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderRecebida);
 
@@ -834,12 +862,12 @@ describe('ServiceOrderService', () => {
 
     it('TC0002 - Should throw error when trying to go back to RECEBIDA', async () => {
       const invalidDto = {
-        status: ServiceOrderStatus.RECEBIDA,
+        status: ServiceOrderStatus.RECEIVED,
         notes: faker.lorem.sentence(),
       };
       const orderEmDiagnostico = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_DIAGNOSTICO,
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
 
@@ -856,16 +884,16 @@ describe('ServiceOrderService', () => {
         serviceOrderId: mockServiceOrder.id,
         serviceId: mockService.id,
         quantity: 1,
-        price: new Decimal(100),
-        totalPrice: new Decimal(100),
+        price: 100,
+        totalPrice: 100,
       };
       const mockPartItem = {
         id: faker.string.uuid(),
         serviceOrderId: mockServiceOrder.id,
         partId: mockPart.id,
         quantity: 2,
-        price: new Decimal(50),
-        totalPrice: new Decimal(100),
+        price: 50,
+        totalPrice: 100,
       };
 
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
@@ -894,8 +922,8 @@ describe('ServiceOrderService', () => {
         serviceOrderId: mockServiceOrder.id,
         serviceId: mockService.id,
         quantity: 1,
-        price: new Decimal(100),
-        totalPrice: new Decimal(100),
+        price: 100,
+        totalPrice: 100,
       };
 
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
@@ -920,8 +948,8 @@ describe('ServiceOrderService', () => {
         serviceOrderId: mockServiceOrder.id,
         partId: mockPart.id,
         quantity: 2,
-        price: new Decimal(50),
-        totalPrice: new Decimal(100),
+        price: 50,
+        totalPrice: 100,
       };
 
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);

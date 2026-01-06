@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { Decimal } from '@prisma/client/runtime/library';
 import { PartService } from '../../../../src/workshop/2-application/services/part.service';
 import { IPartRepository } from '../../../../src/workshop/3-domain/repositories/part-repository.interface';
 import { ErrorHandlerService } from '../../../../src/shared/services/error-handler.service';
@@ -18,7 +16,7 @@ describe('PartService', () => {
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
     supplier: faker.company.name(),
-    price: new Decimal(faker.finance.amount({ min: 10, max: 500, dec: 2 })),
+    price: parseFloat(faker.finance.amount({ min: 10, max: 500, dec: 2 })),
     stock: faker.number.int({ min: 0, max: 100 }),
     minStock: faker.number.int({ min: 5, max: 20 }),
     isActive: true,
@@ -251,7 +249,7 @@ describe('PartService', () => {
       expect(partRepository.findById).toHaveBeenCalledWith(partId);
       expect(partRepository.update).toHaveBeenCalledWith(partId, {
         name: updateDto.name,
-        price: new Decimal(updateDto.price),
+        price: parseFloat(updateDto.price),
       });
       expect(result).toEqual(updatedPart);
     });
@@ -350,7 +348,7 @@ describe('PartService', () => {
       await service.update(partId, updateDto);
 
       expect(partRepository.update).toHaveBeenCalledWith(partId, {
-        price: new Decimal(updateDto.price),
+        price: parseFloat(updateDto.price),
       });
     });
 
@@ -373,7 +371,7 @@ describe('PartService', () => {
       expect(partRepository.update).toHaveBeenCalledWith(partId, {
         name: updateDto.name,
         supplier: updateDto.supplier,
-        price: new Decimal(updateDto.price),
+        price: parseFloat(updateDto.price),
         minStock: updateDto.minStock,
       });
       expect(result).toEqual(updatedPart);

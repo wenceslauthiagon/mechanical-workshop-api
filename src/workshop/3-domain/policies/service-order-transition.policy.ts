@@ -1,4 +1,4 @@
-import { ServiceOrderStatus } from '../../../shared/enums';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 
 export interface ServiceOrderPolicy {
   canTransition(

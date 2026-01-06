@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
+import { ServiceOrderStatus } from '../../../src/shared/enums/service-order-status.enum';
 import { Logger } from '@nestjs/common';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { EmailService } from '../../../src/shared/services/email.service';
@@ -22,12 +22,12 @@ describe('EmailService', () => {
     customerEmail: faker.internet.email(),
     orderNumber: `OS-${faker.string.numeric(3)}`,
     newStatus: faker.helpers.arrayElement([
-      ServiceOrderStatus.RECEBIDA,
-      ServiceOrderStatus.EM_DIAGNOSTICO,
-      ServiceOrderStatus.AGUARDANDO_APROVACAO,
-      ServiceOrderStatus.EM_EXECUCAO,
-      ServiceOrderStatus.FINALIZADA,
-      ServiceOrderStatus.ENTREGUE,
+      ServiceOrderStatus.RECEIVED,
+      ServiceOrderStatus.IN_DIAGNOSIS,
+      ServiceOrderStatus.AWAITING_APPROVAL,
+      ServiceOrderStatus.IN_EXECUTION,
+      ServiceOrderStatus.FINISHED,
+      ServiceOrderStatus.DELIVERED,
     ]),
     statusMessage: faker.lorem.sentence(),
     orderLink: faker.internet.url(),
@@ -104,7 +104,7 @@ describe('EmailService', () => {
     it('TC0001 - Should send notification for RECEBIDA status', async () => {
       const data = {
         ...createMockStatusChangeData(),
-        newStatus: ServiceOrderStatus.RECEBIDA,
+        newStatus: ServiceOrderStatus.RECEIVED,
       };
 
       const sendEmailSpy = jest.spyOn(service, 'sendEmail');
@@ -129,7 +129,7 @@ describe('EmailService', () => {
     it('TC0002 - Should send notification for EM_DIAGNOSTICO status', async () => {
       const data = {
         ...createMockStatusChangeData(),
-        newStatus: ServiceOrderStatus.EM_DIAGNOSTICO,
+        newStatus: ServiceOrderStatus.IN_DIAGNOSIS,
       };
 
       const sendEmailSpy = jest.spyOn(service, 'sendEmail');
@@ -148,7 +148,7 @@ describe('EmailService', () => {
     it('TC0003 - Should send notification for AGUARDANDO_APROVACAO status', async () => {
       const data = {
         ...createMockStatusChangeData(),
-        newStatus: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+        newStatus: ServiceOrderStatus.AWAITING_APPROVAL,
       };
 
       const result = await service.sendStatusChangeNotification(data);
@@ -159,7 +159,7 @@ describe('EmailService', () => {
     it('TC0004 - Should send notification for EM_EXECUCAO status', async () => {
       const data = {
         ...createMockStatusChangeData(),
-        newStatus: ServiceOrderStatus.EM_EXECUCAO,
+        newStatus: ServiceOrderStatus.IN_EXECUTION,
       };
 
       const result = await service.sendStatusChangeNotification(data);
@@ -170,7 +170,7 @@ describe('EmailService', () => {
     it('TC0005 - Should send notification for FINALIZADA status', async () => {
       const data = {
         ...createMockStatusChangeData(),
-        newStatus: ServiceOrderStatus.FINALIZADA,
+        newStatus: ServiceOrderStatus.FINISHED,
       };
 
       const result = await service.sendStatusChangeNotification(data);
@@ -181,7 +181,7 @@ describe('EmailService', () => {
     it('TC0006 - Should send notification for ENTREGUE status', async () => {
       const data = {
         ...createMockStatusChangeData(),
-        newStatus: ServiceOrderStatus.ENTREGUE,
+        newStatus: ServiceOrderStatus.DELIVERED,
       };
 
       const result = await service.sendStatusChangeNotification(data);
@@ -194,7 +194,7 @@ describe('EmailService', () => {
         customerName: faker.person.fullName(),
         customerEmail: faker.internet.email(),
         orderNumber: `OS-${faker.string.numeric(3)}`,
-        newStatus: ServiceOrderStatus.EM_EXECUCAO,
+        newStatus: ServiceOrderStatus.IN_EXECUTION,
         statusMessage: faker.lorem.sentence(),
       };
 

@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
+import { ServiceOrderStatus } from '../../../../src/shared/enums/service-order-status.enum';
 
 import { ServiceOrderController } from '../../../../src/workshop/1-presentation/controllers/service-order.controller';
 import { ServiceOrderService } from '../../../../src/workshop/2-application/services/service-order.service';
@@ -21,7 +22,7 @@ describe('ServiceOrderController', () => {
     customerId: mockCustomerId,
     vehicleId: mockVehicleId,
     description: faker.lorem.paragraph(),
-    status: ServiceOrderStatus.RECEBIDA,
+    status: ServiceOrderStatus.RECEIVED,
     totalServicePrice: '100.00',
     totalPartsPrice: '50.00',
     totalPrice: '150.00',
@@ -38,7 +39,7 @@ describe('ServiceOrderController', () => {
   };
 
   const mockUpdateServiceOrderStatusDto: UpdateServiceOrderStatusDto = {
-    status: ServiceOrderStatus.EM_EXECUCAO,
+    status: ServiceOrderStatus.IN_EXECUTION,
   };
 
   beforeEach(async () => {
@@ -191,7 +192,7 @@ describe('ServiceOrderController', () => {
     it('TC0001 - Should update service order status', async () => {
       const updatedServiceOrder = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
       };
       serviceOrderService.updateStatus.mockResolvedValue(updatedServiceOrder);
 
@@ -231,7 +232,7 @@ describe('ServiceOrderController', () => {
         {
           id: uuidv4(),
           serviceOrderId: mockServiceOrderId,
-          status: ServiceOrderStatus.RECEBIDA,
+          status: ServiceOrderStatus.RECEIVED,
           changedAt: faker.date.past(),
           changedBy: faker.person.fullName(),
         },

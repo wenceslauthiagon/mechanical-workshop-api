@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { Decimal } from '@prisma/client/runtime/library';
 import { ServiceService } from '../../../../src/workshop/2-application/services/service.service';
 import { IServiceRepository } from '../../../../src/workshop/3-domain/repositories/service-repository.interface';
 import { ErrorHandlerService } from '../../../../src/shared/services/error-handler.service';
@@ -16,7 +14,7 @@ describe('ServiceService', () => {
     id: faker.string.uuid(),
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
-    price: new Decimal(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
+    price: parseFloat(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
     category: faker.helpers.arrayElement([
       'Mecânica',
       'Elétrica',
@@ -205,7 +203,7 @@ describe('ServiceService', () => {
       expect(serviceRepository.update).toHaveBeenCalledWith(serviceId, {
         name: updateDto.name,
         description: null,
-        price: new Decimal(updateDto.price),
+        price: updateDto.price,
         category: undefined,
         estimatedMinutes: undefined,
         isActive: undefined,

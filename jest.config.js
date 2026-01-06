@@ -4,7 +4,8 @@ module.exports = {
   roots: ['<rootDir>/src', '<rootDir>/test'],
   testMatch: [
     '<rootDir>/test/**/*.spec.ts',
-    '<rootDir>/test/**/*.test.ts'
+    '<rootDir>/test/**/*.test.ts',
+    '<rootDir>/test/**/*.integration-spec.ts'
   ],
   transform: {
     '^.+\\.(t|j)s$': ['ts-jest', {
@@ -81,6 +82,5 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
-    '^@prisma/client$': '<rootDir>/src/mocks/prisma-shim.ts',
   },
 };

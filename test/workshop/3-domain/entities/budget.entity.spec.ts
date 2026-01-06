@@ -28,7 +28,7 @@ describe('BudgetEntity', () => {
       const discount = 0;
       const total = 110;
       const validUntil = new Date();
-      const status = BudgetStatus.RASCUNHO;
+      const status = BudgetStatus.DRAFT;
       const createdAt = new Date();
       const updatedAt = new Date();
 
@@ -84,7 +84,7 @@ describe('BudgetEntity', () => {
       expect(budget.taxes).toBe(10);
       expect(budget.discount).toBe(0);
       expect(budget.total).toBe(110);
-      expect(budget.status).toBe(BudgetStatus.RASCUNHO);
+      expect(budget.status).toBe(BudgetStatus.DRAFT);
     });
 
     it('TC0002 - Should calculate subtotal from multiple items', () => {
@@ -201,13 +201,13 @@ describe('BudgetEntity', () => {
         0,
         110,
         validUntil,
-        BudgetStatus.ENVIADO,
+        BudgetStatus.SENT,
         new Date(),
       );
 
       const result = budget.approve();
 
-      expect(result.status).toBe(BudgetStatus.APROVADO);
+      expect(result.status).toBe(BudgetStatus.APPROVED);
       expect(result.approvedAt).toBeDefined();
     });
 
@@ -222,7 +222,7 @@ describe('BudgetEntity', () => {
         0,
         110,
         new Date(),
-        BudgetStatus.RASCUNHO,
+        BudgetStatus.DRAFT,
       );
 
       expect(() => budget.approve()).toThrow(
@@ -244,7 +244,7 @@ describe('BudgetEntity', () => {
         0,
         110,
         validUntil,
-        BudgetStatus.ENVIADO,
+        BudgetStatus.SENT,
         new Date(),
       );
 
@@ -266,13 +266,13 @@ describe('BudgetEntity', () => {
         0,
         110,
         new Date(),
-        BudgetStatus.ENVIADO,
+        BudgetStatus.SENT,
         new Date(),
       );
 
       const result = budget.reject();
 
-      expect(result.status).toBe(BudgetStatus.REJEITADO);
+      expect(result.status).toBe(BudgetStatus.REJECTED);
       expect(result.rejectedAt).toBeDefined();
     });
 
@@ -287,7 +287,7 @@ describe('BudgetEntity', () => {
         0,
         110,
         new Date(),
-        BudgetStatus.RASCUNHO,
+        BudgetStatus.DRAFT,
       );
 
       expect(() => budget.reject()).toThrow(
@@ -308,12 +308,12 @@ describe('BudgetEntity', () => {
         0,
         110,
         new Date(),
-        BudgetStatus.RASCUNHO,
+        BudgetStatus.DRAFT,
       );
 
       const result = budget.send();
 
-      expect(result.status).toBe(BudgetStatus.ENVIADO);
+      expect(result.status).toBe(BudgetStatus.SENT);
       expect(result.sentAt).toBeDefined();
     });
 
@@ -328,7 +328,7 @@ describe('BudgetEntity', () => {
         0,
         110,
         new Date(),
-        BudgetStatus.ENVIADO,
+        BudgetStatus.SENT,
       );
 
       expect(() => budget.send()).toThrow(
@@ -352,7 +352,7 @@ describe('BudgetEntity', () => {
         0,
         110,
         validUntil,
-        BudgetStatus.ENVIADO,
+        BudgetStatus.SENT,
       );
 
       expect(budget.isExpired()).toBe(true);
@@ -372,7 +372,7 @@ describe('BudgetEntity', () => {
         0,
         110,
         validUntil,
-        BudgetStatus.ENVIADO,
+        BudgetStatus.SENT,
       );
 
       expect(budget.isExpired()).toBe(false);
@@ -391,7 +391,7 @@ describe('BudgetEntity', () => {
         0,
         110,
         new Date(),
-        BudgetStatus.RASCUNHO,
+        BudgetStatus.DRAFT,
       );
 
       expect(budget.canBeModified()).toBe(true);
@@ -408,7 +408,7 @@ describe('BudgetEntity', () => {
         0,
         110,
         new Date(),
-        BudgetStatus.ENVIADO,
+        BudgetStatus.SENT,
       );
 
       expect(budget.canBeModified()).toBe(false);

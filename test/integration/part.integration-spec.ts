@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import request from 'supertest';
@@ -19,7 +19,7 @@ const mockPart = {
 
 describe('Part Integration Tests', () => {
   let app: INestApplication;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let authToken: string;
   let partId: string;
 
@@ -54,7 +54,9 @@ describe('Part Integration Tests', () => {
     const hashedPassword = await bcrypt.hash(testPassword, 10);
     await prisma.user.upsert({
       where: { email: 'admin@test.com' },
-      update: {},
+      update: {
+        passwordHash: hashedPassword,
+      },
       create: {
         username: 'admin',
         passwordHash: hashedPassword,

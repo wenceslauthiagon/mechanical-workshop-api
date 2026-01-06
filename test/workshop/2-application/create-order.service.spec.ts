@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
+import { CustomerType } from '../../../src/shared/enums/customer-type.enum';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { CreateOrderService } from '../../../src/workshop/2-application/create-order.service';
 import { ErrorHandlerService } from '../../../src/shared/services/error-handler.service';

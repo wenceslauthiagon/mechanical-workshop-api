@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 
 import { ErrorHandlerService } from '../../../src/shared/services/error-handler.service';
+import { ERROR_MESSAGES } from '../../../src/shared/constants/messages.constants';
 
 describe('ErrorHandlerService', () => {
   let service: ErrorHandlerService;
@@ -159,7 +160,7 @@ describe('ErrorHandlerService', () => {
       ).toThrow('Já existe um veículo com esta placa');
       expect(() =>
         service.handleError({ code: 'P2002', message: 'email' }),
-      ).toThrow('Já existe um usuário com este email');
+      ).toThrow(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
       expect(() =>
         service.handleError({ code: 'P2002', message: 'username' }),
       ).toThrow('Já existe um usuário com este nome de usuário');

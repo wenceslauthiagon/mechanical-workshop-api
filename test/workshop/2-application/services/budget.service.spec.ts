@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderStatus } from '../../../../src/shared/enums';
+import { ServiceOrderStatus } from '../../../../src/shared/enums/service-order-status.enum';
 import { CustomerType } from '../../../../src/shared/enums/customer-type.enum';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -35,7 +35,7 @@ describe('BudgetService', () => {
     vehicleId: faker.string.uuid(),
     mechanicId: faker.string.uuid(),
     description: faker.lorem.sentence(),
-    status: ServiceOrderStatus.AGUARDANDO_APROVACAO,
+    status: ServiceOrderStatus.AWAITING_APPROVAL,
     totalServicePrice: new Decimal(100),
     totalPartsPrice: new Decimal(50),
     totalPrice: new Decimal(150),
@@ -94,7 +94,7 @@ describe('BudgetService', () => {
     discount: 0,
     total: 165,
     validUntil: faker.date.future(),
-    status: BudgetStatus.RASCUNHO,
+    status: BudgetStatus.DRAFT,
     items: [mockBudgetItem],
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
@@ -241,7 +241,7 @@ describe('BudgetService', () => {
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.budget.findByServiceOrderId.mockResolvedValue([
-        { ...mockBudget, status: BudgetStatus.RASCUNHO },
+        { ...mockBudget, status: BudgetStatus.DRAFT },
       ]);
 
       await expect(service.create(createBudgetDto)).rejects.toThrow();
@@ -396,7 +396,7 @@ describe('BudgetService', () => {
 
   describe('sendBudget', () => {
     it('TC0001 - Should send budget successfully', async () => {
-      const sentBudget = { ...mockBudget, status: BudgetStatus.ENVIADO };
+      const sentBudget = { ...mockBudget, status: BudgetStatus.SENT };
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.budget.updateStatus.mockResolvedValue(sentBudget);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
@@ -410,7 +410,7 @@ describe('BudgetService', () => {
     });
 
     it('TC0002 - Should send budget without phone when customer has no phone', async () => {
-      const sentBudget = { ...mockBudget, status: BudgetStatus.ENVIADO };
+      const sentBudget = { ...mockBudget, status: BudgetStatus.SENT };
       const customerWithoutPhone = { ...mockCustomer, phone: null };
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.budget.updateStatus.mockResolvedValue(sentBudget);
@@ -430,7 +430,7 @@ describe('BudgetService', () => {
     });
 
     it('TC0003 - Should throw error if not draft', async () => {
-      const sentBudget = { ...mockBudget, status: BudgetStatus.ENVIADO };
+      const sentBudget = { ...mockBudget, status: BudgetStatus.SENT };
       repositories.budget.findById.mockResolvedValue(sentBudget);
 
       await expect(service.sendBudget(mockBudget.id)).rejects.toThrow();
@@ -453,7 +453,7 @@ describe('BudgetService', () => {
     });
 
     it('TC0005 - Should send budget even when customer is not found', async () => {
-      const sentBudget = { ...mockBudget, status: BudgetStatus.ENVIADO };
+      const sentBudget = { ...mockBudget, status: BudgetStatus.SENT };
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.budget.updateStatus.mockResolvedValue(sentBudget);
       repositories.customer.findById.mockResolvedValue(null);
@@ -469,22 +469,22 @@ describe('BudgetService', () => {
 
   describe('approveBudget', () => {
     it('TC0001 - Should approve budget successfully', async () => {
-      const sentBudget = { ...mockBudget, status: BudgetStatus.ENVIADO };
-      const approvedBudget = { ...mockBudget, status: BudgetStatus.APROVADO };
+      const sentBudget = { ...mockBudget, status: BudgetStatus.SENT };
+      const approvedBudget = { ...mockBudget, status: BudgetStatus.APPROVED };
       repositories.budget.findById.mockResolvedValue(sentBudget);
       repositories.budget.updateStatus.mockResolvedValue(approvedBudget);
       repositories.serviceOrder.updateStatus.mockResolvedValue({
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
       });
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
 
       const result = await service.approveBudget(mockBudget.id);
 
-      expect(result.status).toBe(BudgetStatus.APROVADO);
+      expect(result.status).toBe(BudgetStatus.APPROVED);
       expect(repositories.budget.updateStatus).toHaveBeenCalledWith(
         mockBudget.id,
-        BudgetStatus.APROVADO
+        BudgetStatus.APPROVED
       );
       expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
       expect(repositories.serviceOrder.addStatusHistory).toHaveBeenCalled();
@@ -498,7 +498,7 @@ describe('BudgetService', () => {
     });
 
     it('TC0003 - Should throw error if budget is not in sent status', async () => {
-      const draftBudget = { ...mockBudget, status: BudgetStatus.RASCUNHO };
+      const draftBudget = { ...mockBudget, status: BudgetStatus.DRAFT };
       repositories.budget.findById.mockResolvedValue(draftBudget);
 
       await expect(service.approveBudget(mockBudget.id)).rejects.toThrow();
@@ -516,7 +516,7 @@ describe('BudgetService', () => {
     it('TC0005 - Should throw error if budget is expired', async () => {
       const expiredBudget = { 
         ...mockBudget, 
-        status: BudgetStatus.ENVIADO,
+        status: BudgetStatus.SENT,
         validUntil: faker.date.past()
       };
       repositories.budget.findById.mockResolvedValue(expiredBudget);
@@ -528,17 +528,17 @@ describe('BudgetService', () => {
 
   describe('rejectBudget', () => {
     it('TC0001 - Should reject budget successfully', async () => {
-      const sentBudget = { ...mockBudget, status: BudgetStatus.ENVIADO };
-      const rejectedBudget = { ...mockBudget, status: BudgetStatus.REJEITADO };
+      const sentBudget = { ...mockBudget, status: BudgetStatus.SENT };
+      const rejectedBudget = { ...mockBudget, status: BudgetStatus.REJECTED };
       repositories.budget.findById.mockResolvedValue(sentBudget);
       repositories.budget.updateStatus.mockResolvedValue(rejectedBudget);
 
       const result = await service.rejectBudget(mockBudget.id);
 
-      expect(result.status).toBe(BudgetStatus.REJEITADO);
+      expect(result.status).toBe(BudgetStatus.REJECTED);
       expect(repositories.budget.updateStatus).toHaveBeenCalledWith(
         mockBudget.id,
-        BudgetStatus.REJEITADO
+        BudgetStatus.REJECTED
       );
     });
 
@@ -550,7 +550,7 @@ describe('BudgetService', () => {
     });
 
     it('TC0003 - Should throw error if budget is not in sent status', async () => {
-      const draftBudget = { ...mockBudget, status: BudgetStatus.RASCUNHO };
+      const draftBudget = { ...mockBudget, status: BudgetStatus.DRAFT };
       repositories.budget.findById.mockResolvedValue(draftBudget);
 
       await expect(service.rejectBudget(mockBudget.id)).rejects.toThrow();
@@ -626,14 +626,14 @@ describe('BudgetService', () => {
 
   describe('markAsExpired', () => {
     it('TC0001 - Should mark budget as expired successfully', async () => {
-      const draftBudget = { ...mockBudget, status: BudgetStatus.RASCUNHO };
-      const expiredBudget = { ...mockBudget, status: BudgetStatus.EXPIRADO };
+      const draftBudget = { ...mockBudget, status: BudgetStatus.DRAFT };
+      const expiredBudget = { ...mockBudget, status: BudgetStatus.EXPIRED };
       repositories.budget.findById.mockResolvedValue(draftBudget);
       repositories.budget.markAsExpired.mockResolvedValue(expiredBudget);
 
       const result = await service.markAsExpired(mockBudget.id);
 
-      expect(result.status).toBe(BudgetStatus.EXPIRADO);
+      expect(result.status).toBe(BudgetStatus.EXPIRED);
       expect(repositories.budget.markAsExpired).toHaveBeenCalledWith(mockBudget.id);
     });
 
@@ -653,7 +653,7 @@ describe('BudgetService', () => {
     });
 
     it('TC0004 - Should throw error for invalid status transition', async () => {
-      const approvedBudget = { ...mockBudget, status: BudgetStatus.APROVADO };
+      const approvedBudget = { ...mockBudget, status: BudgetStatus.APPROVED };
       repositories.budget.findById.mockResolvedValue(approvedBudget);
 
       await expect(service.markAsExpired(mockBudget.id)).rejects.toThrow();
@@ -694,16 +694,16 @@ describe('BudgetService', () => {
       const budgets = [mockBudget, { ...mockBudget, id: faker.string.uuid() }];
       repositories.budget.findByStatus.mockResolvedValue(budgets);
 
-      const result = await service.findByStatus(BudgetStatus.RASCUNHO);
+      const result = await service.findByStatus(BudgetStatus.DRAFT);
 
-      expect(repositories.budget.findByStatus).toHaveBeenCalledWith(BudgetStatus.RASCUNHO);
+      expect(repositories.budget.findByStatus).toHaveBeenCalledWith(BudgetStatus.DRAFT);
       expect(result).toEqual(budgets);
     });
 
     it('TC0002 - Should return empty array when no budgets with status', async () => {
       repositories.budget.findByStatus.mockResolvedValue([]);
 
-      const result = await service.findByStatus(BudgetStatus.APROVADO);
+      const result = await service.findByStatus(BudgetStatus.APPROVED);
 
       expect(result).toEqual([]);
     });
@@ -712,7 +712,7 @@ describe('BudgetService', () => {
       const error = new Error('Database error');
       repositories.budget.findByStatus.mockRejectedValue(error);
 
-      await expect(service.findByStatus(BudgetStatus.RASCUNHO)).rejects.toThrow(error);
+      await expect(service.findByStatus(BudgetStatus.DRAFT)).rejects.toThrow(error);
       expect(services.errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
