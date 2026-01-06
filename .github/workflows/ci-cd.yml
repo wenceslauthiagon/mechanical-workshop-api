@@ -106,7 +106,7 @@ jobs:
           file: ./docker/Dockerfile
           push: true
           tags: |
-            ghcr.io/creative-ia/mechanical-workshop-api:${{ steps.set-tag.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.set-tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
