@@ -104,7 +104,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   async updateStatus(
     id: string,
     data: {
-      status: string; // Changed to string for SQLite compatibility
+      status: ServiceOrderStatus;
       startedAt?: Date;
       completedAt?: Date;
       deliveredAt?: Date;
@@ -113,10 +113,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   ) {
     return this.prisma.serviceOrder.update({
       where: { id },
-      data: {
-        ...data,
-        status: data.status as any, // Cast to enum for PostgreSQL
-      },
+      data,
     });
   }
 
@@ -180,15 +177,12 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
 
   async addStatusHistory(data: {
     serviceOrderId: string;
-    status: string; // Changed to string for SQLite compatibility
+    status: ServiceOrderStatus;
     notes?: string;
     changedBy?: string;
   }) {
     return this.prisma.serviceOrderStatusHistory.create({
-      data: {
-        ...data,
-        status: data.status as any, // Cast to enum for PostgreSQL
-      },
+      data,
     });
   }
 
