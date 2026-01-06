@@ -109,7 +109,6 @@ jobs:
             ghcr.io/creative-ia/mechanical-workshop-api:${{ steps.set-tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          target: production
 
   deploy-to-kubernetes:
     name: Deploy to Kubernetes
