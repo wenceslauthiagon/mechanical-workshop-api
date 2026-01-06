@@ -1,4 +1,5 @@
-import type { ServiceOrderStatus, ServiceOrder } from '@prisma/client';
+import type { ServiceOrder } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 
 export interface CreateServiceOrderData {
   orderNumber: string;
@@ -17,6 +18,14 @@ export interface IServiceOrderRepository {
   create(data: CreateServiceOrderData): Promise<ServiceOrder>;
 
   findAll(): Promise<ServiceOrder[]>;
+
+  findMany(skip: number, take: number): Promise<ServiceOrder[]>;
+
+  findManyWithPriority(skip: number, take: number): Promise<ServiceOrder[]>;
+
+  countWithPriority(): Promise<number>;
+
+  count(): Promise<number>;
 
   findById(id: string): Promise<ServiceOrder | null>;
 

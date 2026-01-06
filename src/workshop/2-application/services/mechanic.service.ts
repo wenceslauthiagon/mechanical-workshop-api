@@ -7,6 +7,7 @@ import type {
 } from '../../3-domain/repositories/mechanic.repository.interface';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class MechanicService {
@@ -44,6 +45,29 @@ export class MechanicService {
     }
   }
 
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<MechanicWithStats>> {
+    try {
+      const [mechanics, total] = await Promise.all([
+        this.mechanicRepository.findMany(
+          paginationDto.skip,
+          paginationDto.take,
+        ),
+        this.mechanicRepository.count(),
+      ]);
+
+      return new PaginatedResponseDto(
+        mechanics,
+        paginationDto.page || 0,
+        paginationDto.size || 10,
+        total,
+      );
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
   async findById(id: string): Promise<MechanicWithStats> {
     try {
       const mechanic = await this.mechanicRepository.findById(id);
@@ -69,6 +93,15 @@ export class MechanicService {
   async findBySpecialty(specialty: string): Promise<MechanicWithStats[]> {
     try {
       return await this.mechanicRepository.findBySpecialty(specialty);
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async checkAvailability(mechanicId: string): Promise<boolean> {
+    try {
+      const mechanic = await this.findById(mechanicId);
+      return mechanic.isAvailable;
     } catch (error) {
       this.errorHandler.handleError(error);
     }

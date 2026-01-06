@@ -19,7 +19,7 @@ describe('NotificationService', () => {
     discount: Number(faker.finance.amount({ min: 0, max: 200, dec: 2 })),
     total: Number(faker.finance.amount({ min: 800, max: 3500, dec: 2 })),
     validUntil: faker.date.future(),
-    status: BudgetStatus.ENVIADO,
+    status: BudgetStatus.SENT,
     items: [],
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),

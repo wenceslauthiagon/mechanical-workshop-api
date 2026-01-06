@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { Decimal } from '@prisma/client/runtime/library';
 import { ServiceStatsService } from '../../../../src/workshop/2-application/services/service-stats.service';
 import { IServiceOrderRepository } from '../../../../src/workshop/3-domain/repositories/service-order.repository.interface';
 import { IServiceRepository } from '../../../../src/workshop/3-domain/repositories/service-repository.interface';
@@ -18,7 +17,7 @@ describe('ServiceStatsService', () => {
     id: faker.string.uuid(),
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
-    price: new Decimal(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
+    price: parseFloat(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
     category: 'Mecânica',
     estimatedMinutes: 120,
     isActive: true,
@@ -32,11 +31,11 @@ describe('ServiceStatsService', () => {
     customerId: faker.string.uuid(),
     vehicleId: faker.string.uuid(),
     mechanicId: faker.string.uuid(),
-    status: ServiceOrderStatus.FINALIZADA,
-    estimatedTimeHours: new Decimal('2.0'),
-    totalServicePrice: new Decimal('500.00'),
-    totalPartsPrice: new Decimal('200.00'),
-    totalPrice: new Decimal('700.00'),
+    status: ServiceOrderStatus.FINISHED,
+    estimatedTimeHours: 2.0,
+    totalServicePrice: 500.00,
+    totalPartsPrice: 200.00,
+    totalPrice: 700.00,
     estimatedCompletionDate: faker.date.future(),
     startedAt,
     completedAt,
@@ -100,7 +99,7 @@ describe('ServiceStatsService', () => {
           serviceOrderId: mockOrder.id,
           serviceId: mockService.id,
           quantity: 1,
-          price: new Decimal('100'),
+          price: 100,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -162,7 +161,7 @@ describe('ServiceStatsService', () => {
           serviceOrderId: mockOrder.id,
           serviceId: faker.string.uuid(), // Service ID that doesn't exist
           quantity: 1,
-          price: new Decimal('100'),
+          price: 100,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -192,7 +191,7 @@ describe('ServiceStatsService', () => {
           serviceOrderId: mockOrder.id,
           serviceId: mockService1.id,
           quantity: 2,
-          price: new Decimal('100'),
+          price: 100,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -201,7 +200,7 @@ describe('ServiceStatsService', () => {
           serviceOrderId: mockOrder.id,
           serviceId: mockService2.id,
           quantity: 1,
-          price: new Decimal('50'),
+          price: 50,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -241,7 +240,7 @@ describe('ServiceStatsService', () => {
           serviceOrderId: mockOrder1.id,
           serviceId: mockService1.id,
           quantity: 1,
-          price: new Decimal('100'),
+          price: 100,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -253,7 +252,7 @@ describe('ServiceStatsService', () => {
           serviceOrderId: mockOrder2.id,
           serviceId: mockService2.id,
           quantity: 1,
-          price: new Decimal('100'),
+          price: 100,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -289,7 +288,7 @@ describe('ServiceStatsService', () => {
           serviceOrderId: mockOrder.id,
           serviceId: mockService.id,
           quantity: 1,
-          price: new Decimal('100'),
+          price: 100,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -365,7 +364,7 @@ describe('ServiceStatsService', () => {
       const completedAt = new Date('2025-01-01T10:00:00'); // 2 hours
       const mockOrder = {
         ...createMockServiceOrder(startedAt, completedAt),
-        estimatedTimeHours: new Decimal('2.0'),
+        estimatedTimeHours: 2.0,
       };
 
       serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
@@ -381,7 +380,7 @@ describe('ServiceStatsService', () => {
       const completedAt = new Date('2025-01-01T10:00:00');
       const mockOrder = {
         ...createMockServiceOrder(startedAt, completedAt),
-        estimatedTimeHours: new Decimal('0'),
+        estimatedTimeHours: 0,
       };
 
       serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
@@ -405,7 +404,7 @@ describe('ServiceStatsService', () => {
           serviceOrderId: mockOrder.id,
           serviceId: mockService.id,
           quantity: 1,
-          price: new Decimal('100'),
+          price: 100,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -431,6 +430,181 @@ describe('ServiceStatsService', () => {
       const result = await service.getServiceById(faker.string.uuid());
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getServiceStats', () => {
+    it('TC0001 - Should return service stats with period', async () => {
+      const mockService = createMockService();
+      const startedAt = new Date('2025-01-01T08:00:00');
+      const completedAt = new Date('2025-01-01T10:00:00');
+      const mockOrder = createMockServiceOrder(startedAt, completedAt);
+
+      const mockServiceItems = [
+        {
+          id: faker.string.uuid(),
+          serviceOrderId: mockOrder.id,
+          serviceId: mockService.id,
+          quantity: 1,
+          price: 100,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
+      serviceRepository.findAll.mockResolvedValue([mockService]);
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(
+        mockServiceItems,
+      );
+
+      const result = await service.getServiceStats('2025-01-01', '2025-12-31');
+
+      expect(result).toBeDefined();
+      expect(result.period).toBeDefined();
+      expect(result.period.startDate).toBeInstanceOf(Date);
+      expect(result.period.endDate).toBeInstanceOf(Date);
+      expect(result.overall).toBeDefined();
+      expect(result.services).toBeDefined();
+    });
+
+    it('TC0002 - Should return service stats without period', async () => {
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue([]);
+      serviceRepository.findAll.mockResolvedValue([]);
+
+      const result = await service.getServiceStats();
+
+      expect(result).toBeDefined();
+      expect(result.period.startDate).toBeUndefined();
+      expect(result.period.endDate).toBeUndefined();
+      expect(result.overall).toBeDefined();
+      expect(result.services).toBeDefined();
+    });
+  });
+
+  describe('getTopServices', () => {
+    it('TC0001 - Should return top 10 services by default', async () => {
+      const mockServices = Array.from({ length: 15 }, () =>
+        createMockService(),
+      );
+      const startedAt = new Date('2025-01-01T08:00:00');
+      const completedAt = new Date('2025-01-01T10:00:00');
+
+      const mockOrders = mockServices.map((mockService) => {
+        const order = createMockServiceOrder(startedAt, completedAt);
+        return {
+          order,
+          serviceItems: [
+            {
+              id: faker.string.uuid(),
+              serviceOrderId: order.id,
+              serviceId: mockService.id,
+              quantity: 1,
+              price: 100,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ],
+        };
+      });
+
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue(
+        mockOrders.map((o) => o.order),
+      );
+      serviceRepository.findAll.mockResolvedValue(mockServices);
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(
+        mockOrders.flatMap((o) => o.serviceItems),
+      );
+
+      const result = await service.getTopServices();
+
+      expect(result).toBeDefined();
+      expect(result.length).toBeLessThanOrEqual(10);
+    });
+
+    it('TC0002 - Should return top N services with custom limit', async () => {
+      const mockServices = Array.from({ length: 10 }, () =>
+        createMockService(),
+      );
+      const startedAt = new Date('2025-01-01T08:00:00');
+      const completedAt = new Date('2025-01-01T10:00:00');
+
+      const mockOrders = mockServices.map((mockService) => {
+        const order = createMockServiceOrder(startedAt, completedAt);
+        return {
+          order,
+          serviceItems: [
+            {
+              id: faker.string.uuid(),
+              serviceOrderId: order.id,
+              serviceId: mockService.id,
+              quantity: 1,
+              price: 100,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ],
+        };
+      });
+
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue(
+        mockOrders.map((o) => o.order),
+      );
+      serviceRepository.findAll.mockResolvedValue(mockServices);
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(
+        mockOrders.flatMap((o) => o.serviceItems),
+      );
+
+      const result = await service.getTopServices(5);
+
+      expect(result).toBeDefined();
+      expect(result.length).toBeLessThanOrEqual(5);
+    });
+
+    it('TC0003 - Should return services sorted by totalCompletedOrders', async () => {
+      const mockServices = Array.from({ length: 5 }, () =>
+        createMockService(),
+      );
+      const startedAt = new Date('2025-01-01T08:00:00');
+      const completedAt = new Date('2025-01-01T10:00:00');
+
+      const mockOrders = mockServices.flatMap((mockService, index) => {
+        return Array.from({ length: index + 1 }, () => {
+          const order = createMockServiceOrder(startedAt, completedAt);
+          return {
+            order,
+            serviceItems: [
+              {
+                id: faker.string.uuid(),
+                serviceOrderId: order.id,
+                serviceId: mockService.id,
+                quantity: 1,
+                price: 100,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            ],
+          };
+        });
+      });
+
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue(
+        mockOrders.map((o) => o.order),
+      );
+      serviceRepository.findAll.mockResolvedValue(mockServices);
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(
+        mockOrders.flatMap((o) => o.serviceItems),
+      );
+
+      const result = await service.getTopServices();
+
+      expect(result).toBeDefined();
+      // Verify descending order by totalCompletedOrders
+      for (let i = 0; i < result.length - 1; i++) {
+        expect(result[i].totalCompletedOrders).toBeGreaterThanOrEqual(
+          result[i + 1].totalCompletedOrders,
+        );
+      }
     });
   });
 });

@@ -10,7 +10,7 @@ import type {
 @Injectable()
 export class GmailEmailProvider implements IEmailProvider {
   private readonly logger = new Logger(GmailEmailProvider.name);
-  private transporter: nodemailer.Transporter;
+  private transporter!: nodemailer.Transporter; // Using definite assignment assertion
 
   constructor() {
     this.initializeTransporter();
@@ -41,6 +41,14 @@ export class GmailEmailProvider implements IEmailProvider {
   }
 
   async sendEmail(data: EmailData): Promise<void> {
+    // Skip sending real emails in test environment
+    if (process.env.NODE_ENV === 'test') {
+      this.logger.log(
+        `[TEST MODE] Would send email to ${data.to}: ${data.subject}`,
+      );
+      return;
+    }
+
     try {
       if (!this.transporter) {
         throw new Error(
@@ -68,21 +76,28 @@ export class GmailEmailProvider implements IEmailProvider {
         },
       );
     } catch (error) {
+      const err = error as Error;
       this.logger.error(
         `${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_ERROR} to ${data.to}`,
         {
-          error: error.message,
+          error: err.message,
           to: data.to,
           subject: data.subject,
         },
       );
       throw new Error(
-        `${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_ERROR}: ${error.message}`,
+        `${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_ERROR}: ${err.message}`,
       );
     }
   }
 
   async verifyConnection(): Promise<boolean> {
+    // Always return true in test environment
+    if (process.env.NODE_ENV === 'test') {
+      this.logger.log('[TEST MODE] Email connection verification skipped');
+      return true;
+    }
+
     try {
       if (!this.transporter) {
         return false;

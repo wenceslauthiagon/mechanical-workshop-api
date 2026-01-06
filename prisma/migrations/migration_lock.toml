@@ -3,6 +3,11 @@
 # It Should be added in your version-control system (e.g., Git)
 provider = "sqlite"
 =======
+<<<<<<< HEAD
+# It Should be added in your version-control system (e.g., Git)
+provider = "sqlite"
+=======
 # It should be added in your version-control system (i.e. Git)
 provider = "mysql"
 >>>>>>> origin/develop
+>>>>>>> develop

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { CustomerRepository } from '../../../src/workshop/4-infrastructure/repositories/customer.repository';
+import { CustomerType } from '../../../src/shared/enums/customer-type.enum';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { CustomerType } from '@prisma/client';
 
 describe('Customer Repository Integration Tests', () => {
   let repository: CustomerRepository;
@@ -23,16 +23,17 @@ describe('Customer Repository Integration Tests', () => {
     repository = module.get<CustomerRepository>(CustomerRepository);
     prisma = module.get<PrismaService>(PrismaService);
 
-    await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    // Only disable foreign keys for SQLite
+    const isSqlite = process.env.DATABASE_URL?.includes('sqlite');
+    if (isSqlite) {
+      await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    }
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.customer.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.service.deleteMany();
     await prisma.part.deleteMany();
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');

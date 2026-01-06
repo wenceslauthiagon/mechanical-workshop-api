@@ -4,19 +4,18 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService, JwtPayload } from '../services/auth.service';
 import { ConfigService } from '@nestjs/config';
 import { ERROR_MESSAGES } from '../../shared/constants/messages.constants';
-import { APP_CONSTANTS, ENV_KEYS } from '../../shared/constants/app.constants';
 import { ErrorHandlerService } from '../../shared/services/error-handler.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    configService: ConfigService,
     private readonly errorHandler: ErrorHandlerService,
   ) {
     const jwtSecret =
-      configService.get<string>(ENV_KEYS.JWT_SECRET) ||
-      APP_CONSTANTS.DEFAULT_JWT_SECRET_FALLBACK;
+      configService.get<string>('JWT_SECRET') ||
+      'default-jwt-secret-fallback-key-12345';
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

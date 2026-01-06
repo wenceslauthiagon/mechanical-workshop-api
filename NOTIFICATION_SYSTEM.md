@@ -32,12 +32,12 @@ SMS_PROVIDER=mock
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=example@example.com
-SMTP_PASS=REPLACE_WITH_SMTP_APP_PASSWORD
+SMTP_USER=your-email@example.com
+SMTP_PASS=your-app-password
 
 # Empresa
 COMPANY_NAME="Sua Oficina"
-COMPANY_EMAIL=contact@example.com
+COMPANY_EMAIL=contato@oficina.com
 COMPANY_PHONE=(11) 99999-9999
 
 # URLs

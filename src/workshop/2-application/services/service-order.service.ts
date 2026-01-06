@@ -1,6 +1,8 @@
 import { HttpStatus, Injectable, Logger, Inject } from '@nestjs/common';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
-import { ServiceOrderStatus, ServiceOrder } from '@prisma/client';
+import { EmailService } from '../../../shared/services/email.service';
+import { ServiceOrder } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 import { CreateServiceOrderDto } from '../../1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../1-presentation/dtos/service-order/update-service-order-status.dto';
 import { ServiceOrderResponseDto } from '../../1-presentation/dtos/service-order/service-order-response.dto';
@@ -15,9 +17,9 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import {
   ERROR_MESSAGES,
   NOTES_MESSAGES,
-  NOTIFICATION_MESSAGES,
 } from '../../../shared/constants/messages.constants';
-import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
+import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class ServiceOrderService {
@@ -36,6 +38,7 @@ export class ServiceOrderService {
     private readonly partRepository: IPartRepository,
     private readonly prisma: PrismaService,
     private readonly errorHandler: ErrorHandlerService,
+    private readonly emailService: EmailService,
     private readonly notificationService: NotificationService,
     private readonly mechanicService: MechanicService,
   ) {}
@@ -64,12 +67,12 @@ export class ServiceOrderService {
         );
         if (!service) {
           this.errorHandler.handleNotFoundError(
-            `Serviço ${serviceItem.serviceId} não encontrado`,
+            `Servi+�o ${serviceItem.serviceId} n+�o encontrado`,
           );
         }
         if (!service.isActive) {
           this.errorHandler.generateException(
-            `Serviço ${service.name} não está ativo`,
+            `Servi+�o ${service.name} n+�o est+� ativo`,
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -92,7 +95,7 @@ export class ServiceOrderService {
         }
         if (part.stock < partItem.quantity) {
           this.errorHandler.generateException(
-            `${ERROR_MESSAGES.INSUFFICIENT_STOCK_FOR_PART} ${part.name}. Disponível: ${part.stock}, Solicitado: ${partItem.quantity}`,
+            `${ERROR_MESSAGES.INSUFFICIENT_STOCK_FOR_PART} ${part.name}. Dispon+�vel: ${part.stock}, Solicitado: ${partItem.quantity}`,
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -109,7 +112,7 @@ export class ServiceOrderService {
       customerId: data.customerId,
       vehicleId: data.vehicleId,
       description: data.description,
-      status: ServiceOrderStatus.RECEBIDA,
+      status: ServiceOrderStatus.RECEIVED,
       totalServicePrice: 0,
       totalPartsPrice: 0,
       totalPrice: 0,
@@ -178,7 +181,7 @@ export class ServiceOrderService {
 
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: serviceOrder.id,
-      status: ServiceOrderStatus.RECEBIDA,
+      status: ServiceOrderStatus.RECEIVED,
       notes: NOTES_MESSAGES.SERVICE_ORDER_CREATED,
     });
 
@@ -191,6 +194,42 @@ export class ServiceOrderService {
       this.mapToResponseDto(serviceOrder),
     );
     return Promise.all(responsePromises);
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
+    const { skip, take, page = 0, size = 10 } = paginationDto;
+
+    const [serviceOrders, total] = await Promise.all([
+      this.serviceOrderRepository.findMany(skip, take),
+      this.serviceOrderRepository.count(),
+    ]);
+
+    const responsePromises = serviceOrders.map((serviceOrder) =>
+      this.mapToResponseDto(serviceOrder),
+    );
+    const responseDtos = await Promise.all(responsePromises);
+
+    return new PaginatedResponseDto(responseDtos, page, size, total);
+  }
+
+  async findAllPaginatedWithPriority(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
+    const { skip, take, page = 0, size = 10 } = paginationDto;
+
+    const [serviceOrders, total] = await Promise.all([
+      this.serviceOrderRepository.findManyWithPriority(skip, take),
+      this.serviceOrderRepository.countWithPriority(),
+    ]);
+
+    const responsePromises = serviceOrders.map((serviceOrder) =>
+      this.mapToResponseDto(serviceOrder),
+    );
+    const responseDtos = await Promise.all(responsePromises);
+
+    return new PaginatedResponseDto(responseDtos, page, size, total);
   }
 
   async findById(id: string): Promise<ServiceOrderResponseDto> {
@@ -230,63 +269,52 @@ export class ServiceOrderService {
 
     this.validateStatusTransition(serviceOrder.status, data.status);
     const updateData: {
-      status: ServiceOrderStatus;
+      status: ServiceOrderStatus; // Changed back to enum
       startedAt?: Date;
       completedAt?: Date;
       deliveredAt?: Date;
     } = {
-      status: data.status,
+      status: data.status as ServiceOrderStatus,
     };
 
     const now = new Date();
     switch (data.status) {
-      case ServiceOrderStatus.EM_EXECUCAO: {
-        // Validate if there is a mechanic assigned to the service order
-        if (!serviceOrder.mechanicId) {
-          this.errorHandler.generateException(
-            'Para iniciar a execução, é necessário atrelar um mecânico à ordem de serviço.',
-            HttpStatus.BAD_REQUEST,
+      case ServiceOrderStatus.IN_EXECUTION: {
+        if (data.mechanicId) {
+          const mechanicAvailable = await this.mechanicService.checkAvailability(
+            data.mechanicId,
+          );
+          if (!mechanicAvailable) {
+            this.errorHandler.handleBusinessRuleError(
+              MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE,
+            );
+          }
+          await this.mechanicService.assignToServiceOrder(
+            data.mechanicId,
+            id,
           );
         }
-
-        // Check if the mechanic is already executing another service order
-        const mechanic = await this.mechanicService.findById(
-          serviceOrder.mechanicId,
-        );
-        if (!mechanic.isAvailable) {
-          this.errorHandler.handleConflictError(
-            'Mecânico já está ocupado executando outra ordem de serviço.',
-          );
-        }
-
-        // Mark mechanic as unavailable when service order starts execution
-        await this.mechanicService.markAsUnavailable(serviceOrder.mechanicId);
+        
         if (!serviceOrder.startedAt) {
           updateData.startedAt = now;
         }
         break;
       }
-      case ServiceOrderStatus.FINALIZADA: {
+      case ServiceOrderStatus.FINISHED: {
         updateData.completedAt = now;
-        // Release mechanic when service is completed
         if (serviceOrder.mechanicId) {
-          await this.mechanicService.releaseFromServiceOrder(
-            serviceOrder.mechanicId,
-          );
+          await this.mechanicService.releaseFromServiceOrder(serviceOrder.mechanicId);
         }
         break;
       }
-      case ServiceOrderStatus.ENTREGUE: {
+      case ServiceOrderStatus.DELIVERED: {
         updateData.deliveredAt = now;
-        // Release mechanic when service is delivered (in case it wasn't released before)
         if (serviceOrder.mechanicId) {
-          await this.mechanicService.releaseFromServiceOrder(
-            serviceOrder.mechanicId,
-          );
+          await this.mechanicService.releaseFromServiceOrder(serviceOrder.mechanicId);
         }
         break;
       }
-      case ServiceOrderStatus.AGUARDANDO_APROVACAO:
+      case ServiceOrderStatus.AWAITING_APPROVAL:
         break;
     }
 
@@ -294,22 +322,21 @@ export class ServiceOrderService {
 
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: id,
-      status: data.status,
+      status: data.status as ServiceOrderStatus,
       notes: data.notes || `Status alterado para ${data.status}`,
     });
 
-    // Send notification to customer
-    try {
-      const customer = await this.customerRepository.findById(
-        serviceOrder.customerId,
-      );
-      const vehicle = await this.vehicleRepository.findById(
-        serviceOrder.vehicleId,
-      );
+    const customer = await this.customerRepository.findById(
+      serviceOrder.customerId,
+    );
+    const vehicle = await this.vehicleRepository.findById(
+      serviceOrder.vehicleId,
+    );
 
-      if (customer && vehicle) {
-        const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
+    if (customer && vehicle) {
+      const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
 
+      try {
         await this.notificationService.sendServiceOrderStatusNotification(
           id,
           serviceOrder.orderNumber,
@@ -319,12 +346,25 @@ export class ServiceOrderService {
           vehicleInfo,
           customer.phone,
         );
+      } catch (error: any) {
+        this.logger.warn(`Failed to send push notification: ${error.message}`);
       }
-    } catch (error) {
-      this.logger.error(
-        `${NOTIFICATION_MESSAGES.FAILED_TO_SEND_STATUS_NOTIFICATION} ${serviceOrder.orderNumber}`,
-        error,
-      );
+
+      if (customer.email) {
+        try {
+          await this.emailService.sendStatusChangeNotification({
+            customerName: customer.name,
+            customerEmail: customer.email,
+            orderNumber: serviceOrder.orderNumber,
+            newStatus: data.status,
+            statusMessage: data.notes || `Status alterado para ${data.status}`,
+          });
+        } catch (error: any) {
+          this.logger.warn(
+            `Failed to send email notification: ${error.message}`,
+          );
+        }
+      }
     }
 
     return this.findById(id);
@@ -338,7 +378,7 @@ export class ServiceOrderService {
       );
     }
 
-    if (serviceOrder.status !== ServiceOrderStatus.AGUARDANDO_APROVACAO) {
+    if (serviceOrder.status as string !== ServiceOrderStatus.AWAITING_APPROVAL) {
       this.errorHandler.generateException(
         ERROR_MESSAGES.SERVICE_ORDER_NOT_AWAITING_APPROVAL,
         HttpStatus.BAD_REQUEST,
@@ -346,14 +386,14 @@ export class ServiceOrderService {
     }
 
     await this.serviceOrderRepository.updateStatus(id, {
-      status: ServiceOrderStatus.EM_EXECUCAO,
+      status: ServiceOrderStatus.IN_EXECUTION,
       approvedAt: new Date(),
       startedAt: new Date(),
     });
 
     await this.serviceOrderRepository.addStatusHistory({
       serviceOrderId: id,
-      status: ServiceOrderStatus.EM_EXECUCAO,
+      status: ServiceOrderStatus.IN_EXECUTION,
       notes: NOTES_MESSAGES.BUDGET_APPROVED_EXECUTION_STARTED,
     });
 
@@ -423,35 +463,32 @@ export class ServiceOrderService {
   private async generateOrderNumber(): Promise<string> {
     const year = new Date().getFullYear();
     const count = await this.serviceOrderRepository.countByYear(year);
-    return `OS-${year}-${String(count + 1).padStart(
-      APP_CONSTANTS.ORDER_NUMBER_PADDING,
-      APP_CONSTANTS.ORDER_NUMBER_PAD_CHAR,
-    )}`;
+    return `OS-${year}-${String(count + 1).padStart(6, '0')}`;
   }
 
   private validateStatusTransition(
-    currentStatus: ServiceOrderStatus,
-    newStatus: ServiceOrderStatus,
+    currentStatus: string,
+    newStatus: string,
   ): void {
-    const validTransitions: Record<ServiceOrderStatus, ServiceOrderStatus[]> = {
-      [ServiceOrderStatus.RECEBIDA]: [ServiceOrderStatus.EM_DIAGNOSTICO],
-      [ServiceOrderStatus.EM_DIAGNOSTICO]: [
-        ServiceOrderStatus.AGUARDANDO_APROVACAO,
-        ServiceOrderStatus.EM_EXECUCAO,
+    const validTransitions: Record<string, string[]> = {
+      [ServiceOrderStatus.RECEIVED]: [ServiceOrderStatus.IN_DIAGNOSIS],
+      [ServiceOrderStatus.IN_DIAGNOSIS]: [
+        ServiceOrderStatus.AWAITING_APPROVAL,
+        ServiceOrderStatus.IN_EXECUTION,
       ],
-      [ServiceOrderStatus.AGUARDANDO_APROVACAO]: [
-        ServiceOrderStatus.EM_EXECUCAO,
-        ServiceOrderStatus.EM_DIAGNOSTICO,
+      [ServiceOrderStatus.AWAITING_APPROVAL]: [
+        ServiceOrderStatus.IN_EXECUTION,
+        ServiceOrderStatus.IN_DIAGNOSIS,
       ],
-      [ServiceOrderStatus.EM_EXECUCAO]: [ServiceOrderStatus.FINALIZADA],
-      [ServiceOrderStatus.FINALIZADA]: [ServiceOrderStatus.ENTREGUE],
-      [ServiceOrderStatus.ENTREGUE]: [],
+      [ServiceOrderStatus.IN_EXECUTION]: [ServiceOrderStatus.FINISHED],
+      [ServiceOrderStatus.FINISHED]: [ServiceOrderStatus.DELIVERED],
+      [ServiceOrderStatus.DELIVERED]: [],
     };
 
     const allowedTransitions = validTransitions[currentStatus] || [];
     if (!allowedTransitions.includes(newStatus)) {
       this.errorHandler.generateException(
-        `Transição de status inválida: ${currentStatus} → ${newStatus}. Transições permitidas: ${allowedTransitions.join(', ')}`,
+        `Transi+�+�o de status inv+�lida: ${currentStatus} G�� ${newStatus}. Transi+�+�es permitidas: ${allowedTransitions.join(', ')}`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -467,9 +504,6 @@ export class ServiceOrderService {
     const vehicle = await this.vehicleRepository.findById(
       serviceOrder.vehicleId,
     );
-    const mechanic = serviceOrder.mechanicId
-      ? await this.mechanicService.findById(serviceOrder.mechanicId)
-      : null;
 
     // Fetch service order items separately
     const serviceItems = await this.prisma.serviceOrderItem.findMany({
@@ -481,7 +515,7 @@ export class ServiceOrderService {
 
     // Fetch related services and parts
     const services = await Promise.all(
-      serviceItems.map(async (item) => {
+      serviceItems.map(async (item: any) => {
         const service = await this.serviceRepository.findById(item.serviceId);
         return {
           id: item.id,
@@ -499,7 +533,7 @@ export class ServiceOrderService {
     );
 
     const parts = await Promise.all(
-      partItems.map(async (item) => {
+      partItems.map(async (item: any) => {
         const part = await this.partRepository.findById(item.partId);
         return {
           id: item.id,
@@ -554,17 +588,14 @@ export class ServiceOrderService {
             color: vehicle.color,
           }
         : undefined,
-      mechanic: mechanic
-        ? {
-            id: mechanic.id,
-            name: mechanic.name,
-            specialty: mechanic.specialties?.[0] || 'Geral',
-            phone: mechanic.phone || '',
-            isAvailable: mechanic.isAvailable,
-          }
+      mechanic: serviceOrder.mechanicId
+        ? await this.prisma.mechanic.findUnique({
+            where: { id: serviceOrder.mechanicId },
+          })
         : null,
       services,
       parts,
     };
   }
 }
+

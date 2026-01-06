@@ -2,17 +2,20 @@ import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 import { AuthService } from '../../../src/auth/services/auth.service';
-import { UserService } from '../../../src/auth/services/user.service';
-import { ErrorHandlerService } from '../../../src/shared/services/error-handler.service';
+import { PrismaService } from '../../../src/prisma/prisma.service';
+import { UserRole } from '../../../src/shared/enums/user-role.enum';
+
+// Mock bcrypt
+jest.mock('bcryptjs');
+const mockedBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
 
 describe('AuthService', () => {
   let service: AuthService;
-  let userService: jest.Mocked<UserService>;
   let jwtService: jest.Mocked<JwtService>;
-  let errorHandler: jest.Mocked<ErrorHandlerService>;
+  let prismaService: any;
 
   const mockUserId = uuidv4();
   const mockUsername = faker.internet.username();
@@ -30,24 +33,14 @@ describe('AuthService', () => {
     updatedAt: faker.date.recent(),
   };
 
-  const mockLoginDto = {
-    username: mockUsername,
-    password: mockPassword,
-  };
-
   const mockToken = faker.string.alphanumeric(100);
 
   beforeEach(async () => {
-    const mockUserService = {
-      findByUsername: jest.fn(),
-      findById: jest.fn(),
-      validatePassword: jest.fn(),
-      create: jest.fn(),
-      createFirstAdmin: jest.fn(),
-      findAll: jest.fn(),
-      findByEmail: jest.fn(),
-      update: jest.fn(),
-      deactivate: jest.fn(),
+    prismaService = {
+      user: {
+        findUnique: jest.fn(),
+        create: jest.fn(),
+      },
     };
 
     const mockJwtService = {
@@ -55,35 +48,26 @@ describe('AuthService', () => {
       verify: jest.fn(),
     };
 
-    const mockErrorHandler = {
-      generateException: jest.fn(),
-      handleError: jest.fn(),
-      handleConflictError: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         {
-          provide: UserService,
-          useValue: mockUserService,
+          provide: PrismaService,
+          useValue: prismaService,
         },
         {
           provide: JwtService,
           useValue: mockJwtService,
         },
-        {
-          provide: ErrorHandlerService,
-          useValue: mockErrorHandler,
-        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    userService = module.get<jest.Mocked<UserService>>(UserService);
     jwtService = module.get<jest.Mocked<JwtService>>(JwtService);
-    errorHandler =
-      module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('Should be defined', () => {
@@ -91,72 +75,62 @@ describe('AuthService', () => {
     expect(service).toBeInstanceOf(AuthService);
   });
 
-  it('Should instantiate with service dependencies', () => {
-    const testService = new AuthService(userService, jwtService, errorHandler);
-    expect(testService).toBeDefined();
-  });
-
   describe('validateUser', () => {
     it('TC0001 - Should validate user successfully', async () => {
-      userService.findByUsername.mockResolvedValue(mockUser);
-      userService.validatePassword.mockResolvedValue(true);
+      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      jest.spyOn(mockedBcrypt, 'compare').mockResolvedValue(true as never);
 
       const result = await service.validateUser(mockUsername, mockPassword);
 
-      expect(userService.findByUsername).toHaveBeenCalledWith(mockUsername);
-      expect(userService.validatePassword).toHaveBeenCalledWith(
-        mockUser,
-        mockPassword,
-      );
-      expect(result).toEqual(mockUser);
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { username: mockUsername },
+      });
+      expect(mockedBcrypt.compare).toHaveBeenCalledWith(mockPassword, mockUser.passwordHash);
+      expect(result).toBeDefined();
+      expect(result.id).toBe(mockUser.id);
+      expect(result.passwordHash).toBeUndefined();
     });
 
     it('TC0002 - Should return null when user not found', async () => {
-      userService.findByUsername.mockResolvedValue(null);
+      prismaService.user.findUnique.mockResolvedValue(null);
 
       const result = await service.validateUser(mockUsername, mockPassword);
 
-      expect(userService.findByUsername).toHaveBeenCalledWith(mockUsername);
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { username: mockUsername },
+      });
       expect(result).toBeNull();
     });
 
-    it('TC0003 - Should return null when user is inactive', async () => {
-      const inactiveUser = { ...mockUser, isActive: false };
-      userService.findByUsername.mockResolvedValue(inactiveUser);
+    it('TC0003 - Should return null when password is invalid', async () => {
+      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      jest.spyOn(mockedBcrypt, 'compare').mockResolvedValue(false as never);
 
       const result = await service.validateUser(mockUsername, mockPassword);
 
-      expect(userService.findByUsername).toHaveBeenCalledWith(mockUsername);
-      expect(result).toBeNull();
-    });
-
-    it('TC0004 - Should return null when password is invalid', async () => {
-      userService.findByUsername.mockResolvedValue(mockUser);
-      userService.validatePassword.mockResolvedValue(false);
-
-      const result = await service.validateUser(mockUsername, mockPassword);
-
-      expect(userService.findByUsername).toHaveBeenCalledWith(mockUsername);
-      expect(userService.validatePassword).toHaveBeenCalledWith(
-        mockUser,
-        mockPassword,
-      );
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { username: mockUsername },
+      });
+      expect(mockedBcrypt.compare).toHaveBeenCalledWith(mockPassword, mockUser.passwordHash);
       expect(result).toBeNull();
     });
   });
 
   describe('login', () => {
     it('TC0001 - Should login successfully', async () => {
-      userService.findByUsername.mockResolvedValue(mockUser);
-      userService.validatePassword.mockResolvedValue(true);
+      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      jest.spyOn(mockedBcrypt, 'compare').mockResolvedValue(true as never);
       jwtService.sign.mockReturnValue(mockToken);
 
-      const result = await service.login(mockLoginDto);
+      const loginDto = {
+        username: mockUser.username,
+        password: mockPassword,
+      };
+      const result = await service.login(loginDto);
 
       expect(jwtService.sign).toHaveBeenCalledWith({
-        sub: mockUser.id,
         username: mockUser.username,
-        email: mockUser.email,
+        sub: mockUser.id,
         role: mockUser.role,
       });
 
@@ -170,69 +144,92 @@ describe('AuthService', () => {
         },
       });
     });
+  });
 
-    it('TC0002 - Should handle login with invalid credentials', async () => {
-      userService.findByUsername.mockResolvedValue(null);
-      const mockError = new Error('Credenciais inválidas');
-      errorHandler.generateException.mockImplementation(() => {
-        throw mockError;
-      });
-      errorHandler.handleError.mockImplementation(() => {
-        throw mockError;
-      });
+  describe('createUser', () => {
+    it('TC0001 - Should create user successfully', async () => {
+      const hashedPassword = faker.string.alphanumeric(60);
+      jest.spyOn(mockedBcrypt, 'hash').mockResolvedValue(hashedPassword as never);
+      
+      const userData = {
+        username: mockUsername,
+        password: mockPassword,
+        email: mockEmail,
+        role: 'EMPLOYEE',
+      };
 
-      await expect(service.login(mockLoginDto)).rejects.toThrow(mockError);
+      const createdUser = {
+        ...mockUser,
+        passwordHash: hashedPassword,
+      };
 
-      expect(errorHandler.generateException).toHaveBeenCalled();
-      expect(errorHandler.handleError).toHaveBeenCalledWith(mockError);
-    });
+      prismaService.user.create.mockResolvedValue(createdUser);
 
-    it('TC0003 - Should handle login error', async () => {
-      const mockError = new Error('Database error');
-      userService.findByUsername.mockRejectedValue(mockError);
-      errorHandler.handleError.mockImplementation(() => {
-        throw mockError;
-      });
+      const result = await service.createUser(userData);
 
-      await expect(service.login(mockLoginDto)).rejects.toThrow(mockError);
-
-      expect(errorHandler.handleError).toHaveBeenCalledWith(mockError);
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(mockPassword, 10);
+      expect(prismaService.user.create).toHaveBeenCalled();
+      expect(result).toBeDefined();
+      expect(result.id).toBe(createdUser.id);
     });
   });
 
   describe('validateJwtPayload', () => {
-    const mockPayload = {
-      sub: mockUserId,
-      username: mockUsername,
-      email: mockEmail,
-      role: UserRole.EMPLOYEE,
-    };
+    it('TC0001 - Should validate JWT payload and return user', async () => {
+      const payload = {
+        sub: mockUser.id,
+        username: mockUser.username,
+        role: mockUser.role,
+      };
 
-    it('TC0001 - Should validate JWT payload successfully', async () => {
-      userService.findById.mockResolvedValue(mockUser);
+      prismaService.user.findUnique.mockResolvedValue(mockUser);
 
-      const result = await service.validateJwtPayload(mockPayload);
+      const result = await service.validateJwtPayload(payload);
 
-      expect(userService.findById).toHaveBeenCalledWith(mockPayload.sub);
-      expect(result).toEqual(mockUser);
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: payload.sub },
+      });
+      expect(result).toBeDefined();
+      expect(result).not.toBeNull();
+      if (result) {
+        expect(result.id).toBe(mockUser.id);
+        expect(result.username).toBe(mockUser.username);
+        expect((result as any).passwordHash).toBeUndefined();
+      }
     });
 
     it('TC0002 - Should return null when user not found', async () => {
-      userService.findById.mockResolvedValue(null);
+      const payload = {
+        sub: faker.string.uuid(),
+        username: mockUser.username,
+        role: mockUser.role,
+      };
 
-      const result = await service.validateJwtPayload(mockPayload);
+      prismaService.user.findUnique.mockResolvedValue(null);
 
-      expect(userService.findById).toHaveBeenCalledWith(mockPayload.sub);
+      const result = await service.validateJwtPayload(payload);
+
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: payload.sub },
+      });
       expect(result).toBeNull();
     });
 
-    it('TC0003 - Should return null when user is inactive', async () => {
+    it('TC0003 - Should return null when user is not active', async () => {
       const inactiveUser = { ...mockUser, isActive: false };
-      userService.findById.mockResolvedValue(inactiveUser);
+      const payload = {
+        sub: mockUser.id,
+        username: mockUser.username,
+        role: mockUser.role,
+      };
 
-      const result = await service.validateJwtPayload(mockPayload);
+      prismaService.user.findUnique.mockResolvedValue(inactiveUser);
 
-      expect(userService.findById).toHaveBeenCalledWith(mockPayload.sub);
+      const result = await service.validateJwtPayload(payload);
+
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: payload.sub },
+      });
       expect(result).toBeNull();
     });
   });

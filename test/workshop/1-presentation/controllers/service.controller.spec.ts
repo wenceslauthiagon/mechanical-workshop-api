@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
-import { Decimal } from '@prisma/client/runtime/library';
 
 import { ServiceController } from '../../../../src/workshop/1-presentation/controllers/service.controller';
 import { ServiceService } from '../../../../src/workshop/2-application/services/service.service';
@@ -19,9 +18,7 @@ describe('ServiceController', () => {
     id: mockServiceId,
     name: faker.commerce.productName(),
     description: faker.lorem.sentence(),
-    price: new Decimal(
-      faker.number.float({ min: 50, max: 500, fractionDigits: 2 }),
-    ),
+    price: faker.number.float({ min: 50, max: 500, fractionDigits: 2 }),
     category: mockCategory,
     estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
     isActive: true,
@@ -31,7 +28,7 @@ describe('ServiceController', () => {
 
   const mockCreateServiceDto: CreateServiceDto = {
     name: faker.commerce.productName(),
-    description: faker.lorem.sentence(),
+    description: undefined,
     price: faker.number.float({ min: 50, max: 500, fractionDigits: 2 }),
     category: mockCategory,
     estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
@@ -39,7 +36,7 @@ describe('ServiceController', () => {
 
   const mockUpdateServiceDto: UpdateServiceDto = {
     name: faker.commerce.productName(),
-    description: faker.lorem.sentence(),
+    description: undefined,
     price: faker.number.float({ min: 50, max: 500, fractionDigits: 2 }),
     estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
     category: faker.commerce.department(),
@@ -55,6 +52,7 @@ describe('ServiceController', () => {
           useValue: {
             create: jest.fn(),
             findAll: jest.fn(),
+            findAllPaginated: jest.fn(),
             findById: jest.fn(),
             findByCategory: jest.fn(),
             update: jest.fn(),
@@ -84,7 +82,7 @@ describe('ServiceController', () => {
         ...mockServiceData,
         name: mockCreateServiceDto.name,
         description: mockCreateServiceDto.description || null,
-        price: new Decimal(mockCreateServiceDto.price),
+        price: mockCreateServiceDto.price,
         category: mockCreateServiceDto.category,
         estimatedMinutes: mockCreateServiceDto.estimatedMinutes,
       };
@@ -126,6 +124,26 @@ describe('ServiceController', () => {
 
       expect(serviceService.findAll).toHaveBeenCalledWith({});
       expect(result).toEqual(mockServices);
+    });
+
+    it('TC0001a - Should return paginated services', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 0, take: 10 };
+      const mockPaginatedResponse = {
+        data: [mockServiceData],
+        pagination: { page: 1, size: 10, totalPages: 1, totalRecords: 1 },
+      };
+      serviceService.findAllPaginated.mockResolvedValue(mockPaginatedResponse);
+
+      const result = await serviceController.findAllPaginated(paginationDto);
+
+      expect(serviceService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+        {
+          category: undefined,
+          active: undefined,
+        },
+      );
+      expect(result).toEqual(mockPaginatedResponse);
     });
 
     it('TC0002 - Should return services filtered by category', async () => {
@@ -244,9 +262,7 @@ describe('ServiceController', () => {
         ...mockServiceData,
         name: mockUpdateServiceDto.name || mockServiceData.name,
         description: mockUpdateServiceDto.description || null,
-        price: mockUpdateServiceDto.price
-          ? new Decimal(mockUpdateServiceDto.price)
-          : mockServiceData.price,
+        price: mockUpdateServiceDto.price || mockServiceData.price,
         estimatedMinutes:
           mockUpdateServiceDto.estimatedMinutes ||
           mockServiceData.estimatedMinutes,
@@ -324,3 +340,4 @@ describe('ServiceController', () => {
     });
   });
 });
+

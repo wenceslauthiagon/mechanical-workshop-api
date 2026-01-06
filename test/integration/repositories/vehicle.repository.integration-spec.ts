@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { VehicleRepository } from '../../../src/workshop/4-infrastructure/repositories/vehicle.repository';
 import { CustomerRepository } from '../../../src/workshop/4-infrastructure/repositories/customer.repository';
+import { ServiceOrderStatus } from '../../../src/shared/enums/service-order-status.enum';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 function generateValidCPF(): string {
@@ -51,12 +52,9 @@ describe('Vehicle Repository Integration Tests', () => {
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.customer.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.service.deleteMany();
     await prisma.part.deleteMany();
     await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
@@ -151,7 +149,7 @@ describe('Vehicle Repository Integration Tests', () => {
 
   describe('find vehicle', () => {
     let testVehicleId: string;
-    let testLicensePlate: string;
+    let testPlate: string;
     let testCustomerId: string;
 
     beforeAll(async () => {
@@ -166,9 +164,9 @@ describe('Vehicle Repository Integration Tests', () => {
       });
       testCustomerId = customer.id;
 
-      testLicensePlate = 'GHI9012';
+      testPlate = 'GHI9012';
       const vehicle = await vehicleRepository.create({
-        licensePlate: testLicensePlate,
+        licensePlate: testPlate,
         customerId: testCustomerId,
         brand: 'Honda',
         model: 'Civic',
@@ -183,15 +181,15 @@ describe('Vehicle Repository Integration Tests', () => {
 
       expect(vehicle).not.toBeNull();
       expect(vehicle?.id).toBe(testVehicleId);
-      expect(vehicle?.licensePlate).toBe(testLicensePlate);
+      expect(vehicle?.licensePlate).toBe(testPlate);
       expect(vehicle?.brand).toBe('Honda');
     });
 
     it('TC0002 - Should find vehicle by license plate', async () => {
-      const vehicle = await vehicleRepository.findByPlate(testLicensePlate);
+      const vehicle = await vehicleRepository.findByPlate(testPlate);
 
       expect(vehicle).not.toBeNull();
-      expect(vehicle?.licensePlate).toBe(testLicensePlate);
+      expect(vehicle?.licensePlate).toBe(testPlate);
       expect(vehicle?.id).toBe(testVehicleId);
     });
 
@@ -317,7 +315,7 @@ describe('Vehicle Repository Integration Tests', () => {
           orderNumber: 'SO-001',
           customerId: testCustomerId,
           vehicleId: vehicleWithOrderId,
-          status: 'RECEBIDA',
+          status: ServiceOrderStatus.RECEIVED,
           description: 'Test order',
           estimatedCompletionDate: new Date(),
         },

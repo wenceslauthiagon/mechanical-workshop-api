@@ -11,8 +11,8 @@ NOTIFICATION_SMS_PROVIDER=mock       # Mock (sem custo)
 # Gmail SMTP (Gratuito - 500 emails/dia)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=example@example.com
-SMTP_PASS=REPLACE_WITH_SMTP_APP_PASSWORD
+SMTP_USER=your-email@example.com
+SMTP_PASS=your-app-password
 ```
 
 ### 2. **Para Trocar para Serviços Pagos (FÁCIL)**

@@ -37,7 +37,7 @@ export class BudgetRepository implements IBudgetRepository {
         discount: 0,
         total,
         validUntil,
-        status: BudgetStatus.RASCUNHO,
+        status: BudgetStatus.DRAFT,
         items: {
           create: data.items.map((item) => ({
             type: item.type,
@@ -154,12 +154,14 @@ export class BudgetRepository implements IBudgetRepository {
           where: { id },
         });
         if (existingBudget) {
+          const subtotal = typeof existingBudget.subtotal === 'number' 
+            ? existingBudget.subtotal 
+            : existingBudget.subtotal;
+          const taxes = typeof existingBudget.taxes === 'number' 
+            ? existingBudget.taxes 
+            : existingBudget.taxes;
           updateData.total = Number(
-            (
-              existingBudget.subtotal.toNumber() +
-              existingBudget.taxes.toNumber() -
-              data.discount
-            ).toFixed(2),
+            (subtotal + taxes - data.discount).toFixed(2),
           );
         }
       }
@@ -209,11 +211,11 @@ export class BudgetRepository implements IBudgetRepository {
   async updateStatus(id: string, status: BudgetStatus): Promise<Budget> {
     const updateData: any = { status };
 
-    if (status === BudgetStatus.ENVIADO) {
+    if (status === BudgetStatus.SENT) {
       updateData.sentAt = new Date();
-    } else if (status === BudgetStatus.APROVADO) {
+    } else if (status === BudgetStatus.APPROVED) {
       updateData.approvedAt = new Date();
-    } else if (status === BudgetStatus.REJEITADO) {
+    } else if (status === BudgetStatus.REJECTED) {
       updateData.rejectedAt = new Date();
     }
 
@@ -257,6 +259,30 @@ export class BudgetRepository implements IBudgetRepository {
     return budgetsWithItems;
   }
 
+  async findMany(skip: number, take: number): Promise<Budget[]> {
+    const budgets = await this.prisma.budget.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Fetch items separately for each budget
+    const budgetsWithItems = await Promise.all(
+      budgets.map(async (budget) => {
+        const items = await this.prisma.budgetItem.findMany({
+          where: { budgetId: budget.id },
+        });
+        return this.mapToEntity({ ...budget, items });
+      }),
+    );
+
+    return budgetsWithItems;
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.budget.count();
+  }
+
   async findExpired(): Promise<Budget[]> {
     const now = new Date();
     const budgets = await this.prisma.budget.findMany({
@@ -265,7 +291,7 @@ export class BudgetRepository implements IBudgetRepository {
           lt: now,
         },
         status: {
-          not: BudgetStatus.EXPIRADO,
+          not: BudgetStatus.EXPIRED,
         },
       },
     });
@@ -286,7 +312,7 @@ export class BudgetRepository implements IBudgetRepository {
   async markAsExpired(id: string): Promise<Budget> {
     const budget = await this.prisma.budget.update({
       where: { id },
-      data: { status: BudgetStatus.EXPIRADO },
+      data: { status: BudgetStatus.EXPIRED },
       include: {
         items: true,
       },

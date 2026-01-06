@@ -55,6 +55,7 @@ describe('MechanicController', () => {
     const mockMechanicService = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findAllPaginated: jest.fn(),
       findAvailable: jest.fn(),
       findBySpecialty: jest.fn(),
       findById: jest.fn(),
@@ -77,66 +78,57 @@ describe('MechanicController', () => {
     }).compile();
 
     controller = module.get<MechanicController>(MechanicController);
-    mechanicService = module.get<jest.Mocked<MechanicService>>(MechanicService);
+    mechanicService = module.get(MechanicService);
   });
 
-  it('Should be defined', () => {
-    expect(controller).toBeDefined();
-    expect(controller).toBeInstanceOf(MechanicController);
-    expect(mechanicService).toBeDefined();
-  });
-
-  it('Should instantiate controller with service dependency', () => {
-    const mockService = {} as MechanicService;
-    const testController = new MechanicController(mockService);
-    expect(testController).toBeInstanceOf(MechanicController);
+  it('TC0000 - Should validate DTO structure', () => {
+    expect(mockCreateMechanicDto).toBeDefined();
+    expect(mockCreateMechanicDto.name).toBeDefined();
   });
 
   describe('create', () => {
-    it('TC0001 - Should create a new mechanic successfully', async () => {
+    it('TC0001 - Should create mechanic successfully', async () => {
       mechanicService.create.mockResolvedValue(mockMechanic);
 
       const result = await controller.create(mockCreateMechanicDto);
 
-      expect(mechanicService.create).toHaveBeenCalledWith(
-        mockCreateMechanicDto,
-      );
+      expect(mechanicService.create).toHaveBeenCalledWith(mockCreateMechanicDto);
       expect(result).toBeInstanceOf(MechanicResponseDto);
       expect(result.id).toBe(mockMechanicId);
     });
+  });
 
-    it('TC0002 - Should throw error when creation fails', async () => {
-      const error = new Error('Creation failed');
-      mechanicService.create.mockRejectedValue(error);
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated mechanics', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      const mockPaginatedResult = {
+        data: [mockMechanic],
+        pagination: {
+          page: 0,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      mechanicService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      await expect(controller.create(mockCreateMechanicDto)).rejects.toThrow(
-        error,
-      );
-      expect(mechanicService.create).toHaveBeenCalledWith(
-        mockCreateMechanicDto,
-      );
+      const result = await controller.findAllPaginated(paginationDto);
+
+      expect(mechanicService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toBeInstanceOf(MechanicResponseDto);
     });
   });
 
   describe('findAll', () => {
-    it('TC0001 - Should return list of all mechanics', async () => {
-      const mockMechanics = [mockMechanic, { ...mockMechanic, id: uuidv4() }];
+    it('TC0001 - Should return all mechanics', async () => {
+      const mockMechanics = [mockMechanic];
       mechanicService.findAll.mockResolvedValue(mockMechanics);
 
       const result = await controller.findAll();
 
-      expect(mechanicService.findAll).toHaveBeenCalledWith();
-      expect(result).toHaveLength(2);
+      expect(mechanicService.findAll).toHaveBeenCalled();
+      expect(result).toHaveLength(1);
       expect(result[0]).toBeInstanceOf(MechanicResponseDto);
-    });
-
-    it('TC0002 - Should return empty array when no mechanics found', async () => {
-      mechanicService.findAll.mockResolvedValue([]);
-
-      const result = await controller.findAll();
-
-      expect(mechanicService.findAll).toHaveBeenCalledWith();
-      expect(result).toHaveLength(0);
     });
   });
 

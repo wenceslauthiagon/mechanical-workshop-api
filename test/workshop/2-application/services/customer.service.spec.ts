@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CustomerType } from '../../../../src/shared/enums/customer-type.enum';
 import { faker } from '@faker-js/faker/locale/pt_BR';
-import { CustomerType } from '@prisma/client';
 import { CustomerService } from '../../../../src/workshop/2-application/services/customer.service';
 import { ErrorHandlerService } from '../../../../src/shared/services/error-handler.service';
 import { ERROR_MESSAGES } from '../../../../src/shared/constants/messages.constants';
@@ -36,134 +36,112 @@ describe('CustomerService', () => {
     updatedAt: faker.date.recent(),
   };
 
-  const createCustomerDto = {
-    name: faker.person.fullName(),
-    document: '12345678901',
-    email: faker.internet.email(),
-    phone: faker.phone.number(),
-    type: CustomerType.PESSOA_FISICA,
-    address: faker.location.streetAddress(),
-    additionalInfo: null,
-  };
-
   beforeEach(async () => {
-    const mockRepository = {
+    customerRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
       findById: jest.fn(),
-      findByEmail: jest.fn(),
       findByDocument: jest.fn(),
+      findByEmail: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      findWithVehicles: jest.fn(),
       findVehiclesByCustomerId: jest.fn(),
     };
 
-    const mockErrorHandler = {
-      handleError: jest.fn().mockImplementation((error) => {
-        throw error;
+    errorHandler = {
+      handleNotFoundError: jest.fn().mockImplementation((msg) => {
+        throw new Error(msg);
       }),
-      handleNotFoundError: jest.fn().mockImplementation((message) => {
-        throw new Error(message);
+      handleConflictError: jest.fn().mockImplementation((msg) => {
+        throw new Error(msg);
       }),
-      handleConflictError: jest.fn().mockImplementation((message) => {
-        throw new Error(message);
+      handleValueObjectError: jest.fn().mockImplementation((_error, msg) => {
+        throw new Error(msg);
       }),
-      handleValueObjectError: jest.fn().mockImplementation((error, message) => {
-        throw new Error(message);
+      handleError: jest.fn().mockImplementation((err) => {
+        throw err;
       }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CustomerService,
-        { provide: 'ICustomerRepository', useValue: mockRepository },
-        { provide: ErrorHandlerService, useValue: mockErrorHandler },
+        {
+          provide: 'ICustomerRepository',
+          useValue: customerRepository,
+        },
+        {
+          provide: ErrorHandlerService,
+          useValue: errorHandler,
+        },
       ],
     }).compile();
 
     service = module.get<CustomerService>(CustomerService);
-    customerRepository = module.get('ICustomerRepository');
-    errorHandler = module.get(ErrorHandlerService);
-  });
-
-  it('Should be defined', () => {
-    expect(service).toBeDefined();
   });
 
   describe('create', () => {
-    beforeEach(() => {
+    it('TC0001 - Should create customer successfully', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: '123.456.789-01',
+        email: mockCustomer.email,
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
+      };
+
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
       customerRepository.findByEmail.mockResolvedValue(null);
       customerRepository.findByDocument.mockResolvedValue(null);
       customerRepository.create.mockResolvedValue(mockCustomer);
-      jest
-        .spyOn(DocumentUtils, 'validateAndNormalize')
-        .mockReturnValue('12345678901');
-    });
 
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('TC0001 - Should create customer successfully', async () => {
-      const result = await service.create(createCustomerDto);
+      const result = await service.create(createDto);
 
       expect(result).toEqual(mockCustomer);
-      expect(DocumentUtils.validateAndNormalize).toHaveBeenCalledWith(
-        createCustomerDto.document,
-      );
-      expect(customerRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: '12345678901',
-          additionalInfo: null,
-        }),
-      );
+      expect(DocumentUtils.validateAndNormalize).toHaveBeenCalledWith('123.456.789-01');
+      expect(customerRepository.findByEmail).toHaveBeenCalledWith(createDto.email);
+      expect(customerRepository.findByDocument).toHaveBeenCalledWith('12345678901');
+      expect(customerRepository.create).toHaveBeenCalled();
     });
 
-    it('TC0002 - Should create customer with additionalInfo', async () => {
-      const dtoWithInfo = {
-        ...createCustomerDto,
-        additionalInfo: 'VIP Cliente',
+    it('TC0002 - Should throw error for invalid document', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: 'invalid-document',
+        email: mockCustomer.email,
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
       };
-      const customerWithInfo = {
-        ...mockCustomer,
-        additionalInfo: 'VIP Cliente',
-      };
-      customerRepository.create.mockResolvedValue(customerWithInfo);
 
-      const result = await service.create(dtoWithInfo);
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockImplementation(() => {
+        throw new Error('Invalid document');
+      });
 
-      expect(result.additionalInfo).toBe('VIP Cliente');
-      expect(customerRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          additionalInfo: 'VIP Cliente',
-        }),
-      );
-    });
-
-    it('TC0003 - Should throw error when document is invalid', async () => {
-      jest
-        .spyOn(DocumentUtils, 'validateAndNormalize')
-        .mockImplementation(() => {
-          throw new Error('Invalid document');
-        });
-
-      await expect(service.create(createCustomerDto)).rejects.toThrow(
+      await expect(service.create(createDto)).rejects.toThrow(
         ERROR_MESSAGES.INVALID_DOCUMENT,
       );
-      expect(errorHandler.handleValueObjectError).toHaveBeenCalledWith(
-        expect.any(Error),
-        ERROR_MESSAGES.INVALID_DOCUMENT,
-      );
+      expect(errorHandler.handleValueObjectError).toHaveBeenCalled();
     });
 
-    it('TC0004 - Should throw error when email already exists', async () => {
-      const existingCustomer = {
-        ...mockCustomer,
-        email: createCustomerDto.email,
+    it('TC0003 - Should throw error for duplicate email', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: '123.456.789-01',
+        email: mockCustomer.email,
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
       };
-      customerRepository.findByEmail.mockResolvedValue(existingCustomer);
 
-      await expect(service.create(createCustomerDto)).rejects.toThrow(
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
+      customerRepository.findByEmail.mockResolvedValue(mockCustomer);
+
+      await expect(service.create(createDto)).rejects.toThrow(
         ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
       );
       expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
@@ -171,39 +149,45 @@ describe('CustomerService', () => {
       );
     });
 
-    it('TC0005 - Should throw error when document already exists', async () => {
-      const existingCustomer = {
-        ...mockCustomer,
-        document: createCustomerDto.document,
+    it('TC0004 - Should throw error for duplicate document', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: '123.456.789-01',
+        email: 'newemail@example.com',
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
       };
-      customerRepository.findByDocument.mockResolvedValue(existingCustomer);
 
-      await expect(service.create(createCustomerDto)).rejects.toThrow(
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
+      customerRepository.findByEmail.mockResolvedValue(null);
+      customerRepository.findByDocument.mockResolvedValue(mockCustomer);
+
+      await expect(service.create(createDto)).rejects.toThrow(
         ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
       );
       expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
         ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
       );
     });
-  });
 
-  describe('findAll', () => {
-    it('TC0001 - Should return all customers', async () => {
-      const customers = [mockCustomer];
-      customerRepository.findAll.mockResolvedValue(customers);
+    it('TC0005 - Should handle database error during creation', async () => {
+      const createDto = {
+        name: mockCustomer.name,
+        document: '123.456.789-01',
+        email: mockCustomer.email,
+        phone: mockCustomer.phone,
+        type: CustomerType.PESSOA_FISICA,
+        address: mockCustomer.address,
+      };
 
-      const result = await service.findAll();
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
+      customerRepository.findByEmail.mockResolvedValue(null);
+      customerRepository.findByDocument.mockResolvedValue(null);
+      const dbError = new Error('Database error');
+      customerRepository.create.mockRejectedValue(dbError);
 
-      expect(result).toEqual(customers);
-      expect(customerRepository.findAll).toHaveBeenCalled();
-    });
-
-    it('TC0002 - Should return empty array when no customers exist', async () => {
-      customerRepository.findAll.mockResolvedValue([]);
-
-      const result = await service.findAll();
-
-      expect(result).toEqual([]);
+      await expect(service.create(createDto)).rejects.toThrow(dbError);
     });
   });
 

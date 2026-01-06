@@ -15,14 +15,14 @@ export class CreateBudgetDto {
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsString()
-  serviceOrderId: string;
+  serviceOrderId!: string;
 
   @ApiProperty({
     description: 'ID do cliente',
     example: '550e8400-e29b-41d4-a716-446655440001',
   })
   @IsString()
-  customerId: string;
+  customerId!: string;
 
   @ApiProperty({
     description: 'Lista de itens do orçamento',
@@ -40,7 +40,7 @@ export class CreateBudgetDto {
     },
   })
   @IsArray()
-  items: BudgetItem[];
+  items!: BudgetItem[];
 
   @ApiPropertyOptional({
     description: 'Dias de validade do orçamento',
@@ -54,3 +54,4 @@ export class CreateBudgetDto {
   @Max(90)
   validDays?: number;
 }
+

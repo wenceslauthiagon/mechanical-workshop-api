@@ -20,7 +20,7 @@ export class CreateServiceDto {
   @IsString()
   @IsNotEmpty()
   @Length(2, 100)
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'Descrição detalhada do serviço',
@@ -44,7 +44,7 @@ export class CreateServiceDto {
     { message: 'Preço deve ter até 2 casas decimais' },
   )
   @IsNotEmpty()
-  price: number;
+  price!: number;
 
   @ApiProperty({
     description: 'Tempo estimado em minutos',
@@ -54,7 +54,7 @@ export class CreateServiceDto {
   })
   @IsInt()
   @Min(1)
-  estimatedMinutes: number;
+  estimatedMinutes!: number;
 
   @ApiProperty({
     description: 'Categoria do serviço',
@@ -65,7 +65,7 @@ export class CreateServiceDto {
   @IsString()
   @IsNotEmpty()
   @Length(2, 50)
-  category: string;
+  category!: string;
 
   @ApiProperty({
     description: 'Se o serviço está ativo',

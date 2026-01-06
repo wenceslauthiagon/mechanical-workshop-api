@@ -21,11 +21,12 @@ import {
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles } from '../../../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../../../shared/enums/user-role.enum';
 import { ServiceOrderService } from '../../2-application/services/service-order.service';
 import { CreateServiceOrderDto } from '../dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../dtos/service-order/update-service-order-status.dto';
 import { ServiceOrderResponseDto } from '../dtos/service-order/service-order-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @ApiTags('Service Orders')
 @Controller('api/service-orders')
@@ -62,26 +63,70 @@ export class ServiceOrderController {
 
   @Get()
   @ApiOperation({
-    summary: 'Listar todas as ordens de serviço',
-    description: 'Retorna todas as ordens de serviço do sistema',
+    summary: 'Listar ordens de serviço com paginação',
+    description: 'Retorna lista paginada de ordens de serviço do sistema',
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Lista de ordens de serviço retornada com sucesso',
-    type: [ServiceOrderResponseDto],
+    description: 'Lista paginada de ordens de serviço retornada com sucesso',
   })
   @ApiQuery({
     name: 'customerId',
     required: false,
     description: 'Filtrar por ID do cliente',
   })
-  async findAll(
+  async findAllPaginated(
+    @Query() paginationDto: PaginationDto,
     @Query('customerId') customerId?: string,
-  ): Promise<ServiceOrderResponseDto[]> {
+  ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
     if (customerId) {
-      return this.serviceOrderService.findByCustomer(customerId);
+      const orders = await this.serviceOrderService.findByCustomer(customerId);
+      return new PaginatedResponseDto(orders, 0, orders.length, orders.length);
     }
+    return this.serviceOrderService.findAllPaginated(paginationDto);
+  }
+
+  @Get('all')
+  @ApiOperation({
+    summary: 'Listar todas as ordens de serviço (sem paginação)',
+    description:
+      'Retorna todas as ordens de serviço - use com cuidado em produção',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista completa de ordens de serviço retornada com sucesso',
+    type: [ServiceOrderResponseDto],
+  })
+  async findAll(): Promise<ServiceOrderResponseDto[]> {
     return this.serviceOrderService.findAll();
+  }
+
+  @Get('priority')
+  @ApiOperation({
+    summary: 'Listar ordens de serviço com prioridade',
+    description:
+      'Lista ordens de serviço ordenadas por prioridade (Em Execução > Aguardando Aprovação > Diagnóstico > Recebida) e data (mais antigas primeiro). Exclui OS finalizadas e entregues.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número da página',
+  })
+  @ApiQuery({
+    name: 'size',
+    required: false,
+    type: Number,
+    description: 'Tamanho da página',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista ordenada por prioridade retornada com sucesso',
+  })
+  async findAllWithPriority(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<ServiceOrderResponseDto>> {
+    return this.serviceOrderService.findAllPaginatedWithPriority(paginationDto);
   }
 
   @Get(':id')

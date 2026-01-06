@@ -21,6 +21,18 @@ export class VehicleRepository implements IVehicleRepository {
     });
   }
 
+  async findMany(skip: number, take: number): Promise<Vehicle[]> {
+    return this.prisma.vehicle.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.vehicle.count();
+  }
+
   async findById(id: string): Promise<Vehicle | null> {
     return this.prisma.vehicle.findUnique({
       where: { id },

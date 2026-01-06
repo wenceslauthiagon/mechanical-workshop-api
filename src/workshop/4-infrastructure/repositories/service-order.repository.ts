@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { IServiceOrderRepository } from 'src/workshop/3-domain/repositories/service-order.repository.interface';
+import { IServiceOrderRepository } from '../../3-domain/repositories/service-order.repository.interface';
 
 @Injectable()
 export class ServiceOrderRepository implements IServiceOrderRepository {
@@ -34,6 +34,56 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     return this.prisma.serviceOrder.findMany({
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async findMany(skip: number, take: number) {
+    return this.prisma.serviceOrder.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findManyWithPriority(skip: number, take: number) {
+    const statusPriority: Record<string, number> = {
+      [ServiceOrderStatus.IN_EXECUTION]: 1,
+      [ServiceOrderStatus.AWAITING_APPROVAL]: 2,
+      [ServiceOrderStatus.IN_DIAGNOSIS]: 3,
+      [ServiceOrderStatus.RECEIVED]: 4,
+    };
+
+    const orders = await this.prisma.serviceOrder.findMany({
+      where: {
+        status: {
+          notIn: [ServiceOrderStatus.FINISHED, ServiceOrderStatus.DELIVERED],
+        },
+      },
+    });
+
+    const sortedOrders = orders
+      .sort((a, b) => {
+        const priorityDiff =
+          (statusPriority[a.status] || 999) - (statusPriority[b.status] || 999);
+        if (priorityDiff !== 0) return priorityDiff;
+        return a.createdAt.getTime() - b.createdAt.getTime();
+      })
+      .slice(skip, skip + take);
+
+    return sortedOrders;
+  }
+
+  async countWithPriority(): Promise<number> {
+    return this.prisma.serviceOrder.count({
+      where: {
+        status: {
+          notIn: [ServiceOrderStatus.FINISHED, ServiceOrderStatus.DELIVERED],
+        },
+      },
+    });
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.serviceOrder.count();
   }
 
   async findById(id: string) {
@@ -178,7 +228,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     return this.prisma.serviceOrder.findMany({
       where: {
         status: {
-          in: [ServiceOrderStatus.FINALIZADA, ServiceOrderStatus.ENTREGUE],
+          in: [ServiceOrderStatus.FINISHED, ServiceOrderStatus.DELIVERED],
         },
         startedAt: { not: null },
         completedAt: { not: null },

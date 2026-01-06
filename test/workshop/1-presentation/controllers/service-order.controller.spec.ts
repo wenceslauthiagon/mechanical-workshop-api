@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../../src/shared/enums/service-order-status.enum';
 
 import { ServiceOrderController } from '../../../../src/workshop/1-presentation/controllers/service-order.controller';
 import { ServiceOrderService } from '../../../../src/workshop/2-application/services/service-order.service';
-import { CreateServiceOrderDto } from '../../../../src/workshop/1-presentation/dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../../../../src/workshop/1-presentation/dtos/service-order/update-service-order-status.dto';
+import { PaginationDto } from '../../../../src/shared/dtos/pagination.dto';
 
 describe('ServiceOrderController', () => {
   let controller: ServiceOrderController;
@@ -22,7 +22,7 @@ describe('ServiceOrderController', () => {
     customerId: mockCustomerId,
     vehicleId: mockVehicleId,
     description: faker.lorem.paragraph(),
-    status: ServiceOrderStatus.RECEBIDA,
+    status: ServiceOrderStatus.RECEIVED,
     totalServicePrice: '100.00',
     totalPartsPrice: '50.00',
     totalPrice: '150.00',
@@ -38,22 +38,16 @@ describe('ServiceOrderController', () => {
     parts: [],
   };
 
-  const mockCreateServiceOrderDto: CreateServiceOrderDto = {
-    customerId: mockCustomerId,
-    vehicleId: mockVehicleId,
-    description: faker.lorem.paragraph(),
-    services: [{ serviceId: uuidv4(), quantity: 1 }],
-    parts: [{ partId: uuidv4(), quantity: 2 }],
-  };
-
   const mockUpdateServiceOrderStatusDto: UpdateServiceOrderStatusDto = {
-    status: ServiceOrderStatus.EM_EXECUCAO,
+    status: ServiceOrderStatus.IN_EXECUTION,
   };
 
   beforeEach(async () => {
     const mockServiceOrderService = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findAllPaginated: jest.fn(),
+      findAllPaginatedWithPriority: jest.fn(),
       findById: jest.fn(),
       findByCustomer: jest.fn(),
       updateStatus: jest.fn(),
@@ -72,47 +66,62 @@ describe('ServiceOrderController', () => {
     }).compile();
 
     controller = module.get<ServiceOrderController>(ServiceOrderController);
-    serviceOrderService =
-      module.get<jest.Mocked<ServiceOrderService>>(ServiceOrderService);
-  });
-
-  it('Should be defined', () => {
-    expect(controller).toBeDefined();
-    expect(controller).toBeInstanceOf(ServiceOrderController);
-  });
-
-  it('Should instantiate with service dependency', () => {
-    const testController = new ServiceOrderController(serviceOrderService);
-    expect(testController).toBeDefined();
+    serviceOrderService = module.get(ServiceOrderService);
   });
 
   describe('create', () => {
-    it('TC0001 - Should create a service order successfully', async () => {
+    it('TC0001 - Should create service order successfully', async () => {
+      const createDto = {
+        customerId: mockCustomerId,
+        vehicleId: mockVehicleId,
+        description: faker.lorem.sentence(),
+        services: [],
+        parts: [],
+      };
       serviceOrderService.create.mockResolvedValue(mockServiceOrder);
 
-      const result = await controller.create(mockCreateServiceOrderDto);
+      const result = await controller.create(createDto);
 
-      expect(serviceOrderService.create).toHaveBeenCalledWith(
-        mockCreateServiceOrderDto,
-      );
+      expect(serviceOrderService.create).toHaveBeenCalledWith(createDto);
       expect(result).toEqual(mockServiceOrder);
     });
+  });
 
-    it('TC0002 - Should handle service order creation error', async () => {
-      const mockError = new Error('Falha ao criar ordem de serviço');
-      serviceOrderService.create.mockRejectedValue(mockError);
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated service orders', async () => {
+      const paginationDto = new PaginationDto();
+      paginationDto.page = 0;
+      paginationDto.size = 10;
+      const mockPaginatedResponse = {
+        data: [mockServiceOrder],
+        pagination: {
+          page: 0,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      serviceOrderService.findAllPaginated.mockResolvedValue(mockPaginatedResponse);
 
-      await expect(
-        controller.create(mockCreateServiceOrderDto),
-      ).rejects.toThrow(mockError);
-      expect(serviceOrderService.create).toHaveBeenCalledWith(
-        mockCreateServiceOrderDto,
-      );
+      const result = await controller.findAllPaginated(paginationDto);
+
+      expect(serviceOrderService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result).toEqual(mockPaginatedResponse);
+    });
+
+    it('TC0002 - Should filter by customerId when provided', async () => {
+      const paginationDto = new PaginationDto();
+      const mockServiceOrders = [mockServiceOrder];
+      serviceOrderService.findByCustomer.mockResolvedValue(mockServiceOrders);
+
+      const result = await controller.findAllPaginated(paginationDto, mockCustomerId);
+
+      expect(serviceOrderService.findByCustomer).toHaveBeenCalledWith(mockCustomerId);
+      expect(result.data).toEqual(mockServiceOrders);
     });
   });
 
   describe('findAll', () => {
-    it('TC0001 - Should return all service orders when no customerId', async () => {
+    it('TC0001 - Should return all service orders', async () => {
       const mockServiceOrders = [mockServiceOrder];
       serviceOrderService.findAll.mockResolvedValue(mockServiceOrders);
 
@@ -121,17 +130,34 @@ describe('ServiceOrderController', () => {
       expect(serviceOrderService.findAll).toHaveBeenCalled();
       expect(result).toEqual(mockServiceOrders);
     });
+  });
 
-    it('TC0002 - Should return service orders by customer when customerId provided', async () => {
+  describe('findAllWithPriority', () => {
+    it('TC0001 - Should return service orders with priority ordering', async () => {
+      const paginationDto = new PaginationDto();
+      paginationDto.page = 0;
+      paginationDto.size = 10;
       const mockServiceOrders = [mockServiceOrder];
-      serviceOrderService.findByCustomer.mockResolvedValue(mockServiceOrders);
-
-      const result = await controller.findAll(mockCustomerId);
-
-      expect(serviceOrderService.findByCustomer).toHaveBeenCalledWith(
-        mockCustomerId,
+      const mockPaginatedResponse = {
+        data: mockServiceOrders,
+        pagination: {
+          page: 0,
+          size: 10,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      serviceOrderService.findAllPaginatedWithPriority.mockResolvedValue(
+        mockPaginatedResponse,
       );
-      expect(result).toEqual(mockServiceOrders);
+
+      const result = await controller.findAllWithPriority(paginationDto);
+
+      expect(
+        serviceOrderService.findAllPaginatedWithPriority,
+      ).toHaveBeenCalledWith(paginationDto);
+      expect(result).toEqual(mockPaginatedResponse);
+      expect(result.data).toEqual(mockServiceOrders);
     });
   });
 
@@ -166,7 +192,7 @@ describe('ServiceOrderController', () => {
     it('TC0001 - Should update service order status', async () => {
       const updatedServiceOrder = {
         ...mockServiceOrder,
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
       };
       serviceOrderService.updateStatus.mockResolvedValue(updatedServiceOrder);
 
@@ -206,7 +232,7 @@ describe('ServiceOrderController', () => {
         {
           id: uuidv4(),
           serviceOrderId: mockServiceOrderId,
-          status: ServiceOrderStatus.RECEBIDA,
+          status: ServiceOrderStatus.RECEIVED,
           changedAt: faker.date.past(),
           changedBy: faker.person.fullName(),
         },

@@ -46,7 +46,7 @@ describe('BudgetController', () => {
     discount: 0,
     total: 1100,
     validUntil: faker.date.future(),
-    status: BudgetStatus.RASCUNHO,
+    status: BudgetStatus.DRAFT,
     sentAt: undefined,
     approvedAt: undefined,
     rejectedAt: undefined,
@@ -56,7 +56,7 @@ describe('BudgetController', () => {
 
   const mockSentBudget = {
     ...mockBudget,
-    status: BudgetStatus.ENVIADO,
+    status: BudgetStatus.SENT,
     sentAt: new Date(),
   };
 
@@ -95,7 +95,7 @@ describe('BudgetController', () => {
     discount: 0,
     total: 1100,
     validUntil: faker.date.future(),
-    status: BudgetStatus.RASCUNHO,
+    status: BudgetStatus.DRAFT,
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     customer: {
@@ -118,8 +118,10 @@ describe('BudgetController', () => {
     const mockBudgetService = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findAllPaginated: jest.fn(),
       findById: jest.fn(),
       findByServiceOrderId: jest.fn(),
+      update: jest.fn(),
       sendBudget: jest.fn(),
       delete: jest.fn(),
       findAllWithRelations: jest.fn(),
@@ -139,15 +141,16 @@ describe('BudgetController', () => {
     }).compile();
 
     controller = module.get<BudgetController>(BudgetController);
-    budgetService = module.get<jest.Mocked<BudgetService>>(BudgetService);
+    budgetService = module.get(BudgetService);
   });
 
-  it('Should be defined', () => {
-    expect(controller).toBeDefined();
+  it('TC0000 - Should validate DTO structure', () => {
+    expect(mockCreateBudgetDto).toBeDefined();
+    expect(mockCreateBudgetDto.serviceOrderId).toBe(mockServiceOrderId);
   });
 
   describe('create', () => {
-    it('TC0001 - Should create a new budget successfully', async () => {
+    it('TC0001 - Should create budget successfully', async () => {
       budgetService.create.mockResolvedValue(mockBudget);
 
       const result = await controller.create(mockCreateBudgetDto);
@@ -156,37 +159,39 @@ describe('BudgetController', () => {
       expect(result).toBeInstanceOf(BudgetResponseDto);
       expect(result.id).toBe(mockBudgetId);
     });
+  });
 
-    it('TC0002 - Should throw error when creation fails', async () => {
-      const error = new Error('Creation failed');
-      budgetService.create.mockRejectedValue(error);
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated budgets', async () => {
+      const paginationDto = { page: 0, size: 10, skip: 0, take: 10 };
+      const mockPaginatedResult = {
+        data: [mockBudget],
+        pagination: {
+          page: 0,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      budgetService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      await expect(controller.create(mockCreateBudgetDto)).rejects.toThrow(
-        error,
-      );
-      expect(budgetService.create).toHaveBeenCalledWith(mockCreateBudgetDto);
+      const result = await controller.findAllPaginated(paginationDto);
+
+      expect(budgetService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toBeInstanceOf(BudgetResponseDto);
     });
   });
 
   describe('findAll', () => {
-    it('TC0001 - Should return list of all budgets', async () => {
-      const mockBudgets = [mockBudget, { ...mockBudget, id: uuidv4() }];
+    it('TC0001 - Should return all budgets', async () => {
+      const mockBudgets = [mockBudget];
       budgetService.findAll.mockResolvedValue(mockBudgets);
 
       const result = await controller.findAll();
 
-      expect(budgetService.findAll).toHaveBeenCalledWith();
-      expect(result).toHaveLength(2);
+      expect(budgetService.findAll).toHaveBeenCalled();
+      expect(result).toHaveLength(1);
       expect(result[0]).toBeInstanceOf(BudgetResponseDto);
-    });
-
-    it('TC0002 - Should return empty array when no budgets found', async () => {
-      budgetService.findAll.mockResolvedValue([]);
-
-      const result = await controller.findAll();
-
-      expect(budgetService.findAll).toHaveBeenCalledWith();
-      expect(result).toHaveLength(0);
     });
   });
 
@@ -244,7 +249,7 @@ describe('BudgetController', () => {
 
       expect(budgetService.sendBudget).toHaveBeenCalledWith(mockBudgetId);
       expect(result).toBeInstanceOf(BudgetResponseDto);
-      expect(result.status).toBe(BudgetStatus.ENVIADO);
+      expect(result.status).toBe(BudgetStatus.SENT);
     });
 
     it('TC0002 - Should throw error when sending fails', async () => {

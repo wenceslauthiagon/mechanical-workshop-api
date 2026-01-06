@@ -1,57 +1,298 @@
-name: CI/CD
+﻿name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ develop, main ]
+    branches: [main, develop, 'feature/**']
   pull_request:
-    branches: [ develop, main ]
-    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test:
-    name: Run tests
+  lint-and-test:
+    name: Lint and Test
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run tests
-        run: npm test -- --coverage --runInBand
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: coverage
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  build:
-    name: Build (push only)
-    needs: test
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
+          cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Generate Prisma Client
+        env:
+          PRISMA_GENERATE_SKIP_AUTOINSTALL: false
+          DATABASE_URL: file:./test.db
+        run: npx prisma generate --generator client
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: file:./test.db
+        run: npx prisma db push --skip-generate
+
       - name: Run tests
-        run: npm test --silent
-      - name: Build
-        run: npm run build
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
+        env:
+          DATABASE_URL: file:./test.db
+          JWT_SECRET: test-secret-key
+          NODE_ENV: test
+        run: npm run test:cov
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: always()
         with:
-          push: false
-          tags: ghcr.io/${{ github.repository }}:latest
-      - name: Deploy to Kubernetes
-        uses: azure/k8s-deploy@v3
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    outputs:
+      image-tag: ${{ steps.set-tag.outputs.tag }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
         with:
-          manifests: 'k8s/*.yaml'
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image tag
+        id: set-tag
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)
+          
+          if [ "$BRANCH_NAME" = "main" ]; then
+            TAG="latest"
+          else
+            TAG="${BRANCH_NAME}-${SHA_SHORT}"
+          fi
+          
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Building with tag: $TAG"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/creative-ia/mechanical-workshop-api:${{ steps.set-tag.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          target: production
+
+  deploy-to-kubernetes:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: workshop
+          wait: 30s
+
+      - name: Verify cluster
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Load Docker image to Kind
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
+          IMAGE_NAME="ghcr.io/creative-ia/mechanical-workshop-api:$IMAGE_TAG"
+          
+          echo "Pulling image: $IMAGE_NAME"
+          docker pull $IMAGE_NAME
+          
+          echo "Loading image into Kind cluster..."
+          kind load docker-image $IMAGE_NAME --name workshop
+          
+          echo "Image loaded successfully"
+
+      - name: Create namespace
+        run: kubectl apply -f k8s/namespace.yaml
+
+      - name: Deploy ConfigMap
+        run: kubectl apply -f k8s/configmap.yaml
+
+      - name: Deploy Secrets
+        run: kubectl apply -f k8s/secret.yaml
+
+      - name: Deploy PostgreSQL
+        run: |
+          kubectl apply -f k8s/postgres-deployment.yaml
+          echo "Waiting for PostgreSQL to be ready..."
+          kubectl wait --for=condition=available --timeout=120s deployment/postgres -n mechanical-workshop || true
+          kubectl get pods -n mechanical-workshop -l app=postgres
+
+      - name: Deploy Redis
+        run: |
+          kubectl apply -f k8s/redis-deployment.yaml
+          echo "Waiting for Redis to be ready..."
+          kubectl wait --for=condition=available --timeout=120s deployment/redis -n mechanical-workshop || true
+          kubectl get pods -n mechanical-workshop -l app=redis
+
+      - name: Deploy API
+        run: |
+          IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
+          IMAGE_NAME="ghcr.io/creative-ia/mechanical-workshop-api:$IMAGE_TAG"
+          
+          echo "Using image: $IMAGE_NAME"
+          
+          # Update image in deployment with IfNotPresent policy
+          sed -i "s|image: workshop-api:latest|image: $IMAGE_NAME|g" k8s/app-deployment.yaml
+          sed -i "s|imagePullPolicy: Always|imagePullPolicy: IfNotPresent|g" k8s/app-deployment.yaml
+          
+          kubectl apply -f k8s/app-deployment.yaml
+          
+          echo "Waiting for API pods to be created..."
+          sleep 10
+          kubectl get pods -n mechanical-workshop -l app=workshop-api
+
+      - name: Deploy HPA
+        run: kubectl apply -f k8s/hpa.yaml
+
+      - name: Wait for deployments
+        run: |
+          echo "Checking deployment status..."
+          kubectl get deployments -n mechanical-workshop
+          
+          echo "\nWaiting for deployments to be ready (this may take a few minutes)..."
+          
+          # Check pods status before waiting
+          echo "\nCurrent pods status:"
+          kubectl get pods -n mechanical-workshop
+          
+          # Describe failing pods if any
+          echo "\nDescribing API pods:"
+          kubectl describe pods -n mechanical-workshop -l app=workshop-api || true
+          
+          echo "\nChecking API logs:"
+          kubectl logs -n mechanical-workshop -l app=workshop-api --tail=50 || true
+
+      - name: Verify deployment
+        run: |
+          echo "=== Final Status ==="
+          echo "\nPods:"
+          kubectl get pods -n mechanical-workshop -o wide
+          echo "\nServices:"
+          kubectl get svc -n mechanical-workshop
+          echo "\nDeployments:"
+          kubectl get deployments -n mechanical-workshop
+          echo "\nHPA:"
+          kubectl get hpa -n mechanical-workshop
+          echo "\n=== Deployment verification complete ==="
+
+  deploy-with-terraform:
+    name: Deploy with Terraform
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-to-kubernetes]
+    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[terraform]')
+    
+    defaults:
+      run:
+        working-directory: ./infra
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.0"
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: workshop-terraform
+          wait: 30s
+
+      - name: Configure kubectl for Kind
+        run: |
+          kubectl config use-context kind-workshop-terraform
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            -var="kube_context=kind-workshop-terraform" \
+            -var="app_image=ghcr.io/creative-ia/mechanical-workshop-api:latest" \
+            -var="database_password=workshop123" \
+            -var="jwt_secret=default-jwt-secret-key"
+
+      - name: Terraform Apply
+        if: github.event_name == 'push'
+        run: |
+          terraform apply -auto-approve \
+            -var="kube_context=kind-workshop-terraform" \
+            -var="app_image=ghcr.io/creative-ia/mechanical-workshop-api:latest" \
+            -var="database_password=workshop123" \
+            -var="jwt_secret=default-jwt-secret-key"
+      
+      - name: Verify Terraform Deployment
+        run: |
+          echo "=== Terraform Deployment Verification ==="
+          kubectl get all -n mechanical-workshop
+          echo "=== Terraform deployment complete ==="
+
+  notify:
+    name: Notify Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-to-kubernetes]
+    if: always()
+    
+    steps:
+      - name: Notify Success
+        if: needs.deploy-to-kubernetes.result == 'success'
+        run: echo "Deployment successful!"
+
+      - name: Notify Failure
+        if: needs.deploy-to-kubernetes.result == 'failure'
+        run: |
+          echo "Deployment failed!"
+          exit 1

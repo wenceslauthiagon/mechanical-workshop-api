@@ -1,24 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-<<<<<<< HEAD
   name: pet-management-api
 spec:
   selector:
     app: pet-management-api
-=======
-  name: pet-management-service
-  namespace: pet-management
-spec:
-  selector:
-    app: pet-management
->>>>>>> origin/develop
   ports:
     - protocol: TCP
       port: 80
       targetPort: 3000
-<<<<<<< HEAD
   type: ClusterIP
-=======
-  type: LoadBalancer
->>>>>>> origin/develop

@@ -6,28 +6,28 @@ import {
   IsEmail,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CustomerType } from '@prisma/client';
+import { CustomerType } from '../../../../shared/enums/customer-type.enum';
 
 export class CreateCustomerDto {
   @ApiProperty({ description: 'Nome do cliente' })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiProperty({ description: 'Email do cliente' })
   @IsNotEmpty()
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({ description: 'Telefone do cliente' })
   @IsNotEmpty()
   @IsString()
-  phone: string;
+  phone!: string;
 
   @ApiProperty({ description: 'Endereço do cliente' })
   @IsNotEmpty()
   @IsString()
-  address: string;
+  address!: string;
 
   @ApiProperty({
     enum: CustomerType,
@@ -35,7 +35,7 @@ export class CreateCustomerDto {
   })
   @IsNotEmpty()
   @IsEnum(CustomerType)
-  type: CustomerType;
+  type!: CustomerType;
 
   @ApiProperty({
     description: 'CPF ou CNPJ do cliente',
@@ -43,7 +43,7 @@ export class CreateCustomerDto {
   })
   @IsNotEmpty()
   @IsString()
-  document: string;
+  document!: string;
 
   @ApiPropertyOptional({ description: 'Informações adicionais' })
   @IsOptional()

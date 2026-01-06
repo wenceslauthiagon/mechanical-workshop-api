@@ -8,12 +8,14 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { BudgetService } from '../../2-application/services/budget.service';
 import { CreateBudgetDto } from '../dtos/budget/create-budget.dto';
 import { BudgetResponseDto } from '../dtos/budget/budget-response.dto';
 import { BudgetWithRelationsResponseDto } from '../dtos/budget/budget-with-relations-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @ApiTags('Budgets')
 @Controller('budgets')
@@ -36,10 +38,26 @@ export class BudgetController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os orçamentos' })
+  @ApiOperation({ summary: 'Listar orçamentos com paginação' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de orçamentos',
+    description: 'Lista paginada de orçamentos',
+  })
+  async findAllPaginated(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<BudgetResponseDto>> {
+    const result = await this.budgetService.findAllPaginated(paginationDto);
+    return {
+      data: result.data.map((budget) => new BudgetResponseDto(budget)),
+      pagination: result.pagination,
+    };
+  }
+
+  @Get('all')
+  @ApiOperation({ summary: 'Listar todos os orçamentos (sem paginação)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista completa de orçamentos - use com cuidado em produção',
     type: [BudgetResponseDto],
   })
   async findAll(): Promise<BudgetResponseDto[]> {

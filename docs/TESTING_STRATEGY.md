@@ -207,7 +207,7 @@ module.exports = {
 ## Best Practices
 
 ### 1. Test Independence
-- Each test should be independent
+- Each test Should be independent
 - Clean database state between test suites
 - Use `beforeAll`, `beforeEach`, `afterAll`, `afterEach` appropriately
 

@@ -5,6 +5,8 @@ export interface IVehicleRepository {
     data: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Vehicle>;
   findAll(): Promise<Vehicle[]>;
+  findMany(skip: number, take: number): Promise<Vehicle[]>;
+  count(): Promise<number>;
   findById(id: string): Promise<Vehicle | null>;
   findByPlate(plate: string): Promise<Vehicle | null>;
   findByCustomerId(customerId: string): Promise<Vehicle[]>;

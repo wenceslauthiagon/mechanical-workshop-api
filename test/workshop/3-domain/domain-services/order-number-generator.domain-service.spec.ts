@@ -118,3 +118,88 @@ describe('OrderNumberGeneratorDomainService', () => {
     });
   });
 });
+
+describe('Legacy methods', () => {
+  let service: OrderNumberGeneratorDomainService;
+
+  beforeEach(() => {
+    service = new OrderNumberGeneratorDomainService();
+  });
+
+  describe('generateOrderNumber', () => {
+    it('TC0001 - Should generate legacy order number with default year', () => {
+      const result = service.generateOrderNumber();
+
+      expect(result).toMatch(/^OS-\d{4}-\d{6}$/);
+      expect(result).toContain(new Date().getFullYear().toString());
+    });
+
+    it('TC0002 - Should generate legacy order number with custom year', () => {
+      const result = service.generateOrderNumber(2023);
+
+      expect(result).toContain('OS-2023-');
+      expect(result).toMatch(/^OS-2023-\d{6}$/);
+    });
+
+    it('TC0003 - Should generate legacy order number with custom sequence', () => {
+      const result = service.generateOrderNumber(2024, 42);
+
+      expect(result).toBe('OS-2024-000042');
+    });
+
+    it('TC0004 - Should pad sequence number to 6 digits', () => {
+      const result = service.generateOrderNumber(2024, 1);
+
+      expect(result).toBe('OS-2024-000001');
+    });
+  });
+
+  describe('extractYearFromOrderNumber', () => {
+    it('TC0001 - Should extract year from legacy order number', () => {
+      const result = service.extractYearFromOrderNumber('OS-2024-000001');
+
+      expect(result).toBe(2024);
+    });
+
+    it('TC0002 - Should return null for invalid legacy order number', () => {
+      const result = service.extractYearFromOrderNumber('invalid');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('extractSequenceFromOrderNumber', () => {
+    it('TC0001 - Should extract sequence from legacy order number', () => {
+      const result = service.extractSequenceFromOrderNumber('OS-2024-000042');
+
+      expect(result).toBe(42);
+    });
+
+    it('TC0002 - Should return null for invalid legacy order number', () => {
+      const result = service.extractSequenceFromOrderNumber('invalid');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('isValidOrderNumber', () => {
+    it('TC0001 - Should return true for valid legacy order number', () => {
+      const result = service.isValidOrderNumber('OS-2024-000001');
+
+      expect(result).toBe(true);
+    });
+
+    it('TC0002 - Should return false for invalid legacy order number', () => {
+      const result = service.isValidOrderNumber('invalid');
+
+      expect(result).toBe(false);
+    });
+
+    it('TC0003 - Should return false for order number without padding', () => {
+      const result = service.isValidOrderNumber('OS-2024-1');
+
+      expect(result).toBe(false);
+    });
+  });
+});
+

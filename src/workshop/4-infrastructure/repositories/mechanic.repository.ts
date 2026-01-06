@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 import { ErrorHandlerService } from '../../../shared/services/error-handler.service';
 import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
 import {
@@ -45,14 +45,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINALIZADA &&
-            so.status !== ServiceOrderStatus.ENTREGUE,
+            (so.status as string) !== ServiceOrderStatus.FINISHED &&
+            (so.status as string) !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINALIZADA ||
-            so.status === ServiceOrderStatus.ENTREGUE,
+            (so.status as string) === ServiceOrderStatus.FINISHED ||
+            (so.status as string) === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -64,6 +64,46 @@ export class MechanicRepository implements IMechanicRepository {
     );
 
     return mechanicsWithStats;
+  }
+
+  async findMany(skip: number, take: number): Promise<MechanicWithStats[]> {
+    const mechanics = await this.prisma.mechanic.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const mechanicsWithStats = await Promise.all(
+      mechanics.map(async (mechanic) => {
+        const serviceOrders = await this.prisma.serviceOrder.findMany({
+          where: { mechanicId: mechanic.id },
+        });
+
+        const activeServiceOrders = serviceOrders.filter(
+          (so) =>
+            (so.status as string) !== ServiceOrderStatus.FINISHED &&
+            (so.status as string) !== ServiceOrderStatus.DELIVERED,
+        ).length;
+
+        const completedServiceOrders = serviceOrders.filter(
+          (so) =>
+            (so.status as string) === ServiceOrderStatus.FINISHED ||
+            (so.status as string) === ServiceOrderStatus.DELIVERED,
+        ).length;
+
+        return {
+          ...this.mapPrismaMechanic(mechanic),
+          activeServiceOrders,
+          completedServiceOrders,
+        };
+      }),
+    );
+
+    return mechanicsWithStats;
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.mechanic.count();
   }
 
   async findById(id: string): Promise<MechanicWithStats | null> {
@@ -79,14 +119,14 @@ export class MechanicRepository implements IMechanicRepository {
 
     const activeServiceOrders = serviceOrders.filter(
       (so) =>
-        so.status !== ServiceOrderStatus.FINALIZADA &&
-        so.status !== ServiceOrderStatus.ENTREGUE,
+        (so.status as string) !== ServiceOrderStatus.FINISHED &&
+        (so.status as string) !== ServiceOrderStatus.DELIVERED,
     ).length;
 
     const completedServiceOrders = serviceOrders.filter(
       (so) =>
-        so.status === ServiceOrderStatus.FINALIZADA ||
-        so.status === ServiceOrderStatus.ENTREGUE,
+        (so.status as string) === ServiceOrderStatus.FINISHED ||
+        (so.status as string) === ServiceOrderStatus.DELIVERED,
     ).length;
 
     return {
@@ -121,14 +161,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINALIZADA &&
-            so.status !== ServiceOrderStatus.ENTREGUE,
+            (so.status as string) !== ServiceOrderStatus.FINISHED &&
+            (so.status as string) !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINALIZADA ||
-            so.status === ServiceOrderStatus.ENTREGUE,
+            (so.status as string) === ServiceOrderStatus.FINISHED ||
+            (so.status as string) === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -167,14 +207,14 @@ export class MechanicRepository implements IMechanicRepository {
 
         const activeServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status !== ServiceOrderStatus.FINALIZADA &&
-            so.status !== ServiceOrderStatus.ENTREGUE,
+            (so.status as string) !== ServiceOrderStatus.FINISHED &&
+            (so.status as string) !== ServiceOrderStatus.DELIVERED,
         ).length;
 
         const completedServiceOrders = serviceOrders.filter(
           (so) =>
-            so.status === ServiceOrderStatus.FINALIZADA ||
-            so.status === ServiceOrderStatus.ENTREGUE,
+            (so.status as string) === ServiceOrderStatus.FINISHED ||
+            (so.status as string) === ServiceOrderStatus.DELIVERED,
         ).length;
 
         return {
@@ -264,14 +304,14 @@ export class MechanicRepository implements IMechanicRepository {
 
     const activeOrders = serviceOrders.filter(
       (so) =>
-        so.status !== ServiceOrderStatus.FINALIZADA &&
-        so.status !== ServiceOrderStatus.ENTREGUE,
+        (so.status as string) !== ServiceOrderStatus.FINISHED &&
+        (so.status as string) !== ServiceOrderStatus.DELIVERED,
     ).length;
 
     const completedThisMonth = serviceOrders.filter(
       (so) =>
-        (so.status === ServiceOrderStatus.FINALIZADA ||
-          so.status === ServiceOrderStatus.ENTREGUE) &&
+        ((so.status as string) === ServiceOrderStatus.FINISHED ||
+          (so.status as string) === ServiceOrderStatus.DELIVERED) &&
         so.completedAt &&
         so.completedAt >= startOfMonth,
     ).length;
@@ -343,3 +383,5 @@ export class MechanicRepository implements IMechanicRepository {
     };
   }
 }
+
+

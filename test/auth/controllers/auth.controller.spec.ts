@@ -1,13 +1,13 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '@prisma/client';
 
 import { AuthController } from '../../../src/auth/controllers/auth.controller';
 import { AuthService } from '../../../src/auth/services/auth.service';
 import { UserService } from '../../../src/auth/services/user.service';
 import { LoginDto } from '../../../src/auth/dto/login.dto';
 import { CreateUserDto } from '../../../src/auth/dto/create-user.dto';
+import { UserRole } from '../../../src/shared/enums/user-role.enum';
 
 describe('AuthController', () => {
   let controller: AuthController;

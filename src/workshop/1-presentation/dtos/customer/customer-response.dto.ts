@@ -1,39 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CustomerType } from '@prisma/client';
+import { CustomerType } from '../../../../shared/enums/customer-type.enum';
 
 export class CustomerResponseDto {
   @ApiProperty({ description: 'ID do cliente' })
-  id: string;
+  id!: string;
 
   @ApiProperty({ description: 'Nome do cliente' })
-  name: string;
+  name!: string;
 
   @ApiProperty({ description: 'Email do cliente' })
-  email: string;
+  email!: string;
 
   @ApiProperty({ description: 'Telefone do cliente' })
-  phone: string;
+  phone!: string;
 
   @ApiProperty({ description: 'Endereço do cliente' })
-  address: string;
+  address!: string;
 
   @ApiProperty({
     enum: CustomerType,
     description: 'Tipo do cliente (PESSOA_FISICA ou PESSOA_JURIDICA)',
   })
-  type: CustomerType;
+  type!: CustomerType;
 
   @ApiProperty({ description: 'CPF ou CNPJ do cliente' })
-  document: string;
+  document!: string;
 
   @ApiProperty({ description: 'Informações adicionais' })
-  additionalInfo: string | null;
+  additionalInfo!: string | null;
 
   @ApiProperty({ description: 'Data de criação' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({ description: 'Data de atualização' })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @ApiProperty({
     description: 'Veículos do cliente',

@@ -7,6 +7,10 @@ class TestDomainEvent extends BaseDomainEvent {
   constructor(public readonly testData: string) {
     super();
   }
+
+  getEventName(): string {
+    return 'TestDomainEvent';
+  }
 }
 
 describe('BaseDomainEvent', () => {

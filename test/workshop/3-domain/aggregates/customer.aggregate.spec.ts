@@ -1,5 +1,5 @@
-import { CustomerType } from '@prisma/client';
 import { faker } from '@faker-js/faker/locale/pt_BR';
+import { CustomerType } from '../../../../src/shared/enums/customer-type.enum';
 
 import { CustomerAggregate } from '../../../../src/workshop/3-domain/aggregates/customer.aggregate';
 

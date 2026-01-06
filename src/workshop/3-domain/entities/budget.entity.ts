@@ -46,7 +46,7 @@ export class BudgetEntity {
       discount,
       total,
       validUntil,
-      BudgetStatus.RASCUNHO,
+      BudgetStatus.DRAFT,
       undefined,
       undefined,
       undefined,
@@ -54,7 +54,7 @@ export class BudgetEntity {
   }
 
   approve(): BudgetEntity {
-    if (this.status !== BudgetStatus.ENVIADO) {
+    if (this.status !== BudgetStatus.SENT) {
       throw new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_APPROVED);
     }
 
@@ -72,7 +72,7 @@ export class BudgetEntity {
       this.discount,
       this.total,
       this.validUntil,
-      BudgetStatus.APROVADO,
+      BudgetStatus.APPROVED,
       this.sentAt,
       new Date(),
       undefined,
@@ -82,7 +82,7 @@ export class BudgetEntity {
   }
 
   reject(): BudgetEntity {
-    if (this.status !== BudgetStatus.ENVIADO) {
+    if (this.status !== BudgetStatus.SENT) {
       throw new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_REJECTED);
     }
 
@@ -96,7 +96,7 @@ export class BudgetEntity {
       this.discount,
       this.total,
       this.validUntil,
-      BudgetStatus.REJEITADO,
+      BudgetStatus.REJECTED,
       this.sentAt,
       undefined,
       new Date(),
@@ -106,7 +106,7 @@ export class BudgetEntity {
   }
 
   send(): BudgetEntity {
-    if (this.status !== BudgetStatus.RASCUNHO) {
+    if (this.status !== BudgetStatus.DRAFT) {
       throw new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_DRAFT_CAN_BE_SENT);
     }
 
@@ -120,7 +120,7 @@ export class BudgetEntity {
       this.discount,
       this.total,
       this.validUntil,
-      BudgetStatus.ENVIADO,
+      BudgetStatus.SENT,
       new Date(),
       undefined,
       undefined,
@@ -134,7 +134,7 @@ export class BudgetEntity {
   }
 
   canBeModified(): boolean {
-    return this.status === BudgetStatus.RASCUNHO;
+    return this.status === BudgetStatus.DRAFT;
   }
 }
 
@@ -150,9 +150,9 @@ export interface BudgetItem {
 }
 
 export enum BudgetStatus {
-  RASCUNHO = 'RASCUNHO',
-  ENVIADO = 'ENVIADO',
-  APROVADO = 'APROVADO',
-  REJEITADO = 'REJEITADO',
-  EXPIRADO = 'EXPIRADO',
+  DRAFT = 'DRAFT',
+  SENT = 'SENT',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  EXPIRED = 'EXPIRED',
 }

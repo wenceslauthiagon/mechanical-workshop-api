@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CustomerType } from '../../../../src/shared/enums/customer-type.enum';
 import { v4 as uuidv4 } from 'uuid';
-import { CustomerType } from '@prisma/client';
 
 import { CustomerController } from '../../../../src/workshop/1-presentation/controllers/customer.controller';
 import { CustomerService } from '../../../../src/workshop/2-application/services/customer.service';
@@ -80,6 +80,7 @@ describe('CustomerController', () => {
           useValue: {
             create: jest.fn(),
             findAll: jest.fn(),
+            findAllPaginated: jest.fn(),
             findByDocument: jest.fn(),
             findById: jest.fn(),
             update: jest.fn(),
@@ -167,6 +168,50 @@ describe('CustomerController', () => {
 
       await expect(customerController.findAll()).rejects.toThrow(mockError);
       expect(customerService.findAll).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated customers', async () => {
+      const mockCustomers = [mockCustomerData];
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: mockCustomers,
+        pagination: { page: 0, totalPages: 1, totalRecords: 1 },
+      };
+
+      customerService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await customerController.findAllPaginated(
+        paginationDto as any,
+      );
+
+      expect(customerService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toEqual(mockCustomerResponseDto);
+      expect(result.pagination.totalRecords).toBe(1);
+    });
+
+    it('TC0002 - Should return empty paginated result', async () => {
+      const paginationDto = { page: 0, size: 10 };
+      const mockPaginatedResult = {
+        data: [],
+        pagination: { page: 0, totalPages: 0, totalRecords: 0 },
+      };
+
+      customerService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
+
+      const result = await customerController.findAllPaginated(
+        paginationDto as any,
+      );
+
+      expect(customerService.findAllPaginated).toHaveBeenCalledWith(
+        paginationDto,
+      );
+      expect(result.data).toHaveLength(0);
+      expect(result.pagination.totalRecords).toBe(0);
     });
   });
 

@@ -16,6 +16,7 @@ import { CreateMechanicDto } from '../dtos/mechanic/create-mechanic.dto';
 import { UpdateMechanicDto } from '../dtos/mechanic/update-mechanic.dto';
 import { MechanicResponseDto } from '../dtos/mechanic/mechanic-response.dto';
 import { SERVICE_ORDER_CONSTANTS } from '../../../shared/constants/mechanic.constants';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @ApiTags('Mechanics')
 @Controller('mechanics')
@@ -32,6 +33,17 @@ export class MechanicController {
   }
 
   @Get()
+  async findAllPaginated(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<MechanicResponseDto>> {
+    const result = await this.mechanicService.findAllPaginated(paginationDto);
+    return {
+      data: result.data.map((mechanic) => new MechanicResponseDto(mechanic)),
+      pagination: result.pagination,
+    };
+  }
+
+  @Get('all')
   async findAll(): Promise<MechanicResponseDto[]> {
     const mechanics = await this.mechanicService.findAll();
     return mechanics.map((mechanic) => new MechanicResponseDto(mechanic));

@@ -5,6 +5,8 @@ export interface ICustomerRepository {
     data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Customer>;
   findAll(): Promise<Customer[]>;
+  findMany(skip: number, take: number): Promise<Customer[]>;
+  count(): Promise<number>;
   findById(id: string): Promise<Customer | null>;
   findByEmail(email: string): Promise<Customer | null>;
   findByDocument(document: string): Promise<Customer | null>;

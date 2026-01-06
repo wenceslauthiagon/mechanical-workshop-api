@@ -85,7 +85,7 @@ describe('Document', () => {
     it('TC0001 - Should format CPF correctly', () => {
       const document = new Document('52998224725');
 
-      const result = document.formatted;
+      const result = document.getFormatted();
 
       expect(result).toBe('529.982.247-25');
     });
@@ -93,7 +93,7 @@ describe('Document', () => {
     it('TC0002 - Should format CNPJ correctly', () => {
       const document = new Document('11222333000181');
 
-      const result = document.formatted;
+      const result = document.getFormatted();
 
       expect(result).toBe('11.222.333/0001-81');
     });
@@ -126,6 +126,52 @@ describe('Document', () => {
       const result = document.toString();
 
       expect(result).toBe('52998224725');
+    });
+  });
+
+  describe('getValue', () => {
+    it('TC0001 - Should return document value', () => {
+      const document = new Document('52998224725');
+
+      const result = document.getValue();
+
+      expect(result).toBe('52998224725');
+    });
+  });
+
+  describe('isCPF', () => {
+    it('TC0001 - Should return true for CPF', () => {
+      const document = new Document('52998224725');
+
+      const result = document.isCPF();
+
+      expect(result).toBe(true);
+    });
+
+    it('TC0002 - Should return false for CNPJ', () => {
+      const document = new Document('11222333000181');
+
+      const result = document.isCPF();
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isCNPJ', () => {
+    it('TC0001 - Should return true for CNPJ', () => {
+      const document = new Document('11222333000181');
+
+      const result = document.isCNPJ();
+
+      expect(result).toBe(true);
+    });
+
+    it('TC0002 - Should return false for CPF', () => {
+      const document = new Document('52998224725');
+
+      const result = document.isCNPJ();
+
+      expect(result).toBe(false);
     });
   });
 });

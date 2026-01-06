@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 import { UserService } from '../../../src/auth/services/user.service';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { ErrorHandlerService } from '../../../src/shared/services/error-handler.service';
+import { UserRole } from '../../../src/shared/enums/user-role.enum';
 
 // Mock bcrypt
 jest.mock('bcryptjs');
@@ -58,20 +58,23 @@ describe('UserService', () => {
         findUnique: jest
           .fn()
           .mockImplementation(() => Promise.resolve(mockUser)),
-        findMany: jest
-          .fn()
-          .mockImplementation(() => Promise.resolve([mockSafeUser])),
-        update: jest
-          .fn()
-          .mockImplementation(() => Promise.resolve(mockSafeUser)),
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve(null)),
+        findMany: jest.fn().mockImplementation(() => Promise.resolve([mockUser])),
+        update: jest.fn().mockImplementation(() => Promise.resolve(mockUser)),
         count: jest.fn().mockImplementation(() => Promise.resolve(0)),
       },
     };
 
     const mockErrorHandler = {
-      generateException: jest.fn(),
-      handleError: jest.fn(),
-      handleConflictError: jest.fn(),
+      handleConflictError: jest.fn().mockImplementation((msg) => {
+        throw new Error(msg);
+      }),
+      handleNotFoundError: jest.fn().mockImplementation((msg) => {
+        throw new Error(msg);
+      }),
+      handleError: jest.fn().mockImplementation((err) => {
+        throw err;
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -89,65 +92,8 @@ describe('UserService', () => {
     }).compile();
 
     service = module.get<UserService>(UserService);
-    prismaService = module.get<jest.Mocked<PrismaService>>(PrismaService);
-    errorHandler =
-      module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
-
-    // Reset bcrypt mocks
-    mockedBcrypt.hash.mockReset();
-    mockedBcrypt.compare.mockReset();
-  });
-
-  it('Should be defined', () => {
-    expect(service).toBeDefined();
-    expect(service).toBeInstanceOf(UserService);
-  });
-
-  it('Should instantiate with service dependencies', () => {
-    const testService = new UserService(prismaService, errorHandler);
-    expect(testService).toBeDefined();
-  });
-
-  describe('create', () => {
-    it('TC0001 - Should create user successfully', async () => {
-      mockedBcrypt.hash.mockResolvedValue(mockHashedPassword as never);
-      (prismaService.user.create as jest.Mock).mockResolvedValue(mockUser);
-
-      const result = await service.create(mockCreateUserData);
-
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith(mockPassword, 10);
-      expect(prismaService.user.create).toHaveBeenCalledWith({
-        data: {
-          username: mockCreateUserData.username,
-          email: mockCreateUserData.email,
-          passwordHash: mockHashedPassword,
-          role: mockCreateUserData.role || UserRole.EMPLOYEE,
-        },
-      });
-      expect(result).toEqual(mockUser);
-    });
-
-    it('TC0002 - Should create user with default EMPLOYEE role', async () => {
-      const userDataWithoutRole = {
-        username: mockUsername,
-        email: mockEmail,
-        password: mockPassword,
-      };
-
-      mockedBcrypt.hash.mockResolvedValue(mockHashedPassword as never);
-      (prismaService.user.create as jest.Mock).mockResolvedValue(mockUser);
-
-      await service.create(userDataWithoutRole);
-
-      expect(prismaService.user.create).toHaveBeenCalledWith({
-        data: {
-          username: userDataWithoutRole.username,
-          email: userDataWithoutRole.email,
-          passwordHash: mockHashedPassword,
-          role: UserRole.EMPLOYEE,
-        },
-      });
-    });
+    prismaService = module.get(PrismaService);
+    errorHandler = module.get(ErrorHandlerService);
   });
 
   describe('createFirstAdmin', () => {
@@ -182,6 +128,84 @@ describe('UserService', () => {
       ).rejects.toThrow('Usuários já existem');
 
       expect(prismaService.user.count).toHaveBeenCalled();
+      expect(errorHandler.handleConflictError).toHaveBeenCalled();
+    });
+  });
+
+  describe('create', () => {
+    it('TC0001 - Should create user successfully', async () => {
+      mockedBcrypt.hash.mockResolvedValue(mockHashedPassword as never);
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (prismaService.user.create as jest.Mock).mockResolvedValue(mockUser);
+
+      const result = await service.create(mockCreateUserData);
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            { username: mockCreateUserData.username },
+            { email: mockCreateUserData.email },
+          ],
+        },
+      });
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(mockCreateUserData.password, 10);
+      expect(prismaService.user.create).toHaveBeenCalledWith({
+        data: {
+          username: mockCreateUserData.username,
+          email: mockCreateUserData.email,
+          passwordHash: mockHashedPassword,
+          role: mockCreateUserData.role,
+        },
+      });
+      expect(result).toEqual(mockUser);
+    });
+
+    it('TC0002 - Should throw error when username already exists', async () => {
+      const existingUser = { ...mockUser, username: mockCreateUserData.username };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(existingUser);
+      errorHandler.handleConflictError.mockImplementation(() => {
+        throw new Error('Nome de usuário já existe');
+      });
+
+      await expect(service.create(mockCreateUserData)).rejects.toThrow(
+        'Nome de usuário já existe',
+      );
+
+      expect(prismaService.user.findFirst).toHaveBeenCalled();
+      expect(errorHandler.handleConflictError).toHaveBeenCalled();
+    });
+
+    it('TC0003 - Should throw error when email already exists', async () => {
+      const existingUser = { ...mockUser, email: mockCreateUserData.email, username: 'different' };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(existingUser);
+      errorHandler.handleConflictError.mockImplementation(() => {
+        throw new Error('E-mail já cadastrado');
+      });
+
+      await expect(service.create(mockCreateUserData)).rejects.toThrow(
+        'E-mail já cadastrado',
+      );
+
+      expect(prismaService.user.findFirst).toHaveBeenCalled();
+      expect(errorHandler.handleConflictError).toHaveBeenCalled();
+    });
+
+    it('TC0004 - Should handle P2002 unique constraint error', async () => {
+      mockedBcrypt.hash.mockResolvedValue(mockHashedPassword as never);
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      const prismaError = {
+        code: 'P2002',
+        meta: { target: ['username'] },
+      };
+      (prismaService.user.create as jest.Mock).mockRejectedValue(prismaError);
+      errorHandler.handleConflictError.mockImplementation(() => {
+        throw new Error('username já existe');
+      });
+
+      await expect(service.create(mockCreateUserData)).rejects.toThrow(
+        'username já existe',
+      );
+
       expect(errorHandler.handleConflictError).toHaveBeenCalled();
     });
   });

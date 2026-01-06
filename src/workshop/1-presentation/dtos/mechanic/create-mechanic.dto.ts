@@ -18,14 +18,14 @@ export class CreateMechanicDto {
   })
   @IsString()
   @Length(2, 100)
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'Email do mecânico',
     example: 'joao.silva@oficina.com',
   })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiPropertyOptional({
     description: 'Telefone de contato',
@@ -43,7 +43,7 @@ export class CreateMechanicDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsString({ each: true })
-  specialties: string[];
+  specialties!: string[];
 
   @ApiPropertyOptional({
     description: 'Anos de experiência profissional',

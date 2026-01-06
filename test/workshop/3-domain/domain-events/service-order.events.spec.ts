@@ -1,4 +1,3 @@
-import { ServiceOrderStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 import {
   ServiceOrderCreatedEvent,
@@ -6,6 +5,7 @@ import {
   ServiceOrderCompletedEvent,
   ServiceOrderDeliveredEvent,
 } from '../../../../src/workshop/3-domain/domain-events/service-order.events';
+import { ServiceOrderStatus } from '../../../../src/shared/enums/service-order-status.enum';
 
 describe('ServiceOrderCreatedEvent', () => {
   it('TC0001 - Should create event with all required properties', () => {
@@ -31,6 +31,7 @@ describe('ServiceOrderCreatedEvent', () => {
     expect(event.eventId).toBeDefined();
     expect(event.occurredOn).toBeInstanceOf(Date);
     expect(event.eventVersion).toBe(1);
+    expect(event.getEventName()).toBe('ServiceOrderCreated');
   });
 });
 
@@ -38,8 +39,8 @@ describe('ServiceOrderStatusChangedEvent', () => {
   it('TC0001 - Should create event with all required properties and notes', () => {
     const serviceOrderId = faker.string.uuid();
     const orderNumber = 'OS-2024-001';
-    const previousStatus = ServiceOrderStatus.RECEBIDA;
-    const newStatus = ServiceOrderStatus.EM_EXECUCAO;
+    const previousStatus = ServiceOrderStatus.RECEIVED;
+    const newStatus = ServiceOrderStatus.IN_EXECUTION;
     const notes = faker.lorem.sentence();
 
     const event = new ServiceOrderStatusChangedEvent(
@@ -58,13 +59,14 @@ describe('ServiceOrderStatusChangedEvent', () => {
     expect(event.eventId).toBeDefined();
     expect(event.occurredOn).toBeInstanceOf(Date);
     expect(event.eventVersion).toBe(1);
+    expect(event.getEventName()).toBe('ServiceOrderStatusChanged');
   });
 
   it('TC0002 - Should create event without notes', () => {
     const serviceOrderId = faker.string.uuid();
     const orderNumber = 'OS-2024-001';
-    const previousStatus = ServiceOrderStatus.RECEBIDA;
-    const newStatus = ServiceOrderStatus.EM_EXECUCAO;
+    const previousStatus = ServiceOrderStatus.RECEIVED;
+    const newStatus = ServiceOrderStatus.IN_EXECUTION;
 
     const event = new ServiceOrderStatusChangedEvent(
       serviceOrderId,
@@ -109,6 +111,7 @@ describe('ServiceOrderCompletedEvent', () => {
     expect(event.eventId).toBeDefined();
     expect(event.occurredOn).toBeInstanceOf(Date);
     expect(event.eventVersion).toBe(1);
+    expect(event.getEventName()).toBe('ServiceOrderCompleted');
   });
 });
 
@@ -133,5 +136,6 @@ describe('ServiceOrderDeliveredEvent', () => {
     expect(event.eventId).toBeDefined();
     expect(event.occurredOn).toBeInstanceOf(Date);
     expect(event.eventVersion).toBe(1);
+    expect(event.getEventName()).toBe('ServiceOrderDelivered');
   });
 });

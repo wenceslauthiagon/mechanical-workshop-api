@@ -1,4 +1,4 @@
-import { ServiceOrderStatus } from '@prisma/client';
+import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 
 export interface ServiceOrderPolicy {
   canTransition(
@@ -13,17 +13,17 @@ export class DefaultServiceOrderPolicy implements ServiceOrderPolicy {
     ServiceOrderStatus,
     ServiceOrderStatus[]
   > = {
-    [ServiceOrderStatus.RECEBIDA]: [ServiceOrderStatus.EM_DIAGNOSTICO],
-    [ServiceOrderStatus.EM_DIAGNOSTICO]: [
-      ServiceOrderStatus.AGUARDANDO_APROVACAO,
+    [ServiceOrderStatus.RECEIVED]: [ServiceOrderStatus.IN_DIAGNOSIS],
+    [ServiceOrderStatus.IN_DIAGNOSIS]: [
+      ServiceOrderStatus.AWAITING_APPROVAL,
     ],
-    [ServiceOrderStatus.AGUARDANDO_APROVACAO]: [
-      ServiceOrderStatus.EM_EXECUCAO,
-      ServiceOrderStatus.EM_DIAGNOSTICO,
+    [ServiceOrderStatus.AWAITING_APPROVAL]: [
+      ServiceOrderStatus.IN_EXECUTION,
+      ServiceOrderStatus.IN_DIAGNOSIS,
     ],
-    [ServiceOrderStatus.EM_EXECUCAO]: [ServiceOrderStatus.FINALIZADA],
-    [ServiceOrderStatus.FINALIZADA]: [ServiceOrderStatus.ENTREGUE],
-    [ServiceOrderStatus.ENTREGUE]: [],
+    [ServiceOrderStatus.IN_EXECUTION]: [ServiceOrderStatus.FINISHED],
+    [ServiceOrderStatus.FINISHED]: [ServiceOrderStatus.DELIVERED],
+    [ServiceOrderStatus.DELIVERED]: [],
   };
 
   canTransition(

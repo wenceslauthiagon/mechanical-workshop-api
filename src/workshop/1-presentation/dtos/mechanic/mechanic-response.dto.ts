@@ -95,17 +95,17 @@ export class MechanicWorkloadDto {
     description: 'Número de ordens ativas',
     example: 3,
   })
-  activeOrders: number;
+  activeOrders!: number;
 
   @ApiProperty({
     description: 'Número de ordens concluídas neste mês',
     example: 8,
   })
-  completedThisMonth: number;
+  completedThisMonth!: number;
 
   @ApiProperty({
     description: 'Tempo médio de conclusão em horas',
     example: 4.5,
   })
-  averageCompletionTime: number;
+  averageCompletionTime!: number;
 }

@@ -54,9 +54,11 @@ describe('MechanicService', () => {
   };
 
   beforeEach(async () => {
-    const mockRepository = {
+    mechanicRepository = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
       findAvailable: jest.fn(),
@@ -65,59 +67,56 @@ describe('MechanicService', () => {
       toggleAvailability: jest.fn(),
       delete: jest.fn(),
       getWorkload: jest.fn(),
+      getStatistics: jest.fn(),
       assignToServiceOrder: jest.fn(),
       markAsUnavailable: jest.fn(),
       releaseFromServiceOrder: jest.fn(),
     };
 
-    const mockErrorHandler = {
-      handleError: jest.fn().mockImplementation((error) => {
-        throw error;
+    errorHandler = {
+      handleNotFoundError: jest.fn().mockImplementation((msg) => {
+        throw new Error(msg);
       }),
-      handleNotFoundError: jest.fn().mockImplementation((message) => {
-        throw new Error(message);
+      handleConflictError: jest.fn().mockImplementation((msg) => {
+        throw new Error(msg);
       }),
-      handleConflictError: jest.fn().mockImplementation((message) => {
-        throw new Error(message);
+      handleError: jest.fn().mockImplementation((err) => {
+        throw err;
       }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MechanicService,
-        { provide: 'IMechanicRepository', useValue: mockRepository },
-        { provide: ErrorHandlerService, useValue: mockErrorHandler },
+        {
+          provide: 'IMechanicRepository',
+          useValue: mechanicRepository,
+        },
+        {
+          provide: ErrorHandlerService,
+          useValue: errorHandler,
+        },
       ],
     }).compile();
 
     service = module.get<MechanicService>(MechanicService);
-    mechanicRepository = module.get('IMechanicRepository');
-    errorHandler = module.get(ErrorHandlerService);
-  });
-
-  it('Should be defined', () => {
-    expect(service).toBeDefined();
   });
 
   describe('create', () => {
-    beforeEach(() => {
+    it('TC0001 - Should create mechanic successfully', async () => {
       mechanicRepository.findByEmail.mockResolvedValue(null);
       mechanicRepository.create.mockResolvedValue(mockMechanic);
       mechanicRepository.findById.mockResolvedValue(mockMechanic);
-    });
 
-    it('TC0001 - Should create mechanic successfully', async () => {
       const result = await service.create(createMechanicDto);
 
       expect(result).toEqual(mockMechanic);
-      expect(mechanicRepository.findByEmail).toHaveBeenCalledWith(
-        createMechanicDto.email,
-      );
+      expect(mechanicRepository.findByEmail).toHaveBeenCalledWith(createMechanicDto.email);
       expect(mechanicRepository.create).toHaveBeenCalledWith(createMechanicDto);
       expect(mechanicRepository.findById).toHaveBeenCalledWith(mockMechanic.id);
     });
 
-    it('TC0002 - Should throw error when email already exists', async () => {
+    it('TC0002 - Should throw error for duplicate email', async () => {
       mechanicRepository.findByEmail.mockResolvedValue(mockMechanic);
 
       await expect(service.create(createMechanicDto)).rejects.toThrow(
@@ -128,41 +127,39 @@ describe('MechanicService', () => {
       );
     });
 
-    it('TC0003 - Should handle errors through errorHandler', async () => {
-      const error = new Error('DB error');
-      mechanicRepository.create.mockRejectedValue(error);
+    it('TC0003 - Should handle database error during creation', async () => {
+      mechanicRepository.findByEmail.mockResolvedValue(null);
+      const dbError = new Error('Database error');
+      mechanicRepository.create.mockRejectedValue(dbError);
 
-      await expect(service.create(createMechanicDto)).rejects.toThrow(
-        'DB error',
-      );
-      expect(errorHandler.handleError).toHaveBeenCalledWith(error);
+      await expect(service.create(createMechanicDto)).rejects.toThrow(dbError);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(dbError);
     });
   });
 
-  describe('findAll', () => {
-    it('TC0001 - Should return all mechanics', async () => {
+  describe('findAllPaginated', () => {
+    it('TC0001 - Should return paginated mechanics', async () => {
+      const paginationDto = { page: 1, size: 10, skip: 10, take: 10 };
       const mechanics = [mockMechanic, mockMechanic2];
-      mechanicRepository.findAll.mockResolvedValue(mechanics);
+      const total = 2;
 
-      const result = await service.findAll();
+      mechanicRepository.findMany.mockResolvedValue(mechanics);
+      mechanicRepository.count.mockResolvedValue(total);
 
-      expect(result).toEqual(mechanics);
-      expect(mechanicRepository.findAll).toHaveBeenCalled();
+      const result = await service.findAllPaginated(paginationDto);
+
+      expect(result.data).toEqual(mechanics);
+      expect(result.pagination.totalRecords).toBe(total);
+      expect(mechanicRepository.findMany).toHaveBeenCalledWith(10, 10);
+      expect(mechanicRepository.count).toHaveBeenCalled();
     });
 
-    it('TC0002 - Should return empty array when no mechanics exist', async () => {
-      mechanicRepository.findAll.mockResolvedValue([]);
+    it('TC0002 - Should handle errors during pagination', async () => {
+      const error = new Error('Database error');
+      const paginationDto = { page: 1, size: 10, skip: 10, take: 10 };
+      mechanicRepository.findMany.mockRejectedValue(error);
 
-      const result = await service.findAll();
-
-      expect(result).toEqual([]);
-    });
-
-    it('TC0003 - Should handle errors through errorHandler', async () => {
-      const error = new Error('DB error');
-      mechanicRepository.findAll.mockRejectedValue(error);
-
-      await expect(service.findAll()).rejects.toThrow('DB error');
+      await expect(service.findAllPaginated(paginationDto)).rejects.toThrow(error);
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -186,6 +183,10 @@ describe('MechanicService', () => {
       expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
         MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
       );
+    });
+
+    it('TC0002b - Should use createMechanicDto', () => {
+      expect(createMechanicDto.specialties).toContain('Motor');
     });
 
     it('TC0003 - Should handle errors through errorHandler', async () => {

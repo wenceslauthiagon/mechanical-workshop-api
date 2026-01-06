@@ -1,4 +1,4 @@
-import { CustomerType } from '@prisma/client';
+import { CustomerType } from '../../../shared/enums/customer-type.enum';
 import { Email, Document } from '../value-objects';
 
 export interface CustomerAddress {
@@ -145,6 +145,6 @@ export class CustomerAggregate {
   }
 
   getDocumentFormatted(): string {
-    return this._document.formatted;
+    return this._document.getFormatted();
   }
 }

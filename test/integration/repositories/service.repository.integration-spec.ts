@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { ServiceRepository } from '../../../src/workshop/4-infrastructure/repositories/service.repository';
 import { faker } from '@faker-js/faker/locale/pt_BR';
@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker/locale/pt_BR';
 const createMockServiceData = () => ({
   name: faker.commerce.productName(),
   description: faker.commerce.productDescription(),
-  price: new Prisma.Decimal(faker.number.float({ min: 50, max: 500 })),
+  price: faker.number.float({ min: 50, max: 500 }),
   estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
   category: faker.helpers.arrayElement([
     'Manutenção',
@@ -32,19 +32,21 @@ describe('Service Repository Integration Tests', () => {
     serviceRepository = module.get<ServiceRepository>(ServiceRepository);
 
     // Clean database before tests
-    await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    const isSqlite = process.env.DATABASE_URL?.includes('sqlite');
+    if (isSqlite) {
+      await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    }
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
-    await prisma.budgetItem.deleteMany();
-    await prisma.budget.deleteMany();
     await prisma.serviceOrder.deleteMany();
     await prisma.vehicle.deleteMany();
     await prisma.customer.deleteMany();
-    await prisma.mechanic.deleteMany();
     await prisma.service.deleteMany();
     await prisma.part.deleteMany();
-    await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
+    if (isSqlite) {
+      await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
+    }
   });
 
   afterAll(async () => {
@@ -60,8 +62,8 @@ describe('Service Repository Integration Tests', () => {
       expect(service).toHaveProperty('id');
       expect(service.name).toBe(serviceData.name);
       expect(service.description).toBe(serviceData.description);
-      expect(service.price.toNumber()).toBeCloseTo(
-        serviceData.price.toNumber(),
+      expect(Number(service.price)).toBeCloseTo(
+        Number(serviceData.price),
         2,
       );
       expect(service.estimatedMinutes).toBe(serviceData.estimatedMinutes);
@@ -187,13 +189,13 @@ describe('Service Repository Integration Tests', () => {
     });
 
     it('TC0001 - Should update service price', async () => {
-      const newPrice = new Prisma.Decimal(450.0);
+      const newPrice = 450.0;
       const updatedService = await serviceRepository.update(updateServiceId, {
         price: newPrice,
       });
 
       expect(updatedService.id).toBe(updateServiceId);
-      expect(updatedService.price.toNumber()).toBe(450.0);
+      expect(Number(updatedService.price)).toBe(450.0);
       expect(updatedService.name).toBe(updateServiceName);
     });
 
@@ -209,16 +211,19 @@ describe('Service Repository Integration Tests', () => {
     });
 
     it('TC0003 - Should update service to inactive', async () => {
+      const newPrice = 275.0;
       const updatedService = await serviceRepository.update(updateServiceId, {
+        price: newPrice,
         isActive: false,
       });
 
       expect(updatedService.id).toBe(updateServiceId);
+      expect(Number(updatedService.price)).toBe(275.0);
       expect(updatedService.isActive).toBe(false);
     });
 
     it('TC0004 - Should update multiple service fields', async () => {
-      const newPrice = new Prisma.Decimal(500.0);
+      const newPrice = 500.0;
       const updatedService = await serviceRepository.update(updateServiceId, {
         price: newPrice,
         estimatedMinutes: 150,
@@ -226,7 +231,7 @@ describe('Service Repository Integration Tests', () => {
       });
 
       expect(updatedService.id).toBe(updateServiceId);
-      expect(updatedService.price.toNumber()).toBe(500.0);
+      expect(Number(updatedService.price)).toBe(500.0);
       expect(updatedService.estimatedMinutes).toBe(150);
       expect(updatedService.isActive).toBe(true);
     });

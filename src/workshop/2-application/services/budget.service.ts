@@ -15,6 +15,7 @@ import { ErrorHandlerService } from '../../../shared/services/error-handler.serv
 import { NotificationService } from './notification.service';
 import { BUDGET_CONSTANTS } from '../../../shared/constants/budget.constants';
 import { BudgetWithRelationsResponseDto } from '../../1-presentation/dtos/budget/budget-with-relations-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @Injectable()
 export class BudgetService {
@@ -67,9 +68,9 @@ export class BudgetService {
     // Only prevent creation if there's an active budget (not rejected or expired)
     const activeBudget = existingBudgets.find(
       (budget) =>
-        budget.status === BudgetStatus.RASCUNHO ||
-        budget.status === BudgetStatus.ENVIADO ||
-        budget.status === BudgetStatus.APROVADO,
+        budget.status === BudgetStatus.DRAFT ||
+        budget.status === BudgetStatus.SENT ||
+        budget.status === BudgetStatus.APPROVED,
     );
 
     if (activeBudget) {
@@ -84,6 +85,26 @@ export class BudgetService {
   async findAll(): Promise<Budget[]> {
     try {
       return await this.budgetRepository.findAll();
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  async findAllPaginated(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponseDto<Budget>> {
+    try {
+      const [budgets, total] = await Promise.all([
+        this.budgetRepository.findMany(paginationDto.skip, paginationDto.take),
+        this.budgetRepository.count(),
+      ]);
+
+      return new PaginatedResponseDto(
+        budgets,
+        paginationDto.page || 0,
+        paginationDto.size || 10,
+        total,
+      );
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -124,7 +145,7 @@ export class BudgetService {
     try {
       const budget = await this.findById(id);
 
-      if (budget.status !== BudgetStatus.RASCUNHO) {
+      if (budget.status !== BudgetStatus.DRAFT) {
         this.errorHandler.handleError(
           new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_DRAFT_CAN_BE_SENT),
         );
@@ -132,7 +153,7 @@ export class BudgetService {
 
       const updatedBudget = await this.budgetRepository.updateStatus(
         id,
-        BudgetStatus.ENVIADO,
+        BudgetStatus.SENT,
       );
 
       // Send notification to customer
@@ -158,7 +179,7 @@ export class BudgetService {
     try {
       const budget = await this.findById(id);
 
-      if (budget.status !== BudgetStatus.ENVIADO) {
+      if (budget.status !== BudgetStatus.SENT) {
         this.errorHandler.handleError(
           new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_APPROVED),
         );
@@ -174,12 +195,12 @@ export class BudgetService {
       // Update budget status to approved
       const approvedBudget = await this.budgetRepository.updateStatus(
         id,
-        BudgetStatus.APROVADO,
+        BudgetStatus.APPROVED,
       );
 
       // Update service order status and set approvedAt
       await this.serviceOrderRepository.updateStatus(budget.serviceOrderId, {
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
         approvedAt: new Date(),
         startedAt: new Date(),
       });
@@ -187,7 +208,7 @@ export class BudgetService {
       // Add status history entry
       await this.serviceOrderRepository.addStatusHistory({
         serviceOrderId: budget.serviceOrderId,
-        status: ServiceOrderStatus.EM_EXECUCAO,
+        status: ServiceOrderStatus.IN_EXECUTION,
         notes: 'Orçamento aprovado pelo cliente - execução iniciada',
       });
 
@@ -201,7 +222,7 @@ export class BudgetService {
     try {
       const budget = await this.findById(id);
 
-      if (budget.status !== BudgetStatus.ENVIADO) {
+      if (budget.status !== BudgetStatus.SENT) {
         this.errorHandler.handleError(
           new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_REJECTED),
         );
@@ -209,7 +230,7 @@ export class BudgetService {
 
       return await this.budgetRepository.updateStatus(
         id,
-        BudgetStatus.REJEITADO,
+        BudgetStatus.REJECTED,
       );
     } catch (error) {
       this.errorHandler.handleError(error);
@@ -237,10 +258,10 @@ export class BudgetService {
     try {
       const budget = await this.findById(id);
 
-      // Only allow expiration for RASCUNHO and ENVIADO status
+      // Only allow expiration for DRAFT and SENT status
       if (
-        budget.status !== BudgetStatus.RASCUNHO &&
-        budget.status !== BudgetStatus.ENVIADO
+        budget.status !== BudgetStatus.DRAFT &&
+        budget.status !== BudgetStatus.SENT
       ) {
         this.errorHandler.handleError(
           new Error(BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION),
