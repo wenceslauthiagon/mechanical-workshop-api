@@ -88,6 +88,7 @@ jobs:
         id: set-tag
         run: |
           BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          BRANCH_NAME=${BRANCH_NAME//\//-}
           SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)
           
           if [ "$BRANCH_NAME" = "main" ]; then
