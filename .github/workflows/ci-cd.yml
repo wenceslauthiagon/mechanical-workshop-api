@@ -15,31 +15,6 @@ jobs:
     name: Lint and Test
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: workshop
-          POSTGRES_PASSWORD: workshop123
-          POSTGRES_DB: workshop_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,22 +31,20 @@ jobs:
       - name: Run linter
         run: npm run lint
 
-      - name: Use PostgreSQL schema
-        run: cp prisma/schema.postgresql.prisma prisma/schema.prisma
-
       - name: Generate Prisma Client
         env:
           PRISMA_GENERATE_SKIP_AUTOINSTALL: false
+          DATABASE_URL: file:./test.db
         run: npx prisma generate --generator client
 
       - name: Run migrations
         env:
-          DATABASE_URL: postgresql://workshop:workshop123@localhost:5432/workshop_test
+          DATABASE_URL: file:./test.db
         run: npx prisma db push --skip-generate
 
       - name: Run tests
         env:
-          DATABASE_URL: postgresql://workshop:workshop123@localhost:5432/workshop_test
+          DATABASE_URL: file:./test.db
           JWT_SECRET: test-secret-key
           NODE_ENV: test
         run: npm run test:cov
