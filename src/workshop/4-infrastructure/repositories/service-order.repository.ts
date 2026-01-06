@@ -113,7 +113,10 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   ) {
     return this.prisma.serviceOrder.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        status: data.status as any, // Cast to enum for PostgreSQL
+      },
     });
   }
 
@@ -182,7 +185,10 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
     changedBy?: string;
   }) {
     return this.prisma.serviceOrderStatusHistory.create({
-      data,
+      data: {
+        ...data,
+        status: data.status as any, // Cast to enum for PostgreSQL
+      },
     });
   }
 

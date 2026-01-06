@@ -23,7 +23,11 @@ describe('Customer Repository Integration Tests', () => {
     repository = module.get<CustomerRepository>(CustomerRepository);
     prisma = module.get<PrismaService>(PrismaService);
 
-    await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    // Only disable foreign keys for SQLite
+    const isSqlite = process.env.DATABASE_URL?.includes('sqlite');
+    if (isSqlite) {
+      await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    }
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();

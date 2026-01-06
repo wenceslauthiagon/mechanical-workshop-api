@@ -32,7 +32,10 @@ describe('Service Repository Integration Tests', () => {
     serviceRepository = module.get<ServiceRepository>(ServiceRepository);
 
     // Clean database before tests
-    await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    const isSqlite = process.env.DATABASE_URL?.includes('sqlite');
+    if (isSqlite) {
+      await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    }
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
@@ -41,7 +44,9 @@ describe('Service Repository Integration Tests', () => {
     await prisma.customer.deleteMany();
     await prisma.service.deleteMany();
     await prisma.part.deleteMany();
-    await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
+    if (isSqlite) {
+      await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
+    }
   });
 
   afterAll(async () => {
@@ -57,8 +62,8 @@ describe('Service Repository Integration Tests', () => {
       expect(service).toHaveProperty('id');
       expect(service.name).toBe(serviceData.name);
       expect(service.description).toBe(serviceData.description);
-      expect(service.price).toBeCloseTo(
-        serviceData.price,
+      expect(Number(service.price)).toBeCloseTo(
+        Number(serviceData.price),
         2,
       );
       expect(service.estimatedMinutes).toBe(serviceData.estimatedMinutes);
@@ -190,7 +195,7 @@ describe('Service Repository Integration Tests', () => {
       });
 
       expect(updatedService.id).toBe(updateServiceId);
-      expect(updatedService.price).toBe(450.0);
+      expect(Number(updatedService.price)).toBe(450.0);
       expect(updatedService.name).toBe(updateServiceName);
     });
 
@@ -206,11 +211,14 @@ describe('Service Repository Integration Tests', () => {
     });
 
     it('TC0003 - Should update service to inactive', async () => {
+      const newPrice = 275.0;
       const updatedService = await serviceRepository.update(updateServiceId, {
+        price: newPrice,
         isActive: false,
       });
 
       expect(updatedService.id).toBe(updateServiceId);
+      expect(Number(updatedService.price)).toBe(275.0);
       expect(updatedService.isActive).toBe(false);
     });
 
@@ -223,7 +231,7 @@ describe('Service Repository Integration Tests', () => {
       });
 
       expect(updatedService.id).toBe(updateServiceId);
-      expect(updatedService.price).toBe(500.0);
+      expect(Number(updatedService.price)).toBe(500.0);
       expect(updatedService.estimatedMinutes).toBe(150);
       expect(updatedService.isActive).toBe(true);
     });

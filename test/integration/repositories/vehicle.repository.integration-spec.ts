@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { VehicleRepository } from '../../../src/workshop/4-infrastructure/repositories/vehicle.repository';
 import { CustomerRepository } from '../../../src/workshop/4-infrastructure/repositories/customer.repository';
+import { ServiceOrderStatus } from '../../../src/shared/enums/service-order-status.enum';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 function generateValidCPF(): string {

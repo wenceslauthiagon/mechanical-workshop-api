@@ -8,9 +8,7 @@ const createMockPartData = () => ({
   name: faker.vehicle.vehicle(),
   description: faker.commerce.productDescription(),
   partNumber: `PN-${faker.string.alphanumeric(6).toUpperCase()}`,
-  price: 
-    faker.number.float({ min: 10, max: 500, fractionDigits: 2 },
-  ),
+  price: faker.number.float({ min: 10, max: 500, fractionDigits: 2 }),
   stock: faker.number.int({ min: 0, max: 100 }),
   minStock: faker.number.int({ min: 1, max: 10 }),
   supplier: faker.company.name(),
@@ -29,7 +27,10 @@ describe('Part Repository Integration Tests', () => {
     prisma = module.get<PrismaService>(PrismaService);
     partRepository = module.get<PartRepository>(PartRepository);
 
-    await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    const isSqlite = process.env.DATABASE_URL?.includes('sqlite');
+    if (isSqlite) {
+      await prisma.$executeRawUnsafe('PRAGMA foreign_keys = OFF;');
+    }
     await prisma.serviceOrderItem.deleteMany();
     await prisma.serviceOrderPart.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();
@@ -38,7 +39,9 @@ describe('Part Repository Integration Tests', () => {
     await prisma.customer.deleteMany();
     await prisma.service.deleteMany();
     await prisma.part.deleteMany();
-    await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
+    if (isSqlite) {
+      await prisma.$executeRawUnsafe('PRAGMA foreign_keys = ON;');
+    }
   });
 
   afterAll(async () => {
@@ -54,7 +57,7 @@ describe('Part Repository Integration Tests', () => {
       expect(part).toHaveProperty('id');
       expect(part.name).toBe(partData.name);
       expect(part.partNumber).toBe(partData.partNumber);
-      expect(part.price).toBeCloseTo(partData.price, 2);
+      expect(Number(part.price)).toBeCloseTo(Number(partData.price), 2);
       expect(part.stock).toBe(partData.stock);
       expect(part.minStock).toBe(partData.minStock);
       expect(part.supplier).toBe(partData.supplier);
@@ -191,14 +194,14 @@ describe('Part Repository Integration Tests', () => {
           min: 50,
           max: 100,
           fractionDigits: 2,
-        }).toFixed(2),
+        }).toFixed(2)
       );
       const updatedPart = await partRepository.update(updatePartId, {
         price: newPrice,
       });
 
       expect(updatedPart.id).toBe(updatePartId);
-      expect(updatedPart.price).toBeCloseTo(newPrice, 2);
+      expect(Number(updatedPart.price)).toBeCloseTo(Number(newPrice), 2);
     });
 
     it('TC0002 - Should update part stock', async () => {
@@ -227,7 +230,7 @@ describe('Part Repository Integration Tests', () => {
           min: 60,
           max: 120,
           fractionDigits: 2,
-        }).toFixed(2),
+        }).toFixed(2)
       );
       const newMinStock = faker.number.int({ min: 10, max: 20 });
 
@@ -238,7 +241,7 @@ describe('Part Repository Integration Tests', () => {
       });
 
       expect(updatedPart.id).toBe(updatePartId);
-      expect(updatedPart.price).toBeCloseTo(newPrice, 2);
+      expect(Number(updatedPart.price)).toBeCloseTo(Number(newPrice), 2);
       expect(updatedPart.minStock).toBe(newMinStock);
       expect(updatedPart.isActive).toBe(true);
     });
