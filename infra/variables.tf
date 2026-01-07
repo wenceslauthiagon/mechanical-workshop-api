@@ -111,36 +111,3 @@ variable "oci_compartment_ocid" {
   type        = string
   default     = ""
 }
-
-variable "oci_vcn_cidr" {
-  description = "CIDR block for OCI VCN"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "oci_subnet_cidr" {
-  description = "CIDR block for OCI subnet"
-  type        = string
-  default     = "10.0.1.0/24"
-}
-
-variable "node_shape" {
-  description = "OCI compute shape for worker nodes"
-  type        = string
-  default     = "VM.Standard.E3.Flex"
-}
-
-variable "node_count" {
-  description = "Number of worker nodes in the node pool"
-  type        = number
-  default     = 3
-}
-
-variable "node_image_id" {
-  description = "OCI image OCID to use for worker nodes (region-specific)"
-  type        = string
-  default     = ""
-variable "region" {
-  type    = string
-  default = "us-east-1"
-}
