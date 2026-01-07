@@ -3,27 +3,26 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: workshop-api-hpa
   namespace: mechanical-workshop
->>>>>>> develop
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: workshop-api
-  minReplicas: 3
+  minReplicas: 2
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -41,13 +40,3 @@ spec:
         value: 2
         periodSeconds: 30
       selectPolicy: Max
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 60
->>>>>>> develop
