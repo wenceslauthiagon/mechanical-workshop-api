@@ -3,7 +3,6 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: workshop-api-hpa
   namespace: mechanical-workshop
->>>>>>> develop
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -50,4 +49,3 @@ spec:
         target:
           type: Utilization
           averageUtilization: 60
->>>>>>> develop
