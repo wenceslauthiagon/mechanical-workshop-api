@@ -85,7 +85,7 @@ resource "oci_core_security_list" "sec_list" {
   ingress_security_rules = [
     {
       protocol = "6"
-      tcp_options {
+      tcp_options = {
         max = 65535
         min = 1
       }

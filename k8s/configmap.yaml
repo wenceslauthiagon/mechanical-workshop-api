@@ -13,4 +13,3 @@ data:
   REDIS_HOST: "redis-service"
   REDIS_PORT: "6379"
   JWT_EXPIRATION: "24h"
->>>>>>> develop
