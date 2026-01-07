@@ -132,12 +132,16 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ./infra
-        run: terraform plan -out=tfplan
+        run: |
+          terraform plan -out=tfplan \
+            -var="database_password=workshop123" \
+            -var="jwt_secret=ci-cd-jwt-secret-key"
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         working-directory: ./infra
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform apply -auto-approve tfplan
 
   deploy-to-kubernetes:
     name: Deploy to Kubernetes
