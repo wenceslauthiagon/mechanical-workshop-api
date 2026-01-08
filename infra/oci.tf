@@ -68,12 +68,10 @@ resource "oci_core_route_table" "rt" {
   compartment_id = var.oci_compartment_ocid
   vcn_id         = oci_core_virtual_network.vcn[0].id
 
-  route_rules = [
-    {
-      destination = "0.0.0.0/0"
-      network_entity_id = oci_core_internet_gateway.igw[0].id
-    }
-  ]
+  route_rules {
+    destination       = "0.0.0.0/0"
+    network_entity_id = oci_core_internet_gateway.igw[0].id
+  }
 }
 
 resource "oci_core_security_list" "sec_list" {
@@ -82,31 +80,28 @@ resource "oci_core_security_list" "sec_list" {
   vcn_id         = oci_core_virtual_network.vcn[0].id
   display_name   = "${var.app_name}-sec"
 
-  ingress_security_rules = [
-    {
-      protocol = "6"
-      tcp_options = {
-        max = 65535
-        min = 1
-      }
-      source = "0.0.0.0/0"
+  ingress_security_rules {
+    protocol = "6"
+    tcp_options {
+      max = 65535
+      min = 1
     }
-  ]
+    source = "0.0.0.0/0"
+  }
 
-  egress_security_rules = [
-    {
-      protocol = "all"
-      destination = "0.0.0.0/0"
-    }
-  ]
+  egress_security_rules {
+    protocol    = "all"
+    destination = "0.0.0.0/0"
+  }
 }
 
 # Basic OKE cluster. This is intentionally minimal; review kube_version and node options.
 resource "oci_containerengine_cluster" "oke" {
-  count          = var.provision_oci_cluster ? 1 : 0
-  compartment_id = var.oci_compartment_ocid
-  name           = "${var.app_name}-oke"
-  vcn_id         = oci_core_virtual_network.vcn[0].id
+  count              = var.provision_oci_cluster ? 1 : 0
+  compartment_id     = var.oci_compartment_ocid
+  name               = "${var.app_name}-oke"
+  vcn_id             = oci_core_virtual_network.vcn[0].id
+  kubernetes_version = "v1.28.2"
 }
 
 # Node pool for OKE
