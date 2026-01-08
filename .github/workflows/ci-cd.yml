@@ -283,27 +283,30 @@ jobs:
           kubectl config use-context kind-workshop-terraform
           kubectl cluster-info
           kubectl get nodes
+          echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
 
       - name: Terraform Init
         run: terraform init
+        env:
+          KUBECONFIG: ${{ env.KUBECONFIG }}
 
       - name: Terraform Validate
         run: terraform validate
 
       - name: Terraform Plan
         run: |
-          terraform plan \
+          terraform plan -out=tfplan \
             -var="app_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" \
             -var="database_password=workshop123" \
             -var="jwt_secret=default-jwt-secret-key"
+        env:
+          KUBECONFIG: ${{ env.KUBECONFIG }}
 
       - name: Terraform Apply
         if: github.event_name == 'push'
-        run: |
-          terraform apply -auto-approve \
-            -var="app_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" \
-            -var="database_password=workshop123" \
-            -var="jwt_secret=default-jwt-secret-key"
+        run: terraform apply -auto-approve tfplan
+        env:
+          KUBECONFIG: ${{ env.KUBECONFIG }}
       
       - name: Verify Terraform Deployment
         run: |
