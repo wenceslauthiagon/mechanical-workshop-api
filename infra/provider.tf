@@ -14,10 +14,6 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.5"
     }
-    oci = {
-      source  = "oracle/oci"
-      version = "~> 4.0"
-    }
   }
 
   backend "local" {
@@ -37,13 +33,12 @@ provider "helm" {
   }
 }
 
-# Optional OCI provider configuration. Set `provision_oci_cluster = true` and
-# provide the OCI variables in `terraform.tfvars` or via environment variables
-# to enable provisioning of OCI resources (OKE, VCN, etc.).
-provider "oci" {
-  tenancy_ocid     = var.oci_tenancy_ocid != "" ? var.oci_tenancy_ocid : null
-  user_ocid        = var.oci_user_ocid != "" ? var.oci_user_ocid : null
-  fingerprint      = var.oci_fingerprint != "" ? var.oci_fingerprint : null
-  private_key_path = var.oci_private_key_path != "" && var.oci_private_key_path != "~/.oci/oci_api_key.pem" ? var.oci_private_key_path : null
-  region           = var.oci_region != "" ? var.oci_region : null
-}
+# OCI provider is declared in required_providers but not configured here.
+# If you need to provision OCI resources (OKE, VCN, etc.), set provision_oci_cluster = true
+# and configure OCI credentials via environment variables:
+# - TF_VAR_oci_tenancy_ocid
+# - TF_VAR_oci_user_ocid
+# - TF_VAR_oci_fingerprint
+# - TF_VAR_oci_private_key_path
+# - TF_VAR_oci_region
+# - TF_VAR_oci_compartment_ocid
