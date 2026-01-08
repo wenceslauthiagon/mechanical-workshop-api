@@ -256,7 +256,7 @@ jobs:
   deploy-with-terraform:
     name: Deploy with Terraform
     runs-on: ubuntu-latest
-    needs: [build-and-push, deploy-to-kubernetes]
+    needs: [build-and-push]
     if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[terraform]')
     
     defaults:
@@ -283,6 +283,8 @@ jobs:
           kubectl config use-context kind-workshop-terraform
           kubectl cluster-info
           kubectl get nodes
+        env:
+          KUBECONFIG: /home/runner/.kube/config
 
       - name: Terraform Init
         run: terraform init
@@ -291,6 +293,8 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
+        env:
+          KUBECONFIG: /home/runner/.kube/config
 
       - name: Terraform Plan
         run: |
@@ -312,6 +316,8 @@ jobs:
           echo "=== Terraform Deployment Verification ==="
           kubectl get all -n mechanical-workshop
           echo "=== Terraform deployment complete ==="
+        env:
+          KUBECONFIG: /home/runner/.kube/config
 
   notify:
     name: Notify Deployment
