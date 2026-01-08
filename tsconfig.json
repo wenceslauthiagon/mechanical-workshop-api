@@ -32,8 +32,18 @@
     "types": ["node", "jest"],
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "src/application/**/*",
+    "src/domain/**/*",
+    "src/infrastructure/api/**/*",
+    "src/infrastructure/database/repositories/Prisma*.ts"
+  ]
 }

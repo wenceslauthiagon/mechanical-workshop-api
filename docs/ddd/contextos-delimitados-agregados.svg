@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1400" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1400" height="900" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="700" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#333">
+    Sistema Oficina Mecânica - Contextos Delimitados e Agregados
+  </text>
+  
+  <!-- CONTEXTO 1: WORKSHOP CONTEXT (Principal) -->
+  <rect x="50" y="60" width="800" height="650" fill="#E8F5E8" stroke="#4CAF50" stroke-width="3" rx="10" stroke-dasharray="10,5"/>
+  <text x="450" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2E7D32">
+    🔧 WORKSHOP CONTEXT (Contexto Principal)
+  </text>
+  
+  <!-- Agregado: Service Order (Principal) -->
+  <rect x="80" y="110" width="340" height="280" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="250" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#E65100">
+    📋 SERVICE ORDER AGGREGATE (Raiz)
+  </text>
+  
+  <!-- Entidades do Service Order -->
+  <rect x="100" y="150" width="120" height="40" fill="#FFCC02" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="160" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">ServiceOrder (Root)</text>
+  
+  <rect x="240" y="150" width="120" height="40" fill="#FFE082" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="300" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">ServiceOrderItem</text>
+  
+  <rect x="100" y="210" width="120" height="40" fill="#FFE082" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="160" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">ServiceOrderPart</text>
+  
+  <rect x="240" y="210" width="120" height="40" fill="#FFE082" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="300" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">StatusHistory</text>
+  
+  <!-- Domain Events do Service Order -->
+  <text x="250" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#D84315">Domain Events:</text>
+  <text x="250" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#D84315">• ServiceOrderCreated</text>
+  <text x="250" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#D84315">• ServiceOrderStatusChanged</text>
+  <text x="250" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#D84315">• ServiceOrderCompleted</text>
+  <text x="250" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#D84315">• ServiceOrderDelivered</text>
+  
+  <!-- Status Enum -->
+  <text x="250" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#5D4037">Status: RECEBIDA → AGUARDANDO → APROVADA → EM_EXECUCAO → FINALIZADA → ENTREGUE</text>
+  
+  <!-- Agregado: Customer -->
+  <rect x="450" y="110" width="180" height="160" fill="#E1F5FE" stroke="#0288D1" stroke-width="2" rx="8"/>
+  <text x="540" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#01579B">
+    👤 CUSTOMER AGGREGATE
+  </text>
+  
+  <rect x="470" y="150" width="140" height="40" fill="#81D4FA" stroke="#0288D1" stroke-width="1" rx="4"/>
+  <text x="540" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">Customer (Root)</text>
+  
+  <rect x="470" y="210" width="140" height="40" fill="#B3E5FC" stroke="#0288D1" stroke-width="1" rx="4"/>
+  <text x="540" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">CustomerType</text>
+  
+  <!-- Agregado: Vehicle -->
+  <rect x="650" y="110" width="180" height="160" fill="#F3E5F5" stroke="#7B1FA2" stroke-width="2" rx="8"/>
+  <text x="740" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#4A148C">
+    🚗 VEHICLE AGGREGATE
+  </text>
+  
+  <rect x="670" y="150" width="140" height="40" fill="#CE93D8" stroke="#7B1FA2" stroke-width="1" rx="4"/>
+  <text x="740" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">Vehicle (Root)</text>
+  
+  <rect x="670" y="210" width="140" height="40" fill="#E1BEE7" stroke="#7B1FA2" stroke-width="1" rx="4"/>
+  <text x="740" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">VehicleSpec</text>
+  
+  <!-- Agregado: Budget -->
+  <rect x="80" y="420" width="180" height="160" fill="#FFF3E0" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="170" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#E65100">
+    💰 BUDGET AGGREGATE
+  </text>
+  
+  <rect x="100" y="460" width="140" height="40" fill="#FFCC02" stroke="#F57C00" stroke-width="1" rx="4"/>
+  <text x="170" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">Budget (Root)</text>
+  
+  <rect x="100" y="520" width="140" height="40" fill="#FFE082" stroke="#F57C00" stroke-width="1" rx="4"/>
+  <text x="170" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">BudgetItem</text>
+  
+  <!-- Agregado: Service -->
+  <rect x="290" y="420" width="180" height="160" fill="#E8F5E8" stroke="#388E3C" stroke-width="2" rx="8"/>
+  <text x="380" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1B5E20">
+    🔧 SERVICE AGGREGATE
+  </text>
+  
+  <rect x="310" y="460" width="140" height="40" fill="#A5D6A7" stroke="#388E3C" stroke-width="1" rx="4"/>
+  <text x="380" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">Service (Root)</text>
+  
+  <rect x="310" y="520" width="140" height="40" fill="#C8E6C9" stroke="#388E3C" stroke-width="1" rx="4"/>
+  <text x="380" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">ServiceCategory</text>
+  
+  <!-- Agregado: Part -->
+  <rect x="500" y="420" width="180" height="160" fill="#FCE4EC" stroke="#C2185B" stroke-width="2" rx="8"/>
+  <text x="590" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#880E4F">
+    🔩 PART AGGREGATE
+  </text>
+  
+  <rect x="520" y="460" width="140" height="40" fill="#F8BBD9" stroke="#C2185B" stroke-width="1" rx="4"/>
+  <text x="590" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">Part (Root)</text>
+  
+  <rect x="520" y="520" width="140" height="40" fill="#FCE4EC" stroke="#C2185B" stroke-width="1" rx="4"/>
+  <text x="590" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">StockControl</text>
+  
+  <!-- Agregado: Mechanic -->
+  <rect x="710" y="420" width="120" height="160" fill="#E0F2F1" stroke="#00695C" stroke-width="2" rx="8"/>
+  <text x="770" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#004D40">
+    👨‍🔧 MECHANIC
+  </text>
+  
+  <rect x="720" y="460" width="100" height="40" fill="#80CBC4" stroke="#00695C" stroke-width="1" rx="4"/>
+  <text x="770" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">Mechanic (Root)</text>
+  
+  <rect x="720" y="520" width="100" height="40" fill="#B2DFDB" stroke="#00695C" stroke-width="1" rx="4"/>
+  <text x="770" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">Specialization</text>
+  
+  <!-- Domain Services -->
+  <rect x="80" y="620" width="750" height="80" fill="#F5F5F5" stroke="#757575" stroke-width="2" rx="8"/>
+  <text x="455" y="645" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#424242">
+    🎯 DOMAIN SERVICES
+  </text>
+  <text x="200" y="670" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#616161">• ServiceOrderPricingDomainService</text>
+  <text x="500" y="670" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#616161">• OrderNumberGeneratorDomainService</text>
+  <text x="750" y="670" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#616161">• StockValidationService</text>
+  
+  <!-- CONTEXTO 2: AUTHENTICATION CONTEXT -->
+  <rect x="900" y="60" width="450" height="300" fill="#FFF3E0" stroke="#FF9800" stroke-width="3" rx="10" stroke-dasharray="10,5"/>
+  <text x="1125" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#E65100">
+    🔐 AUTHENTICATION CONTEXT
+  </text>
+  
+  <!-- Agregado: User -->
+  <rect x="920" y="110" width="180" height="160" fill="#FFF8E1" stroke="#FF8F00" stroke-width="2" rx="8"/>
+  <text x="1010" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#E65100">
+    👥 USER AGGREGATE
+  </text>
+  
+  <rect x="940" y="150" width="140" height="40" fill="#FFECB3" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="1010" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">User (Root)</text>
+  
+  <rect x="940" y="210" width="140" height="40" fill="#FFE0B2" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="1010" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000">UserRole</text>
+  
+  <!-- Auth Services -->
+  <rect x="1120" y="110" width="200" height="160" fill="#FFF8E1" stroke="#FF8F00" stroke-width="2" rx="8"/>
+  <text x="1220" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#E65100">
+    🛡️ AUTH SERVICES
+  </text>
+  
+  <rect x="1140" y="150" width="160" height="30" fill="#FFECB3" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="1220" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#000">AuthService</text>
+  
+  <rect x="1140" y="190" width="160" height="30" fill="#FFECB3" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="1220" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#000">UserService</text>
+  
+  <rect x="1140" y="230" width="160" height="30" fill="#FFECB3" stroke="#FF8F00" stroke-width="1" rx="4"/>
+  <text x="1220" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#000">JwtStrategy</text>
+  
+  <!-- CONTEXTO 3: SHARED CONTEXT -->
+  <rect x="900" y="400" width="450" height="250" fill="#F3E5F5" stroke="#9C27B0" stroke-width="3" rx="10" stroke-dasharray="10,5"/>
+  <text x="1125" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6A1B9A">
+    🔧 SHARED CONTEXT (Infraestrutura)
+  </text>
+  
+  <!-- Shared Services -->
+  <rect x="920" y="450" width="200" height="80" fill="#FCE4EC" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="1020" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#6A1B9A">
+    📋 SHARED SERVICES
+  </text>
+  <text x="1020" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6A1B9A">• ErrorHandlerService</text>
+  <text x="1020" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6A1B9A">• LoggerService</text>
+  
+  <!-- Configuration -->
+  <rect x="1140" y="450" width="180" height="80" fill="#FCE4EC" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="1230" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#6A1B9A">
+    ⚙️ CONFIGURATION
+  </text>
+  <text x="1230" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6A1B9A">• AppConfigService</text>
+  <text x="1230" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6A1B9A">• NotificationConfig</text>
+  
+  <!-- Infrastructure -->
+  <rect x="920" y="550" width="400" height="80" fill="#FCE4EC" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="1120" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#6A1B9A">
+    🏗️ INFRASTRUCTURE
+  </text>
+  <text x="1020" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6A1B9A">• PrismaService</text>
+  <text x="1120" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6A1B9A">• HealthCheckModule</text>
+  <text x="1220" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6A1B9A">• Database Repositories</text>
+  
+  <!-- INTEGRAÇÕES E RELACIONAMENTOS -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+  
+  <!-- Relacionamentos entre agregados -->
+  <path d="M 420 180 L 445 180" stroke="#FF5722" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
+  <text x="432" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#FF5722">usa</text>
+  
+  <path d="M 420 220 L 645 220" stroke="#FF5722" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
+  <text x="532" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#FF5722">possui</text>
+  
+  <path d="M 260 390 L 260 415" stroke="#FF5722" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
+  <text x="220" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#FF5722">gera</text>
+  
+  <!-- Comunicação entre contextos -->
+  <path d="M 850 200 L 895 200" stroke="#2196F3" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="872" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2196F3">Auth</text>
+  
+  <path d="M 850 500 L 895 500" stroke="#9C27B0" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="872" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#9C27B0">Shared</text>
+  
+  <!-- ARQUITETURA CAMADAS -->
+  <rect x="50" y="750" width="1300" height="120" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="700" y="775" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0D47A1">
+    🏗️ CLEAN ARCHITECTURE - 4 CAMADAS
+  </text>
+  
+  <rect x="80" y="790" width="280" height="60" fill="#BBDEFB" stroke="#1976D2" stroke-width="1" rx="4"/>
+  <text x="220" y="810" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0D47A1">1. PRESENTATION</text>
+  <text x="220" y="830" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1565C0">Controllers, DTOs, APIs REST</text>
+  
+  <rect x="380" y="790" width="280" height="60" fill="#BBDEFB" stroke="#1976D2" stroke-width="1" rx="4"/>
+  <text x="520" y="810" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0D47A1">2. APPLICATION</text>
+  <text x="520" y="830" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1565C0">Services, Use Cases</text>
+  
+  <rect x="680" y="790" width="280" height="60" fill="#BBDEFB" stroke="#1976D2" stroke-width="1" rx="4"/>
+  <text x="820" y="810" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0D47A1">3. DOMAIN</text>
+  <text x="820" y="830" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1565C0">Entities, Aggregates, Events</text>
+  
+  <rect x="980" y="790" width="280" height="60" fill="#BBDEFB" stroke="#1976D2" stroke-width="1" rx="4"/>
+  <text x="1120" y="810" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0D47A1">4. INFRASTRUCTURE</text>
+  <text x="1120" y="830" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1565C0">Repositories, Database</text>
+  
+</svg>

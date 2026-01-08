@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1600" height="1000" fill="#ffffff"/>
+  
+  <!-- Title -->
+  <text x="800" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">
+    Event Storming - Sistema Oficina Mecânica (Fluxos Reais)
+  </text>
+  
+  <!-- FLUXO 1: RECEPÇÃO DE VEÍCULO -->
+  <rect x="50" y="70" width="1500" height="140" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>
+  <text x="70" y="90" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#495057">
+    FLUXO 1: RECEPÇÃO DE VEÍCULO
+  </text>
+  
+  <!-- Actor -->
+  <rect x="70" y="110" width="80" height="60" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="110" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">👤 CLIENTE</text>
+  <text x="110" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Solicita</text>
+  <text x="110" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Serviço</text>
+  
+  <!-- Command -->
+  <rect x="170" y="110" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="220" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Registrar</text>
+  <text x="220" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Ordem de</text>
+  <text x="220" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Serviço</text>
+  
+  <!-- Event -->
+  <rect x="290" y="110" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="340" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Ordem</text>
+  <text x="340" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Criada</text>
+  
+  <!-- Read Model -->
+  <rect x="410" y="110" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="460" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📋 Lista de</text>
+  <text x="460" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Ordens</text>
+  <text x="460" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Recebidas</text>
+  
+  <!-- Policy -->
+  <rect x="530" y="110" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="590" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Notificar</text>
+  <text x="590" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Cliente sobre</text>
+  <text x="590" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Recebimento</text>
+  
+  <!-- External System -->
+  <rect x="670" y="110" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
+  <text x="730" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">� Email</text>
+  <text x="730" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">NotificationService</text>
+  <text x="730" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">(Gmail SMTP)</text>
+  
+  <!-- Actor 2 -->
+  <rect x="810" y="110" width="80" height="60" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="850" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">👨‍🔧 MECÂNICO</text>
+  <text x="850" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Avalia</text>
+  <text x="850" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Veículo</text>
+  
+  <!-- Command 2 -->
+  <rect x="910" y="110" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="960" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Atualizar</text>
+  <text x="960" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Status para</text>
+  <text x="960" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGUARDANDO_APROVACAO</text>
+  
+  <!-- Event 2 -->
+  <rect x="1030" y="110" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="1080" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Status</text>
+  <text x="1080" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Alterado para</text>
+  <text x="1080" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGUARDANDO_APROVACAO</text>
+  
+  <!-- Read Model 2 -->
+  <rect x="1150" y="110" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="1200" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📋 Dashboard</text>
+  <text x="1200" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Ordens</text>
+  <text x="1200" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGUARDANDO_APROVACAO</text>
+  
+  <!-- Aggregate -->
+  <rect x="1270" y="110" width="120" height="60" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="8"/>
+  <text x="1330" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🏗️ SERVICE</text>
+  <text x="1330" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">ORDER</text>
+  <text x="1330" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGGREGATE</text>
+  
+  <!-- Arrows Fluxo 1 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+  
+  <path d="M 150 140 L 165 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 270 140 L 285 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 390 140 L 405 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 510 140 L 525 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 650 140 L 665 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 790 140 L 805 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 890 140 L 905 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1010 140 L 1025 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1130 140 L 1145 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1250 140 L 1265 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- FLUXO 2: ORÇAMENTO E APROVAÇÃO -->
+  <rect x="50" y="230" width="1500" height="140" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>
+  <text x="70" y="250" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#495057">
+    FLUXO 2: ORÇAMENTO E APROVAÇÃO
+  </text>
+  
+  <!-- Actor -->
+  <rect x="70" y="270" width="80" height="60" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="110" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">👨‍🔧 MECÂNICO</text>
+  <text x="110" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Cria</text>
+  <text x="110" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Orçamento</text>
+  
+  <!-- Command -->
+  <rect x="170" y="270" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="220" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Criar</text>
+  <text x="220" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Orçamento</text>
+  
+  <!-- Event -->
+  <rect x="290" y="270" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="340" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Orçamento</text>
+  <text x="340" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Criado</text>
+  
+  <!-- Policy -->
+  <rect x="410" y="270" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="470" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Enviar</text>
+  <text x="470" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Orçamento</text>
+  <text x="470" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">para Cliente</text>
+  
+  <!-- External System -->
+  <rect x="550" y="270" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
+  <text x="610" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📧 Sistema</text>
+  <text x="610" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Email/PDF</text>
+  
+  <!-- Actor 2 -->
+  <rect x="690" y="270" width="80" height="60" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="730" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">👤 CLIENTE</text>
+  <text x="730" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Aprova</text>
+  <text x="730" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Orçamento</text>
+  
+  <!-- Command 2 -->
+  <rect x="790" y="270" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="840" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Aprovar</text>
+  <text x="840" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Orçamento</text>
+  
+  <!-- Event 2 -->
+  <rect x="910" y="270" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="960" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Status</text>
+  <text x="960" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Alterado para</text>
+  <text x="960" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">APROVADO</text>
+  
+  <!-- Read Model -->
+  <rect x="1030" y="270" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="1080" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📋 Lista</text>
+  <text x="1080" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Ordens</text>
+  <text x="1080" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Aprovadas</text>
+  
+  <!-- Policy 2 -->
+  <rect x="1150" y="270" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="1210" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Alocar</text>
+  <text x="1210" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Mecânico</text>
+  <text x="1210" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Disponível</text>
+  
+  <!-- Aggregate -->
+  <rect x="1290" y="270" width="120" height="60" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="8"/>
+  <text x="1350" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🏗️ BUDGET</text>
+  <text x="1350" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGGREGATE</text>
+  
+  <!-- Arrows Fluxo 2 -->
+  <path d="M 150 300 L 165 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 270 300 L 285 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 390 300 L 405 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 530 300 L 545 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 670 300 L 685 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 770 300 L 785 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 890 300 L 905 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1010 300 L 1025 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1130 300 L 1145 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1270 300 L 1285 300" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- FLUXO 3: EXECUÇÃO DO SERVIÇO -->
+  <rect x="50" y="390" width="1500" height="140" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>
+  <text x="70" y="410" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#495057">
+    FLUXO 3: EXECUÇÃO DO SERVIÇO
+  </text>
+  
+  <!-- Actor -->
+  <rect x="70" y="430" width="80" height="60" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="110" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">👨‍🔧 MECÂNICO</text>
+  <text x="110" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Inicia</text>
+  <text x="110" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Serviço</text>
+  
+  <!-- Command -->
+  <rect x="170" y="430" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="220" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Iniciar</text>
+  <text x="220" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Execução</text>
+  
+  <!-- Event -->
+  <rect x="290" y="430" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="340" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Status</text>
+  <text x="340" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Alterado para</text>
+  <text x="340" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">EM_EXECUÇÃO</text>
+  
+  <!-- Read Model -->
+  <rect x="410" y="430" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="460" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📋 Dashboard</text>
+  <text x="460" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Serviços em</text>
+  <text x="460" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Execução</text>
+  
+  <!-- Policy -->
+  <rect x="530" y="430" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="590" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Validar</text>
+  <text x="590" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Estoque de</text>
+  <text x="590" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Peças</text>
+  
+  <!-- External System -->
+  <rect x="670" y="430" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
+  <text x="730" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📦 Sistema</text>
+  <text x="730" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Estoque</text>
+  
+  <!-- Command 2 -->
+  <rect x="810" y="430" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="860" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Finalizar</text>
+  <text x="860" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Serviço</text>
+  
+  <!-- Event 2 -->
+  <rect x="930" y="430" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="980" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Serviço</text>
+  <text x="980" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Finalizado</text>
+  
+  <!-- Policy 2 -->
+  <rect x="1050" y="430" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="1110" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Notificar</text>
+  <text x="1110" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Cliente sobre</text>
+  <text x="1110" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Conclusão</text>
+  
+  <!-- External System 2 -->
+  <rect x="1190" y="430" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
+  <text x="1250" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📧 Email</text>
+  <text x="1250" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">NotificationService</text>
+  <text x="1250" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">(Status: FINALIZADA)</text>
+  
+  <!-- External System 2 -->
+  <rect x="1190" y="430" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
+  <text x="1250" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📧 Email</text>
+  <text x="1250" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">NotificationService</text>
+  <text x="1250" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">(Status: FINALIZADA)</text>
+  
+  <!-- Read Model 2 -->
+  <rect x="1330" y="430" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="1380" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📋 Lista</text>
+  <text x="1380" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Serviços</text>
+  <text x="1380" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Finalizados</text>
+  
+  <!-- Aggregate -->
+  <rect x="1450" y="430" width="120" height="60" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="8"/>
+  <text x="1510" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🏗️ SERVICE</text>
+  <text x="1510" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGGREGATE</text>
+  
+  <!-- Arrows Fluxo 3 -->
+  <path d="M 150 460 L 165 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 270 460 L 285 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 390 460 L 405 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 510 460 L 525 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 650 460 L 665 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 790 460 L 805 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 910 460 L 925 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1030 460 L 1045 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1170 460 L 1185 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1310 460 L 1325 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1430 460 L 1445 460" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- FLUXO 4: ENTREGA DO VEÍCULO -->
+  <rect x="50" y="550" width="1500" height="140" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>
+  <text x="70" y="570" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#495057">
+    FLUXO 4: ENTREGA DO VEÍCULO
+  </text>
+  
+  <!-- Actor -->
+  <rect x="70" y="590" width="80" height="60" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="110" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">👤 CLIENTE</text>
+  <text x="110" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Solicita</text>
+  <text x="110" y="635" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Retirada</text>
+  
+  <!-- Command -->
+  <rect x="170" y="590" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="220" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Processar</text>
+  <text x="220" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Entrega</text>
+  
+  <!-- Policy -->
+  <rect x="290" y="590" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="350" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Validar</text>
+  <text x="350" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Pagamento</text>
+  
+  <!-- External System -->
+  <rect x="430" y="590" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
+  <text x="490" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">💳 Sistema</text>
+  <text x="490" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Pagamento</text>
+  
+  <!-- Event -->
+  <rect x="570" y="590" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="620" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Pagamento</text>
+  <text x="620" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Confirmado</text>
+  
+  <!-- Command 2 -->
+  <rect x="690" y="590" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="740" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Entregar</text>
+  <text x="740" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Veículo</text>
+  
+  <!-- Event 2 -->
+  <rect x="810" y="590" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="860" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Veículo</text>
+  <text x="860" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Entregue</text>
+  
+  <!-- Read Model -->
+  <rect x="930" y="590" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="980" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📋 Histórico</text>
+  <text x="980" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Entregas</text>
+  
+  <!-- Policy 2 -->
+  <rect x="1050" y="590" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="1110" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Gerar</text>
+  <text x="1110" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Relatório</text>
+  <text x="1110" y="635" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Financeiro</text>
+  
+  <!-- Read Model 2 -->
+  <rect x="1190" y="590" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="1240" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📊 Dashboard</text>
+  <text x="1240" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Financeiro</text>
+  
+  <!-- Aggregate -->
+  <rect x="1310" y="590" width="120" height="60" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="8"/>
+  <text x="1370" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🏗️ PAYMENT</text>
+  <text x="1370" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGGREGATE</text>
+  
+  <!-- Arrows Fluxo 4 -->
+  <path d="M 150 620 L 165 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 270 620 L 285 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 410 620 L 425 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 550 620 L 565 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 670 620 L 685 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 790 620 L 805 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 910 620 L 925 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1030 620 L 1045 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1170 620 L 1185 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1290 620 L 1305 620" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- FLUXO 5: GESTÃO DE ESTOQUE -->
+  <rect x="50" y="710" width="1500" height="140" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>
+  <text x="70" y="730" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#495057">
+    FLUXO 5: GESTÃO DE ESTOQUE E PEÇAS
+  </text>
+  
+  <!-- Actor -->
+  <rect x="70" y="750" width="80" height="60" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="110" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">👨‍💼 GERENTE</text>
+  <text x="110" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Cadastra</text>
+  <text x="110" y="795" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Peça</text>
+  
+  <!-- Command -->
+  <rect x="170" y="750" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="220" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Cadastrar</text>
+  <text x="220" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Nova Peça</text>
+  
+  <!-- Event -->
+  <rect x="290" y="750" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="340" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Peça</text>
+  <text x="340" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Cadastrada</text>
+  
+  <!-- Read Model -->
+  <rect x="410" y="750" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="460" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📋 Catálogo</text>
+  <text x="460" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">de Peças</text>
+  
+  <!-- Policy -->
+  <rect x="530" y="750" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="590" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Verificar</text>
+  <text x="590" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Estoque</text>
+  <text x="590" y="795" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Mínimo</text>
+  
+  <!-- Command 2 -->
+  <rect x="670" y="750" width="100" height="60" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="8"/>
+  <text x="720" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📝 Atualizar</text>
+  <text x="720" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Estoque</text>
+  
+  <!-- Event 2 -->
+  <rect x="790" y="750" width="100" height="60" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="8"/>
+  <text x="840" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">⚡ Estoque</text>
+  <text x="840" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Atualizado</text>
+  
+  <!-- Policy 2 -->
+  <rect x="910" y="750" width="120" height="60" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="8"/>
+  <text x="970" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🔄 Alertar</text>
+  <text x="970" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Estoque</text>
+  <text x="970" y="795" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Baixo</text>
+  
+  <!-- External System -->
+  <rect x="1050" y="750" width="120" height="60" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
+  <text x="1110" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📧 Sistema</text>
+  <text x="1110" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Notificação</text>
+  
+  <!-- Read Model 2 -->
+  <rect x="1190" y="750" width="100" height="60" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="1240" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">📊 Relatório</text>
+  <text x="1240" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">Estoque</text>
+  
+  <!-- Aggregate -->
+  <rect x="1310" y="750" width="120" height="60" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="8"/>
+  <text x="1370" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold">🏗️ PART</text>
+  <text x="1370" y="785" text-anchor="middle" font-family="Arial, sans-serif" font-size="8">AGGREGATE</text>
+  
+  <!-- Arrows Fluxo 5 -->
+  <path d="M 150 780 L 165 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 270 780 L 285 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 390 780 L 405 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 510 780 L 525 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 650 780 L 665 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 770 780 L 785 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 890 780 L 905 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1030 780 L 1045 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1170 780 L 1185 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 1290 780 L 1305 780" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- LEGENDA -->
+  <rect x="50" y="880" width="1500" height="100" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>
+  <text x="800" y="905" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#495057">
+    LEGENDA - Event Storming
+  </text>
+  
+  <!-- Legenda Items -->
+  <rect x="100" y="920" width="60" height="30" fill="#FFF9C4" stroke="#F57C00" stroke-width="2" rx="4"/>
+  <text x="130" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">👤 Actor</text>
+  
+  <rect x="200" y="920" width="80" height="30" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="4"/>
+  <text x="240" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">📝 Command</text>
+  
+  <rect x="320" y="920" width="60" height="30" fill="#FFE0B2" stroke="#F57C00" stroke-width="2" rx="4"/>
+  <text x="350" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">⚡ Event</text>
+  
+  <rect x="420" y="920" width="80" height="30" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="4"/>
+  <text x="460" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">📋 Read Model</text>
+  
+  <rect x="540" y="920" width="60" height="30" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="4"/>
+  <text x="570" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">🔄 Policy</text>
+  
+  <rect x="640" y="920" width="100" height="30" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="4"/>
+  <text x="690" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">🔗 External System</text>
+  
+  <rect x="780" y="920" width="80" height="30" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="4"/>
+  <text x="820" y="940" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">🏗️ Aggregate</text>
+  
+
+  
+</svg>

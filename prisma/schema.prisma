@@ -1,292 +1,233 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Mechanical Workshop Management System - Database Schema (SQLite version for testing)
+// Complete system for managing clients, vehicles, services, parts and service orders
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite" 
   url      = env("DATABASE_URL")
 }
 
-model Owner {
-  id        String   @id @default(uuid())
+// Models
+model Customer {
+  id        String      @id @default(uuid())
+  document  String      @unique // CPF or CNPJ
+  type      String // PESSOA_FISICA or PESSOA_JURIDICA
   name      String
-  email     String   @unique
-  password  String
+  email     String      @unique
   phone     String
-  address   String?
-  pets      Pet[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  address   String
+  additionalInfo String? @map("additional_info")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 
-  @@map("owners")
+  // Relations
+  vehicles      Vehicle[]
+  serviceOrders ServiceOrder[]
+
+  @@map("customers")
 }
 
-model Pet {
-  id              String             @id @default(uuid())
-  name            String
-  type            PetType
-  breed           String
-  gender          PetGender
-  birthDate       DateTime
-  weight          Float
-  color           String
-  microchipNumber String?
-  ownerId         String
-  owner           Owner              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  vaccines        Vaccine[]
-  medications     Medication[]
-  visits          VeterinaryVisit[]
-  reminders       Reminder[]
-  weightHistory   WeightHistory[]
-  allergies       Allergy[]
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+model Vehicle {
+  id           String   @id @default(uuid())
+  licensePlate String   @unique @map("license_plate")
+  customerId   String   @map("customer_id")
+  brand        String
+  model        String
+  year         Int
+  color        String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  @@map("pets")
+  // Relations
+  customer      Customer       @relation(fields: [customerId], references: [id])
+  serviceOrders ServiceOrder[]
+
+  @@map("vehicles")
 }
 
-model Vaccine {
-  id               String        @id @default(uuid())
-  petId            String
-  pet              Pet           @relation(fields: [petId], references: [id], onDelete: Cascade)
+model Service {
+  id               String  @id @default(uuid())
   name             String
   description      String?
-  applicationDate  DateTime?
-  scheduledDate    DateTime
-  nextDoseDate     DateTime?
-  veterinarianName String?
-  clinicName       String?
-  batchNumber      String?
-  status           VaccineStatus
-  observations     String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  price            Float
+  estimatedMinutes Int     @map("estimated_minutes")
+  category         String
+  isActive         Boolean @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
-  @@map("vaccines")
+  // Relations
+  serviceOrderItems ServiceOrderItem[]
+
+  @@map("services")
 }
 
-model Medication {
-  id           String              @id @default(uuid())
-  petId        String
-  pet          Pet                 @relation(fields: [petId], references: [id], onDelete: Cascade)
-  name         String
-  type         MedicationType
-  dosage       String
-  frequency    MedicationFrequency
-  startDate    DateTime
-  endDate      DateTime?
-  prescribedBy String?
-  reason       String
-  instructions String?
-  status       MedicationStatus
-  observations String?
-  doses        MedicationDose[]
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+model Part {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  partNumber  String? @unique @map("part_number")
+  price       Float
+  stock       Int     @default(0)
+  minStock    Int     @default(0) @map("min_stock")
+  supplier    String?
+  isActive    Boolean @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  @@map("medications")
-}
+  // Relations
+  serviceOrderParts ServiceOrderPart[]
 
-model MedicationDose {
-  id               String      @id @default(uuid())
-  medicationId     String
-  medication       Medication  @relation(fields: [medicationId], references: [id], onDelete: Cascade)
-  scheduledTime    DateTime
-  administeredTime DateTime?
-  administered     Boolean     @default(false)
-  observations     String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-
-  @@map("medication_doses")
-}
-
-model VeterinaryVisit {
-  id               String    @id @default(uuid())
-  petId            String
-  pet              Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
-  date             DateTime
-  type             VisitType
-  veterinarianName String
-  clinicName       String
-  reason           String
-  diagnosis        String?
-  treatment        String?
-  prescriptions    String?
-  examResults      String?
-  cost             Float?
-  nextVisitDate    DateTime?
-  observations     String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  @@map("veterinary_visits")
-}
-
-enum PetType {
-  DOG
-  CAT
-}
-
-enum PetGender {
-  MALE
-  FEMALE
-}
-
-enum VaccineStatus {
-  SCHEDULED
-  APPLIED
-  OVERDUE
-  CANCELED
-}
-
-enum MedicationFrequency {
-  ONCE
-  DAILY
-  TWICE_DAILY
-  THREE_TIMES_DAILY
-  WEEKLY
-  MONTHLY
-  AS_NEEDED
-}
-
-enum MedicationStatus {
-  ACTIVE
-  COMPLETED
-  SUSPENDED
-}
-
-enum VisitType {
-  ROUTINE_CHECKUP
-  VACCINATION
-  EMERGENCY
-  SURGERY
-  DENTAL
-  CONSULTATION
-  EXAM
-  OTHER
-}
-
-model Reminder {
-  id                 String         @id @default(uuid())
-  petId              String
-  pet                Pet            @relation(fields: [petId], references: [id], onDelete: Cascade)
-  type               ReminderType
-  title              String
-  description        String?
-  dueDate            DateTime
-  status             ReminderStatus
-  relatedEntityId    String?
-  notificationSent   Boolean        @default(false)
-  notificationSentAt DateTime?
-  completedAt        DateTime?
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-
-  @@map("reminders")
-}
-
-model WeightHistory {
-  id              String   @id @default(uuid())
-  petId           String
-  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
-  weight          Float
-  measurementDate DateTime
-  observations    String?
-  recordedBy      String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@map("weight_history")
-}
-
-model Allergy {
-  id            String          @id @default(uuid())
-  petId         String
-  pet           Pet             @relation(fields: [petId], references: [id], onDelete: Cascade)
-  allergen      String
-  type          AllergyType
-  severity      AllergySeverity
-  symptoms      String?
-  diagnosedDate DateTime?
-  diagnosedBy   String?
-  notes         String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-
-  @@map("allergies")
-}
-
-enum ReminderType {
-  VACCINE
-  MEDICATION
-  VETERINARY_VISIT
-  DEWORMING
-  FLEA_TICK_TREATMENT
-  WEIGHT_CHECK
-  GROOMING
-  WALK
-  EXERCISE
-  OTHER
-}
-
-enum ReminderStatus {
-  PENDING
-  SENT
-  COMPLETED
-  CANCELED
-}
-
-enum AllergyType {
-  MEDICATION
-  FOOD
-  ENVIRONMENTAL
-  OTHER
-}
-
-enum AllergySeverity {
-  MILD
-  MODERATE
-  SEVERE
-  LIFE_THREATENING
-}
-
-enum MedicationType {
-  ANTIBIOTIC
-  ANTI_INFLAMMATORY
-  ANALGESIC
-  ANTIPARASITIC
-  FLEA_TICK_CONTROL
-  DEWORMER
-  HEARTWORM_PREVENTION
-  SUPPLEMENT
-  VACCINE
-  OTHER
-}
-
-enum OrderStatus {
-  RECEBIDA
-  DIAGNOSTICO
-  AGUARDANDO_APROVACAO
-  EXECUCAO
-  FINALIZADA
-  ENTREGUE
+  @@map("parts")
 }
 
 model ServiceOrder {
-  id           String      @id @default(uuid())
-  clientName   String
-  clientContact String
-  vehicle      Json
-  services     Json
-  parts        Json
-  status       OrderStatus @default(RECEBIDA)
-  isDeleted    Boolean     @default(false)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id                      String             @id @default(uuid())
+  orderNumber             String             @unique @map("order_number")
+  customerId              String             @map("customer_id")
+  vehicleId               String             @map("vehicle_id")
+  mechanicId              String?            @map("mechanic_id")
+  status                  String             @default("RECEIVED") // RECEIVED, IN_DIAGNOSIS, AWAITING_APPROVAL, IN_EXECUTION, FINISHED, DELIVERED
+  description             String
+  totalServicePrice       Float              @default(0) @map("total_service_price")
+  totalPartsPrice         Float              @default(0) @map("total_parts_price")
+  totalPrice              Float              @default(0) @map("total_price")
+  estimatedTimeHours      Float              @default(0) @map("estimated_time_hours")
+  estimatedCompletionDate DateTime           @map("estimated_completion_date")
+  startedAt               DateTime?          @map("started_at")
+  completedAt             DateTime?          @map("completed_at")
+  deliveredAt             DateTime?          @map("delivered_at")
+  approvedAt              DateTime?          @map("approved_at")
+  createdAt               DateTime           @default(now()) @map("created_at")
+  updatedAt               DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  customer    Customer           @relation(fields: [customerId], references: [id])
+  vehicle     Vehicle            @relation(fields: [vehicleId], references: [id])
+  mechanic    Mechanic?          @relation(fields: [mechanicId], references: [id])
+  services    ServiceOrderItem[]
+  parts       ServiceOrderPart[]
+  statusHistory ServiceOrderStatusHistory[]
 
   @@map("service_orders")
+}
+
+model ServiceOrderItem {
+  id             String  @id @default(uuid())
+  serviceOrderId String  @map("service_order_id")
+  serviceId      String  @map("service_id")
+  quantity       Int     @default(1)
+  price          Float
+  totalPrice     Float @map("total_price")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  service      Service      @relation(fields: [serviceId], references: [id])
+
+  @@map("service_order_items")
+}
+
+model ServiceOrderPart {
+  id             String  @id @default(uuid())
+  serviceOrderId String  @map("service_order_id")
+  partId         String  @map("part_id")
+  quantity       Int
+  price          Float
+  totalPrice     Float @map("total_price")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  part         Part         @relation(fields: [partId], references: [id])
+
+  @@map("service_order_parts")
+}
+
+model ServiceOrderStatusHistory {
+  id             String             @id @default(uuid())
+  serviceOrderId String             @map("service_order_id")
+  status         String // RECEIVED, IN_DIAGNOSIS, AWAITING_APPROVAL, IN_EXECUTION, FINISHED, DELIVERED
+  notes          String?
+  changedBy      String?            @map("changed_by")
+  createdAt      DateTime           @default(now()) @map("created_at")
+
+  // Relations
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+
+  @@map("service_order_status_history")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("EMPLOYEE") // ADMIN, EMPLOYEE, CLIENT
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Mechanic {
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @unique
+  phone           String?
+  specialties     String   // JSON array stored as string
+  isActive        Boolean  @default(true) @map("is_active")
+  isAvailable     Boolean  @default(true) @map("is_available")
+  experienceYears Int      @default(0) @map("experience_years")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  serviceOrders ServiceOrder[]
+
+  @@map("mechanics")
+}
+
+model Budget {
+  id             String   @id @default(uuid())
+  serviceOrderId String   @map("service_order_id")
+  customerId     String   @map("customer_id")
+  subtotal       Float
+  taxes          Float
+  discount       Float
+  total          Float
+  validUntil     DateTime @map("valid_until")
+  status         String   @default("RASCUNHO") // RASCUNHO, ENVIADO, APROVADO, REJEITADO
+  sentAt         DateTime? @map("sent_at")
+  approvedAt     DateTime? @map("approved_at")
+  rejectedAt     DateTime? @map("rejected_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  items BudgetItem[]
+
+  @@map("budgets")
+}
+
+model BudgetItem {
+  id          String   @id @default(uuid())
+  budgetId    String   @map("budget_id")
+  type        String   // SERVICE or PART
+  serviceId   String?  @map("service_id")
+  partId      String?  @map("part_id")
+  description String
+  quantity    Int
+  unitPrice   Float    @map("unit_price")
+  total       Float
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@map("budget_items")
 }
