@@ -267,6 +267,8 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform plan -out=tfplan \
+            -var="kubeconfig_path=/home/runner/.kube/config" \
+            -var="kube_context=kind-workshop-terraform" \
             -var="app_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" \
             -var="database_password=workshop123" \
             -var="jwt_secret=default-jwt-secret-key"
