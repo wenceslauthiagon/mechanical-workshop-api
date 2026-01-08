@@ -283,12 +283,11 @@ jobs:
           kubectl config use-context kind-workshop-terraform
           kubectl cluster-info
           kubectl get nodes
-          echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
 
       - name: Terraform Init
         run: terraform init
         env:
-          KUBECONFIG: ${{ env.KUBECONFIG }}
+          KUBECONFIG: /home/runner/.kube/config
 
       - name: Terraform Validate
         run: terraform validate
@@ -300,13 +299,13 @@ jobs:
             -var="database_password=workshop123" \
             -var="jwt_secret=default-jwt-secret-key"
         env:
-          KUBECONFIG: ${{ env.KUBECONFIG }}
+          KUBECONFIG: /home/runner/.kube/config
 
       - name: Terraform Apply
         if: github.event_name == 'push'
         run: terraform apply -auto-approve tfplan
         env:
-          KUBECONFIG: ${{ env.KUBECONFIG }}
+          KUBECONFIG: /home/runner/.kube/config
       
       - name: Verify Terraform Deployment
         run: |
