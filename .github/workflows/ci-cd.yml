@@ -293,7 +293,6 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform plan \
-            -var="kube_context=kind-workshop-terraform" \
             -var="app_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" \
             -var="database_password=workshop123" \
             -var="jwt_secret=default-jwt-secret-key"
@@ -302,7 +301,6 @@ jobs:
         if: github.event_name == 'push'
         run: |
           terraform apply -auto-approve \
-            -var="kube_context=kind-workshop-terraform" \
             -var="app_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" \
             -var="database_password=workshop123" \
             -var="jwt_secret=default-jwt-secret-key"

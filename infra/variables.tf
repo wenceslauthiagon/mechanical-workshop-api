@@ -1,13 +1,13 @@
 variable "kubeconfig_path" {
-  description = "Path to kubeconfig file"
+  description = "Path to kubeconfig file (empty string uses in-cluster config)"
   type        = string
-  default     = "~/.kube/config"
+  default     = ""
 }
 
 variable "kube_context" {
-  description = "Kubernetes context to use"
+  description = "Kubernetes context to use (empty string uses current context)"
   type        = string
-  default     = "docker-desktop"
+  default     = ""
 }
 
 variable "namespace" {
