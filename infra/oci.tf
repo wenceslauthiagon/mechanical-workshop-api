@@ -106,33 +106,27 @@ resource "oci_containerengine_cluster" "oke" {
 
 # Node pool for OKE
 resource "oci_containerengine_node_pool" "nodepool" {
-  count          = var.provision_oci_cluster ? 1 : 0
-  compartment_id = var.oci_compartment_ocid
-  cluster_id     = oci_containerengine_cluster.oke[0].id
-  name           = "${var.app_name}-nodepool"
+  count              = var.provision_oci_cluster ? 1 : 0
+  compartment_id     = var.oci_compartment_ocid
+  cluster_id         = oci_containerengine_cluster.oke[0].id
+  name               = "${var.app_name}-nodepool"
+  node_shape         = var.node_shape
+  kubernetes_version = oci_containerengine_cluster.oke[0].kubernetes_version
 
   node_config_details {
-    placement_configs = [
-      for ad in data.oci_identity_availability_domains.ads[0].availability_domains : {
-        availability_domain = ad.name
-        subnet_id            = oci_core_subnet.subnet[0].id
+    dynamic "placement_configs" {
+      for_each = data.oci_identity_availability_domains.ads[0].availability_domains
+      content {
+        availability_domain = placement_configs.value.name
+        subnet_id           = oci_core_subnet.subnet[0].id
       }
-    ]
-
-    size  = var.node_count
-    shape = var.node_shape
+    }
+    size = var.node_count
   }
-
-  kubernetes_version = oci_containerengine_cluster.oke[0].kubernetes_version
 
   depends_on = [oci_containerengine_cluster.oke]
 }
 
 output "oke_cluster_id" {
   value = var.provision_oci_cluster ? oci_containerengine_cluster.oke[0].id : ""
-}
-
-output "oke_kubeconfig" {
-  value = var.provision_oci_cluster ? oci_containerengine_cluster.oke[0].kube_config[0].value : ""
-  description = "Base64 kubeconfig content (may require formatting)."
 }
