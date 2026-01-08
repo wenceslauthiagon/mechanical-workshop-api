@@ -111,38 +111,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  terraform-deploy:
-    name: Terraform Deploy
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.0
-
-      - name: Terraform Init
-        working-directory: ./infra
-        run: terraform init
-
-      - name: Terraform Plan
-        working-directory: ./infra
-        run: |
-          terraform plan -out=tfplan \
-            -var="database_password=workshop123" \
-            -var="jwt_secret=ci-cd-jwt-secret-key"
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        working-directory: ./infra
-        run: |
-          terraform apply -auto-approve tfplan
-
   deploy-to-kubernetes:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
