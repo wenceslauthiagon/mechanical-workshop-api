@@ -59,7 +59,7 @@ async function bootstrap() {
           'Budgets',
           'Public - Service Orders',
           'Public - Budgets',
-          'Service Statistics',
+          'Service Stats',
           'Health Check',
         ];
 
