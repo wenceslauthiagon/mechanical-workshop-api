@@ -1,4 +1,4 @@
-# Pet Management API
+# Mechanical Workshop API - Sistema de Gestão de Oficina Mecânica
 
 [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -6,13 +6,42 @@
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
-[![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+[![Azure](https://img.shields.io/badge/Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
+[![Kong](https://img.shields.io/badge/Kong-003459?style=for-the-badge&logo=kong&logoColor=white)](https://konghq.com/)
+[![Datadog](https://img.shields.io/badge/Datadog-632CA6?style=for-the-badge&logo=datadog&logoColor=white)](https://www.datadoghq.com/)
 
-Sistema de gestão para oficina mecânica desenvolvido com **NestJS**, **Prisma** e **PostgreSQL**, seguindo os princípios de **Clean Architecture**, **Domain-Driven Design (DDD)** e **Infrastructure as Code (IaC)**.
+Sistema completo de gestão para oficina mecânica com **arquitetura corporativa em nuvem**, desenvolvido com **NestJS**, **Azure Functions**, **Kubernetes** e **Terraform**, seguindo **Clean Architecture**, **DDD** e **IaC**.
+
+> 🎓 **Tech Challenge - Fase 3** | FIAP - Pós-Graduação em Arquitetura de Software
+
+## 🌟 Destaques da Implementação
+
+### ✅ Requisitos do Tech Challenge Implementados
+
+- 🔐 **Autenticação Serverless via CPF** - Azure Function com validação completa e JWT
+- 🚪 **API Gateway (Kong)** - Rate limiting, JWT validation, CORS, correlation ID
+- 🐳 **4 Repositórios Separados** - Auth, K8s Infra, DB Infra e App Principal
+- 🔄 **CI/CD Completo** - GitHub Actions com deploy automático (staging + production)
+- ☁️ **Infraestrutura em Cloud** - Azure (AKS, PostgreSQL, Functions, Redis)
+- 📊 **Monitoramento Total** - Datadog (APM, Logs, Métricas, Dashboards, Alertas)
+- 🏗️ **Infrastructure as Code** - Terraform para todos os recursos
+- 📐 **Documentação Arquitetural** - Diagramas, RFCs e ADRs completos
+- 🔒 **Segurança Corporativa** - JWT, RBAC, SSL/TLS, Secrets Management
+- 📈 **Alta Disponibilidade** - HPA, HA Database, Multiple Replicas
+
+### 🔗 Repositórios do Projeto
+
+Este é o **repositório principal da aplicação**. Outros repositórios:
+
+1. **[Auth Function](https://github.com/[org]/mechanical-workshop-auth-function)** - Azure Function serverless para autenticação via CPF
+2. **[Kubernetes Infra](https://github.com/[org]/mechanical-workshop-kubernetes-infra)** - Terraform para provisionamento do cluster AKS
+3. **[Database Infra](https://github.com/[org]/mechanical-workshop-database-infra)** - Terraform para PostgreSQL gerenciado
+
+---
 
 ## 📋 Sobre o Projeto
 
-Este projeto foi desenvolvido como parte do **Tech Challenge - Fase 2**, implementando uma solução completa e profissional para gestão de oficina mecânica com:
+Sistema de gestão de oficina mecânica implementando práticas de **arquitetura corporativa** com:
 
 - ✅ **Clean Architecture** com 4 camadas bem definidas
 - ✅ **Clean Code** com boas práticas e padrões

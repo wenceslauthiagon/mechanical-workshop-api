@@ -111,115 +111,127 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy-to-kubernetes:
-    name: Deploy to Kubernetes
+  deploy-to-aks-staging:
+    name: Deploy to AKS Staging
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create Kind cluster
-        uses: helm/kind-action@v1
+      - name: Azure Login
+        uses: azure/login@v1
         with:
-          cluster_name: workshop
-          wait: 30s
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Verify cluster
-        run: |
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Load Docker image to Kind
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          
-          IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
-          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$IMAGE_TAG"
-          
-          echo "Pulling image: $IMAGE_NAME"
-          docker pull $IMAGE_NAME
-          
-          echo "Loading image into Kind cluster..."
-          kind load docker-image $IMAGE_NAME --name workshop
-          
-          echo "Image loaded successfully"
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: mechanical-workshop-rg-staging
+          cluster-name: mechanical-workshop-aks-staging
 
       - name: Create namespace
-        run: kubectl apply -f k8s/namespace.yaml
-
-      - name: Deploy ConfigMap
-        run: kubectl apply -f k8s/configmap.yaml
-
-      - name: Deploy Secrets
-        run: kubectl apply -f k8s/secret.yaml
-
-      - name: Deploy PostgreSQL
         run: |
-          kubectl apply -f k8s/postgres-deployment.yaml
-          echo "Waiting for PostgreSQL to be ready..."
-          kubectl wait --for=condition=available --timeout=120s deployment/postgres -n mechanical-workshop || true
-          kubectl get pods -n mechanical-workshop -l app=postgres
+          kubectl create namespace mechanical-workshop --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Deploy Redis
+      - name: Create Image Pull Secret
         run: |
-          kubectl apply -f k8s/redis-deployment.yaml
-          echo "Waiting for Redis to be ready..."
-          kubectl wait --for=condition=available --timeout=120s deployment/redis -n mechanical-workshop || true
-          kubectl get pods -n mechanical-workshop -l app=redis
+          kubectl create secret docker-registry ghcr-secret \
+            --docker-server=${{ env.REGISTRY }} \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --namespace=mechanical-workshop \
+            --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Deploy API
+      - name: Deploy ConfigMap and Secrets
+        run: |
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/secret.yaml
+
+      - name: Deploy Application
         run: |
           IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
           IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$IMAGE_TAG"
           
-          echo "Using image: $IMAGE_NAME"
-          
-          # Update image in deployment with IfNotPresent policy
-          sed -i "s|image: workshop-api:latest|image: $IMAGE_NAME|g" k8s/app-deployment.yaml
-          sed -i "s|imagePullPolicy: Always|imagePullPolicy: IfNotPresent|g" k8s/app-deployment.yaml
-          
-          kubectl apply -f k8s/app-deployment.yaml
-          
-          echo "Waiting for API pods to be created..."
-          sleep 10
-          kubectl get pods -n mechanical-workshop -l app=workshop-api
+          sed -i "s|image: .*|image: $IMAGE_NAME|g" k8s/deployment.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/hpa.yaml
 
-      - name: Deploy HPA
-        run: kubectl apply -f k8s/hpa.yaml
-
-      - name: Wait for deployments
+      - name: Wait for rollout
         run: |
-          echo "Checking deployment status..."
-          kubectl get deployments -n mechanical-workshop
-          
-          echo "\nWaiting for deployments to be ready (this may take a few minutes)..."
-          
-          # Check pods status before waiting
-          echo "\nCurrent pods status:"
-          kubectl get pods -n mechanical-workshop
-          
-          # Describe failing pods if any
-          echo "\nDescribing API pods:"
-          kubectl describe pods -n mechanical-workshop -l app=workshop-api || true
-          
-          echo "\nChecking API logs:"
-          kubectl logs -n mechanical-workshop -l app=workshop-api --tail=50 || true
+          kubectl rollout status deployment/workshop-api -n mechanical-workshop --timeout=5m
 
       - name: Verify deployment
         run: |
-          echo "=== Final Status ==="
-          echo "\nPods:"
-          kubectl get pods -n mechanical-workshop -o wide
-          echo "\nServices:"
+          kubectl get pods -n mechanical-workshop
           kubectl get svc -n mechanical-workshop
-          echo "\nDeployments:"
-          kubectl get deployments -n mechanical-workshop
-          echo "\nHPA:"
           kubectl get hpa -n mechanical-workshop
-          echo "\n=== Deployment verification complete ==="
+
+  deploy-to-aks-production:
+    name: Deploy to AKS Production
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: mechanical-workshop-rg
+          cluster-name: mechanical-workshop-aks
+
+      - name: Create namespace
+        run: |
+          kubectl create namespace mechanical-workshop --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create Image Pull Secret
+        run: |
+          kubectl create secret docker-registry ghcr-secret \
+            --docker-server=${{ env.REGISTRY }} \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --namespace=mechanical-workshop \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy ConfigMap and Secrets
+        run: |
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/secret.yaml
+
+      - name: Deploy Application
+        run: |
+          IMAGE_TAG="latest"
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$IMAGE_TAG"
+          
+          sed -i "s|image: .*|image: $IMAGE_NAME|g" k8s/deployment.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/hpa.yaml
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/workshop-api -n mechanical-workshop --timeout=5m
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n mechanical-workshop
+          kubectl get svc -n mechanical-workshop
+          kubectl get hpa -n mechanical-workshop
 
   deploy-with-terraform:
     name: Deploy with Terraform
@@ -289,19 +301,21 @@ jobs:
         env:
           KUBECONFIG: /home/runner/.kube/config
 
+
   notify:
     name: Notify Deployment
     runs-on: ubuntu-latest
-    needs: [deploy-to-kubernetes]
+    needs: [deploy-to-aks-staging, deploy-to-aks-production]
     if: always()
     
     steps:
       - name: Notify Success
-        if: needs.deploy-to-kubernetes.result == 'success'
+        if: needs.deploy-to-aks-staging.result == 'success' || needs.deploy-to-aks-production.result == 'success'
         run: echo "Deployment successful!"
 
       - name: Notify Failure
-        if: needs.deploy-to-kubernetes.result == 'failure'
+        if: needs.deploy-to-aks-staging.result == 'failure' || needs.deploy-to-aks-production.result == 'failure'
         run: |
           echo "Deployment failed!"
           exit 1
+
