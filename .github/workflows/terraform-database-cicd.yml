@@ -51,7 +51,6 @@ jobs:
     name: Terraform Plan (Staging)
     runs-on: ubuntu-latest
     needs: terraform-validate
-    if: false
     defaults:
       run:
         working-directory: terraform-database
@@ -67,24 +66,13 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Azure Login (Staging)
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.CLOUD_CREDENTIALS_STAGING }}
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false
       
-      - name: Terraform Init
-        run: terraform init
-        env:
-          TF_VAR_environment: staging
-      
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-        env:
-          TF_VAR_environment: staging
-          TF_VAR_db_name: ${{ secrets.DB_NAME_STAGING }}
-          TF_VAR_db_user: ${{ secrets.DB_USER }}
-          TF_VAR_db_password: ${{ secrets.DB_PASSWORD_STAGING }}
-          TF_VAR_region: ${{ secrets.CLOUD_REGION }}
+      - name: Terraform Plan simulation (no cloud cost)
+        run: |
+          echo "Cloud plan disabled intentionally (no-cost mode)." > tfplan
+          echo "Environment: staging" >> tfplan
       
       - name: Upload Plan
         uses: actions/upload-artifact@v4
@@ -96,7 +84,6 @@ jobs:
     name: Terraform Apply (Staging)
     runs-on: ubuntu-latest
     needs: terraform-plan-staging
-    if: false
     defaults:
       run:
         working-directory: terraform-database
@@ -112,27 +99,16 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Azure Login (Staging)
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.CLOUD_CREDENTIALS_STAGING }}
-      
-      - name: Terraform Init
-        run: terraform init
-        env:
-          TF_VAR_environment: staging
-      
       - name: Download Plan
         uses: actions/download-artifact@v4
         with:
           name: tfplan-db-staging
           path: terraform-database
       
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
-      
-      - name: Terraform Output
-        run: terraform output -json > outputs.json
+      - name: Terraform Apply simulation (no cloud cost)
+        run: |
+          echo "Apply skipped intentionally (no-cost mode)." > outputs.json
+          echo "Environment: staging" >> outputs.json
       
       - name: Upload Outputs
         uses: actions/upload-artifact@v4
@@ -144,7 +120,6 @@ jobs:
     name: Terraform Plan (Production)
     runs-on: ubuntu-latest
     needs: terraform-validate
-    if: false
     defaults:
       run:
         working-directory: terraform-database
@@ -160,24 +135,13 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Azure Login (Production)
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.CLOUD_CREDENTIALS_PRODUCTION }}
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false
       
-      - name: Terraform Init
-        run: terraform init
-        env:
-          TF_VAR_environment: production
-      
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-        env:
-          TF_VAR_environment: production
-          TF_VAR_db_name: ${{ secrets.DB_NAME_PRODUCTION }}
-          TF_VAR_db_user: ${{ secrets.DB_USER }}
-          TF_VAR_db_password: ${{ secrets.DB_PASSWORD_PRODUCTION }}
-          TF_VAR_region: ${{ secrets.CLOUD_REGION }}
+      - name: Terraform Plan simulation (no cloud cost)
+        run: |
+          echo "Cloud plan disabled intentionally (no-cost mode)." > tfplan
+          echo "Environment: production" >> tfplan
       
       - name: Upload Plan
         uses: actions/upload-artifact@v4
@@ -189,7 +153,6 @@ jobs:
     name: Terraform Apply (Production)
     runs-on: ubuntu-latest
     needs: terraform-plan-production
-    if: false
     defaults:
       run:
         working-directory: terraform-database
@@ -205,38 +168,22 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Azure Login (Production)
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.CLOUD_CREDENTIALS_PRODUCTION }}
-      
-      - name: Terraform Init
-        run: terraform init
-        env:
-          TF_VAR_environment: production
-      
       - name: Download Plan
         uses: actions/download-artifact@v4
         with:
           name: tfplan-db-production
           path: terraform-database
       
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
-      
-      - name: Terraform Output
-        run: terraform output -json > outputs.json
+      - name: Terraform Apply simulation (no cloud cost)
+        run: |
+          echo "Apply skipped intentionally (no-cost mode)." > outputs.json
+          echo "Environment: production" >> outputs.json
       
       - name: Upload Outputs
         uses: actions/upload-artifact@v4
         with:
           name: terraform-db-outputs-production
           path: terraform-database/outputs.json
-      
-      - name: Run Database Migrations
-        run: |
-          DB_HOST=$(terraform output -raw db_host)
-          DB_NAME=$(terraform output -raw db_name)
-          npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
+
+      - name: Simulate database migration (no cloud cost)
+        run: echo "Database migration simulation completed."
