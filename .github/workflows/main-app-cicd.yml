@@ -61,11 +61,13 @@ jobs:
       
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: file:./test.db
       
       - name: Run database migrations
-        run: npx prisma migrate deploy
+        run: npx prisma db push --skip-generate
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db?schema=public
+          DATABASE_URL: file:./test.db
       
       - name: Run linter
         run: npm run lint
@@ -73,7 +75,7 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db?schema=public
+          DATABASE_URL: file:./test.db
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           JWT_SECRET: test-secret
@@ -81,7 +83,7 @@ jobs:
       - name: Run integration tests
         run: npm run test:integration
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db?schema=public
+          DATABASE_URL: file:./test.db
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           JWT_SECRET: test-secret
@@ -89,7 +91,7 @@ jobs:
       - name: Generate coverage report
         run: npm run test:cov
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db?schema=public
+          DATABASE_URL: file:./test.db
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           JWT_SECRET: test-secret

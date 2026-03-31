@@ -105,8 +105,8 @@ resource "azurerm_key_vault_secret" "db_password" {
 }
 
 resource "azurerm_key_vault_secret" "connection_string" {
-  name  = "database-connection-string"
-  value = "postgresql://${var.admin_username}:${random_password.admin_password.result}@${azurerm_postgresql_flexible_server.main.fqdn}:5432/${var.database_name}?schema=public&sslmode=require"
+  name         = "database-connection-string"
+  value        = "postgresql://${var.admin_username}:${random_password.admin_password.result}@${azurerm_postgresql_flexible_server.main.fqdn}:5432/${var.database_name}?schema=public&sslmode=require"
   key_vault_id = azurerm_key_vault.main.id
 
   depends_on = [azurerm_key_vault.main]

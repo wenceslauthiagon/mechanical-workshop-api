@@ -20,7 +20,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     max_count           = var.max_node_count
     os_disk_size_gb     = 30
     type                = "VirtualMachineScaleSets"
-    
+
     tags = var.tags
   }
 
