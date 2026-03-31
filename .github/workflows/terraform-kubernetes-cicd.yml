@@ -66,9 +66,10 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Configure Cloud Credentials
-        run: |
-          echo "${{ secrets.CLOUD_CREDENTIALS_STAGING }}" > credentials.json
+      - name: Azure Login (Staging)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CLOUD_CREDENTIALS_STAGING }}
       
       - name: Terraform Init
         run: terraform init
@@ -108,9 +109,10 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Configure Cloud Credentials
-        run: |
-          echo "${{ secrets.CLOUD_CREDENTIALS_STAGING }}" > credentials.json
+      - name: Azure Login (Staging)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CLOUD_CREDENTIALS_STAGING }}
       
       - name: Terraform Init
         run: terraform init
@@ -155,9 +157,10 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Configure Cloud Credentials
-        run: |
-          echo "${{ secrets.CLOUD_CREDENTIALS_PRODUCTION }}" > credentials.json
+      - name: Azure Login (Production)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CLOUD_CREDENTIALS_PRODUCTION }}
       
       - name: Terraform Init
         run: terraform init
@@ -197,9 +200,10 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Configure Cloud Credentials
-        run: |
-          echo "${{ secrets.CLOUD_CREDENTIALS_PRODUCTION }}" > credentials.json
+      - name: Azure Login (Production)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CLOUD_CREDENTIALS_PRODUCTION }}
       
       - name: Terraform Init
         run: terraform init
