@@ -115,7 +115,7 @@ jobs:
     name: Deploy to AKS Staging
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: false
     environment:
       name: staging
     
@@ -176,7 +176,7 @@ jobs:
     name: Deploy to AKS Production
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: false
     environment:
       name: production
     
@@ -237,7 +237,7 @@ jobs:
     name: Deploy with Terraform
     runs-on: ubuntu-latest
     needs: [build-and-push]
-    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[terraform]')
+    if: false
     
     defaults:
       run:
@@ -316,6 +316,5 @@ jobs:
       - name: Notify Failure
         if: needs.deploy-to-aks-staging.result == 'failure' || needs.deploy-to-aks-production.result == 'failure'
         run: |
-          echo "Deployment failed!"
-          exit 1
+          echo "Deployment failed (cloud deploy is disabled in this workflow)."
 

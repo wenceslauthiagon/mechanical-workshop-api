@@ -152,7 +152,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/develop'
+    if: false
     environment:
       name: staging
       url: https://staging.workshop-api.com
@@ -188,7 +188,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: false
     environment:
       name: production
       url: https://workshop-api.com
