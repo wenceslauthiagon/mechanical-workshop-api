@@ -1,0 +1,12 @@
+resource_group_name              = "mechanical-workshop-rg"
+location                         = "East US"
+server_name                      = "mechanical-workshop-db"
+database_name                    = "workshop"
+admin_username                   = "workshopadmin"
+sku_name                         = "GP_Standard_D2s_v3"
+storage_mb                       = 32768
+backup_retention_days            = 7
+geo_redundant_backup_enabled     = true
+high_availability_mode           = "ZoneRedundant"
+postgresql_version               = "14"
+environment                      = "production"
