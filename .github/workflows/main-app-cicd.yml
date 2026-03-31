@@ -7,7 +7,7 @@ on:
       - 'src/**'
       - 'test/**'
       - 'k8s/**'
-      - 'Dockerfile'
+      - 'docker/Dockerfile'
       - 'package.json'
   pull_request:
     branches: [main, develop]
@@ -141,8 +141,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./docker/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
