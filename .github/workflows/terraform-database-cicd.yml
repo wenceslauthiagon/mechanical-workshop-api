@@ -85,7 +85,7 @@ jobs:
           TF_VAR_region: ${{ secrets.CLOUD_REGION }}
       
       - name: Upload Plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan-db-staging
           path: terraform-database/tfplan
@@ -120,7 +120,7 @@ jobs:
           TF_VAR_environment: staging
       
       - name: Download Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tfplan-db-staging
           path: terraform-database
@@ -132,7 +132,7 @@ jobs:
         run: terraform output -json > outputs.json
       
       - name: Upload Outputs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: terraform-db-outputs-staging
           path: terraform-database/outputs.json
@@ -176,7 +176,7 @@ jobs:
           TF_VAR_region: ${{ secrets.CLOUD_REGION }}
       
       - name: Upload Plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan-db-production
           path: terraform-database/tfplan
@@ -211,7 +211,7 @@ jobs:
           TF_VAR_environment: production
       
       - name: Download Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tfplan-db-production
           path: terraform-database
@@ -223,7 +223,7 @@ jobs:
         run: terraform output -json > outputs.json
       
       - name: Upload Outputs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: terraform-db-outputs-production
           path: terraform-database/outputs.json

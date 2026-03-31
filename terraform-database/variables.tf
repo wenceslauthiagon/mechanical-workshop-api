@@ -70,12 +70,6 @@ variable "environment" {
   default     = "production"
 }
 
-variable "allowed_aks_subnet_id" {
-  description = "ID da subnet do AKS para Private Link"
-  type        = string
-  default     = ""
-}
-
 variable "tags" {
   description = "Tags para os recursos"
   type        = map(string)
