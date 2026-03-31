@@ -19,7 +19,6 @@ jobs:
   terraform-plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
-    if: false
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIR }}
