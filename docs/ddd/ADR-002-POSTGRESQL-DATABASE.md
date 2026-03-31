@@ -159,6 +159,8 @@ Precisamos escolher um banco de dados que:
 
 ## Modelo Relacional Justificado
 
+> 📊 **Diagrama ER completo (Mermaid)**: [ER-DIAGRAM.md](./ER-DIAGRAM.md)
+
 ### Schema Principal
 
 ```sql
