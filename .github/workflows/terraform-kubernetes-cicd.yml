@@ -1,0 +1,230 @@
+name: CI/CD - Terraform Kubernetes
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'terraform-kubernetes/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'terraform-kubernetes/**'
+  workflow_dispatch:
+
+env:
+  TF_VERSION: 1.6.0
+  CLOUD_DEPLOY_ENABLED: 'false'
+
+jobs:
+  terraform-validate:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform-kubernetes
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+      
+      - name: Terraform Init
+        run: terraform init -backend=false
+      
+      - name: Terraform Validate
+        run: terraform validate
+      
+      - name: TFLint
+        uses: terraform-linters/setup-tflint@v4
+      
+      - name: Run TFLint
+        run: tflint --init && tflint
+
+  terraform-plan-staging:
+    name: Terraform Plan (Staging)
+    runs-on: ubuntu-latest
+    needs: terraform-validate
+    if: false
+    defaults:
+      run:
+        working-directory: terraform-kubernetes
+    environment:
+      name: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      
+      - name: Azure Login (Staging)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CLOUD_CREDENTIALS_STAGING }}
+      
+      - name: Terraform Init
+        run: terraform init
+        env:
+          TF_VAR_environment: staging
+      
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        env:
+          TF_VAR_environment: staging
+          TF_VAR_cluster_name: ${{ secrets.CLUSTER_NAME_STAGING }}
+          TF_VAR_region: ${{ secrets.CLOUD_REGION }}
+      
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-staging
+          path: terraform-kubernetes/tfplan
+
+  terraform-apply-staging:
+    name: Terraform Apply (Staging)
+    runs-on: ubuntu-latest
+    needs: terraform-plan-staging
+    if: false
+    defaults:
+      run:
+        working-directory: terraform-kubernetes
+    environment:
+      name: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      
+      - name: Azure Login (Staging)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CLOUD_CREDENTIALS_STAGING }}
+      
+      - name: Terraform Init
+        run: terraform init
+        env:
+          TF_VAR_environment: staging
+      
+      - name: Download Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-staging
+          path: terraform-kubernetes
+      
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+      
+      - name: Terraform Output
+        run: terraform output -json > outputs.json
+      
+      - name: Upload Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-outputs-staging
+          path: terraform-kubernetes/outputs.json
+
+  terraform-plan-production:
+    name: Terraform Plan (Production)
+    runs-on: ubuntu-latest
+    needs: terraform-validate
+    if: false
+    defaults:
+      run:
+        working-directory: terraform-kubernetes
+    environment:
+      name: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      
+      - name: Azure Login (Production)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CLOUD_CREDENTIALS_PRODUCTION }}
+      
+      - name: Terraform Init
+        run: terraform init
+        env:
+          TF_VAR_environment: production
+      
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        env:
+          TF_VAR_environment: production
+          TF_VAR_cluster_name: ${{ secrets.CLUSTER_NAME_PRODUCTION }}
+          TF_VAR_region: ${{ secrets.CLOUD_REGION }}
+      
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-production
+          path: terraform-kubernetes/tfplan
+
+  terraform-apply-production:
+    name: Terraform Apply (Production)
+    runs-on: ubuntu-latest
+    needs: terraform-plan-production
+    if: false
+    defaults:
+      run:
+        working-directory: terraform-kubernetes
+    environment:
+      name: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      
+      - name: Azure Login (Production)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CLOUD_CREDENTIALS_PRODUCTION }}
+      
+      - name: Terraform Init
+        run: terraform init
+        env:
+          TF_VAR_environment: production
+      
+      - name: Download Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-production
+          path: terraform-kubernetes
+      
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+      
+      - name: Terraform Output
+        run: terraform output -json > outputs.json
+      
+      - name: Upload Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-outputs-production
+          path: terraform-kubernetes/outputs.json

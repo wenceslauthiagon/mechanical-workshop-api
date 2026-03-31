@@ -1,0 +1,4 @@
+# CODEOWNERS — Kubernetes Infrastructure
+# Toda mudança na infraestrutura requer revisão do soat-architecture
+
+*                           @soat-architecture

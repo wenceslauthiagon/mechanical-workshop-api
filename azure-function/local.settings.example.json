@@ -1,0 +1,10 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "JWT_SECRET": "your-super-secret-jwt-key-change-in-production",
+    "JWT_EXPIRATION": "24h",
+    "DATABASE_URL": "postgresql://workshop:workshop@localhost:5432/mechanical_workshop?schema=public"
+  }
+}

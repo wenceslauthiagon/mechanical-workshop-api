@@ -1,0 +1,5 @@
+# CODEOWNERS — Database Infrastructure
+# Toda mudança no banco de dados requer revisão do soat-architecture
+
+*                           @soat-architecture
+prisma/                     @soat-architecture
