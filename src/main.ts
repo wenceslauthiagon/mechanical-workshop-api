@@ -1,11 +1,53 @@
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { AuthModule } from './auth/auth.module';
+import { AuthCheckModule } from './auth-check/auth-check.module';
+import { WorkshopModule } from './workshop/workshop.module';
 import { API_TAGS } from './shared/constants/messages.constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Workaround: prevent Swagger from crashing on circular metadata in some DTOs.
+  // Keeps all routes visible while schemas are gradually normalized.
+  const swaggerInternals = (await import(
+    '@nestjs/swagger/dist/services/schema-object-factory'
+  )) as {
+    SchemaObjectFactory?: {
+      prototype?: {
+        createNotBuiltInTypeReference?: (...args: unknown[]) => unknown;
+        __circularPatchApplied?: boolean;
+      };
+    };
+  };
+
+  const schemaFactoryPrototype = swaggerInternals.SchemaObjectFactory?.prototype;
+  if (
+    schemaFactoryPrototype?.createNotBuiltInTypeReference &&
+    !schemaFactoryPrototype.__circularPatchApplied
+  ) {
+    const originalCreateNotBuiltInTypeReference =
+      schemaFactoryPrototype.createNotBuiltInTypeReference;
+
+    schemaFactoryPrototype.createNotBuiltInTypeReference = function (
+      ...args: unknown[]
+    ) {
+      try {
+        return originalCreateNotBuiltInTypeReference.apply(this, args);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '';
+        if (message.includes('A circular dependency has been detected')) {
+          return { type: 'object' };
+        }
+        throw error;
+      }
+    };
+
+    schemaFactoryPrototype.__circularPatchApplied = true;
+  }
 
   // Global exception filter
   // const errorHandlerService = new ErrorHandlerService();
@@ -41,7 +83,9 @@ async function bootstrap() {
     )
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config, {
+    include: [AuthModule, AuthCheckModule, WorkshopModule],
+  });
 
   const swaggerPath = 'api';
 
@@ -61,6 +105,7 @@ async function bootstrap() {
           'Public - Budgets',
           'Service Stats',
           'Health Check',
+          'Auth Check',
         ];
 
         const indexA = order.indexOf(a);
@@ -75,7 +120,7 @@ async function bootstrap() {
     },
   };
 
-  SwaggerModule.setup(`${swaggerPath}/swagger`, app, document, swaggerOptions);
+  SwaggerModule.setup(swaggerPath, app, document, swaggerOptions);
 
   const port = parseInt(process.env.PORT || '3000', 10);
   const host = process.env.HOST || '0.0.0.0';

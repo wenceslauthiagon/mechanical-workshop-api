@@ -10,7 +10,13 @@ import {
   HttpStatus,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiExcludeController,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 import { BudgetService } from '../../2-application/services/budget.service';
 import { CreateBudgetDto } from '../dtos/budget/create-budget.dto';
 import { BudgetResponseDto } from '../dtos/budget/budget-response.dto';
@@ -18,6 +24,7 @@ import { BudgetWithRelationsResponseDto } from '../dtos/budget/budget-with-relat
 import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
 @ApiTags('Budgets')
+@ApiExcludeController()
 @Controller('budgets')
 export class BudgetController {
   constructor(private readonly budgetService: BudgetService) {}
@@ -129,7 +136,10 @@ export class BudgetController {
     status: 200,
     description:
       'Lista de orçamentos com dados frescos de clientes, OS e itens',
-    type: [BudgetWithRelationsResponseDto],
+    schema: {
+      type: 'array',
+      items: { type: 'object' },
+    },
   })
   async findAllEnriched(): Promise<BudgetWithRelationsResponseDto[]> {
     return await this.budgetService.findAllWithRelations();
@@ -143,7 +153,9 @@ export class BudgetController {
   @ApiResponse({
     status: 200,
     description: 'Orçamento com dados frescos de cliente, OS e itens',
-    type: BudgetWithRelationsResponseDto,
+    schema: {
+      type: 'object',
+    },
   })
   async findOneEnriched(
     @Param('id') id: string,
@@ -159,7 +171,10 @@ export class BudgetController {
   @ApiResponse({
     status: 200,
     description: 'Orçamentos do cliente com dados frescos',
-    type: [BudgetWithRelationsResponseDto],
+    schema: {
+      type: 'array',
+      items: { type: 'object' },
+    },
   })
   async findByCustomerEnriched(
     @Param('customerId') customerId: string,
@@ -175,7 +190,10 @@ export class BudgetController {
   @ApiResponse({
     status: 200,
     description: 'Orçamentos da OS com dados frescos',
-    type: [BudgetWithRelationsResponseDto],
+    schema: {
+      type: 'array',
+      items: { type: 'object' },
+    },
   })
   async findByServiceOrderEnriched(
     @Param('serviceOrderId') serviceOrderId: string,

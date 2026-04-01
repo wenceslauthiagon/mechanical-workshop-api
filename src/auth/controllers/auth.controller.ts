@@ -3,12 +3,14 @@ import {
   Post,
   Body,
   Get,
+  Inject,
   UseGuards,
   Request,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import {
+  ApiBody,
   ApiTags,
   ApiOperation,
   ApiResponse,
@@ -30,13 +32,25 @@ import { UserRole } from '../../shared/enums/user-role.enum';
 @Controller('auth')
 export class AuthController {
   constructor(
+    @Inject(AuthService)
     private readonly authService: AuthService,
+    @Inject(UserService)
     private readonly userService: UserService,
   ) {}
 
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['username', 'password'],
+      properties: {
+        username: { type: 'string', example: 'admin' },
+        password: { type: 'string', example: 'admin123' },
+      },
+    },
+  })
   @ApiOperation({
     summary: 'Login do usuário',
     description: 'Autentica um usuário e retorna um token JWT',
@@ -73,6 +87,19 @@ export class AuthController {
 
   @Post('users/first-admin')
   @Public()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['username', 'email', 'password', 'confirmPassword', 'role'],
+      properties: {
+        username: { type: 'string', example: 'admin' },
+        email: { type: 'string', example: 'admin@oficina.com' },
+        password: { type: 'string', example: 'admin123' },
+        confirmPassword: { type: 'string', example: 'admin123' },
+        role: { type: 'string', example: 'ADMIN' },
+      },
+    },
+  })
   @ApiOperation({
     summary: 'Criar primeiro usuário admin',
     description:
@@ -95,6 +122,19 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth('JWT-auth')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['username', 'email', 'password', 'confirmPassword', 'role'],
+      properties: {
+        username: { type: 'string', example: 'funcionario1' },
+        email: { type: 'string', example: 'funcionario1@oficina.com' },
+        password: { type: 'string', example: 'senha123' },
+        confirmPassword: { type: 'string', example: 'senha123' },
+        role: { type: 'string', example: 'EMPLOYEE' },
+      },
+    },
+  })
   @ApiOperation({
     summary: 'Criar usuário (Admin apenas)',
     description: 'Cria um novo usuário no sistema. Requer role ADMIN.',

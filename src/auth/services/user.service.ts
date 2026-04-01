@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { UserRole } from '../../shared/enums/user-role.enum';
@@ -18,7 +18,9 @@ export type SafeUser = Omit<User, 'passwordHash'>;
 @Injectable()
 export class UserService {
   constructor(
+    @Inject(PrismaService)
     private readonly prisma: PrismaService,
+    @Inject(ErrorHandlerService)
     private readonly errorHandler: ErrorHandlerService,
   ) {}
 

@@ -1,121 +1,127 @@
-# Documento de Entrega — Tech Challenge Fase 5
+# Documento de Entrega — Tech Challenge
 ## Sistema de Gestão de Oficina Mecânica
 
 ---
 
 ## 1. Identificação do Grupo
 
-**Nome do Grupo:** [INSIRA O NOME DO GRUPO]
+**Nome do Grupo:** [PREENCHER]  
+**Turma:** [PREENCHER]
 
-**Turma:** [INSIRA A TURMA]
+### Integrantes
 
-**Participantes:**
-
-| Nome Completo | RM | Discord |
+| Nome Completo | RM | Contato |
 |---|---|---|
-| Thiago Camilo Nonato Wenceslau | rm369061 | [Discord do Thiago] |
-| Robson | [RM] | [Discord do Robson] |
-| [Nome 3] | [RM] | [Discord#3] |
-
-> ⚠️ **Preencha os campos entre colchetes antes de gerar o PDF.**
+| Thiago Camilo Nonato Wenceslau | rm369061 | [PREENCHER] |
+| Robson | [PREENCHER] | [PREENCHER] |
+| [Integrante 3] | [PREENCHER] | [PREENCHER] |
 
 ---
 
-## 2. Repositórios GitHub (4 Repositórios)
+## 2. Repositórios GitHub Entregues
 
-### 2.1. Lambda / Function Serverless
+### 2.1. Repositório Principal (API)
+- URL: https://github.com/wenceslauthiagon/mechanical-workshop-api
+- Stack: NestJS + TypeScript + Prisma
+- Principais pontos:
+	- Arquitetura em camadas (Clean Architecture + DDD)
+	- Gestão de clientes, veículos, serviços, peças e ordens de serviço
+	- Testes automatizados (unitários e integração)
+	- Pipelines CI/CD para `develop` e `main`
 
-**Repositório**: https://github.com/[org]/mechanical-workshop-auth-function
+### 2.2. Function Serverless (Autenticação CPF)
+- URL: https://github.com/wenceslauthiagon/mechanical-workshop-auth-function
+- Objetivo: autenticação via CPF com emissão de JWT
+- Principais pontos:
+	- Azure Function (Node/TypeScript)
+	- Validação de CPF
+	- Integração com banco e geração de token
 
-**Propósito**: Azure Function para autenticação via CPF e geração de JWT
+### 2.3. Infraestrutura Kubernetes (Terraform)
+- URL: https://github.com/wenceslauthiagon/mechanical-workshop-kubernetes-infra
+- Objetivo: provisionamento e configuração de infraestrutura K8s
+- Principais pontos:
+	- Terraform para ambiente Kubernetes
+	- Estrutura de CI/CD para validação e plano
 
-**Conteúdo**:
-- Azure Function v4 (TypeScript)
-- Validação completa de CPF (dígitos verificadores)
-- Consulta ao PostgreSQL via Prisma
-- Geração de JWT (HS256, 24h)
-- CI/CD com GitHub Actions (deploy automático)
-
----
-
-### 2.2. Infraestrutura Kubernetes (Terraform)
-
-**Repositório**: https://github.com/[org]/mechanical-workshop-kubernetes-infra
-
-**Propósito**: Provisionamento do cluster AKS e manifestos K8s
-
-**Conteúdo**:
-- Terraform para Azure Kubernetes Service (AKS)
-- Manifestos K8s: deployment, HPA, Kong, Datadog
-- CI/CD: terraform plan em PRs, terraform apply no merge
-
----
-
-### 2.3. Infraestrutura do Banco de Dados (Terraform)
-
-**Repositório**: https://github.com/[org]/mechanical-workshop-database-infra
-
-**Propósito**: Provisionamento do PostgreSQL gerenciado (Azure)
-
-**Conteúdo**:
-- Terraform para Azure Database for PostgreSQL 16
-- Alta Disponibilidade (Zone Redundant)
-- Azure Key Vault para secrets
-- CI/CD: terraform apply + prisma migrate deploy automático
+### 2.4. Infraestrutura de Banco de Dados (Terraform)
+- URL: https://github.com/wenceslauthiagon/mechanical-workshop-database-infra
+- Objetivo: provisionamento da infraestrutura de banco
+- Principais pontos:
+	- Terraform para recursos de banco gerenciado
+	- Validação e automação por pipeline
 
 ---
 
-### 2.4. Aplicação Principal (NestJS)
+## 3. Evidências de CI/CD
 
-**Repositório**: https://github.com/[org]/mechanical-workshop-api
+### Status das pipelines
+- Branch `develop`: ✅ execução concluída com sucesso
+- Branch `main`: ✅ execução concluída com sucesso
 
-**Propósito**: API REST para gestão completa da oficina mecânica
+### Etapas executadas
+- Lint e testes
+- Build e push de imagem Docker
+- Etapas de deploy (staging e production) em modo sem custo de cloud
+- Etapas de Terraform (validate/plan/apply/simulação conforme workflow)
 
-**Conteúdo**:
-- NestJS 11 + TypeScript 5
-- Clean Architecture + DDD
-- 844 testes (unit + integration + e2e) com > 80% cobertura
-- CI/CD completo: lint → test → security scan → docker build → deploy K8s
-
----
-
-## 3. Vídeo de Demonstração
-
-**Plataforma**: YouTube  
-**URL**: https://youtu.be/[VIDEO-ID]  
-**Duração**: [XX min XX seg]  
-**Visibilidade**: Não listado
-
-**Conteúdo demonstrado**:
-- [ ] Autenticação com CPF (Azure Function + JWT)
-- [ ] Execução da pipeline CI/CD (GitHub Actions)
-- [ ] Deploy automatizado (Kubernetes)
-- [ ] Consumo de APIs protegidas (com/sem token)
-- [ ] Dashboard de monitoramento (Datadog) ao vivo
-- [ ] Logs estruturados e traces (correlation ID)
+> Observação: para controle de custo, os fluxos de deploy em cloud foram configurados para execução sem provisionamento pago, mantendo a esteira completa para validação acadêmica.
 
 ---
 
-## 4. Documentação Arquitetural
+## 4. Requisitos Arquiteturais do Desafio
 
-**Repositório de referência**: https://github.com/[org]/mechanical-workshop-api/tree/main/docs
+### 4.1 API Gateway + Autenticação
+- API Gateway: Kong
+- Autenticação: Function serverless por CPF
+- JWT para acesso às rotas protegidas
 
-| Documento | Link |
-|---|---|
-| Diagrama de Componentes | [COMPONENT_DIAGRAM.md](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/ddd/COMPONENT_DIAGRAM.md) |
-| Diagrama de Sequência | [SEQUENCE_DIAGRAM.md](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/ddd/SEQUENCE_DIAGRAM.md) |
-| Diagrama ER | [ER-DIAGRAM.md](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/ddd/ER-DIAGRAM.md) |
-| RFC-001: Escolha da Nuvem | [RFC-001-CLOUD-PLATFORM.md](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/ddd/RFC-001-CLOUD-PLATFORM.md) |
-| RFC-002: Estratégia de Auth | [RFC-002-AUTHENTICATION-STRATEGY.md](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/ddd/RFC-002-AUTHENTICATION-STRATEGY.md) |
-| ADR-001: API Gateway Kong | [ADR-001-API-GATEWAY-KONG.md](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/ddd/ADR-001-API-GATEWAY-KONG.md) |
-| ADR-002: PostgreSQL | [ADR-002-POSTGRESQL-DATABASE.md](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/ddd/ADR-002-POSTGRESQL-DATABASE.md) |
-| Postman Collection | [Mechanical-Workshop-API.postman_collection.json](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/Mechanical-Workshop-API.postman_collection.json) |
+### 4.2 Infraestrutura e Orquestração
+- Kubernetes para execução da aplicação
+- Terraform para IaC (infra de cluster e banco)
+- Pipelines automatizadas via GitHub Actions
+
+### 4.3 Observabilidade
+- Monitoramento e documentação em `docs/MONITORING_SETUP.md`
+- Estratégia com métricas, logs e health checks
 
 ---
 
-## 5. Confirmação do Colaborador `soat-architecture`
+## 5. Documentação Técnica Entregue
 
-O usuário **`soat-architecture`** foi adicionado como **Admin** nos seguintes repositórios:
+Documentação principal:  
+https://github.com/wenceslauthiagon/mechanical-workshop-api/tree/main/docs
+
+### Diagramas e decisões
+- Diagrama de Componentes: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/COMPONENT_DIAGRAM.md
+- Diagrama de Sequência: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/SEQUENCE_DIAGRAM.md
+- Diagrama ER: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/ER-DIAGRAM.md
+- ADR-001 (Kong): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/ADR-001-API-GATEWAY-KONG.md
+- ADR-002 (PostgreSQL): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/ADR-002-POSTGRESQL-DATABASE.md
+- RFC-001 (Cloud): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/RFC-001-CLOUD-PLATFORM.md
+- RFC-002 (Auth): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/RFC-002-AUTHENTICATION-STRATEGY.md
+
+---
+
+## 6. Vídeo de Demonstração
+
+**Plataforma:** YouTube (não listado)  
+**Link:** [PREENCHER]  
+**Duração:** [PREENCHER]
+
+### Roteiro sugerido (checklist)
+- [ ] Mostrar os 4 repositórios
+- [ ] Mostrar autenticação por CPF na Function
+- [ ] Mostrar uso do JWT na API
+- [ ] Mostrar pipeline verde em `develop`
+- [ ] Mostrar pipeline verde em `main`
+- [ ] Mostrar documentação arquitetural
+
+---
+
+## 7. Colaborador obrigatório `soat-architecture`
+
+Marcar após conferência no GitHub:
 
 | Repositório | Status |
 |---|---|
@@ -124,41 +130,33 @@ O usuário **`soat-architecture`** foi adicionado como **Admin** nos seguintes r
 | mechanical-workshop-database-infra | [ ] Adicionado |
 | mechanical-workshop-api | [ ] Adicionado |
 
-> ⚠️ **Marque os checkboxes e delete esta nota após confirmar a adição.**
+---
+
+## 8. Checklist Final para Entrega no Portal
+
+- [ ] Documento revisado (sem campos `[PREENCHER]`)
+- [ ] Links dos 4 repositórios válidos
+- [ ] Link do vídeo válido
+- [ ] Evidências de pipeline anexadas/mostradas no vídeo
+- [ ] Colaborador `soat-architecture` confirmado
+- [ ] PDF exportado e enviado no Portal do Aluno
 
 ---
 
-## 6. Relatório de Vulnerabilidades
+## 9. Como Exportar para PDF
 
-- Arquivo: [`docs/VULNERABILITY_REPORT_SUMMARY.md`](https://github.com/[org]/mechanical-workshop-api/blob/main/docs/VULNERABILITY_REPORT_SUMMARY.md)
+### Opção rápida (VS Code)
+1. Abrir este arquivo no VS Code.
+2. Usar extensão **Markdown PDF**.
+3. Executar: `Markdown PDF: Export (pdf)`.
 
----
-
-## 7. Checklist Final
-
-Antes de entregar, confirme:
-
-- [ ] 4 repositórios criados e públicos (ou com soat-architecture como colaborador)
-- [ ] `soat-architecture` adicionado em todos os 4 repos
-- [ ] Branch `main` protegida em todos os repos
-- [ ] CI/CD funcionando (pelo menos 1 execução verde em cada repo)
-- [ ] Vídeo gravado e publicado (YouTube/Vimeo)
-- [ ] Link do vídeo preenchido acima
-- [ ] Este PDF gerado e enviado no Portal do Aluno
-
----
-
-## Como Gerar o PDF
+### Opção via Pandoc
 
 ```bash
-# Com pandoc instalado:
-pandoc docs/DELIVERY_DOCUMENT.md -o DELIVERY_DOCUMENT.pdf --pdf-engine=xelatex
-
-# Alternativa: abrir no GitHub e usar Print to PDF do navegador
+pandoc docs/DELIVERY_DOCUMENT.md -o TECH_CHALLENGE_ENTREGA.pdf --pdf-engine=xelatex
 ```
 
 ---
 
-**Data de entrega**: ___/___/______
-
-**Assinatura**: _________________________________
+**Data:** ___/___/______  
+**Assinatura do grupo:** _________________________________

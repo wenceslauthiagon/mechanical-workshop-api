@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
@@ -21,7 +21,9 @@ export interface JwtPayload {
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(PrismaService)
     private prisma: PrismaService,
+    @Inject(JwtService)
     private jwtService: JwtService,
   ) {}
 

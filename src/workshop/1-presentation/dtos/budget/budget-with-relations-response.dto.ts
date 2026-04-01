@@ -55,6 +55,12 @@ export class BudgetItemResponseDto {
   @ApiProperty({
     description: 'Dados do serviço relacionado (quando aplicável)',
     required: false,
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      description: { type: 'string' },
+      category: { type: 'string' },
+    },
   })
   service?: {
     name: string;
@@ -65,6 +71,12 @@ export class BudgetItemResponseDto {
   @ApiProperty({
     description: 'Dados da peça relacionada (quando aplicável)',
     required: false,
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      description: { type: 'string' },
+      partNumber: { type: 'string' },
+    },
   })
   part?: {
     name: string;
@@ -143,6 +155,14 @@ export class BudgetWithRelationsResponseDto {
 
   @ApiProperty({
     description: 'Dados atualizados do cliente',
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      name: { type: 'string' },
+      document: { type: 'string' },
+      email: { type: 'string' },
+      phone: { type: 'string' },
+    },
   })
   customer!: {
     id: string;
@@ -154,6 +174,13 @@ export class BudgetWithRelationsResponseDto {
 
   @ApiProperty({
     description: 'Dados atualizados da ordem de serviço',
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      orderNumber: { type: 'string' },
+      status: { type: 'string' },
+      description: { type: 'string' },
+    },
   })
   serviceOrder!: {
     id: string;

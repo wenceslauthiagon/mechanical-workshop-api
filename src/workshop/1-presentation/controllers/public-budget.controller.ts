@@ -6,13 +6,20 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiExcludeController,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 import { BudgetService } from '../../2-application/services/budget.service';
 import { BudgetResponseDto } from '../dtos/budget/budget-response.dto';
 import { BUDGET_CONSTANTS } from '../../../shared/constants/budget.constants';
 import { BudgetStatus } from '../../3-domain/entities/budget.entity';
 
 @ApiTags('Public - Budgets')
+@ApiExcludeController()
 @Controller('public/budgets')
 export class PublicBudgetController {
   constructor(private readonly budgetService: BudgetService) {}

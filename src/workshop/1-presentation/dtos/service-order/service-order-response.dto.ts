@@ -111,6 +111,15 @@ export class ServiceOrderResponseDto {
 
   @ApiProperty({
     description: 'Dados do cliente',
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      name: { type: 'string' },
+      document: { type: 'string' },
+      type: { type: 'string' },
+      email: { type: 'string' },
+      phone: { type: 'string' },
+    },
   })
   customer?: {
     id: string;
@@ -123,6 +132,15 @@ export class ServiceOrderResponseDto {
 
   @ApiProperty({
     description: 'Dados do veículo',
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      licensePlate: { type: 'string' },
+      brand: { type: 'string' },
+      model: { type: 'string' },
+      year: { type: 'number' },
+      color: { type: 'string' },
+    },
   })
   vehicle?: {
     id: string;
@@ -136,6 +154,14 @@ export class ServiceOrderResponseDto {
   @ApiProperty({
     description: 'Dados do mecânico responsável',
     nullable: true,
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      name: { type: 'string' },
+      specialties: { type: 'string' },
+      phone: { type: 'string', nullable: true },
+      isAvailable: { type: 'boolean' },
+    },
   })
   mechanic?: {
     id: string;
