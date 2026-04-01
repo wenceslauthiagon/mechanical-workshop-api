@@ -15,34 +15,15 @@
 
 ### 1.1. Aplicação Principal (API)
 - URL: https://github.com/wenceslauthiagon/mechanical-workshop-api
-- Stack: NestJS + TypeScript + Prisma
-- Principais pontos:
-  - Arquitetura em camadas (Clean Architecture + DDD)
-  - Gestão de clientes, veículos, serviços, peças e ordens de serviço
-  - Testes automatizados (unitários e integração)
-  - Pipelines CI/CD para `develop` e `main`
 
 ### 1.2. Function Serverless (Autenticação CPF)
 - URL: https://github.com/wenceslauthiagon/mechanical-workshop-auth-function
-- Objetivo: autenticação via CPF com emissão de JWT
-- Principais pontos:
-  - Azure Function (Node/TypeScript)
-  - Validação de CPF com algoritmo de dígitos verificadores
-  - Integração com banco de dados e geração de token JWT
 
 ### 1.3. Infraestrutura Kubernetes (Terraform)
 - URL: https://github.com/wenceslauthiagon/mechanical-workshop-kubernetes-infra
-- Objetivo: provisionamento e configuração de infraestrutura K8s
-- Principais pontos:
-  - Terraform para ambiente Kubernetes
-  - Estrutura de CI/CD para validação e plano
 
 ### 1.4. Infraestrutura de Banco de Dados (Terraform)
 - URL: https://github.com/wenceslauthiagon/mechanical-workshop-database-infra
-- Objetivo: provisionamento da infraestrutura de banco
-- Principais pontos:
-  - Terraform para recursos de banco gerenciado
-  - Validação e automação por pipeline
 
 ---
 
@@ -60,13 +41,12 @@
 
 ## 3. Evidências de CI/CD
 
-### Status das pipelines
 - Branch `develop`: ✅ execução concluída com sucesso
 - Branch `main`: ✅ execução concluída com sucesso
 
 ### Etapas executadas
 - Lint e testes
-- Build e push de imagem Docker
+- Build e push de imagem
 - Deploy Staging e Production em modo sem custo
 - Etapas de Terraform conforme workflow
 
@@ -106,29 +86,34 @@ https://github.com/wenceslauthiagon/mechanical-workshop-api/tree/main/docs
 
 ## 6. Como Testar a Função de Validação de CPF
 
-A autenticação via CPF é implementada como uma **Azure Function** independente, localizada no repositório da Function Serverless.
+A autenticação via CPF é implementada como uma **Azure Function** independente.  
+Repositório: https://github.com/wenceslauthiagon/mechanical-workshop-auth-function
 
 ### Pré-requisitos
-- [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local) instalado
+- [Azure Functions Core Tools v4](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local) instalado
 - Node.js 18+
-- Banco de dados com pelo menos um cliente cadastrado (tipo `PESSOA_FISICA`) com CPF
+- API principal rodando com pelo menos um cliente do tipo `PESSOA_FISICA` cadastrado com CPF no campo `document`
 
-### Configuração
+### Passo a passo
 
+**1. Instalar o Azure Functions Core Tools (se necessário):**
 ```bash
-# 1. Clone o repositório da function
+npm install -g azure-functions-core-tools@4 --unsafe-perm true
+```
+
+**2. Clonar e instalar dependências:**
+```bash
 git clone https://github.com/wenceslauthiagon/mechanical-workshop-auth-function
 cd mechanical-workshop-auth-function
-
-# 2. Instale as dependências
 npm install
+```
 
-# 3. Configure as variáveis de ambiente
+**3. Configurar variáveis de ambiente:**
+```bash
 cp local.settings.example.json local.settings.json
 ```
 
-Edite o `local.settings.json`:
-
+Editar o `local.settings.json`:
 ```json
 {
   "IsEncrypted": false,
@@ -142,53 +127,36 @@ Edite o `local.settings.json`:
 }
 ```
 
-### Iniciar a Function
-
+**4. Iniciar a Function:**
 ```bash
 npm start
 # Function disponível em: http://localhost:7071
 ```
 
-### Testar via cURL
+### Exemplos de requisição
+
+| Cenário | CPF | Resposta esperada |
+|---|---|---|
+| CPF com dígitos inválidos | `00000000000` | `400 Bad Request` |
+| CPF válido, cliente não cadastrado | `52998224725` | `404 Not Found` |
+| CPF válido, cliente cadastrado | CPF do cliente | `200 OK` com `{ token: "..." }` |
 
 ```bash
-# CPF inválido (formato incorreto)
-curl -X POST http://localhost:7071/api/auth \
-  -H "Content-Type: application/json" \
-  -d '{"cpf": "00000000000"}'
-# Resposta: 400 Bad Request — CPF inválido
-
-# CPF válido mas cliente não cadastrado
-curl -X POST http://localhost:7071/api/auth \
-  -H "Content-Type: application/json" \
-  -d '{"cpf": "52998224725"}'
-# Resposta: 404 Not Found — Cliente não encontrado
-
-# CPF válido com cliente cadastrado
+# Testar via curl
 curl -X POST http://localhost:7071/api/auth \
   -H "Content-Type: application/json" \
   -d '{"cpf": "SEU_CPF_CADASTRADO"}'
-# Resposta: 200 OK — { "token": "eyJhbGci..." }
 ```
 
-### Testar via Postman / Insomnia
+### Usar o JWT retornado na API principal
 
-| Campo | Valor |
-|---|---|
-| Método | `POST` |
-| URL | `http://localhost:7071/api/auth` |
-| Body (JSON) | `{ "cpf": "52998224725" }` |
-
-### Usar o JWT retornado na API Principal
-
-```bash
-# Copie o token retornado e use no header Authorization da API principal
-curl -X GET http://localhost:3000/api/customers \
-  -H "Authorization: Bearer eyJhbGci..."
+Após obter o token, utilize-o no header `Authorization` da API principal:
+```
+Authorization: Bearer eyJhbGci...
 ```
 
-### CPF para testes (gerador online)
-Use o gerador em https://www.4devs.com.br/gerador_de_cpf para criar CPFs válidos e cadastre um cliente com esse CPF na API principal antes de testar.
+> 💡 Para gerar CPFs válidos para teste: https://www.4devs.com.br/gerador_de_cpf  
+> Cadastre o cliente via `POST /api/customers` no Swagger em `http://localhost:3000/api`
 
 ---
 
@@ -218,12 +186,11 @@ Usuário solicitado: **`soat-architecture`**
 ## 9. Como Exportar para PDF
 
 ### Opção rápida (VS Code)
-1. Abrir este arquivo no VS Code.
-2. Usar extensão **Markdown PDF**.
-3. Executar: `Markdown PDF: Export (pdf)`.
+1. Abrir este arquivo no VS Code
+2. Instalar extensão **Markdown PDF**
+3. Executar: `Markdown PDF: Export (pdf)`
 
 ### Opção via Pandoc
-
 ```bash
 pandoc docs/DELIVERY_DOCUMENT.md -o TECH_CHALLENGE_ENTREGA.pdf --pdf-engine=xelatex
 ```

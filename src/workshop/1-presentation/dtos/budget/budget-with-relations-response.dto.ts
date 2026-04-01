@@ -55,12 +55,8 @@ export class BudgetItemResponseDto {
   @ApiProperty({
     description: 'Dados do serviço relacionado (quando aplicável)',
     required: false,
-    type: 'object',
-    properties: {
-      name: { type: 'string' },
-      description: { type: 'string' },
-      category: { type: 'string' },
-    },
+    type: Object,
+    example: { name: 'Troca de óleo', description: 'Descrição', category: 'MAINTENANCE' },
   })
   service?: {
     name: string;
@@ -71,12 +67,8 @@ export class BudgetItemResponseDto {
   @ApiProperty({
     description: 'Dados da peça relacionada (quando aplicável)',
     required: false,
-    type: 'object',
-    properties: {
-      name: { type: 'string' },
-      description: { type: 'string' },
-      partNumber: { type: 'string' },
-    },
+    type: Object,
+    example: { name: 'Filtro de óleo', description: 'Descrição', partNumber: 'FO-12345' },
   })
   part?: {
     name: string;
@@ -155,14 +147,8 @@ export class BudgetWithRelationsResponseDto {
 
   @ApiProperty({
     description: 'Dados atualizados do cliente',
-    type: 'object',
-    properties: {
-      id: { type: 'string' },
-      name: { type: 'string' },
-      document: { type: 'string' },
-      email: { type: 'string' },
-      phone: { type: 'string' },
-    },
+    type: Object,
+    example: { id: 'uuid', name: 'João Silva', document: '12345678900', email: 'joao@email.com', phone: '(11)99999-9999' },
   })
   customer!: {
     id: string;
@@ -174,13 +160,8 @@ export class BudgetWithRelationsResponseDto {
 
   @ApiProperty({
     description: 'Dados atualizados da ordem de serviço',
-    type: 'object',
-    properties: {
-      id: { type: 'string' },
-      orderNumber: { type: 'string' },
-      status: { type: 'string' },
-      description: { type: 'string' },
-    },
+    type: Object,
+    example: { id: 'uuid', orderNumber: 'OS-2023-0001', status: 'OPEN', description: 'Descrição da OS' },
   })
   serviceOrder!: {
     id: string;
