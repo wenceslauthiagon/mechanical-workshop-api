@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService, JwtPayload } from '../services/auth.service';
@@ -9,9 +10,12 @@ import { ErrorHandlerService } from '../../shared/services/error-handler.service
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly authService: AuthService,
+    configService: ConfigService,
     private readonly errorHandler: ErrorHandlerService,
   ) {
-    const jwtSecret = process.env.JWT_SECRET || 'default-jwt-secret-fallback-key-12345';
+    const jwtSecret =
+      configService.get<string>('JWT_SECRET') ||
+      'default-jwt-secret-fallback-key-12345';
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

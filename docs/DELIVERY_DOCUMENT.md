@@ -3,53 +3,58 @@
 
 ---
 
-## 1. Identificação do Grupo
-
-**Nome do Grupo:** [PREENCHER]  
-**Turma:** [PREENCHER]
-
-### Integrantes
+## Integrantes
 
 | Nome Completo | RM | Contato |
 |---|---|---|
-| Thiago Camilo Nonato Wenceslau | rm369061 | [PREENCHER] |
-| Robson | [PREENCHER] | [PREENCHER] |
-| [Integrante 3] | [PREENCHER] | [PREENCHER] |
+| Thiago Camilo Nonato Wenceslau | rm369061 | (11) 98911-9768 |
 
 ---
 
-## 2. Repositórios GitHub Entregues
+## 1. Repositórios GitHub Entregues
 
-### 2.1. Repositório Principal (API)
+### 1.1. Aplicação Principal (API)
 - URL: https://github.com/wenceslauthiagon/mechanical-workshop-api
 - Stack: NestJS + TypeScript + Prisma
 - Principais pontos:
-	- Arquitetura em camadas (Clean Architecture + DDD)
-	- Gestão de clientes, veículos, serviços, peças e ordens de serviço
-	- Testes automatizados (unitários e integração)
-	- Pipelines CI/CD para `develop` e `main`
+  - Arquitetura em camadas (Clean Architecture + DDD)
+  - Gestão de clientes, veículos, serviços, peças e ordens de serviço
+  - Testes automatizados (unitários e integração)
+  - Pipelines CI/CD para `develop` e `main`
 
-### 2.2. Function Serverless (Autenticação CPF)
+### 1.2. Function Serverless (Autenticação CPF)
 - URL: https://github.com/wenceslauthiagon/mechanical-workshop-auth-function
 - Objetivo: autenticação via CPF com emissão de JWT
 - Principais pontos:
-	- Azure Function (Node/TypeScript)
-	- Validação de CPF
-	- Integração com banco e geração de token
+  - Azure Function (Node/TypeScript)
+  - Validação de CPF com algoritmo de dígitos verificadores
+  - Integração com banco de dados e geração de token JWT
 
-### 2.3. Infraestrutura Kubernetes (Terraform)
+### 1.3. Infraestrutura Kubernetes (Terraform)
 - URL: https://github.com/wenceslauthiagon/mechanical-workshop-kubernetes-infra
 - Objetivo: provisionamento e configuração de infraestrutura K8s
 - Principais pontos:
-	- Terraform para ambiente Kubernetes
-	- Estrutura de CI/CD para validação e plano
+  - Terraform para ambiente Kubernetes
+  - Estrutura de CI/CD para validação e plano
 
-### 2.4. Infraestrutura de Banco de Dados (Terraform)
+### 1.4. Infraestrutura de Banco de Dados (Terraform)
 - URL: https://github.com/wenceslauthiagon/mechanical-workshop-database-infra
 - Objetivo: provisionamento da infraestrutura de banco
 - Principais pontos:
-	- Terraform para recursos de banco gerenciado
-	- Validação e automação por pipeline
+  - Terraform para recursos de banco gerenciado
+  - Validação e automação por pipeline
+
+---
+
+## 2. Requisitos Atendidos no Desafio
+
+- ✅ API Gateway com Kong
+- ✅ Arquitetura com 4 repositórios separados
+- ✅ CI/CD com GitHub Actions
+- ✅ Infraestrutura como código com Terraform
+- ✅ Orquestração com Kubernetes
+- ✅ Documentação arquitetural (diagramas, ADRs e RFCs)
+- ✅ Observabilidade e monitoramento documentados
 
 ---
 
@@ -62,84 +67,151 @@
 ### Etapas executadas
 - Lint e testes
 - Build e push de imagem Docker
-- Etapas de deploy (staging e production) em modo sem custo de cloud
-- Etapas de Terraform (validate/plan/apply/simulação conforme workflow)
+- Deploy Staging e Production em modo sem custo
+- Etapas de Terraform conforme workflow
 
-> Observação: para controle de custo, os fluxos de deploy em cloud foram configurados para execução sem provisionamento pago, mantendo a esteira completa para validação acadêmica.
-
----
-
-## 4. Requisitos Arquiteturais do Desafio
-
-### 4.1 API Gateway + Autenticação
-- API Gateway: Kong
-- Autenticação: Function serverless por CPF
-- JWT para acesso às rotas protegidas
-
-### 4.2 Infraestrutura e Orquestração
-- Kubernetes para execução da aplicação
-- Terraform para IaC (infra de cluster e banco)
-- Pipelines automatizadas via GitHub Actions
-
-### 4.3 Observabilidade
-- Monitoramento e documentação em `docs/MONITORING_SETUP.md`
-- Estratégia com métricas, logs e health checks
+> **Observação:** para evitar custos em nuvem, os deploys foram configurados em modo de simulação, mantendo a esteira completa para validação acadêmica.
 
 ---
 
-## 5. Documentação Técnica Entregue
+## 4. Documentação Técnica
 
 Documentação principal:  
 https://github.com/wenceslauthiagon/mechanical-workshop-api/tree/main/docs
 
-### Diagramas e decisões
+### Links principais
 - Diagrama de Componentes: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/COMPONENT_DIAGRAM.md
 - Diagrama de Sequência: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/SEQUENCE_DIAGRAM.md
 - Diagrama ER: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/ER-DIAGRAM.md
-- ADR-001 (Kong): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/ADR-001-API-GATEWAY-KONG.md
-- ADR-002 (PostgreSQL): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/ADR-002-POSTGRESQL-DATABASE.md
-- RFC-001 (Cloud): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/RFC-001-CLOUD-PLATFORM.md
-- RFC-002 (Auth): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/RFC-002-AUTHENTICATION-STRATEGY.md
+- ADR API Gateway (Kong): https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/ADR-001-API-GATEWAY-KONG.md
+- ADR Banco PostgreSQL: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/ADR-002-POSTGRESQL-DATABASE.md
+- RFC Plataforma Cloud: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/RFC-001-CLOUD-PLATFORM.md
+- RFC Estratégia de Autenticação: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/docs/ddd/RFC-002-AUTHENTICATION-STRATEGY.md
 
 ---
 
-## 6. Vídeo de Demonstração
+## 5. Vídeo de Demonstração
 
 **Plataforma:** YouTube (não listado)  
 **Link:** [PREENCHER]  
 **Duração:** [PREENCHER]
 
-### Roteiro sugerido (checklist)
-- [ ] Mostrar os 4 repositórios
-- [ ] Mostrar autenticação por CPF na Function
-- [ ] Mostrar uso do JWT na API
-- [ ] Mostrar pipeline verde em `develop`
-- [ ] Mostrar pipeline verde em `main`
-- [ ] Mostrar documentação arquitetural
+### Conteúdo apresentado
+- Visão dos 4 repositórios
+- Execução da pipeline em `develop`
+- Execução da pipeline em `main`
+- Documentação arquitetural
 
 ---
 
-## 7. Colaborador obrigatório `soat-architecture`
+## 6. Como Testar a Função de Validação de CPF
 
-Marcar após conferência no GitHub:
+A autenticação via CPF é implementada como uma **Azure Function** independente, localizada no repositório da Function Serverless.
+
+### Pré-requisitos
+- [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local) instalado
+- Node.js 18+
+- Banco de dados com pelo menos um cliente cadastrado (tipo `PESSOA_FISICA`) com CPF
+
+### Configuração
+
+```bash
+# 1. Clone o repositório da function
+git clone https://github.com/wenceslauthiagon/mechanical-workshop-auth-function
+cd mechanical-workshop-auth-function
+
+# 2. Instale as dependências
+npm install
+
+# 3. Configure as variáveis de ambiente
+cp local.settings.example.json local.settings.json
+```
+
+Edite o `local.settings.json`:
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "DATABASE_URL": "file:../mechanical-workshop-api/prisma/dev.db",
+    "JWT_SECRET": "your-secret-key",
+    "JWT_EXPIRATION": "24h"
+  }
+}
+```
+
+### Iniciar a Function
+
+```bash
+npm start
+# Function disponível em: http://localhost:7071
+```
+
+### Testar via cURL
+
+```bash
+# CPF inválido (formato incorreto)
+curl -X POST http://localhost:7071/api/auth \
+  -H "Content-Type: application/json" \
+  -d '{"cpf": "00000000000"}'
+# Resposta: 400 Bad Request — CPF inválido
+
+# CPF válido mas cliente não cadastrado
+curl -X POST http://localhost:7071/api/auth \
+  -H "Content-Type: application/json" \
+  -d '{"cpf": "52998224725"}'
+# Resposta: 404 Not Found — Cliente não encontrado
+
+# CPF válido com cliente cadastrado
+curl -X POST http://localhost:7071/api/auth \
+  -H "Content-Type: application/json" \
+  -d '{"cpf": "SEU_CPF_CADASTRADO"}'
+# Resposta: 200 OK — { "token": "eyJhbGci..." }
+```
+
+### Testar via Postman / Insomnia
+
+| Campo | Valor |
+|---|---|
+| Método | `POST` |
+| URL | `http://localhost:7071/api/auth` |
+| Body (JSON) | `{ "cpf": "52998224725" }` |
+
+### Usar o JWT retornado na API Principal
+
+```bash
+# Copie o token retornado e use no header Authorization da API principal
+curl -X GET http://localhost:3000/api/customers \
+  -H "Authorization: Bearer eyJhbGci..."
+```
+
+### CPF para testes (gerador online)
+Use o gerador em https://www.4devs.com.br/gerador_de_cpf para criar CPFs válidos e cadastre um cliente com esse CPF na API principal antes de testar.
+
+---
+
+## 7. Colaborador Obrigatório
+
+Usuário solicitado: **`soat-architecture`**
 
 | Repositório | Status |
 |---|---|
-| mechanical-workshop-auth-function | [ ] Adicionado |
-| mechanical-workshop-kubernetes-infra | [ ] Adicionado |
-| mechanical-workshop-database-infra | [ ] Adicionado |
-| mechanical-workshop-api | [ ] Adicionado |
+| mechanical-workshop-auth-function | [X] Adicionado — https://github.com/wenceslauthiagon/mechanical-workshop-auth-function |
+| mechanical-workshop-kubernetes-infra | [X] Adicionado — https://github.com/wenceslauthiagon/mechanical-workshop-kubernetes-infra |
+| mechanical-workshop-database-infra | [X] Adicionado — https://github.com/wenceslauthiagon/mechanical-workshop-database-infra |
+| mechanical-workshop-api | [X] Adicionado — https://github.com/wenceslauthiagon/mechanical-workshop-api |
 
 ---
 
-## 8. Checklist Final para Entrega no Portal
+## 8. Checklist Final de Entrega
 
-- [ ] Documento revisado (sem campos `[PREENCHER]`)
-- [ ] Links dos 4 repositórios válidos
-- [ ] Link do vídeo válido
-- [ ] Evidências de pipeline anexadas/mostradas no vídeo
-- [ ] Colaborador `soat-architecture` confirmado
-- [ ] PDF exportado e enviado no Portal do Aluno
+- [X] Campos pendentes preenchidos
+- [ ] Link do vídeo preenchido
+- [X] Evidências de pipeline validadas
+- [X] `soat-architecture` confirmado nos 4 repositórios
+- [ ] PDF gerado e enviado no Portal do Aluno
 
 ---
 
@@ -158,5 +230,4 @@ pandoc docs/DELIVERY_DOCUMENT.md -o TECH_CHALLENGE_ENTREGA.pdf --pdf-engine=xela
 
 ---
 
-**Data:** ___/___/______  
-**Assinatura do grupo:** _________________________________
+**Data:** 31/03/2026
