@@ -44,7 +44,21 @@ export class CustomerController {
     summary: 'Criar novo cliente',
     description: 'Cria um novo cliente no sistema com validação de CPF/CNPJ',
   })
-  @ApiBody({ type: CreateCustomerDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name', 'email', 'phone', 'address', 'type', 'document'],
+      properties: {
+        name: { type: 'string', example: 'João da Silva' },
+        email: { type: 'string', example: 'joao@email.com' },
+        phone: { type: 'string', example: '(11) 99999-9999' },
+        address: { type: 'string', example: 'Rua A, 123 - São Paulo/SP' },
+        type: { type: 'string', enum: ['PESSOA_FISICA', 'PESSOA_JURIDICA'], example: 'PESSOA_FISICA' },
+        document: { type: 'string', example: '12345678901' },
+        additionalInfo: { type: 'string', nullable: true, example: 'Cliente preferencial' },
+      },
+    },
+  })
   @ApiResponse({
     status: 201,
     description: 'Cliente criado com sucesso',
@@ -139,7 +153,20 @@ export class CustomerController {
     description: 'Atualiza dados de um cliente existente',
   })
   @ApiParam({ name: 'id', description: 'ID do cliente' })
-  @ApiBody({ type: UpdateCustomerDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'João da Silva' },
+        email: { type: 'string', example: 'joao@email.com' },
+        phone: { type: 'string', example: '(11) 99999-9999' },
+        address: { type: 'string', example: 'Rua A, 123 - São Paulo/SP' },
+        type: { type: 'string', enum: ['PESSOA_FISICA', 'PESSOA_JURIDICA'], example: 'PESSOA_FISICA' },
+        document: { type: 'string', example: '12345678901' },
+        additionalInfo: { type: 'string', nullable: true, example: 'Cliente preferencial' },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Cliente atualizado com sucesso',

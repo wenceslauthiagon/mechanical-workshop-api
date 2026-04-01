@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Decimal } from '@prisma/client/runtime/library';
 
 export class PartResponseDto {
   @ApiProperty()
@@ -14,8 +13,8 @@ export class PartResponseDto {
   @ApiProperty()
   partNumber!: string;
 
-  @ApiProperty()
-  price!: Decimal;
+  @ApiProperty({ type: Number })
+  price!: number;
 
   @ApiProperty()
   stock!: number;

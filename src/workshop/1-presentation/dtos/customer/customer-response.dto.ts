@@ -39,6 +39,17 @@ export class CustomerResponseDto {
     description: 'Veículos do cliente',
     required: false,
     type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        licensePlate: { type: 'string' },
+        brand: { type: 'string' },
+        model: { type: 'string' },
+        year: { type: 'number' },
+        color: { type: 'string' },
+      },
+    },
   })
   vehicles?: {
     id: string;
