@@ -10,6 +10,7 @@ import { SharedModule } from '../shared/shared.module';
 
 @Module({
   imports: [
+    ConfigModule,
     PassportModule,
     SharedModule, // Import SharedModule for PrismaService and ErrorHandlerService
     JwtModule.registerAsync({
