@@ -1,6 +1,0 @@
-# CODEOWNERS — Auth Function
-# Toda mudança na função de autenticação requer revisão do soat-architecture
-
-*                           @soat-architecture
-auth/                       @soat-architecture
-prisma/                     @soat-architecture
