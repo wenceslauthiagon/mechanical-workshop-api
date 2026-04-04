@@ -1,0 +1,230 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: workshop
+data:
+  kong.yml: |
+    _format_version: "3.0"
+    
+    # Definição dos serviços
+    services:
+      # Azure Function de Autenticação
+      - name: auth-service
+        url: https://mechanical-workshop-auth.azurewebsites.net/api
+        protocol: https
+        port: 443
+        path: /
+        connect_timeout: 60000
+        write_timeout: 60000
+        read_timeout: 60000
+        tags:
+          - auth
+        routes:
+          - name: auth-route
+            paths:
+              - /auth
+            methods:
+              - POST
+            strip_path: false
+            preserve_host: false
+            protocols:
+              - http
+              - https
+      
+      # API Principal da Oficina
+      - name: workshop-api
+        url: http://workshop-api-service:3000
+        protocol: http
+        port: 3000
+        path: /
+        connect_timeout: 60000
+        write_timeout: 60000
+        read_timeout: 60000
+        tags:
+          - api
+        routes:
+          # Rotas públicas (sem autenticação)
+          - name: health-route
+            paths:
+              - /health
+            methods:
+              - GET
+            strip_path: false
+            preserve_host: false
+            protocols:
+              - http
+              - https
+          
+          - name: docs-route
+            paths:
+              - /api-docs
+            methods:
+              - GET
+            strip_path: false
+            preserve_host: false
+            protocols:
+              - http
+              - https
+          
+          # Rotas protegidas (requerem autenticação JWT)
+          - name: customers-route
+            paths:
+              - /customers
+            methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+            strip_path: false
+            preserve_host: false
+            protocols:
+              - http
+              - https
+            plugins:
+              - name: jwt
+                config:
+                  key_claim_name: kid
+                  secret_is_base64: false
+                  claims_to_verify:
+                    - exp
+          
+          - name: vehicles-route
+            paths:
+              - /vehicles
+            methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+            strip_path: false
+            preserve_host: false
+            protocols:
+              - http
+              - https
+            plugins:
+              - name: jwt
+                config:
+                  key_claim_name: kid
+                  secret_is_base64: false
+                  claims_to_verify:
+                    - exp
+          
+          - name: service-orders-route
+            paths:
+              - /service-orders
+            methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+            strip_path: false
+            preserve_host: false
+            protocols:
+              - http
+              - https
+            plugins:
+              - name: jwt
+                config:
+                  key_claim_name: kid
+                  secret_is_base64: false
+                  claims_to_verify:
+                    - exp
+          
+          - name: parts-route
+            paths:
+              - /parts
+            methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+            strip_path: false
+            preserve_host: false
+            protocols:
+              - http
+              - https
+            plugins:
+              - name: jwt
+                config:
+                  key_claim_name: kid
+                  secret_is_base64: false
+                  claims_to_verify:
+                    - exp
+          
+          - name: services-route
+            paths:
+              - /services
+            methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+            strip_path: false
+            preserve_host: false
+            protocols:
+              - http
+              - https
+            plugins:
+              - name: jwt
+                config:
+                  key_claim_name: kid
+                  secret_is_base64: false
+                  claims_to_verify:
+                    - exp
+    
+    # Plugins globais
+    plugins:
+      - name: correlation-id
+        config:
+          header_name: X-Correlation-ID
+          generator: uuid
+          echo_downstream: true
+      
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 5000
+          policy: local
+      
+      - name: request-size-limiting
+        config:
+          allowed_payload_size: 10
+      
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+            - X-Correlation-ID
+          exposed_headers:
+            - X-Correlation-ID
+          credentials: true
+          max_age: 3600
+      
+      - name: prometheus
+        config:
+          per_consumer: false
+    
+    # Consumidores JWT
+    consumers:
+      - username: workshop-auth
+        jwt_secrets:
+          - key: mechanical-workshop-auth
+            algorithm: HS256
+            secret: "${JWT_SECRET}"

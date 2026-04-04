@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-proxy
+  namespace: workshop
+  labels:
+    app: kong
+spec:
+  type: LoadBalancer
+  ports:
+    - name: proxy
+      port: 80
+      targetPort: 8000
+      protocol: TCP
+    - name: proxy-ssl
+      port: 443
+      targetPort: 8443
+      protocol: TCP
+  selector:
+    app: kong
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-admin
+  namespace: workshop
+  labels:
+    app: kong
+spec:
+  type: ClusterIP
+  ports:
+    - name: admin
+      port: 8001
+      targetPort: 8001
+      protocol: TCP
+  selector:
+    app: kong
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+  namespace: workshop
+  labels:
+    app: kong
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+        - name: kong
+          image: kong:3.5
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: "/kong/declarative/kong.yml"
+            - name: KONG_PROXY_ACCESS_LOG
+              value: "/dev/stdout"
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: "/dev/stdout"
+            - name: KONG_PROXY_ERROR_LOG
+              value: "/dev/stderr"
+            - name: KONG_ADMIN_ERROR_LOG
+              value: "/dev/stderr"
+            - name: KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8001"
+            - name: KONG_PROXY_LISTEN
+              value: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: workshop-secrets
+                  key: JWT_SECRET
+          ports:
+            - name: proxy
+              containerPort: 8000
+              protocol: TCP
+            - name: proxy-ssl
+              containerPort: 8443
+              protocol: TCP
+            - name: admin
+              containerPort: 8001
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: kong-config
+              mountPath: /kong/declarative
+              readOnly: true
+      volumes:
+        - name: kong-config
+          configMap:
+            name: kong-config
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kong-hpa
+  namespace: workshop
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kong
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
