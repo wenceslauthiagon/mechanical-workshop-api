@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
+  postgres-os:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: os
+      POSTGRES_PASSWORD: os
+      POSTGRES_DB: os_db
+    ports:
+      - '5433:5432'
+
+  postgres-billing:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: billing
+      POSTGRES_PASSWORD: billing
+      POSTGRES_DB: billing_db
+    ports:
+      - '5434:5432'
+
+  mongo-execution:
+    image: mongo:7
+    ports:
+      - '27017:27017'
