@@ -2,17 +2,17 @@
 
 ## Participantes
 
-- [Seu Nome e Matrícula]
+- Preencher com Nome e Matrícula do aluno
 
 ## Repositórios
 
-- OS Service: `<link-repo>`
-- Billing Service: `<link-repo>`
-- Execution Service: `<link-repo>`
+- OS Service: ../../phase4/os-service
+- Billing Service: ../../phase4/billing-service
+- Execution Service: ../../phase4/execution-service
 
 ## Vídeo de Demonstração
 
-[Link YouTube/Vimeo - até 15 min]
+Preencher com link YouTube/Vimeo (até 15 min)
 
 ## Arquitetura
 
@@ -99,4 +99,4 @@
 
 ---
 
-**Data**: ${new Date().toISOString()}
+**Data**: 2026-04-07
