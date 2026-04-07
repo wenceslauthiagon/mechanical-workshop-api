@@ -5,20 +5,22 @@ const feature = loadFeature('./test/bdd/os-saga.feature');
 
 defineFeature(feature, (test) => {
   test('abrir OS e concluir fluxo principal', ({ given, when, and, then }) => {
-    const { service, bus } = createApp();
+    let service: Awaited<ReturnType<typeof createApp>>['service'];
     let orderId = '';
 
-    given('existe uma ordem de serviço aberta', () => {
+    given('existe uma ordem de serviço aberta', async () => {
+      const appCtx = await createApp();
+      service = appCtx.service;
       const order = service.open('c1', 'v1', 'revisão geral');
       orderId = order.id;
     });
 
     when('o pagamento é confirmado', () => {
-      bus.emit('event.billing.payment_confirmed', { orderId });
+      service.mark(orderId, 'PAYMENT_CONFIRMED');
     });
 
     and('a execução é concluída', () => {
-      bus.emit('event.execution.completed', { orderId });
+      service.mark(orderId, 'COMPLETED');
     });
 
     then('a ordem deve ficar com status COMPLETED', () => {

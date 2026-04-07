@@ -1,8 +1,13 @@
 import { createApp } from './app';
 
-const { app } = createApp();
-const port = Number(process.env.PORT ?? 3001);
+(async () => {
+  const { app } = await createApp();
+  const port = Number(process.env.PORT ?? 3001);
 
-app.listen(port, () => {
-  console.log(`OS service running on ${port}`);
+  app.listen(port, () => {
+    console.log(`✅ OS service running on port ${port}`);
+  });
+})().catch(error => {
+  console.error('Failed to start OS service:', error);
+  process.exit(1);
 });

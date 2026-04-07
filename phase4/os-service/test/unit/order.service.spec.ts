@@ -1,21 +1,20 @@
-import { EventBus } from '../../src/infra/event-bus';
 import { OrderRepository } from '../../src/infra/order.repository';
 import { OrderService } from '../../src/application/order.service';
+import * as rabbitmq from '../../src/infra/rabbitmq';
 
 describe('OrderService', () => {
   it('should open order and emit billing command', () => {
-    const bus = new EventBus();
     const repo = new OrderRepository();
-    const service = new OrderService(repo, bus);
+    const service = new OrderService(repo);
 
-    let emitted = false;
-    bus.on('command.billing.generate', () => {
-      emitted = true;
-    });
+    const publishSpy = jest.spyOn(rabbitmq, 'publishEvent').mockResolvedValue();
 
     const order = service.open('c1', 'v1', 'troca de óleo');
 
     expect(order.status).toBe('OPENED');
-    expect(emitted).toBe(true);
+    expect(publishSpy).toHaveBeenCalledWith(
+      'command.billing.generate',
+      expect.objectContaining({ orderId: order.id, customerId: 'c1', vehicleId: 'v1' }),
+    );
   });
 });

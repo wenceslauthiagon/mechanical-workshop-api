@@ -1,13 +1,10 @@
 import { v4 as uuid } from 'uuid';
-import { EventBus } from '../infra/event-bus';
 import { OrderRepository } from '../infra/order.repository';
 import { OrderStatus, ServiceOrder } from '../domain/order';
+import { publishEvent } from '../infra/rabbitmq';
 
 export class OrderService {
-  constructor(
-    private readonly repo: OrderRepository,
-    private readonly bus: EventBus,
-  ) {}
+  constructor(private readonly repo: OrderRepository) {}
 
   open(customerId: string, vehicleId: string, description: string): ServiceOrder {
     const id = uuid();
@@ -21,7 +18,9 @@ export class OrderService {
     };
 
     this.repo.create(order);
-    this.bus.emit('command.billing.generate', { orderId: id });
+    
+    // Emitir comando para billing gerar orçamento
+    publishEvent('command.billing.generate', { orderId: id, customerId, vehicleId }).catch(console.error);
 
     return order;
   }
@@ -33,6 +32,10 @@ export class OrderService {
     order.status = status;
     order.history.push({ status, at: new Date().toISOString(), reason });
     this.repo.save(order);
+    
+    // Emitir evento de mudança de status
+    publishEvent(`event.order.${status.toLowerCase()}`, { orderId, status, reason }).catch(console.error);
+    
     return order;
   }
 

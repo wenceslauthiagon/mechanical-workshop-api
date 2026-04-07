@@ -1,0 +1,36 @@
+// prisma/schema.prisma - OS Service
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ServiceOrder {
+  id          String    @id @default(cuid())
+  customerId  String
+  vehicleId   String
+  description String
+  status      String    @default("OPENED") // OPENED, BUDGET_PENDING, BUDGET_APPROVED, PAYMENT_CONFIRMED, IN_EXECUTION, COMPLETED, CANCELLED
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  history ServiceOrderHistory[]
+
+  @@map("service_orders")
+}
+
+model ServiceOrderHistory {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  order ServiceOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("service_order_history")
+}
