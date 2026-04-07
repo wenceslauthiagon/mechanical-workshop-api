@@ -1,7 +1,9 @@
 import request from 'supertest';
-import { faker } from '@faker-js/faker/locale/pt_BR';
+import { randomUUID } from 'crypto';
 import { createApp } from '../../src/app';
 import { Express } from 'express';
+
+const randomText = () => `desc-${Math.random().toString(36).slice(2, 10)}`;
 
 describe('OS Service - Integration Tests', () => {
   let app: Express;
@@ -14,9 +16,9 @@ describe('OS Service - Integration Tests', () => {
   describe('POST /orders', () => {
     it('TC0001 - Should create a service order with status OPENED', async () => {
       const payload = {
-        customerId: faker.string.uuid(),
-        vehicleId: faker.string.uuid(),
-        description: faker.lorem.sentence(),
+        customerId: randomUUID(),
+        vehicleId: randomUUID(),
+        description: randomText(),
       };
 
       const response = await request(app)
@@ -41,9 +43,9 @@ describe('OS Service - Integration Tests', () => {
       const createRes = await request(app)
         .post('/orders')
         .send({
-          customerId: faker.string.uuid(),
-          vehicleId: faker.string.uuid(),
-          description: faker.lorem.sentence(),
+          customerId: randomUUID(),
+          vehicleId: randomUUID(),
+          description: randomText(),
         })
         .expect(201);
 
@@ -56,7 +58,7 @@ describe('OS Service - Integration Tests', () => {
 
     it('TC0002 - Should return 404 when order not found', async () => {
       const response = await request(app)
-        .get(`/orders/${faker.string.uuid()}`)
+        .get(`/orders/${randomUUID()}`)
         .expect(404);
 
       expect(response.body).toHaveProperty('message', 'Order not found');
@@ -68,9 +70,9 @@ describe('OS Service - Integration Tests', () => {
       const createRes = await request(app)
         .post('/orders')
         .send({
-          customerId: faker.string.uuid(),
-          vehicleId: faker.string.uuid(),
-          description: faker.lorem.sentence(),
+          customerId: randomUUID(),
+          vehicleId: randomUUID(),
+          description: randomText(),
         })
         .expect(201);
 
@@ -87,9 +89,9 @@ describe('OS Service - Integration Tests', () => {
       const createRes = await request(app)
         .post('/orders')
         .send({
-          customerId: faker.string.uuid(),
-          vehicleId: faker.string.uuid(),
-          description: faker.lorem.sentence(),
+          customerId: randomUUID(),
+          vehicleId: randomUUID(),
+          description: randomText(),
         })
         .expect(201);
 
@@ -105,7 +107,7 @@ describe('OS Service - Integration Tests', () => {
 
     it('TC0003 - Should return 404 when order not found', async () => {
       const response = await request(app)
-        .patch(`/orders/${faker.string.uuid()}/status`)
+        .patch(`/orders/${randomUUID()}/status`)
         .send({ status: 'COMPLETED' })
         .expect(404);
 

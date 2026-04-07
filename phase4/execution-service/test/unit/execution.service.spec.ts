@@ -1,7 +1,8 @@
-import { faker } from '@faker-js/faker/locale/pt_BR';
+import { randomUUID } from 'crypto';
 import { ExecutionService } from '../../src/execution.service';
 
 describe('ExecutionService', () => {
+  const randomText = () => `note-${Math.random().toString(36).slice(2, 10)}`;
   let eventEmitter: jest.Mock;
   let service: ExecutionService;
 
@@ -16,7 +17,7 @@ describe('ExecutionService', () => {
 
   describe('start', () => {
     it('TC0001 - Should create execution record with status QUEUED', () => {
-      const orderId = faker.string.uuid();
+      const orderId = randomUUID();
 
       const record = service.start(orderId);
 
@@ -28,8 +29,8 @@ describe('ExecutionService', () => {
     });
 
     it('TC0002 - Should generate unique ids for different executions', () => {
-      const r1 = service.start(faker.string.uuid());
-      const r2 = service.start(faker.string.uuid());
+      const r1 = service.start(randomUUID());
+      const r2 = service.start(randomUUID());
 
       expect(r1.id).not.toBe(r2.id);
     });
@@ -37,8 +38,8 @@ describe('ExecutionService', () => {
 
   describe('updateStatus', () => {
     it('TC0001 - Should update status to IN_PROGRESS', () => {
-      const record = service.start(faker.string.uuid());
-      const note = faker.lorem.sentence();
+      const record = service.start(randomUUID());
+      const note = randomText();
 
       const updated = service.updateStatus(record.id, 'IN_PROGRESS', note);
 
@@ -47,7 +48,7 @@ describe('ExecutionService', () => {
     });
 
     it('TC0002 - Should mark as COMPLETED, set completedAt and emit event', () => {
-      const orderId = faker.string.uuid();
+      const orderId = randomUUID();
       const record = service.start(orderId);
 
       service.updateStatus(record.id, 'COMPLETED', 'Reparo concluído');
@@ -60,9 +61,9 @@ describe('ExecutionService', () => {
     });
 
     it('TC0003 - Should mark as FAILED and emit event with reason', () => {
-      const orderId = faker.string.uuid();
+      const orderId = randomUUID();
       const record = service.start(orderId);
-      const reason = faker.lorem.sentence();
+      const reason = randomText();
 
       service.updateStatus(record.id, 'FAILED', reason);
 
@@ -74,12 +75,12 @@ describe('ExecutionService', () => {
 
     it('TC0004 - Should throw error if execution not found', () => {
       expect(() =>
-        service.updateStatus(faker.string.uuid(), 'COMPLETED'),
+        service.updateStatus(randomUUID(), 'COMPLETED'),
       ).toThrow('EXECUTION_NOT_FOUND');
     });
 
     it('TC0005 - Should not emit event for intermediate status changes', () => {
-      const record = service.start(faker.string.uuid());
+      const record = service.start(randomUUID());
 
       service.updateStatus(record.id, 'IN_PROGRESS');
 

@@ -3,10 +3,8 @@ import { createApp } from './app';
 (async () => {
   const { app } = await createApp();
   const port = Number(process.env.PORT ?? 3003);
-  app.listen(port, () => {
-    console.log(`✅ Execution service running on port ${port}`);
-  });
+  app.listen(port);
 })().catch(error => {
-  console.error('Failed to start execution service:', error);
+  void error;
   process.exit(1);
 });

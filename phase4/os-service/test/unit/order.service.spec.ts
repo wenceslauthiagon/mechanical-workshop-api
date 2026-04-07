@@ -1,9 +1,10 @@
-import { faker } from '@faker-js/faker/locale/pt_BR';
+import { randomUUID } from 'crypto';
 import { OrderRepository } from '../../src/infra/order.repository';
 import { OrderService } from '../../src/application/order.service';
 import * as rabbitmq from '../../src/infra/rabbitmq';
 
 describe('OrderService', () => {
+  const randomText = () => `desc-${Math.random().toString(36).slice(2, 10)}`;
   let repo: OrderRepository;
   let service: OrderService;
   let publishSpy: jest.SpyInstance;
@@ -24,9 +25,9 @@ describe('OrderService', () => {
 
   describe('open', () => {
     it('TC0001 - Should open order with status OPENED and emit billing command', () => {
-      const customerId = faker.string.uuid();
-      const vehicleId = faker.string.uuid();
-      const description = faker.lorem.sentence();
+      const customerId = randomUUID();
+      const vehicleId = randomUUID();
+      const description = randomText();
 
       const order = service.open(customerId, vehicleId, description);
 
@@ -44,8 +45,8 @@ describe('OrderService', () => {
     });
 
     it('TC0002 - Should generate unique id for each order', () => {
-      const o1 = service.open(faker.string.uuid(), faker.string.uuid(), faker.lorem.sentence());
-      const o2 = service.open(faker.string.uuid(), faker.string.uuid(), faker.lorem.sentence());
+      const o1 = service.open(randomUUID(), randomUUID(), randomText());
+      const o2 = service.open(randomUUID(), randomUUID(), randomText());
 
       expect(o1.id).not.toBe(o2.id);
     });
@@ -53,7 +54,7 @@ describe('OrderService', () => {
 
   describe('mark', () => {
     it('TC0001 - Should update status and append to history', () => {
-      const order = service.open(faker.string.uuid(), faker.string.uuid(), faker.lorem.sentence());
+      const order = service.open(randomUUID(), randomUUID(), randomText());
 
       const updated = service.mark(order.id, 'PAYMENT_CONFIRMED');
 
@@ -63,8 +64,8 @@ describe('OrderService', () => {
     });
 
     it('TC0002 - Should store reason in history when provided', () => {
-      const order = service.open(faker.string.uuid(), faker.string.uuid(), faker.lorem.sentence());
-      const reason = faker.lorem.sentence();
+      const order = service.open(randomUUID(), randomUUID(), randomText());
+      const reason = randomText();
 
       const updated = service.mark(order.id, 'CANCELLED', reason);
 
@@ -72,13 +73,13 @@ describe('OrderService', () => {
     });
 
     it('TC0003 - Should throw error if order not found', () => {
-      expect(() => service.mark(faker.string.uuid(), 'COMPLETED')).toThrow('ORDER_NOT_FOUND');
+      expect(() => service.mark(randomUUID(), 'COMPLETED')).toThrow('ORDER_NOT_FOUND');
     });
   });
 
   describe('get', () => {
     it('TC0001 - Should return order by id', () => {
-      const order = service.open(faker.string.uuid(), faker.string.uuid(), faker.lorem.sentence());
+      const order = service.open(randomUUID(), randomUUID(), randomText());
 
       const found = service.get(order.id);
 
@@ -86,7 +87,7 @@ describe('OrderService', () => {
     });
 
     it('TC0002 - Should throw error if order not found', () => {
-      expect(() => service.get(faker.string.uuid())).toThrow('ORDER_NOT_FOUND');
+      expect(() => service.get(randomUUID())).toThrow('ORDER_NOT_FOUND');
     });
   });
 });

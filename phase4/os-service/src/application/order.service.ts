@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'crypto';
 import { OrderRepository } from '../infra/order.repository';
 import { OrderStatus, ServiceOrder } from '../domain/order';
 import { publishEvent } from '../infra/rabbitmq';
@@ -7,7 +7,7 @@ export class OrderService {
   constructor(private readonly repo: OrderRepository) {}
 
   open(customerId: string, vehicleId: string, description: string): ServiceOrder {
-    const id = uuid();
+    const id = randomUUID();
     const order: ServiceOrder = {
       id,
       customerId,
@@ -20,7 +20,7 @@ export class OrderService {
     this.repo.create(order);
     
     // Emitir comando para billing gerar orçamento
-    publishEvent('command.billing.generate', { orderId: id, customerId, vehicleId }).catch(console.error);
+    publishEvent('command.billing.generate', { orderId: id, customerId, vehicleId }).catch(() => undefined);
 
     return order;
   }
@@ -34,7 +34,7 @@ export class OrderService {
     this.repo.save(order);
     
     // Emitir evento de mudança de status
-    publishEvent(`event.order.${status.toLowerCase()}`, { orderId, status, reason }).catch(console.error);
+    publishEvent(`event.order.${status.toLowerCase()}`, { orderId, status, reason }).catch(() => undefined);
     
     return order;
   }

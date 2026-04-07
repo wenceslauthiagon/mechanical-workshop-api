@@ -5,12 +5,10 @@
 const subscribers = new Map<string, Set<Function>>();
 
 export async function connectRabbitMQ(): Promise<void> {
-  console.log('[BILLING] Connected to event bus (local mock)');
+  // no-op for local mock
 }
 
 export async function publishEvent(topic: string, payload: any): Promise<void> {
-  console.log(`[BILLING] 📤 Publishing event: ${topic}`, payload);
-  
   // Simular delay
   await new Promise(resolve => setTimeout(resolve, 10));
   
@@ -21,7 +19,7 @@ export async function publishEvent(topic: string, payload: any): Promise<void> {
       try {
         await handler(payload);
       } catch (error) {
-        console.error(`[BILLING] ❌ Handler error for ${topic}:`, error);
+        // swallow handler errors in mock bus to avoid breaking publisher flow
       }
     }
   }
@@ -32,7 +30,6 @@ export async function subscribeEvent(topic: string, handler: (payload: any) => P
     subscribers.set(topic, new Set());
   }
   subscribers.get(topic)!.add(handler);
-  console.log(`[BILLING] 📬 Subscribed to: ${topic}`);
 }
 
 // For testing: reset state

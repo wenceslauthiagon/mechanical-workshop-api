@@ -1,9 +1,10 @@
 import request from 'supertest';
-import { faker } from '@faker-js/faker/locale/pt_BR';
+import { randomUUID } from 'crypto';
 import { createApp } from '../../src/app';
 import { Express } from 'express';
 
 describe('Billing Service - Integration Tests', () => {
+  const randomAmount = (min: number, max: number) => Number((Math.random() * (max - min) + min).toFixed(2));
   let app: Express;
 
   beforeAll(async () => {
@@ -14,8 +15,8 @@ describe('Billing Service - Integration Tests', () => {
   describe('POST /billing/budget', () => {
     it('TC0001 - Should create a budget successfully', async () => {
       const payload = {
-        orderId: faker.string.uuid(),
-        estimatedTotal: faker.number.float({ min: 200, max: 3000, fractionDigits: 2 }),
+        orderId: randomUUID(),
+        estimatedTotal: randomAmount(200, 3000),
       };
 
       const response = await request(app)
@@ -34,8 +35,8 @@ describe('Billing Service - Integration Tests', () => {
 
   describe('POST /billing/payment/approve', () => {
     it('TC0001 - Should approve payment for existing budget', async () => {
-      const orderId = faker.string.uuid();
-      const amount = faker.number.float({ min: 100, max: 2000, fractionDigits: 2 });
+      const orderId = randomUUID();
+      const amount = randomAmount(100, 2000);
 
       const budgetRes = await request(app)
         .post('/billing/budget')
@@ -58,7 +59,7 @@ describe('Billing Service - Integration Tests', () => {
     it('TC0002 - Should return 404 when budget not found', async () => {
       const response = await request(app)
         .post('/billing/payment/approve')
-        .send({ budgetId: faker.string.uuid(), amount: 500 })
+        .send({ budgetId: randomUUID(), amount: 500 })
         .expect(404);
 
       expect(response.body).toHaveProperty('message', 'Budget not found');

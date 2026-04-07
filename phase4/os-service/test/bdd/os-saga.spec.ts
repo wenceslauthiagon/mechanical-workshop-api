@@ -1,9 +1,10 @@
-import { faker } from '@faker-js/faker/locale/pt_BR';
+import { randomUUID } from 'crypto';
 import { OrderRepository } from '../../src/infra/order.repository';
 import { OrderService } from '../../src/application/order.service';
 import * as rabbitmq from '../../src/infra/rabbitmq';
 
 describe('Saga Orchestration - OrderService', () => {
+  const randomText = () => `desc-${Math.random().toString(36).slice(2, 10)}`;
   let service: OrderService;
 
   beforeEach(() => {
@@ -17,7 +18,7 @@ describe('Saga Orchestration - OrderService', () => {
 
   describe('Fluxo principal - OS aberta até conclusão', () => {
     it('TC0001 - Should complete full lifecycle: OPENED -> PAYMENT_CONFIRMED -> COMPLETED', () => {
-      const order = service.open(faker.string.uuid(), faker.string.uuid(), 'revisão geral');
+      const order = service.open(randomUUID(), randomUUID(), 'revisão geral');
       expect(order.status).toBe('OPENED');
 
       service.mark(order.id, 'PAYMENT_CONFIRMED');
@@ -35,7 +36,7 @@ describe('Saga Orchestration - OrderService', () => {
 
   describe('Compensação - falha no pagamento', () => {
     it('TC0001 - Should cancel order when payment fails', () => {
-      const order = service.open(faker.string.uuid(), faker.string.uuid(), 'troca de óleo');
+      const order = service.open(randomUUID(), randomUUID(), 'troca de óleo');
 
       service.mark(order.id, 'CANCELLED', 'Pagamento recusado');
 
@@ -47,7 +48,7 @@ describe('Saga Orchestration - OrderService', () => {
 
   describe('Compensação - falha na execução', () => {
     it('TC0001 - Should cancel order when execution fails after payment confirmed', () => {
-      const order = service.open(faker.string.uuid(), faker.string.uuid(), 'revisão completa');
+      const order = service.open(randomUUID(), randomUUID(), randomText());
       service.mark(order.id, 'PAYMENT_CONFIRMED');
 
       service.mark(order.id, 'CANCELLED', 'Peças indisponíveis');

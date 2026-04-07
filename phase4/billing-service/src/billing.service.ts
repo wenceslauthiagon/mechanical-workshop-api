@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'crypto';
 import { Budget, Payment } from './domain';
 
 export class BillingService {
@@ -12,7 +12,7 @@ export class BillingService {
 
   generateBudget(orderId: string, estimatedTotal: number): Budget {
     const budget: Budget = {
-      id: uuid(),
+      id: randomUUID(),
       orderId,
       estimatedTotal,
       status: 'SENT',
@@ -26,7 +26,7 @@ export class BillingService {
     if (!budget) throw new Error('BUDGET_NOT_FOUND');
 
     const payment: Payment = {
-      id: uuid(),
+      id: randomUUID(),
       budgetId,
       amount,
       status: 'CONFIRMED',

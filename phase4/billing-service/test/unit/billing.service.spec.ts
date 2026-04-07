@@ -1,7 +1,8 @@
-import { faker } from '@faker-js/faker/locale/pt_BR';
+import { randomUUID } from 'crypto';
 import { BillingService } from '../../src/billing.service';
 
 describe('BillingService', () => {
+  const randomAmount = (min: number, max: number) => Number((Math.random() * (max - min) + min).toFixed(2));
   let eventEmitter: jest.Mock;
   let service: BillingService;
 
@@ -16,8 +17,8 @@ describe('BillingService', () => {
 
   describe('generateBudget', () => {
     it('TC0001 - Should create budget successfully with status SENT', () => {
-      const orderId = faker.string.uuid();
-      const estimatedTotal = faker.number.float({ min: 100, max: 5000, fractionDigits: 2 });
+      const orderId = randomUUID();
+      const estimatedTotal = randomAmount(100, 5000);
 
       const budget = service.generateBudget(orderId, estimatedTotal);
 
@@ -28,8 +29,8 @@ describe('BillingService', () => {
     });
 
     it('TC0002 - Should generate unique ids for different budgets', () => {
-      const b1 = service.generateBudget(faker.string.uuid(), 100);
-      const b2 = service.generateBudget(faker.string.uuid(), 200);
+      const b1 = service.generateBudget(randomUUID(), 100);
+      const b2 = service.generateBudget(randomUUID(), 200);
 
       expect(b1.id).not.toBe(b2.id);
     });
@@ -37,8 +38,8 @@ describe('BillingService', () => {
 
   describe('approvePayment', () => {
     it('TC0001 - Should approve payment and emit payment_confirmed event', () => {
-      const orderId = faker.string.uuid();
-      const amount = faker.number.float({ min: 100, max: 3000, fractionDigits: 2 });
+      const orderId = randomUUID();
+      const amount = randomAmount(100, 3000);
 
       const budget = service.generateBudget(orderId, amount);
       const payment = service.approvePayment(budget.id, amount);
@@ -54,11 +55,11 @@ describe('BillingService', () => {
     });
 
     it('TC0002 - Should throw error if budget not found', () => {
-      expect(() => service.approvePayment(faker.string.uuid(), 500)).toThrow('BUDGET_NOT_FOUND');
+      expect(() => service.approvePayment(randomUUID(), 500)).toThrow('BUDGET_NOT_FOUND');
     });
 
     it('TC0003 - Should not emit event when budget is not found', () => {
-      expect(() => service.approvePayment(faker.string.uuid(), 500)).toThrow('BUDGET_NOT_FOUND');
+      expect(() => service.approvePayment(randomUUID(), 500)).toThrow('BUDGET_NOT_FOUND');
 
       expect(eventEmitter).not.toHaveBeenCalled();
     });
@@ -66,7 +67,7 @@ describe('BillingService', () => {
 
   describe('refund', () => {
     it('TC0001 - Should process refund and emit refund_processed event', () => {
-      const orderId = faker.string.uuid();
+      const orderId = randomUUID();
       const budget = service.generateBudget(orderId, 300);
       const payment = service.approvePayment(budget.id, 300);
       eventEmitter.mockClear();
@@ -80,11 +81,11 @@ describe('BillingService', () => {
     });
 
     it('TC0002 - Should throw error if payment not found', () => {
-      expect(() => service.refund(faker.string.uuid(), 'reason')).toThrow('PAYMENT_NOT_FOUND');
+      expect(() => service.refund(randomUUID(), 'reason')).toThrow('PAYMENT_NOT_FOUND');
     });
 
     it('TC0003 - Should not emit event when payment is not found', () => {
-      expect(() => service.refund(faker.string.uuid(), 'reason')).toThrow('PAYMENT_NOT_FOUND');
+      expect(() => service.refund(randomUUID(), 'reason')).toThrow('PAYMENT_NOT_FOUND');
 
       expect(eventEmitter).not.toHaveBeenCalled();
     });

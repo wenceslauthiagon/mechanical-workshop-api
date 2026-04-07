@@ -1,0 +1,12 @@
+{
+  "name": "phase4-microservices",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "npm --prefix ./billing-service test && npm --prefix ./execution-service test && npm --prefix ./os-service test",
+    "test:billing": "npm --prefix ./billing-service test",
+    "test:execution": "npm --prefix ./execution-service test",
+    "test:os": "npm --prefix ./os-service test",
+    "test:cov": "npm --prefix ./billing-service run test:cov && npm --prefix ./execution-service run test:cov && npm --prefix ./os-service run test:cov"
+  }
+}

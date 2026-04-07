@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { faker } from '@faker-js/faker/locale/pt_BR';
+import { randomUUID } from 'crypto';
 import { createApp } from '../../src/app';
 import { Express } from 'express';
 
@@ -13,7 +13,7 @@ describe('Execution Service - Integration Tests', () => {
 
   describe('POST /execution/start', () => {
     it('TC0001 - Should start an execution record successfully', async () => {
-      const orderId = faker.string.uuid();
+      const orderId = randomUUID();
 
       const response = await request(app)
         .post('/execution/start')
@@ -32,13 +32,13 @@ describe('Execution Service - Integration Tests', () => {
 
   describe('PATCH /execution/:id/status', () => {
     it('TC0001 - Should update status to IN_PROGRESS', async () => {
-      const orderId = faker.string.uuid();
+      const orderId = randomUUID();
       const startRes = await request(app)
         .post('/execution/start')
         .send({ orderId })
         .expect(201);
 
-      const note = faker.lorem.sentence();
+      const note = 'nota-andamento';
       const response = await request(app)
         .patch(`/execution/${startRes.body.id}/status`)
         .send({ status: 'IN_PROGRESS', note })
@@ -49,7 +49,7 @@ describe('Execution Service - Integration Tests', () => {
     });
 
     it('TC0002 - Should update status to COMPLETED', async () => {
-      const orderId = faker.string.uuid();
+      const orderId = randomUUID();
       const startRes = await request(app)
         .post('/execution/start')
         .send({ orderId })
@@ -66,7 +66,7 @@ describe('Execution Service - Integration Tests', () => {
 
     it('TC0003 - Should return 404 when execution not found', async () => {
       const response = await request(app)
-        .patch(`/execution/${faker.string.uuid()}/status`)
+        .patch(`/execution/${randomUUID()}/status`)
         .send({ status: 'COMPLETED' })
         .expect(404);
 

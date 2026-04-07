@@ -4,10 +4,8 @@ import { createApp } from './app';
   const { app } = await createApp();
   const port = Number(process.env.PORT ?? 3001);
 
-  app.listen(port, () => {
-    console.log(`✅ OS service running on port ${port}`);
-  });
+  app.listen(port);
 })().catch(error => {
-  console.error('Failed to start OS service:', error);
+  void error;
   process.exit(1);
 });

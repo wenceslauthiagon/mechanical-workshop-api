@@ -10,7 +10,7 @@ export async function createApp() {
   await connectRabbitMQ();
 
   const service = new ExecutionService((topic: string, payload: any) => {
-    publishEvent(topic, payload).catch(console.error);
+    publishEvent(topic, payload).catch(() => undefined);
   });
 
   // Subscrever comandos do OS
@@ -29,7 +29,7 @@ export async function createApp() {
           orderId,
           executionId: record.id,
           completedAt: new Date().toISOString()
-        }).catch(console.error);
+        }).catch(() => undefined);
       }, executionTime);
       
     } catch (error) {
@@ -37,7 +37,7 @@ export async function createApp() {
       publishEvent('event.execution.failed', {
         orderId,
         reason: (error as Error).message,
-      }).catch(console.error);
+      }).catch(() => undefined);
     }
   });
 
