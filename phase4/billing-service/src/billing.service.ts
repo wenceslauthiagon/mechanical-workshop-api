@@ -1,3 +1,4 @@
+import { v4 as uuid } from 'uuid';
 import { Budget, Payment } from './domain';
 
 export class BillingService {
@@ -10,14 +11,13 @@ export class BillingService {
   }
 
   generateBudget(orderId: string, estimatedTotal: number): Budget {
-    const id = Math.random().toString();
     const budget: Budget = {
-      id,
+      id: uuid(),
       orderId,
       estimatedTotal,
       status: 'SENT',
     };
-    this.budgets.set(id, budget);
+    this.budgets.set(budget.id, budget);
     return budget;
   }
 
@@ -25,16 +25,15 @@ export class BillingService {
     const budget = this.budgets.get(budgetId);
     if (!budget) throw new Error('BUDGET_NOT_FOUND');
 
-    const id = Math.random().toString();
     const payment: Payment = {
-      id,
+      id: uuid(),
       budgetId,
       amount,
       status: 'CONFIRMED',
     };
 
-    this.payments.set(id, payment);
-    this.eventEmitter('event.billing.payment_confirmed', { orderId: budget.orderId, paymentId: id });
+    this.payments.set(payment.id, payment);
+    this.eventEmitter('event.billing.payment_confirmed', { orderId: budget.orderId, paymentId: payment.id });
 
     return payment;
   }
