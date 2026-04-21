@@ -7,8 +7,7 @@ export const prisma = new PrismaClient({
 export async function connectDatabase() {
   try {
     await prisma.$connect();
-  } catch (error) {
-    void error;
+  } catch {
     process.exit(1);
   }
 }

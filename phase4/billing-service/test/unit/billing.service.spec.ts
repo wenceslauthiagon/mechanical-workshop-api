@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { BillingService } from '../../src/billing.service';
 
 describe('BillingService', () => {

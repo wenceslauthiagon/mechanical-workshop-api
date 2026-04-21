@@ -12,11 +12,19 @@ spec:
       labels:
         app: billing-service
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: billing-service
-          image: ghcr.io/your-org/billing-service:latest
+          image: ghcr.io/your-org/billing-service:v1.0.0
           ports:
             - containerPort: 3002
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+              ephemeral-storage: "256Mi"
+            limits:
+              memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service

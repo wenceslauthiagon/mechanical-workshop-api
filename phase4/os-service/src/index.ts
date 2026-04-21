@@ -5,7 +5,6 @@ import { createApp } from './app';
   const port = Number(process.env.PORT ?? 3001);
 
   app.listen(port);
-})().catch(error => {
-  void error;
+})().catch(() => {
   process.exit(1);
 });

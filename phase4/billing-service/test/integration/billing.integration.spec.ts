@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { createApp } from '../../src/app';
 import { Express } from 'express';
 
@@ -62,7 +62,7 @@ describe('Billing Service - Integration Tests', () => {
         .send({ budgetId: randomUUID(), amount: 500 })
         .expect(404);
 
-      expect(response.body).toHaveProperty('message', 'Budget not found');
+        expect(response.body).toHaveProperty('message', 'BUDGET_NOT_FOUND');
     });
   });
 

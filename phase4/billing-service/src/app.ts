@@ -1,6 +1,7 @@
 import express from 'express';
 import { connectRabbitMQ, publishEvent, subscribeEvent } from './infra/rabbitmq';
 import { BillingService } from './billing.service';
+import { processPayment } from './infra/mercadopago.client';
 
 export async function createApp() {
   const app = express();
@@ -17,11 +18,21 @@ export async function createApp() {
   await subscribeEvent('command.billing.generate', async (payload: any) => {
     try {
       const budget = service.generateBudget(payload.orderId, payload.estimatedTotal || 1500);
+      const gatewayPayment = await processPayment(
+        budget.estimatedTotal,
+        `OS ${payload.orderId} - orçamento mecânica`,
+      );
+
+      if (gatewayPayment.status !== 'approved') {
+        throw new Error(`PAYMENT_NOT_APPROVED_${gatewayPayment.status.toUpperCase()}`);
+      }
+
       const payment = service.approvePayment(budget.id, budget.estimatedTotal);
       publishEvent('event.billing.payment_confirmed', { 
         orderId: payload.orderId,
         budgetId: budget.id,
         paymentId: payment.id,
+        mercadopagoId: gatewayPayment.id,
         amount: payment.amount 
       }).catch(() => undefined);
     } catch (error) {
@@ -36,9 +47,12 @@ export async function createApp() {
   await subscribeEvent('command.billing.refund', async (payload: any) => {
     try {
       service.refund(payload.orderId, payload.reason);
-      publishEvent('event.billing.refunded', { orderId: payload.orderId }).catch(() => undefined);
+      publishEvent('event.billing.refunded', { orderId: payload.orderId }).catch(() => {});
     } catch (error) {
-      void error;
+      publishEvent('event.billing.refund_failed', {
+        orderId: payload.orderId,
+        reason: error instanceof Error ? error.message : 'REFUND_FAILED',
+      }).catch(() => {});
     }
   });
 
@@ -48,13 +62,22 @@ export async function createApp() {
     res.status(201).json(budget);
   });
 
-  app.post('/billing/payment/approve', (req, res) => {
+  app.post('/billing/payment/approve', async (req, res) => {
     const { budgetId, amount } = req.body;
     try {
+      const gatewayPayment = await processPayment(amount, `Aprovação de pagamento do orçamento ${budgetId}`);
+      if (gatewayPayment.status !== 'approved') {
+        return res.status(402).json({
+          message: `Payment not approved: ${gatewayPayment.status}`,
+        });
+      }
+
       const payment = service.approvePayment(budgetId, amount);
-      res.status(201).json(payment);
-    } catch (err) {
-      res.status(404).json({ message: 'Budget not found' });
+      res.status(201).json({ ...payment, mercadopagoId: gatewayPayment.id });
+    } catch (error) {
+      res.status(404).json({
+        message: error instanceof Error ? error.message : 'Budget not found',
+      });
     }
   });
 

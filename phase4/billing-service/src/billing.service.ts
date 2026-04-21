@@ -1,10 +1,10 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { Budget, Payment } from './domain';
 
 export class BillingService {
   private readonly budgets = new Map<string, Budget>();
   private readonly payments = new Map<string, Payment>();
-  private eventEmitter: (topic: string, payload: any) => void;
+  private readonly eventEmitter: (topic: string, payload: any) => void;
 
   constructor(eventEmitter: (topic: string, payload: any) => void) {
     this.eventEmitter = eventEmitter;

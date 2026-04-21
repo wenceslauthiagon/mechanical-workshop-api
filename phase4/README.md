@@ -1,6 +1,6 @@
 # Fase 4 - Arquitetura de Microsserviços (Saga Orquestrado)
 
-Este diretório contém o **starter kit completo da Fase 4** para separar a solução em 3 microsserviços independentes, com bancos próprios, mensageria e Saga Pattern.
+Este diretório contém a **implementação da Fase 4** com 3 microsserviços independentes, bancos próprios, mensageria e Saga Pattern.
 
 ## Microsserviços
 
@@ -48,6 +48,28 @@ npm install
 npm run dev
 ```
 
+## Como comprovar execução em ambiente real
+
+Para evidência operacional da entrega, os itens abaixo devem constar no material final:
+
+1. **Deploy em Kubernetes real**
+  - pipeline executando build, testes, quality gate e deploy
+  - imagem publicada em registry
+  - rollout do deployment concluído com sucesso
+
+2. **Bancos gerenciados**
+  - PostgreSQL gerenciado para `os-service` e `billing-service`
+  - MongoDB gerenciado para `execution-service`
+  - segredos e strings de conexão configurados fora do código
+
+3. **Evidências centralizadas**
+  - links diretos dos repositórios
+  - links diretos das execuções de CI/CD
+  - link do vídeo
+  - prints/links de cluster, bancos e monitoramento
+
+O documento central para essa comprovação é `phase4/docs/ENTREGA_FASE4.md`.
+
 ## Entregáveis cobertos
 
 - 3 serviços independentes
@@ -58,7 +80,8 @@ npm run dev
 - fluxo BDD (no `os-service`)
 - pipeline CI/CD por serviço
 - Dockerfile + manifestos Kubernetes por serviço
+- integração com Mercado Pago via cliente dedicado com fallback local para desenvolvimento
 
-## Próximo passo recomendado
+## Repositórios por serviço
 
-Separar cada pasta de serviço em repositório próprio (um repo por microsserviço), mantendo os mesmos arquivos base daqui.
+Cada microsserviço deve ser mantido em repositório próprio para entrega final conforme requisito da fase.

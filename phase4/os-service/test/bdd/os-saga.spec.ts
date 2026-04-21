@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { OrderRepository } from '../../src/infra/order.repository';
 import { OrderService } from '../../src/application/order.service';
 import * as rabbitmq from '../../src/infra/rabbitmq';

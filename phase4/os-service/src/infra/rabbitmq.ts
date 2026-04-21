@@ -10,14 +10,12 @@ export async function connectRabbitMQ() {
 }
 
 export async function publishEvent(topic: string, payload: any) {
-  void topic;
-  void payload;
   const topicHandlers = handlers.get(topic) || [];
   for (const handler of topicHandlers) {
     try {
-      await handler(payload);
-    } catch (error) {
-      void error;
+      await Promise.resolve(handler(payload));
+    } catch {
+      // ignore handler errors in local mock to preserve publisher flow
     }
   }
 }
@@ -26,7 +24,10 @@ export async function subscribeEvent(topic: string, handler: EventHandler) {
   if (!handlers.has(topic)) {
     handlers.set(topic, []);
   }
-  handlers.get(topic)!.push(handler);
+  const topicHandlers = handlers.get(topic);
+  if (topicHandlers) {
+    topicHandlers.push(handler);
+  }
 }
 
 export function resetSubscribers() {

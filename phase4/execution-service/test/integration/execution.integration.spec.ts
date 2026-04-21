@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { createApp } from '../../src/app';
 import { Express } from 'express';
 

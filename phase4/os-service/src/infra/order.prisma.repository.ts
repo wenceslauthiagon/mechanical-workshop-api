@@ -83,7 +83,7 @@ export class OrderPrismaRepository {
       data: { status: order.status },
     });
 
-    const lastHist = order.history[order.history.length - 1];
+    const lastHist = order.history.at(-1);
     if (lastHist) {
       await this.db.serviceOrderHistory.create({
         data: {

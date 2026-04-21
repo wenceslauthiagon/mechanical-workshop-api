@@ -41,7 +41,7 @@ describe('App', () => {
 
   it('TC0002 - Should publish execution.completed when command handler succeeds', async () => {
     const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0);
-    const timeoutSpy = jest.spyOn(global, 'setTimeout').mockImplementation(((cb: any) => {
+    const timeoutSpy = jest.spyOn(globalThis, 'setTimeout').mockImplementation(((cb: any) => {
       cb();
       return 0 as any;
     }) as any);

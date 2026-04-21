@@ -16,11 +16,7 @@ export async function publishEvent(topic: string, payload: any): Promise<void> {
   const handlers = subscribers.get(topic);
   if (handlers) {
     for (const handler of handlers) {
-      try {
-        await handler(payload);
-      } catch (error) {
-        // swallow handler errors in mock bus to avoid breaking publisher flow
-      }
+      await Promise.resolve(handler(payload)).catch(() => undefined);
     }
   }
 }

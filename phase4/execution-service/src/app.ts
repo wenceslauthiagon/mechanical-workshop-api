@@ -22,7 +22,7 @@ export async function createApp() {
       // Simular execução (1-3 segundos)
       const executionTime = Math.random() * 2000 + 1000;
       setTimeout(async () => {
-        const completed = service.updateStatus(record.id, 'COMPLETED', 'Diagnosis and repair completed');
+        service.updateStatus(record.id, 'COMPLETED', 'Diagnosis and repair completed');
         
         // Emitir sucesso
         publishEvent('event.execution.completed', {

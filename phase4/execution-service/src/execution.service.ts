@@ -2,7 +2,7 @@ import { ExecutionRecord } from './domain';
 
 export class ExecutionService {
   private readonly records = new Map<string, ExecutionRecord>();
-  private eventEmitter: (topic: string, payload: any) => void;
+  private readonly eventEmitter: (topic: string, payload: any) => void;
 
   constructor(eventEmitter: (topic: string, payload: any) => void) {
     this.eventEmitter = eventEmitter;

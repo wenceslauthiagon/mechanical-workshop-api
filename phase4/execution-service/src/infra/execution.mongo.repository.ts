@@ -55,7 +55,10 @@ export class ExecutionMongoRepository {
 
   async findByOrderId(orderId: string): Promise<ExecutionRecord | undefined> {
     const doc = await this.collection.findOne({ orderId });
-    return doc ? this.toDomain(doc, doc._id!) : undefined;
+    if (!doc?._id) {
+      return undefined;
+    }
+    return this.toDomain(doc, doc._id);
   }
 
   async save(record: ExecutionRecord): Promise<void> {

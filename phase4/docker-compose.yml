@@ -86,7 +86,7 @@ services:
       context: ./billing-service
     container_name: phase4-billing-service
     environment:
-      DATABASE_URL: postgresql://billing:billing@postgres-billing:5432/billing_db
+      DATABASE_URL: postgresql://billing:${BILLING_DB_PASSWORD}@postgres-billing:5432/billing_db
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       PORT: 3002
       NODE_ENV: development
@@ -103,7 +103,7 @@ services:
       context: ./execution-service
     container_name: phase4-execution-service
     environment:
-      MONGODB_URI: mongodb://execution:execution@mongo-execution:27017/execution_db?authSource=admin
+      MONGODB_URI: mongodb://execution:${EXECUTION_DB_PASSWORD}@mongo-execution:27017/execution_db?authSource=admin
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       PORT: 3003
       NODE_ENV: development
