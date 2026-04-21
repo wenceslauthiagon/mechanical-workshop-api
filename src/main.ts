@@ -1,12 +1,15 @@
+// Datadog tracer já inicializado via dd-trace-init.js
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthCheckModule } from './auth-check/auth-check.module';
 import { WorkshopModule } from './workshop/workshop.module';
 import { API_TAGS } from './shared/constants/messages.constants';
+
+const logger = new Logger('[API-SERVER]');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -62,7 +65,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production' ? false : true,
+    origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
   });
 
@@ -122,10 +125,18 @@ async function bootstrap() {
 
   SwaggerModule.setup(swaggerPath, app, document, swaggerOptions);
 
-  const port = parseInt(process.env.PORT || '3000', 10);
+  const port = Number.parseInt(process.env.PORT || '3000', 10);
   const host = process.env.HOST || '0.0.0.0';
 
   await app.listen(port, host);
+  
+  // Evidence Log para Terminal
+  logger.log('═══════════════════════════════════════════════════════════');
+  logger.log(`✅ API INICIADA COM SUCESSO`);
+  logger.log(`📍 Host: http://127.0.0.1:${port}`);
+  logger.log(`📎 Documentação: http://127.0.0.1:${port}/api`);
+  logger.log(`🔒 Status: READY FOR REQUESTS`);
+  logger.log('═══════════════════════════════════════════════════════════');
 }
 
 void bootstrap();

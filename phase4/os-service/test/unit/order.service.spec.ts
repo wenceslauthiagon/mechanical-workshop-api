@@ -1,0 +1,93 @@
+import { randomUUID } from 'node:crypto';
+import { OrderRepository } from '../../src/infra/order.repository';
+import { OrderService } from '../../src/application/order.service';
+import * as rabbitmq from '../../src/infra/rabbitmq';
+
+describe('OrderService', () => {
+  const randomText = () => `desc-${Math.random().toString(36).slice(2, 10)}`;
+  let repo: OrderRepository;
+  let service: OrderService;
+  let publishSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    repo = new OrderRepository();
+    service = new OrderService(repo);
+    publishSpy = jest.spyOn(rabbitmq, 'publishEvent').mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('TC0001 - Should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  describe('open', () => {
+    it('TC0001 - Should open order with status OPENED and emit billing command', () => {
+      const customerId = randomUUID();
+      const vehicleId = randomUUID();
+      const description = randomText();
+
+      const order = service.open(customerId, vehicleId, description);
+
+      expect(order.id).toBeDefined();
+      expect(order.customerId).toBe(customerId);
+      expect(order.vehicleId).toBe(vehicleId);
+      expect(order.description).toBe(description);
+      expect(order.status).toBe('OPENED');
+      expect(order.history).toHaveLength(1);
+      expect(order.history[0].status).toBe('OPENED');
+      expect(publishSpy).toHaveBeenCalledWith(
+        'command.billing.generate',
+        expect.objectContaining({ orderId: order.id, customerId, vehicleId }),
+      );
+    });
+
+    it('TC0002 - Should generate unique id for each order', () => {
+      const o1 = service.open(randomUUID(), randomUUID(), randomText());
+      const o2 = service.open(randomUUID(), randomUUID(), randomText());
+
+      expect(o1.id).not.toBe(o2.id);
+    });
+  });
+
+  describe('mark', () => {
+    it('TC0001 - Should update status and append to history', () => {
+      const order = service.open(randomUUID(), randomUUID(), randomText());
+
+      const updated = service.mark(order.id, 'PAYMENT_CONFIRMED');
+
+      expect(updated.status).toBe('PAYMENT_CONFIRMED');
+      expect(updated.history).toHaveLength(2);
+      expect(updated.history[1].status).toBe('PAYMENT_CONFIRMED');
+    });
+
+    it('TC0002 - Should store reason in history when provided', () => {
+      const order = service.open(randomUUID(), randomUUID(), randomText());
+      const reason = randomText();
+
+      const updated = service.mark(order.id, 'CANCELLED', reason);
+
+      expect(updated.history[1].reason).toBe(reason);
+    });
+
+    it('TC0003 - Should throw error if order not found', () => {
+      expect(() => service.mark(randomUUID(), 'COMPLETED')).toThrow('ORDER_NOT_FOUND');
+    });
+  });
+
+  describe('get', () => {
+    it('TC0001 - Should return order by id', () => {
+      const order = service.open(randomUUID(), randomUUID(), randomText());
+
+      const found = service.get(order.id);
+
+      expect(found).toEqual(order);
+    });
+
+    it('TC0002 - Should throw error if order not found', () => {
+      expect(() => service.get(randomUUID())).toThrow('ORDER_NOT_FOUND');
+    });
+  });
+});
