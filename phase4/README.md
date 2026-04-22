@@ -37,6 +37,18 @@ Compensações em falha:
 
 1. Suba infraestrutura local:
 
+Antes, copie as variaveis do compose:
+
+```bash
+cp phase4/.env.example phase4/.env
+```
+
+No PowerShell:
+
+```powershell
+Copy-Item phase4/.env.example phase4/.env
+```
+
 ```bash
 docker compose -f phase4/docker-compose.yml up -d
 ```
@@ -81,6 +93,31 @@ O documento central para essa comprovação é `phase4/docs/ENTREGA_FASE4.md`.
 - pipeline CI/CD por serviço
 - Dockerfile + manifestos Kubernetes por serviço
 - integração com Mercado Pago via cliente dedicado com fallback local para desenvolvimento
+
+## CI/CD por microsserviço (executável no GitHub Actions)
+
+Os workflows válidos estão na raiz do repositório em `.github/workflows`:
+
+- `.github/workflows/phase4-os-service-cicd.yml`
+- `.github/workflows/phase4-billing-service-cicd.yml`
+- `.github/workflows/phase4-execution-service-cicd.yml`
+
+Cada pipeline executa:
+
+1. build
+2. testes com cobertura
+3. quality gate (SonarQube)
+4. build/push de imagem no GHCR
+5. deploy em Kubernetes
+
+## Checklist rápido de validação local
+
+1. Subir infraestrutura: `docker compose -f phase4/docker-compose.yml up -d`
+2. Rodar cobertura: `npm --prefix phase4 run test:cov`
+3. Subir serviços em dev:
+  - `npm --prefix phase4/os-service run dev`
+  - `npm --prefix phase4/billing-service run dev`
+  - `npm --prefix phase4/execution-service run dev`
 
 ## Repositórios por serviço
 

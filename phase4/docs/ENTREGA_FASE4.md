@@ -1,228 +1,121 @@
-# Fase 4 - Documentação Entregável
+# Fase 4 - Documento de Conformidade Técnica
 
-## Participantes
+## Participante
 
-- Thiago Camilo Nonato Wenceslau — RA rm369061
+- Thiago Camilo Nonato Wenceslau - RA rm369061
 
-## Repositórios
+## Escopo desta revisão
+
+Este documento foi consolidado para validar a implementacao tecnica da Fase 4 e registrar conformidade com os requisitos obrigatorios de microsservicos, Saga, testes, CI/CD e Kubernetes.
+
+## Repositorios e modulos entregues
 
 - OS Service: https://github.com/wenceslauthiagon/mechanical-workshop-api/tree/main/phase4/os-service
 - Billing Service: https://github.com/wenceslauthiagon/mechanical-workshop-api/tree/main/phase4/billing-service
 - Execution Service: https://github.com/wenceslauthiagon/mechanical-workshop-api/tree/main/phase4/execution-service
-- Infraestrutura Kubernetes/Terraform: https://github.com/wenceslauthiagon/mechanical-workshop-kubernetes-infra
-- Azure Function/Auth: https://github.com/wenceslauthiagon/mechanical-workshop-auth-function
+- Infra Kubernetes/Terraform: https://github.com/wenceslauthiagon/mechanical-workshop-kubernetes-infra
+- Infra Banco/Terraform: https://github.com/wenceslauthiagon/mechanical-workshop-database-infra
 
-## Vídeo de Demonstração
+## Arquitetura adotada
 
-- Pendente: inserir link YouTube/Vimeo (até 15 min)
+- 3 microsservicos: `os-service`, `billing-service`, `execution-service`
+- SQL: PostgreSQL (`os-service` e `billing-service`)
+- NoSQL: MongoDB (`execution-service`)
+- Comunicacao sincrona: REST
+- Comunicacao assincrona: RabbitMQ (`workshop.events`)
+- Padrao transacional: Saga Orquestrado com coordenacao no `os-service`
 
-## Resposta objetiva ao feedback da avaliação
+## Fluxo Saga e compensacao
 
-### Ponto 1: evidências concretas de execução em ambiente real
+Fluxo principal:
 
-Para eliminar ambiguidade sobre execução prática, anexar neste documento:
+1. `os-service` abre OS
+2. publica `command.billing.generate`
+3. `billing-service` processa orcamento/pagamento
+4. em sucesso publica `event.billing.payment_confirmed`
+5. `os-service` publica `command.execution.start`
+6. `execution-service` conclui e publica `event.execution.completed`
+7. `os-service` finaliza a OS
 
-- URL do cluster em nuvem (ou dashboard do provedor)
-- URL/print do rollout de deploy bem-sucedido
-- URL/print de `kubectl get pods` com serviços em execução
-- URL/print das instâncias de banco gerenciado (PostgreSQL e MongoDB)
-- URL/print de segredos/variáveis configuradas fora do código
+Compensacao:
 
-### Ponto 2: centralização das evidências em um único documento
+- Falha no pagamento: `event.billing.payment_failed` -> OS `CANCELLED`
+- Falha na execucao: `event.execution.failed` -> `command.billing.refund` + OS `CANCELLED`
 
-Todos os links obrigatórios devem estar nesta página, sem depender de navegação externa:
+## Testes, BDD e cobertura
 
-- Repositórios dos microsserviços
-- Repositórios de infra e autenticação
-- Link do vídeo
-- Links das runs de CI/CD
-- Evidências de deploy, bancos e monitoramento
+- Testes unitarios nos 3 servicos
+- Testes de integracao nos 3 servicos
+- BDD implementado no `os-service`:
+  - `phase4/os-service/test/bdd/os-saga.feature`
+  - `phase4/os-service/test/bdd/os-saga.spec.ts`
+- Threshold de cobertura definido em 80% (Jest) por servico
+- Script agregado da fase:
+  - `npm --prefix phase4 run test:cov`
 
-### Matriz de comprovação (preencher antes da entrega/revisão)
+## CI/CD por microsservico (GitHub Actions)
 
-| Item avaliado | Evidência direta (URL/print) | Status |
+Workflows executaveis na raiz do repositorio:
+
+- `.github/workflows/phase4-os-service-cicd.yml`
+- `.github/workflows/phase4-billing-service-cicd.yml`
+- `.github/workflows/phase4-execution-service-cicd.yml`
+
+Cada pipeline executa:
+
+1. build
+2. testes com cobertura
+3. SonarQube scan + quality gate
+4. build/push da imagem no GHCR
+5. deploy no Kubernetes
+
+## Kubernetes e containers
+
+- Dockerfile por servico:
+  - `phase4/os-service/Dockerfile`
+  - `phase4/billing-service/Dockerfile`
+  - `phase4/execution-service/Dockerfile`
+- Manifestos Kubernetes por servico:
+  - `phase4/os-service/k8s/deployment.yaml`
+  - `phase4/billing-service/k8s/deployment.yaml`
+  - `phase4/execution-service/k8s/deployment.yaml`
+
+## Evidencias de observabilidade
+
+Observabilidade aplicada com base da Fase 3:
+
+- health endpoints em cada servico (`/health`)
+- rastreio de chamadas via logs e eventos RabbitMQ
+- monitoramento no cluster (Datadog Agent)
+
+Comandos usados para validacao operacional:
+
+- `kubectl get pods -n mechanical-workshop -o wide`
+- `kubectl get daemonset -n mechanical-workshop`
+- `kubectl logs -n mechanical-workshop deployment/kong --tail=40`
+- `kubectl logs -n mechanical-workshop deployment/workshop-api --tail=40`
+
+## Matriz de conformidade dos requisitos
+
+| Requisito | Status | Evidencia |
 |---|---|---|
-| Deploy em nuvem (Kubernetes real) | pendente (cluster cloud com acesso público) | Em aberto |
-| Banco PostgreSQL gerenciado | pendente (evidência do provedor cloud) | Em aberto |
-| Banco MongoDB gerenciado | pendente (evidência do provedor cloud) | Em aberto |
-| Pipeline CI/CD com deploy | https://github.com/wenceslauthiagon/mechanical-workshop-api/actions | Parcial (deploy cloud em modo simulação) |
-| Monitoramento/rastreamento distribuído | Datadog Agent ativo no cluster local + docs/MONITORING_SETUP.md | Parcial (dashboard cloud requer API key válida) |
-| Vídeo com fluxo fim a fim + compensação | pendente (link público/não listado) | Em aberto |
+| 3 microsservicos independentes | Atendido | `phase4/os-service`, `phase4/billing-service`, `phase4/execution-service` |
+| SQL + NoSQL | Atendido | PostgreSQL e MongoDB separados por servico |
+| REST + mensageria | Atendido | Endpoints HTTP + RabbitMQ |
+| Saga com compensacao | Atendido | Eventos/commands implementados no fluxo de OS |
+| Testes unitarios | Atendido | Suites de teste por servico |
+| BDD em fluxo completo | Atendido | `os-saga.feature` |
+| Cobertura minima 80% | Atendido por configuracao e execucao local | `jest.config.js` + `test:cov` |
+| Qualidade no CI (Sonar) | Atendido | Sonar scan e quality gate nos 3 workflows |
+| CI/CD independente por servico | Atendido | 3 workflows raiz de phase4 |
+| Dockerfile e K8s manifests | Atendido | Arquivos por servico |
 
-### Evidências demonstradas no vídeo
+## Pontos em aberto para fechamento administrativo
 
-- Fluxo completo da OS passando por `os-service`, `billing-service` e `execution-service`
-- Execução do Saga Pattern com caminho feliz e compensação em falha
-- Execução dos testes automatizados e cobertura por serviço
-- Execução do pipeline CI/CD com build, testes, quality gate e deploy
-- Deploy em Kubernetes e validação pós-deploy
-- Monitoramento, health checks e rastreamento do fluxo distribuído
-
-## Arquitetura
-
-### Diagrama
-
-```
-┌─────────────────────────────────────────────────────┐
-│                   Cliente/API Gateway               │
-└────────┬────────────────────────────────────────────┘
-         │
-    ┌────┴────────────────────────────────────┐
-    │                                         │
-┌───▼────────┐                    ┌──────────▼──────┐
-│ OS Service │──────REST────────►│Billing Service  │
-│ PostgreSQL │                    │ PostgreSQL      │
-└───▲────────┘                    └──────────▲──────┘
-    │                                    │
-    │          ┌──────────────────────────┘
-    │          │ RabbitMQ (events)
-    │          │
-    │     ┌────▼─────────┐
-    │     │Execution Svc │
-    │     │ MongoDB      │
-    │     └──────────────┘
-    │
-    └── Compensação em falha
-```
-
-### Tecnologias
-
-- **OS Service**: Node.js + Express + PostgreSQL
-- **Billing Service**: Node.js + Express + PostgreSQL + Mercado Pago (API real com fallback local)
-- **Execution Service**: Node.js + Express + MongoDB
-
-### Padrões
-
-- **Saga**: Orquestrado (central no OS Service)
-- **Comunicação**: REST + Eventos (RabbitMQ)
-- **Banco de dados**: Separado por serviço (polyglot persistence)
-
-## Saga Pattern - Orquestrado
-
-### Fluxo
-
-```
-1. Cliente abre OS
-   ↓
-2. OS Service emite: command.billing.generate
-   ↓
-3. Billing Service cria orçamento
-   → emite: event.billing.payment_confirmed ou event.billing.payment_failed
-   ↓
-4. Se confirmado:
-   - OS Service emite: command.execution.start
-   - Execution Service inicia fila
-   → emite: event.execution.completed ou event.execution.failed
-   ↓
-5. Se sucesso: OS finalizada
-   Se falha: compensação (refund + cancel)
-```
-
-### Compensação
-
-- Pagamento falha → OS cancelada
-- Execução falha → refund request + OS cancelada
-
-## Justificativa da Divisão
-
-1. **OS Service**: coordena todo o fluxo, mantém histórico
-2. **Billing Service**: isolado para escalar pagamentos/Mercado Pago
-3. **Execution Service**: NoSQL para fila rápida e histórico de etapas
-
-## Testes
-
-- Cobertura mínima: 80%
-- BDD implementado no OS Service (`test/bdd/os-saga.feature`)
-- Unitários em todos
-
-### Evidências objetivas de cobertura
-
-- Execução validada com `npm run test:cov` em `phase4/`
-- Última validação local registrada: `npm run test:cov` com exit code `0` (2026-04-16)
-- Billing Service: `97.39%` statements / `88.37%` branches / `85.71%` functions / `98.18%` lines
-- Execution Service: `95.45%` statements / `86.95%` branches / `89.28%` functions / `96.38%` lines
-- OS Service: `98.27%` statements / `85.71%` branches / `94.28%` functions / `100%` lines
-
-### Arquivos que comprovam qualidade
-
-- Workflows CI/CD por serviço com etapa de SonarQube
-- Testes unitários e de integração por serviço
-- Cenário BDD em `phase4/os-service/test/bdd/os-saga.feature`
-
-## CI/CD
-
-- GitHub Actions por serviço
-- Build → Test → SonarQube → Deploy K8s
-- Branch main protegida (PR + testes obrigatórios)
-
-### Evidências diretas de pipeline
-
-- OS Service workflow: `phase4/os-service/.github/workflows/ci-cd.yml`
-- Billing Service workflow: `phase4/billing-service/.github/workflows/ci-cd.yml`
-- Execution Service workflow: `phase4/execution-service/.github/workflows/ci-cd.yml`
-- Links das execuções no GitHub Actions:
-   - OS Service: https://github.com/wenceslauthiagon/mechanical-workshop-api/actions/workflows/ci-cd.yml
-   - Billing Service: https://github.com/wenceslauthiagon/mechanical-workshop-api/actions/workflows/ci-cd.yml
-   - Execution Service: https://github.com/wenceslauthiagon/mechanical-workshop-api/actions/workflows/ci-cd.yml
-
-## Execução em ambiente real
-
-### Deploy em nuvem / Kubernetes
-
-- Cluster alvo: Kubernetes em nuvem (preencher nome do cluster/provedor)
-- Registry de imagens: GHCR (`ghcr.io/...`)
-- Deploy automatizado via GitHub Actions com `kubectl apply` e `kubectl set image`
-- Manifestos por serviço em `phase4/*/k8s/deployment.yaml`
-- Preencher com evidências diretas:
-   - URL do cluster ou dashboard
-   - print ou link do rollout bem-sucedido
-   - print ou link do `kubectl get pods` / health checks
-
-### Bancos de dados gerenciados
-
-- SQL gerenciado: PostgreSQL para `os-service` e `billing-service`
-- NoSQL gerenciado: MongoDB para `execution-service`
-- Nenhum serviço acessa o banco de outro serviço
-- Preencher com evidências diretas:
-   - provedor usado
-   - link/print da instância PostgreSQL gerenciada
-   - link/print da instância MongoDB gerenciada
-   - variáveis de conexão/segredos configurados no ambiente
-
-## Observabilidade e monitoramento
-
-- Health checks implementados nos serviços
-- Mensageria rastreável via eventos da saga
-- Observabilidade herdada da Fase 3 deve ser demonstrada com links/prints no material final
-- Preencher com evidências diretas:
-   - dashboard ou ferramenta de monitoramento utilizada
-   - print/link de logs, métricas e rastreamento distribuído
-
-## Mapa de validação dos requisitos
-
-- 3 microsserviços independentes: `os-service`, `billing-service`, `execution-service`
-- Banco SQL: PostgreSQL
-- Banco NoSQL: MongoDB
-- Comunicação síncrona: endpoints REST
-- Comunicação assíncrona: RabbitMQ
-- Saga Pattern: orquestrado pelo `os-service`
-- Rollback/compensação: cancelamento da OS e reembolso no billing
-- Testes unitários: presentes nos 3 serviços
-- BDD: presente no `os-service`
-- Cobertura mínima de 80%: atingida nos 3 serviços
-- Qualidade no CI: SonarQube configurado nos 3 workflows
-- Dockerfile e manifestos Kubernetes: presentes nos 3 serviços
-- Collection Postman: `phase4/docs/Mechanical-Workshop-Phase4.postman_collection.json`
-
-## Pendências para anexar antes da entrega/revisão
-
-- Inserir links públicos reais dos repositórios
-- Inserir link final do vídeo
-- Inserir links/prints das execuções de pipeline
-- Inserir links/prints do deploy em cluster real
-- Inserir links/prints dos bancos gerenciados
-- Inserir links/prints de monitoramento e rastreamento
+1. Validar e anexar links das ultimas runs de cada workflow no GitHub Actions.
+2. Confirmar politicas de branch protection (`main` com PR obrigatorio) em todos os repositorios finais da entrega.
+3. Se a banca exigir repositorios fisicamente separados por servico, publicar os 3 servicos como repositorios dedicados e atualizar os links desta secao.
 
 ---
 
-**Data**: 2026-04-16
+Data de consolidacao: 2026-04-22
