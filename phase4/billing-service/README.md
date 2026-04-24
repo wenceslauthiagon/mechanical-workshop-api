@@ -9,6 +9,7 @@ Responsável por:
 
 - `POST /billing/budget`
 - `POST /billing/payment/approve`
+- `GET /billing/order/:orderId`
 
 ## Integração Mercado Pago
 

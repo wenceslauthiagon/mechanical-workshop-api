@@ -57,6 +57,24 @@ export async function createApp() {
     }
   });
 
+  app.get('/execution/:id', (req, res) => {
+    try {
+      const record = service.getById(req.params.id);
+      res.json(record);
+    } catch {
+      res.status(404).json({ message: 'Execution not found' });
+    }
+  });
+
+  app.get('/execution/order/:orderId', (req, res) => {
+    try {
+      const record = service.getByOrderId(req.params.orderId);
+      res.json(record);
+    } catch {
+      res.status(404).json({ message: 'Execution not found' });
+    }
+  });
+
   app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
   });

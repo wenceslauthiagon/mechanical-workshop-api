@@ -1,4 +1,5 @@
 import { ExecutionRecord } from './domain';
+import { randomUUID } from 'node:crypto';
 
 export class ExecutionService {
   private readonly records = new Map<string, ExecutionRecord>();
@@ -9,7 +10,7 @@ export class ExecutionService {
   }
 
   start(orderId: string): ExecutionRecord {
-    const id = Math.random().toString();
+    const id = randomUUID();
     const record: ExecutionRecord = {
       id,
       orderId,
@@ -18,6 +19,22 @@ export class ExecutionService {
       startedAt: new Date().toISOString(),
     };
     this.records.set(id, record);
+    return record;
+  }
+
+  getById(executionId: string): ExecutionRecord {
+    const record = this.records.get(executionId);
+    if (!record) {
+      throw new Error('EXECUTION_NOT_FOUND');
+    }
+    return record;
+  }
+
+  getByOrderId(orderId: string): ExecutionRecord {
+    const record = [...this.records.values()].find(item => item.orderId === orderId);
+    if (!record) {
+      throw new Error('EXECUTION_NOT_FOUND');
+    }
     return record;
   }
 

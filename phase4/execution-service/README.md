@@ -13,4 +13,5 @@ MongoDB (NoSQL).
 
 - `POST /execution/start`
 - `GET /execution/:id`
+- `GET /execution/order/:orderId`
 - `PATCH /execution/:id/status`

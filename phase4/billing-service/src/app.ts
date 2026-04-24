@@ -81,6 +81,17 @@ export async function createApp() {
     }
   });
 
+  app.get('/billing/order/:orderId', (req, res) => {
+    try {
+      const result = service.getOrderBilling(req.params.orderId);
+      res.json(result);
+    } catch (error) {
+      res.status(404).json({
+        message: error instanceof Error ? error.message : 'BUDGET_NOT_FOUND',
+      });
+    }
+  });
+
   app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
   });
