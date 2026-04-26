@@ -34,6 +34,15 @@ describe('ExecutionService', () => {
 
       expect(r1.id).not.toBe(r2.id);
     });
+
+    it('TC0003 - Should be idempotent for the same orderId', () => {
+      const orderId = randomUUID();
+
+      const record1 = service.start(orderId);
+      const record2 = service.start(orderId);
+
+      expect(record2.id).toBe(record1.id);
+    });
   });
 
   describe('updateStatus', () => {
@@ -85,6 +94,20 @@ describe('ExecutionService', () => {
       service.updateStatus(record.id, 'IN_PROGRESS');
 
       expect(eventEmitter).not.toHaveBeenCalled();
+    });
+
+    it('TC0006 - Should be idempotent for the same status', () => {
+      const orderId = randomUUID();
+      const record = service.start(orderId);
+      eventEmitter.mockClear();
+
+      service.updateStatus(record.id, 'IN_PROGRESS', 'first');
+      eventEmitter.mockClear();
+
+      service.updateStatus(record.id, 'IN_PROGRESS', 'second');
+
+      expect(eventEmitter).not.toHaveBeenCalled();
+      expect(record.notes).toEqual(['first']);
     });
   });
 });

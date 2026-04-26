@@ -55,6 +55,7 @@ describe('App', () => {
   it('TC0004 - Should handle execution.completed and complete order', async () => {
     const { service } = await createApp();
     const order = await service.open('c3', 'v3', 'desc3');
+    await service.mark(order.id, 'PAYMENT_CONFIRMED');
 
     const handler = handlers.get('event.execution.completed');
     await handler?.({ orderId: order.id });
@@ -71,6 +72,47 @@ describe('App', () => {
 
     expect((await service.get(order.id)).status).toBe('CANCELLED');
     expect(publishEvent).toHaveBeenCalledWith('command.billing.refund', { orderId: order.id, reason: 'execution_failed' });
+  });
+
+  it('TC0008 - Should not publish duplicate execution command on repeated payment confirmation', async () => {
+    const { service } = await createApp();
+    const order = await service.open('c5', 'v5', 'desc5');
+
+    const handler = handlers.get('event.billing.payment_confirmed');
+    await handler?.({ orderId: order.id });
+    await handler?.({ orderId: order.id });
+
+    const executionStartCalls = (publishEvent as jest.Mock).mock.calls.filter(
+      ([topic]) => topic === 'command.execution.start',
+    );
+
+    expect(executionStartCalls).toHaveLength(1);
+  });
+
+  it('TC0009 - Should return 409 on invalid transition via patch endpoint', async () => {
+    const { app } = await createApp();
+
+    const create = await request(app)
+      .post('/orders')
+      .send({ customerId: 'cx', vehicleId: 'vx', description: 'descx' })
+      .expect(201);
+
+    await request(app)
+      .patch(`/orders/${create.body.id}/status`)
+      .send({ status: 'PAYMENT_CONFIRMED' })
+      .expect(200);
+
+    await request(app)
+      .patch(`/orders/${create.body.id}/status`)
+      .send({ status: 'COMPLETED' })
+      .expect(200);
+
+    const response = await request(app)
+      .patch(`/orders/${create.body.id}/status`)
+      .send({ status: 'PAYMENT_CONFIRMED' })
+      .expect(409);
+
+    expect(response.body).toEqual({ message: 'Invalid status transition' });
   });
 
   it('TC0006 - Should return 404 on get order when not found', async () => {

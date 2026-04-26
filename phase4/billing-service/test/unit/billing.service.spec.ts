@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { BillingService } from '../../src/billing.service';
 
+const orderId = randomUUID();
+
 describe('BillingService', () => {
   const randomAmount = (min: number, max: number) => Number((Math.random() * (max - min) + min).toFixed(2));
   let eventEmitter: jest.Mock;
@@ -17,7 +19,7 @@ describe('BillingService', () => {
 
   describe('generateBudget', () => {
     it('TC0001 - Should create budget successfully with status SENT', () => {
-      const orderId = randomUUID();
+      
       const estimatedTotal = randomAmount(100, 5000);
 
       const budget = service.generateBudget(orderId, estimatedTotal);
@@ -38,7 +40,6 @@ describe('BillingService', () => {
 
   describe('approvePayment', () => {
     it('TC0001 - Should approve payment and emit payment_confirmed event', () => {
-      const orderId = randomUUID();
       const amount = randomAmount(100, 3000);
 
       const budget = service.generateBudget(orderId, amount);
@@ -63,11 +64,23 @@ describe('BillingService', () => {
 
       expect(eventEmitter).not.toHaveBeenCalled();
     });
+
+    it('TC0004 - Should be idempotent for the same budget', () => {
+      const amount = 500;
+
+      const budget = service.generateBudget(orderId, amount);
+      const payment1 = service.approvePayment(budget.id, amount);
+      eventEmitter.mockClear();
+
+      const payment2 = service.approvePayment(budget.id, amount);
+
+      expect(payment2.id).toBe(payment1.id);
+      expect(eventEmitter).not.toHaveBeenCalled();
+    });
   });
 
   describe('refund', () => {
     it('TC0001 - Should process refund and emit refund_processed event', () => {
-      const orderId = randomUUID();
       const budget = service.generateBudget(orderId, 300);
       const payment = service.approvePayment(budget.id, 300);
       eventEmitter.mockClear();
@@ -88,6 +101,20 @@ describe('BillingService', () => {
       expect(() => service.refund(randomUUID(), 'reason')).toThrow('PAYMENT_NOT_FOUND');
 
       expect(eventEmitter).not.toHaveBeenCalled();
+    });
+
+    it('TC0004 - Should be idempotent for the same payment id', () => {
+      const budget = service.generateBudget(orderId, 300);
+      const payment = service.approvePayment(budget.id, 300);
+      eventEmitter.mockClear();
+
+      service.refund(payment.id, 'execution_failed');
+      const emitCount1 = eventEmitter.mock.calls.length;
+      
+      service.refund(payment.id, 'execution_failed');
+      const emitCount2 = eventEmitter.mock.calls.length;
+
+      expect(emitCount2).toBe(emitCount1);
     });
   });
 });

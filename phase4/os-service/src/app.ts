@@ -21,23 +21,40 @@ export async function createApp() {
   }
   const service = new OrderService(repo);
 
+  const transitionIfNeeded = async (orderId: string, status: 'PAYMENT_CONFIRMED' | 'CANCELLED' | 'COMPLETED', reason?: string) => {
+    try {
+      const current = await service.get(orderId);
+      if (current.status === status) {
+        return false;
+      }
+      await service.mark(orderId, status, reason);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   // Subscrever eventos dos outros serviços
   await subscribeEvent('event.billing.payment_confirmed', async ({ orderId }) => {
-    await service.mark(orderId, 'PAYMENT_CONFIRMED');
-    publishEvent('command.execution.start', { orderId });
+    const changed = await transitionIfNeeded(orderId, 'PAYMENT_CONFIRMED');
+    if (changed) {
+      publishEvent('command.execution.start', { orderId });
+    }
   });
 
   await subscribeEvent('event.billing.payment_failed', async ({ orderId, reason }) => {
-    await service.mark(orderId, 'CANCELLED', reason);
+    await transitionIfNeeded(orderId, 'CANCELLED', reason);
   });
 
   await subscribeEvent('event.execution.completed', async ({ orderId }) => {
-    await service.mark(orderId, 'COMPLETED');
+    await transitionIfNeeded(orderId, 'COMPLETED');
   });
 
   await subscribeEvent('event.execution.failed', async ({ orderId, reason }) => {
-    await service.mark(orderId, 'CANCELLED', reason);
-    publishEvent('command.billing.refund', { orderId, reason: 'execution_failed' });
+    const changed = await transitionIfNeeded(orderId, 'CANCELLED', reason);
+    if (changed) {
+      publishEvent('command.billing.refund', { orderId, reason: 'execution_failed' });
+    }
   });
 
   // Endpoints
@@ -59,7 +76,10 @@ export async function createApp() {
     try {
       const updated = await service.mark(req.params.id, req.body.status, req.body.reason);
       return res.json(updated);
-    } catch {
+    } catch (error) {
+      if (error instanceof Error && error.message === 'ORDER_INVALID_STATUS_TRANSITION') {
+        return res.status(409).json({ message: 'Invalid status transition' });
+      }
       return res.status(404).json({ message: 'Order not found' });
     }
   });

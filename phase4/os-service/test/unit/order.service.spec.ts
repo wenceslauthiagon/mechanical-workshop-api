@@ -75,6 +75,23 @@ describe('OrderService', () => {
     it('TC0003 - Should throw error if order not found', async () => {
       await expect(service.mark(randomUUID(), 'COMPLETED')).rejects.toThrow('ORDER_NOT_FOUND');
     });
+
+    it('TC0004 - Should be idempotent when receiving the same status', async () => {
+      const order = await service.open(randomUUID(), randomUUID(), randomText());
+
+      const same = await service.mark(order.id, 'OPENED');
+
+      expect(same.status).toBe('OPENED');
+      expect(same.history).toHaveLength(1);
+    });
+
+    it('TC0005 - Should reject invalid terminal transition', async () => {
+      const order = await service.open(randomUUID(), randomUUID(), randomText());
+      await service.mark(order.id, 'PAYMENT_CONFIRMED');
+      await service.mark(order.id, 'COMPLETED');
+
+      await expect(service.mark(order.id, 'PAYMENT_CONFIRMED')).rejects.toThrow('ORDER_INVALID_STATUS_TRANSITION');
+    });
   });
 
   describe('get', () => {

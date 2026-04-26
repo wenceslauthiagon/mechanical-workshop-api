@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 
 export class ExecutionService {
   private readonly records = new Map<string, ExecutionRecord>();
+  private readonly orderExecutions = new Map<string, string>();
   private readonly eventEmitter: (topic: string, payload: any) => void;
 
   constructor(eventEmitter: (topic: string, payload: any) => void) {
@@ -10,6 +11,15 @@ export class ExecutionService {
   }
 
   start(orderId: string): ExecutionRecord {
+    // Idempotent: return existing if already started
+    const existingId = this.orderExecutions.get(orderId);
+    if (existingId) {
+      const existing = this.records.get(existingId);
+      if (existing) {
+        return existing;
+      }
+    }
+
     const id = randomUUID();
     const record: ExecutionRecord = {
       id,
@@ -19,6 +29,7 @@ export class ExecutionService {
       startedAt: new Date().toISOString(),
     };
     this.records.set(id, record);
+    this.orderExecutions.set(orderId, id);
     return record;
   }
 
@@ -41,6 +52,11 @@ export class ExecutionService {
   updateStatus(executionId: string, status: ExecutionRecord['status'], note?: string): ExecutionRecord {
     const record = this.records.get(executionId);
     if (!record) throw new Error('EXECUTION_NOT_FOUND');
+
+    // Idempotent: skip if same status
+    if (record.status === status) {
+      return record;
+    }
 
     record.status = status;
     if (note) record.notes.push(note);
