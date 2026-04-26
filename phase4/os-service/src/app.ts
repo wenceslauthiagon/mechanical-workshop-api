@@ -2,6 +2,9 @@ import express from 'express';
 import { connectRabbitMQ, publishEvent, subscribeEvent } from './infra/rabbitmq';
 import { OrderRepository } from './infra/order.repository';
 import { OrderService } from './application/order.service';
+import { OrderPrismaRepository } from './infra/order.prisma.repository';
+import { connectDatabase, prisma } from './infra/prisma.client';
+import { OrderRepositoryPort } from './application/order-repository.port';
 
 export async function createApp() {
   const app = express();
@@ -10,49 +13,63 @@ export async function createApp() {
   // Conectar event bus
   await connectRabbitMQ();
 
-  const repo = new OrderRepository();
+  let repo: OrderRepositoryPort = new OrderRepository();
+  const usePrismaRepo = process.env.OS_USE_PRISMA_REPO === 'true';
+  if (usePrismaRepo && process.env.DATABASE_URL) {
+    await connectDatabase();
+    repo = new OrderPrismaRepository(prisma as unknown as any);
+  }
   const service = new OrderService(repo);
 
   // Subscrever eventos dos outros serviços
-  await subscribeEvent('event.billing.payment_confirmed', ({ orderId }) => {
-    service.mark(orderId, 'PAYMENT_CONFIRMED');
+  await subscribeEvent('event.billing.payment_confirmed', async ({ orderId }) => {
+    await service.mark(orderId, 'PAYMENT_CONFIRMED');
     publishEvent('command.execution.start', { orderId });
   });
 
-  await subscribeEvent('event.billing.payment_failed', ({ orderId, reason }) => {
-    service.mark(orderId, 'CANCELLED', reason);
+  await subscribeEvent('event.billing.payment_failed', async ({ orderId, reason }) => {
+    await service.mark(orderId, 'CANCELLED', reason);
   });
 
-  await subscribeEvent('event.execution.completed', ({ orderId }) => {
-    service.mark(orderId, 'COMPLETED');
+  await subscribeEvent('event.execution.completed', async ({ orderId }) => {
+    await service.mark(orderId, 'COMPLETED');
   });
 
-  await subscribeEvent('event.execution.failed', ({ orderId, reason }) => {
-    service.mark(orderId, 'CANCELLED', reason);
+  await subscribeEvent('event.execution.failed', async ({ orderId, reason }) => {
+    await service.mark(orderId, 'CANCELLED', reason);
     publishEvent('command.billing.refund', { orderId, reason: 'execution_failed' });
   });
 
   // Endpoints
-  app.post('/orders', (req, res) => {
+  app.post('/orders', async (req, res) => {
     const { customerId, vehicleId, description } = req.body;
-    const order = service.open(customerId, vehicleId, description);
-    res.status(201).json(order);
+    const order = await service.open(customerId, vehicleId, description);
+    return res.status(201).json(order);
   });
 
-  app.get('/orders/:id', (req, res) => {
+  app.get('/orders/:id', async (req, res) => {
     try {
-      res.json(service.get(req.params.id));
+      return res.json(await service.get(req.params.id));
     } catch {
-      res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: 'Order not found' });
     }
   });
 
-  app.patch('/orders/:id/status', (req, res) => {
+  app.patch('/orders/:id/status', async (req, res) => {
     try {
-      const updated = service.mark(req.params.id, req.body.status, req.body.reason);
-      res.json(updated);
+      const updated = await service.mark(req.params.id, req.body.status, req.body.reason);
+      return res.json(updated);
     } catch {
-      res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: 'Order not found' });
+    }
+  });
+
+  app.get('/orders/:id/history', async (req, res) => {
+    try {
+      const order = await service.get(req.params.id);
+      return res.json({ orderId: order.id, history: order.history });
+    } catch {
+      return res.status(404).json({ message: 'Order not found' });
     }
   });
 

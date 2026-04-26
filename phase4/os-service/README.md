@@ -19,7 +19,13 @@ Justificativa:
 
 - `POST /orders`
 - `GET /orders/:id`
+- `GET /orders/:id/history`
 - `PATCH /orders/:id/status`
+
+## Persistencia
+
+- padrao: repositorio em memoria
+- Prisma/PostgreSQL: habilite `OS_USE_PRISMA_REPO=true` e configure `DATABASE_URL`
 
 ## Testes
 

@@ -7,6 +7,7 @@
  */
 
 import { ServiceOrder, OrderStatus } from '../domain/order';
+import { OrderRepositoryPort } from '../application/order-repository.port';
 
 // ── Prisma-shape interfaces (matches prisma/schema.prisma of this service) ──
 interface PrismaServiceOrder {
@@ -40,7 +41,7 @@ interface OsServicePrismaClient {
 }
 
 // ── Repository ──
-export class OrderPrismaRepository {
+export class OrderPrismaRepository implements OrderRepositoryPort {
   // Injected so it can be swapped in tests without touching prisma.client.ts
   constructor(private readonly db: OsServicePrismaClient) {}
 

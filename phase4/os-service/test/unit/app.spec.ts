@@ -31,45 +31,45 @@ describe('App', () => {
 
   it('TC0002 - Should handle payment_confirmed and publish execution command', async () => {
     const { service } = await createApp();
-    const order = service.open('c1', 'v1', 'desc');
+    const order = await service.open('c1', 'v1', 'desc');
 
     const handler = handlers.get('event.billing.payment_confirmed');
     await handler?.({ orderId: order.id });
 
-    expect(service.get(order.id).status).toBe('PAYMENT_CONFIRMED');
+    expect((await service.get(order.id)).status).toBe('PAYMENT_CONFIRMED');
     expect(publishEvent).toHaveBeenCalledWith('command.execution.start', { orderId: order.id });
   });
 
   it('TC0003 - Should handle payment_failed and cancel order', async () => {
     const { service } = await createApp();
-    const order = service.open('c2', 'v2', 'desc2');
+    const order = await service.open('c2', 'v2', 'desc2');
 
     const handler = handlers.get('event.billing.payment_failed');
     await handler?.({ orderId: order.id, reason: 'declined' });
 
-    const current = service.get(order.id);
+    const current = await service.get(order.id);
     expect(current.status).toBe('CANCELLED');
     expect(current.history.at(-1)?.reason).toBe('declined');
   });
 
   it('TC0004 - Should handle execution.completed and complete order', async () => {
     const { service } = await createApp();
-    const order = service.open('c3', 'v3', 'desc3');
+    const order = await service.open('c3', 'v3', 'desc3');
 
     const handler = handlers.get('event.execution.completed');
     await handler?.({ orderId: order.id });
 
-    expect(service.get(order.id).status).toBe('COMPLETED');
+    expect((await service.get(order.id)).status).toBe('COMPLETED');
   });
 
   it('TC0005 - Should handle execution.failed and publish billing refund command', async () => {
     const { service } = await createApp();
-    const order = service.open('c4', 'v4', 'desc4');
+    const order = await service.open('c4', 'v4', 'desc4');
 
     const handler = handlers.get('event.execution.failed');
     await handler?.({ orderId: order.id, reason: 'broken' });
 
-    expect(service.get(order.id).status).toBe('CANCELLED');
+    expect((await service.get(order.id)).status).toBe('CANCELLED');
     expect(publishEvent).toHaveBeenCalledWith('command.billing.refund', { orderId: order.id, reason: 'execution_failed' });
   });
 

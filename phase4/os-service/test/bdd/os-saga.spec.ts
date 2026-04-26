@@ -17,14 +17,14 @@ describe('Saga Orchestration - OrderService', () => {
   });
 
   describe('Fluxo principal - OS aberta até conclusão', () => {
-    it('TC0001 - Should complete full lifecycle: OPENED -> PAYMENT_CONFIRMED -> COMPLETED', () => {
-      const order = service.open(randomUUID(), randomUUID(), 'revisão geral');
+    it('TC0001 - Should complete full lifecycle: OPENED -> PAYMENT_CONFIRMED -> COMPLETED', async () => {
+      const order = await service.open(randomUUID(), randomUUID(), 'revisão geral');
       expect(order.status).toBe('OPENED');
 
-      service.mark(order.id, 'PAYMENT_CONFIRMED');
-      service.mark(order.id, 'COMPLETED');
+      await service.mark(order.id, 'PAYMENT_CONFIRMED');
+      await service.mark(order.id, 'COMPLETED');
 
-      const final = service.get(order.id);
+      const final = await service.get(order.id);
       expect(final.status).toBe('COMPLETED');
       expect(final.history.map(h => h.status)).toEqual([
         'OPENED',
@@ -35,25 +35,25 @@ describe('Saga Orchestration - OrderService', () => {
   });
 
   describe('Compensação - falha no pagamento', () => {
-    it('TC0001 - Should cancel order when payment fails', () => {
-      const order = service.open(randomUUID(), randomUUID(), 'troca de óleo');
+    it('TC0001 - Should cancel order when payment fails', async () => {
+      const order = await service.open(randomUUID(), randomUUID(), 'troca de óleo');
 
-      service.mark(order.id, 'CANCELLED', 'Pagamento recusado');
+      await service.mark(order.id, 'CANCELLED', 'Pagamento recusado');
 
-      const cancelled = service.get(order.id);
+      const cancelled = await service.get(order.id);
       expect(cancelled.status).toBe('CANCELLED');
       expect(cancelled.history[1].reason).toBe('Pagamento recusado');
     });
   });
 
   describe('Compensação - falha na execução', () => {
-    it('TC0001 - Should cancel order when execution fails after payment confirmed', () => {
-      const order = service.open(randomUUID(), randomUUID(), randomText());
-      service.mark(order.id, 'PAYMENT_CONFIRMED');
+    it('TC0001 - Should cancel order when execution fails after payment confirmed', async () => {
+      const order = await service.open(randomUUID(), randomUUID(), randomText());
+      await service.mark(order.id, 'PAYMENT_CONFIRMED');
 
-      service.mark(order.id, 'CANCELLED', 'Peças indisponíveis');
+      await service.mark(order.id, 'CANCELLED', 'Peças indisponíveis');
 
-      const cancelled = service.get(order.id);
+      const cancelled = await service.get(order.id);
       expect(cancelled.status).toBe('CANCELLED');
       expect(cancelled.history).toHaveLength(3);
       expect(cancelled.history[2].reason).toBe('Peças indisponíveis');

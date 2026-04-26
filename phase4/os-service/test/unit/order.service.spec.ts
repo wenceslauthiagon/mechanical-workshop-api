@@ -24,12 +24,12 @@ describe('OrderService', () => {
   });
 
   describe('open', () => {
-    it('TC0001 - Should open order with status OPENED and emit billing command', () => {
+    it('TC0001 - Should open order with status OPENED and emit billing command', async () => {
       const customerId = randomUUID();
       const vehicleId = randomUUID();
       const description = randomText();
 
-      const order = service.open(customerId, vehicleId, description);
+      const order = await service.open(customerId, vehicleId, description);
 
       expect(order.id).toBeDefined();
       expect(order.customerId).toBe(customerId);
@@ -44,50 +44,50 @@ describe('OrderService', () => {
       );
     });
 
-    it('TC0002 - Should generate unique id for each order', () => {
-      const o1 = service.open(randomUUID(), randomUUID(), randomText());
-      const o2 = service.open(randomUUID(), randomUUID(), randomText());
+    it('TC0002 - Should generate unique id for each order', async () => {
+      const o1 = await service.open(randomUUID(), randomUUID(), randomText());
+      const o2 = await service.open(randomUUID(), randomUUID(), randomText());
 
       expect(o1.id).not.toBe(o2.id);
     });
   });
 
   describe('mark', () => {
-    it('TC0001 - Should update status and append to history', () => {
-      const order = service.open(randomUUID(), randomUUID(), randomText());
+    it('TC0001 - Should update status and append to history', async () => {
+      const order = await service.open(randomUUID(), randomUUID(), randomText());
 
-      const updated = service.mark(order.id, 'PAYMENT_CONFIRMED');
+      const updated = await service.mark(order.id, 'PAYMENT_CONFIRMED');
 
       expect(updated.status).toBe('PAYMENT_CONFIRMED');
       expect(updated.history).toHaveLength(2);
       expect(updated.history[1].status).toBe('PAYMENT_CONFIRMED');
     });
 
-    it('TC0002 - Should store reason in history when provided', () => {
-      const order = service.open(randomUUID(), randomUUID(), randomText());
+    it('TC0002 - Should store reason in history when provided', async () => {
+      const order = await service.open(randomUUID(), randomUUID(), randomText());
       const reason = randomText();
 
-      const updated = service.mark(order.id, 'CANCELLED', reason);
+      const updated = await service.mark(order.id, 'CANCELLED', reason);
 
       expect(updated.history[1].reason).toBe(reason);
     });
 
-    it('TC0003 - Should throw error if order not found', () => {
-      expect(() => service.mark(randomUUID(), 'COMPLETED')).toThrow('ORDER_NOT_FOUND');
+    it('TC0003 - Should throw error if order not found', async () => {
+      await expect(service.mark(randomUUID(), 'COMPLETED')).rejects.toThrow('ORDER_NOT_FOUND');
     });
   });
 
   describe('get', () => {
-    it('TC0001 - Should return order by id', () => {
-      const order = service.open(randomUUID(), randomUUID(), randomText());
+    it('TC0001 - Should return order by id', async () => {
+      const order = await service.open(randomUUID(), randomUUID(), randomText());
 
-      const found = service.get(order.id);
+      const found = await service.get(order.id);
 
       expect(found).toEqual(order);
     });
 
-    it('TC0002 - Should throw error if order not found', () => {
-      expect(() => service.get(randomUUID())).toThrow('ORDER_NOT_FOUND');
+    it('TC0002 - Should throw error if order not found', async () => {
+      await expect(service.get(randomUUID())).rejects.toThrow('ORDER_NOT_FOUND');
     });
   });
 });
