@@ -1,6 +1,8 @@
 import express from 'express';
 import { connectRabbitMQ, publishEvent, subscribeEvent } from './infra/rabbitmq';
 import { ExecutionService } from './execution.service';
+import { validateExecutionStart, validateExecutionStatusUpdate, validateExecutionId } from './infra/validators';
+import { errorHandler } from './infra/error-handler';
 
 export async function createApp() {
   const app = express();
@@ -42,12 +44,22 @@ export async function createApp() {
   });
 
   app.post('/execution/start', (req, res) => {
+    const error = validateExecutionStart(req.body.orderId);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     const { orderId } = req.body;
     const record = service.start(orderId);
     res.status(201).json(record);
   });
 
   app.patch('/execution/:id/status', (req, res) => {
+    const error = validateExecutionStatusUpdate(req.params.id, req.body.status);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     const { status, note } = req.body;
     try {
       const record = service.updateStatus(req.params.id, status, note);
@@ -58,6 +70,11 @@ export async function createApp() {
   });
 
   app.get('/execution/:id', (req, res) => {
+    const error = validateExecutionId(req.params.id);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     try {
       const record = service.getById(req.params.id);
       res.json(record);
@@ -67,6 +84,11 @@ export async function createApp() {
   });
 
   app.get('/execution/order/:orderId', (req, res) => {
+    const error = validateExecutionStart(req.params.orderId);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     try {
       const record = service.getByOrderId(req.params.orderId);
       res.json(record);
@@ -78,6 +100,8 @@ export async function createApp() {
   app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
   });
+
+  app.use(errorHandler);
 
   return { app, service };
 }

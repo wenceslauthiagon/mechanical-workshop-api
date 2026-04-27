@@ -116,6 +116,42 @@ describe('BillingService', () => {
 
       expect(emitCount2).toBe(emitCount1);
     });
+
+    it('TC0005 - Should refund by orderId and resolve payment via budget', () => {
+      const oid = randomUUID();
+      const budget = service.generateBudget(oid, 100);
+      service.approvePayment(budget.id, 100);
+      eventEmitter.mockClear();
+
+      service.refund(oid, 'no_parts');
+
+      expect(eventEmitter).toHaveBeenCalledWith(
+        'event.billing.refund_processed',
+        expect.objectContaining({ orderId: oid }),
+      );
+    });
+
+    it('TC0006 - Should throw PAYMENT_NOT_FOUND when orderId maps to budget but no payment', () => {
+      const oid = randomUUID();
+      service.generateBudget(oid, 100);
+      // Budget exists via orderId but no payment was approved
+      expect(() => service.refund(oid, 'test')).toThrow('PAYMENT_NOT_FOUND');
+    });
+  });
+
+  describe('getOrderBilling', () => {
+    it('TC0001 - Should throw BUDGET_NOT_FOUND when no budget exists for order', () => {
+      expect(() => service.getOrderBilling(randomUUID())).toThrow('BUDGET_NOT_FOUND');
+    });
+
+    it('TC0002 - Should return budget and undefined payment when payment does not exist yet', () => {
+      const oid = randomUUID();
+      const budget = service.generateBudget(oid, 250);
+
+      const result = service.getOrderBilling(oid);
+
+      expect(result.budget.id).toBe(budget.id);
+      expect(result.payment).toBeUndefined();
+    });
   });
 });
-

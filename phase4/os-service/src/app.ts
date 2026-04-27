@@ -5,6 +5,8 @@ import { OrderService } from './application/order.service';
 import { OrderPrismaRepository } from './infra/order.prisma.repository';
 import { connectDatabase, prisma } from './infra/prisma.client';
 import { OrderRepositoryPort } from './application/order-repository.port';
+import { validateOrderCreation, validateOrderId, validateStatusUpdate } from './infra/validators';
+import { errorHandler } from './infra/error-handler';
 
 export async function createApp() {
   const app = express();
@@ -59,12 +61,22 @@ export async function createApp() {
 
   // Endpoints
   app.post('/orders', async (req, res) => {
+    const error = validateOrderCreation(req.body.customerId, req.body.vehicleId, req.body.description);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     const { customerId, vehicleId, description } = req.body;
     const order = await service.open(customerId, vehicleId, description);
     return res.status(201).json(order);
   });
 
   app.get('/orders/:id', async (req, res) => {
+    const error = validateOrderId(req.params.id);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     try {
       return res.json(await service.get(req.params.id));
     } catch {
@@ -73,6 +85,11 @@ export async function createApp() {
   });
 
   app.patch('/orders/:id/status', async (req, res) => {
+    const error = validateOrderId(req.params.id) || validateStatusUpdate(req.body.status);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     try {
       const updated = await service.mark(req.params.id, req.body.status, req.body.reason);
       return res.json(updated);
@@ -85,6 +102,11 @@ export async function createApp() {
   });
 
   app.get('/orders/:id/history', async (req, res) => {
+    const error = validateOrderId(req.params.id);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     try {
       const order = await service.get(req.params.id);
       return res.json({ orderId: order.id, history: order.history });
@@ -96,6 +118,8 @@ export async function createApp() {
   app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
   });
+
+  app.use(errorHandler);
 
   return { app, service, repo };
 }

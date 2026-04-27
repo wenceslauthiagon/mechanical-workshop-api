@@ -1,6 +1,9 @@
 import request from 'supertest';
+import { randomUUID } from 'node:crypto';
 import { createApp } from '../../src/app';
 import { connectRabbitMQ, publishEvent, subscribeEvent } from '../../src/infra/rabbitmq';
+import { connectDatabase } from '../../src/infra/prisma.client';
+import { OrderPrismaRepository } from '../../src/infra/order.prisma.repository';
 
 const handlers = new Map<string, (payload: any) => void | Promise<void>>();
 
@@ -12,12 +15,25 @@ jest.mock('../../src/infra/rabbitmq', () => ({
   }),
 }));
 
+jest.mock('../../src/infra/prisma.client', () => ({
+  connectDatabase: jest.fn(),
+  prisma: {},
+}));
+
+jest.mock('../../src/infra/order.prisma.repository', () => ({
+  OrderPrismaRepository: jest.fn(),
+}));
+
 describe('App', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     handlers.clear();
+    delete process.env.OS_USE_PRISMA_REPO;
+    delete process.env.DATABASE_URL;
     (connectRabbitMQ as jest.Mock).mockResolvedValue(undefined);
     (publishEvent as jest.Mock).mockResolvedValue(undefined);
+    (connectDatabase as jest.Mock).mockResolvedValue(undefined);
+    (OrderPrismaRepository as unknown as jest.Mock).mockImplementation(() => ({}));
   });
 
   it('TC0001 - Should subscribe all saga topics on bootstrap', async () => {
@@ -118,7 +134,7 @@ describe('App', () => {
   it('TC0006 - Should return 404 on get order when not found', async () => {
     const { app } = await createApp();
 
-    const response = await request(app).get('/orders/missing').expect(404);
+    const response = await request(app).get(`/orders/${randomUUID()}`).expect(404);
     expect(response.body).toEqual({ message: 'Order not found' });
   });
 
@@ -126,10 +142,92 @@ describe('App', () => {
     const { app } = await createApp();
 
     const response = await request(app)
-      .patch('/orders/missing/status')
+      .patch(`/orders/${randomUUID()}/status`)
       .send({ status: 'COMPLETED' })
       .expect(404);
 
     expect(response.body).toEqual({ message: 'Order not found' });
+  });
+
+  it('TC0010 - Should return 400 when post orders receives invalid payload', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .post('/orders')
+      .send({ customerId: '', vehicleId: 'v', description: 'd' })
+      .expect(400);
+
+    expect(response.body).toEqual({ message: 'customerId is required' });
+  });
+
+  it('TC0011 - Should return 400 when get order receives invalid id', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get('/orders/invalid-id')
+      .expect(400);
+
+    expect(response.body).toEqual({ message: 'orderId must be a valid UUID' });
+  });
+
+  it('TC0012 - Should return history for existing order', async () => {
+    const { app, service } = await createApp();
+    const order = await service.open('c1', 'v1', 'd1');
+
+    const response = await request(app)
+      .get(`/orders/${order.id}/history`)
+      .expect(200);
+
+    expect(response.body).toMatchObject({ orderId: order.id, history: expect.any(Array) });
+  });
+
+  it('TC0013 - Should return 400 when history endpoint receives invalid id', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get('/orders/invalid-id/history')
+      .expect(400);
+
+    expect(response.body).toEqual({ message: 'orderId must be a valid UUID' });
+  });
+
+  it('TC0014 - Should return 404 when history not found', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get(`/orders/${randomUUID()}/history`)
+      .expect(404);
+
+    expect(response.body).toEqual({ message: 'Order not found' });
+  });
+
+  it('TC0015 - Should return 400 when patch receives invalid status', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .patch(`/orders/${randomUUID()}/status`)
+      .send({ status: 'INVALID_STATUS' })
+      .expect(400);
+
+    expect(response.body).toHaveProperty('message');
+  });
+
+  it('TC0016 - Should initialize Prisma repository when feature flag is enabled', async () => {
+    process.env.OS_USE_PRISMA_REPO = 'true';
+    process.env.DATABASE_URL = 'postgresql://local/test';
+
+    await createApp();
+
+    expect(connectDatabase).toHaveBeenCalledTimes(1);
+    expect(OrderPrismaRepository).toHaveBeenCalledTimes(1);
+  });
+
+  it('TC0017 - Should swallow transition errors and avoid execution start publish', async () => {
+    await createApp();
+
+    const handler = handlers.get('event.billing.payment_confirmed');
+    await expect(handler?.({ orderId: randomUUID() })).resolves.toBeUndefined();
+
+    expect(publishEvent).not.toHaveBeenCalledWith('command.execution.start', expect.anything());
   });
 });

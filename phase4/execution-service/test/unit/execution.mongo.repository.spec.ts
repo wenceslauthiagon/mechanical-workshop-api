@@ -83,6 +83,16 @@ describe('ExecutionMongoRepository', () => {
     expect(result?.id).toBe('exec-2');
   });
 
+  it('TC0003A - Should return undefined when order lookup has no _id', async () => {
+    collection.findOne.mockResolvedValueOnce({
+      orderId: 'order-x',
+      status: 'QUEUED',
+      notes: [],
+    });
+
+    await expect(repo.findByOrderId('order-x')).resolves.toBeUndefined();
+  });
+
   it('TC0004 - Should save execution status and completedAt', async () => {
     collection.updateOne.mockResolvedValue(undefined);
 

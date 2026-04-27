@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { randomUUID } from 'node:crypto';
 import { createApp } from '../../src/app';
 import { connectRabbitMQ, publishEvent, subscribeEvent } from '../../src/infra/rabbitmq';
 
@@ -7,6 +8,8 @@ const handlers = new Map<string, (payload: any) => Promise<void>>();
 const mockService = {
   start: jest.fn(),
   updateStatus: jest.fn(),
+  getById: jest.fn(),
+  getByOrderId: jest.fn(),
 };
 
 jest.mock('../../src/infra/rabbitmq', () => ({
@@ -22,6 +25,9 @@ jest.mock('../../src/execution.service', () => ({
 }));
 
 describe('App', () => {
+  let executionId: string;
+  let orderId: string;
+
   beforeEach(() => {
     jest.clearAllMocks();
     handlers.clear();
@@ -29,8 +35,13 @@ describe('App', () => {
     (connectRabbitMQ as jest.Mock).mockResolvedValue(undefined);
     (publishEvent as jest.Mock).mockResolvedValue(undefined);
 
-    mockService.start.mockReturnValue({ id: 'exec-1', orderId: 'order-1', status: 'QUEUED', notes: [] });
-    mockService.updateStatus.mockReturnValue({ id: 'exec-1', orderId: 'order-1', status: 'COMPLETED', notes: [] });
+    executionId = randomUUID();
+    orderId = randomUUID();
+
+    mockService.start.mockReturnValue({ id: executionId, orderId, status: 'QUEUED', notes: [] });
+    mockService.updateStatus.mockReturnValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
+    mockService.getById.mockReturnValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
+    mockService.getByOrderId.mockReturnValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
   });
 
   it('TC0001 - Should subscribe to command.execution.start on bootstrap', async () => {
@@ -49,13 +60,13 @@ describe('App', () => {
     await createApp();
 
     const handler = handlers.get('command.execution.start');
-    await handler?.({ orderId: 'order-1' });
+    await handler?.({ orderId });
 
-    expect(mockService.start).toHaveBeenCalledWith('order-1');
-    expect(mockService.updateStatus).toHaveBeenCalledWith('exec-1', 'COMPLETED', 'Diagnosis and repair completed');
+    expect(mockService.start).toHaveBeenCalledWith(orderId);
+    expect(mockService.updateStatus).toHaveBeenCalledWith(executionId, 'COMPLETED', 'Diagnosis and repair completed');
     expect(publishEvent).toHaveBeenCalledWith(
       'event.execution.completed',
-      expect.objectContaining({ orderId: 'order-1', executionId: 'exec-1' }),
+      expect.objectContaining({ orderId, executionId }),
     );
 
     randomSpy.mockRestore();
@@ -63,6 +74,7 @@ describe('App', () => {
   });
 
   it('TC0003 - Should publish execution.failed when command handler throws', async () => {
+    const failedOrderId = randomUUID();
     mockService.start.mockImplementation(() => {
       throw new Error('START_FAILED');
     });
@@ -70,27 +82,56 @@ describe('App', () => {
     await createApp();
 
     const handler = handlers.get('command.execution.start');
-    await handler?.({ orderId: 'order-2' });
+    await handler?.({ orderId: failedOrderId });
 
     expect(publishEvent).toHaveBeenCalledWith(
       'event.execution.failed',
-      expect.objectContaining({ orderId: 'order-2', reason: 'START_FAILED' }),
+      expect.objectContaining({ orderId: failedOrderId, reason: 'START_FAILED' }),
     );
   });
 
+  it('TC0003A - Should swallow publish failure after completion event', async () => {
+    const timeoutSpy = jest.spyOn(globalThis, 'setTimeout').mockImplementation(((cb: any) => {
+      cb();
+      return 0 as any;
+    }) as any);
+    (publishEvent as jest.Mock).mockRejectedValueOnce(new Error('EVENT_PUBLISH_FAILED'));
+
+    await createApp();
+
+    const handler = handlers.get('command.execution.start');
+    await expect(handler?.({ orderId })).resolves.toBeUndefined();
+
+    timeoutSpy.mockRestore();
+  });
+
+  it('TC0003B - Should swallow publish failure after failed execution event', async () => {
+    mockService.start.mockImplementation(() => {
+      throw new Error('START_FAILED');
+    });
+    (publishEvent as jest.Mock).mockRejectedValueOnce(new Error('EVENT_PUBLISH_FAILED'));
+
+    await createApp();
+
+    const handler = handlers.get('command.execution.start');
+    await expect(handler?.({ orderId })).resolves.toBeUndefined();
+  });
+
   it('TC0004 - Should create execution via endpoint', async () => {
+    const endpointOrderId = randomUUID();
     const { app } = await createApp();
 
     const response = await request(app)
       .post('/execution/start')
-      .send({ orderId: 'order-9' })
+      .send({ orderId: endpointOrderId })
       .expect(201);
 
-    expect(mockService.start).toHaveBeenCalledWith('order-9');
-    expect(response.body).toHaveProperty('id', 'exec-1');
+    expect(mockService.start).toHaveBeenCalledWith(endpointOrderId);
+    expect(response.body).toHaveProperty('id', executionId);
   });
 
   it('TC0005 - Should return 404 when update status endpoint fails', async () => {
+    const missingExecutionId = randomUUID();
     mockService.updateStatus.mockImplementation(() => {
       throw new Error('EXECUTION_NOT_FOUND');
     });
@@ -98,8 +139,100 @@ describe('App', () => {
     const { app } = await createApp();
 
     const response = await request(app)
-      .patch('/execution/missing/status')
+      .patch(`/execution/${missingExecutionId}/status`)
       .send({ status: 'COMPLETED' })
+      .expect(404);
+
+    expect(response.body).toEqual({ message: 'Execution not found' });
+  });
+
+  it('TC0006 - Should return 400 when start endpoint receives invalid order id', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .post('/execution/start')
+      .send({ orderId: 'invalid-id' })
+      .expect(400);
+
+    expect(response.body).toEqual({ message: 'orderId must be a valid UUID' });
+  });
+
+  it('TC0007 - Should return 400 when status endpoint receives invalid payload', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .patch(`/execution/${executionId}/status`)
+      .send({ status: 'INVALID_STATUS' })
+      .expect(400);
+
+    expect(response.body).toEqual({ message: 'status must be one of: QUEUED, IN_PROGRESS, COMPLETED, FAILED' });
+  });
+
+  it('TC0008 - Should return execution by id', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get(`/execution/${executionId}`)
+      .expect(200);
+
+    expect(mockService.getById).toHaveBeenCalledWith(executionId);
+    expect(response.body).toHaveProperty('id', executionId);
+  });
+
+  it('TC0009 - Should return 400 when get by id receives invalid execution id', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get('/execution/invalid-id')
+      .expect(400);
+
+    expect(response.body).toEqual({ message: 'executionId must be a valid UUID' });
+  });
+
+  it('TC0010 - Should return 404 when get by id fails', async () => {
+    mockService.getById.mockImplementation(() => {
+      throw new Error('EXECUTION_NOT_FOUND');
+    });
+
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get(`/execution/${executionId}`)
+      .expect(404);
+
+    expect(response.body).toEqual({ message: 'Execution not found' });
+  });
+
+  it('TC0011 - Should return execution by order id', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get(`/execution/order/${orderId}`)
+      .expect(200);
+
+    expect(mockService.getByOrderId).toHaveBeenCalledWith(orderId);
+    expect(response.body).toHaveProperty('orderId', orderId);
+  });
+
+  it('TC0012 - Should return 400 when get by order id receives invalid order id', async () => {
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get('/execution/order/invalid-id')
+      .expect(400);
+
+    expect(response.body).toEqual({ message: 'orderId must be a valid UUID' });
+  });
+
+  it('TC0013 - Should return 404 when get by order id fails', async () => {
+    mockService.getByOrderId.mockImplementation(() => {
+      throw new Error('EXECUTION_NOT_FOUND');
+    });
+
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get(`/execution/order/${orderId}`)
       .expect(404);
 
     expect(response.body).toEqual({ message: 'Execution not found' });

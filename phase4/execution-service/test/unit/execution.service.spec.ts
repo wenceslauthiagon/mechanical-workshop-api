@@ -45,6 +45,21 @@ describe('ExecutionService', () => {
     });
   });
 
+  describe('queries', () => {
+    it('TC0001 - Should get execution by id and order id', () => {
+      const orderId = randomUUID();
+      const record = service.start(orderId);
+
+      expect(service.getById(record.id)).toEqual(record);
+      expect(service.getByOrderId(orderId)).toEqual(record);
+    });
+
+    it('TC0002 - Should throw when querying unknown execution', () => {
+      expect(() => service.getById(randomUUID())).toThrow('EXECUTION_NOT_FOUND');
+      expect(() => service.getByOrderId(randomUUID())).toThrow('EXECUTION_NOT_FOUND');
+    });
+  });
+
   describe('updateStatus', () => {
     it('TC0001 - Should update status to IN_PROGRESS', () => {
       const record = service.start(randomUUID());

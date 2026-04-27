@@ -2,6 +2,8 @@ import express from 'express';
 import { connectRabbitMQ, publishEvent, subscribeEvent } from './infra/rabbitmq';
 import { BillingService } from './billing.service';
 import { processPayment } from './infra/mercadopago.client';
+import { validateBudgetCreation, validatePaymentApproval, validateOrderId } from './infra/validators';
+import { errorHandler } from './infra/error-handler';
 
 export async function createApp() {
   const app = express();
@@ -57,12 +59,22 @@ export async function createApp() {
   });
 
   app.post('/billing/budget', (req, res) => {
+    const error = validateBudgetCreation(req.body.orderId, req.body.estimatedTotal);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     const { orderId, estimatedTotal } = req.body;
     const budget = service.generateBudget(orderId, estimatedTotal);
     res.status(201).json(budget);
   });
 
   app.post('/billing/payment/approve', async (req, res) => {
+    const error = validatePaymentApproval(req.body.budgetId, req.body.amount);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     const { budgetId, amount } = req.body;
     try {
       const gatewayPayment = await processPayment(amount, `Aprovação de pagamento do orçamento ${budgetId}`);
@@ -82,6 +94,11 @@ export async function createApp() {
   });
 
   app.get('/billing/order/:orderId', (req, res) => {
+    const error = validateOrderId(req.params.orderId);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
     try {
       const result = service.getOrderBilling(req.params.orderId);
       res.json(result);
@@ -95,6 +112,8 @@ export async function createApp() {
   app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
   });
+
+  app.use(errorHandler);
 
   return { app, service };
 }
