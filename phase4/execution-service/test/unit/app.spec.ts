@@ -38,10 +38,10 @@ describe('App', () => {
     executionId = randomUUID();
     orderId = randomUUID();
 
-    mockService.start.mockReturnValue({ id: executionId, orderId, status: 'QUEUED', notes: [] });
-    mockService.updateStatus.mockReturnValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
-    mockService.getById.mockReturnValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
-    mockService.getByOrderId.mockReturnValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
+    mockService.start.mockResolvedValue({ id: executionId, orderId, status: 'QUEUED', notes: [] });
+    mockService.updateStatus.mockResolvedValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
+    mockService.getById.mockResolvedValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
+    mockService.getByOrderId.mockResolvedValue({ id: executionId, orderId, status: 'COMPLETED', notes: [] });
   });
 
   it('TC0001 - Should subscribe to command.execution.start on bootstrap', async () => {
@@ -75,7 +75,7 @@ describe('App', () => {
 
   it('TC0003 - Should publish execution.failed when command handler throws', async () => {
     const failedOrderId = randomUUID();
-    mockService.start.mockImplementation(() => {
+    mockService.start.mockImplementation(async () => {
       throw new Error('START_FAILED');
     });
 
@@ -106,7 +106,7 @@ describe('App', () => {
   });
 
   it('TC0003B - Should swallow publish failure after failed execution event', async () => {
-    mockService.start.mockImplementation(() => {
+    mockService.start.mockImplementation(async () => {
       throw new Error('START_FAILED');
     });
     (publishEvent as jest.Mock).mockRejectedValueOnce(new Error('EVENT_PUBLISH_FAILED'));
@@ -115,6 +115,29 @@ describe('App', () => {
 
     const handler = handlers.get('command.execution.start');
     await expect(handler?.({ orderId })).resolves.toBeUndefined();
+  });
+
+  it('TC0003C - Should publish execution.failed when async completion update fails', async () => {
+    const timeoutSpy = jest.spyOn(globalThis, 'setTimeout').mockImplementation(((cb: any) => {
+      cb();
+      return 0 as any;
+    }) as any);
+
+    mockService.updateStatus.mockImplementation(async () => {
+      throw new Error('UPDATE_FAILED');
+    });
+
+    await createApp();
+
+    const handler = handlers.get('command.execution.start');
+    await handler?.({ orderId });
+
+    expect(publishEvent).toHaveBeenCalledWith(
+      'event.execution.failed',
+      expect.objectContaining({ orderId, reason: 'UPDATE_FAILED' }),
+    );
+
+    timeoutSpy.mockRestore();
   });
 
   it('TC0004 - Should create execution via endpoint', async () => {
@@ -132,7 +155,7 @@ describe('App', () => {
 
   it('TC0005 - Should return 404 when update status endpoint fails', async () => {
     const missingExecutionId = randomUUID();
-    mockService.updateStatus.mockImplementation(() => {
+    mockService.updateStatus.mockImplementation(async () => {
       throw new Error('EXECUTION_NOT_FOUND');
     });
 
@@ -144,6 +167,21 @@ describe('App', () => {
       .expect(404);
 
     expect(response.body).toEqual({ message: 'Execution not found' });
+  });
+
+  it('TC0005A - Should return 500 when update status endpoint fails with unknown error', async () => {
+    mockService.updateStatus.mockImplementation(async () => {
+      throw new Error('UPDATE_FAILED');
+    });
+
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .patch(`/execution/${executionId}/status`)
+      .send({ status: 'COMPLETED' })
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
   });
 
   it('TC0006 - Should return 400 when start endpoint receives invalid order id', async () => {
@@ -190,7 +228,7 @@ describe('App', () => {
   });
 
   it('TC0010 - Should return 404 when get by id fails', async () => {
-    mockService.getById.mockImplementation(() => {
+    mockService.getById.mockImplementation(async () => {
       throw new Error('EXECUTION_NOT_FOUND');
     });
 
@@ -201,6 +239,20 @@ describe('App', () => {
       .expect(404);
 
     expect(response.body).toEqual({ message: 'Execution not found' });
+  });
+
+  it('TC0010A - Should return 500 when get by id fails with unknown error', async () => {
+    mockService.getById.mockImplementation(async () => {
+      throw new Error('DB_UNAVAILABLE');
+    });
+
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get(`/execution/${executionId}`)
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
   });
 
   it('TC0011 - Should return execution by order id', async () => {
@@ -225,7 +277,7 @@ describe('App', () => {
   });
 
   it('TC0013 - Should return 404 when get by order id fails', async () => {
-    mockService.getByOrderId.mockImplementation(() => {
+    mockService.getByOrderId.mockImplementation(async () => {
       throw new Error('EXECUTION_NOT_FOUND');
     });
 
@@ -236,5 +288,19 @@ describe('App', () => {
       .expect(404);
 
     expect(response.body).toEqual({ message: 'Execution not found' });
+  });
+
+  it('TC0013A - Should return 500 when get by order id fails with unknown error', async () => {
+    mockService.getByOrderId.mockImplementation(async () => {
+      throw new Error('DB_UNAVAILABLE');
+    });
+
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get(`/execution/order/${orderId}`)
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
   });
 });

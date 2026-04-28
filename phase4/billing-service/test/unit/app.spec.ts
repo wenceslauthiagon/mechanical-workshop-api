@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { createApp } from '../../src/app';
 import { connectRabbitMQ, publishEvent, subscribeEvent } from '../../src/infra/rabbitmq';
 import { processPayment } from '../../src/infra/mercadopago.client';
+import { connectDatabase } from '../../src/infra/prisma.client';
 
 const handlers = new Map<string, (payload: any) => Promise<void>>();
 
@@ -29,6 +30,10 @@ jest.mock('../../src/infra/mercadopago.client', () => ({
   processPayment: jest.fn(),
 }));
 
+jest.mock('../../src/infra/prisma.client', () => ({
+  connectDatabase: jest.fn(),
+}));
+
 describe('App', () => {
   let budgetId: string;
   let orderId: string;
@@ -40,14 +45,15 @@ describe('App', () => {
     (connectRabbitMQ as jest.Mock).mockResolvedValue(undefined);
     (publishEvent as jest.Mock).mockResolvedValue(undefined);
     (processPayment as jest.Mock).mockResolvedValue({ id: 'mp-1', status: 'approved' });
+    (connectDatabase as jest.Mock).mockResolvedValue({});
 
     budgetId = randomUUID();
     orderId = randomUUID();
     paymentId = randomUUID();
 
-    mockService.generateBudget.mockReturnValue({ id: budgetId, orderId, estimatedTotal: 1000, status: 'SENT' });
-    mockService.approvePayment.mockReturnValue({ id: paymentId, budgetId, amount: 1000, status: 'CONFIRMED' });
-    mockService.refund.mockReturnValue(undefined);
+    mockService.generateBudget.mockResolvedValue({ id: budgetId, orderId, estimatedTotal: 1000, status: 'SENT' });
+    mockService.approvePayment.mockResolvedValue({ id: paymentId, budgetId, amount: 1000, status: 'CONFIRMED' });
+    mockService.refund.mockResolvedValue(undefined);
   });
 
   it('TC0001 - Should register event subscriptions on bootstrap', async () => {
@@ -88,7 +94,7 @@ describe('App', () => {
 
   it('TC0003 - Should publish payment_failed when generate command throws', async () => {
     const failedOrderId = randomUUID();
-    mockService.approvePayment.mockImplementation(() => {
+    mockService.approvePayment.mockImplementation(async () => {
       throw new Error('PAYMENT_ERROR');
     });
 
@@ -116,7 +122,7 @@ describe('App', () => {
 
   it('TC0005 - Should swallow refund errors without rethrowing', async () => {
     const refundOrderId = randomUUID();
-    mockService.refund.mockImplementation(() => {
+    mockService.refund.mockImplementation(async () => {
       throw new Error('REFUND_ERROR');
     });
 
@@ -131,7 +137,7 @@ describe('App', () => {
   });
 
   it('TC0006 - Should return 404 on payment approve endpoint when budget is missing', async () => {
-    mockService.approvePayment.mockImplementation(() => {
+    mockService.approvePayment.mockImplementation(async () => {
       throw new Error('BUDGET_NOT_FOUND');
     });
 
@@ -181,7 +187,7 @@ describe('App', () => {
   });
 
   it('TC0010 - Should return order billing info', async () => {
-    mockService.getOrderBilling.mockReturnValue({ budget: { id: 'b1' } });
+    mockService.getOrderBilling.mockResolvedValue({ budget: { id: 'b1' } });
     const { app } = await createApp();
     const orderId = randomUUID();
 
@@ -204,7 +210,7 @@ describe('App', () => {
   });
 
   it('TC0012 - Should return 404 when order billing is not found', async () => {
-    mockService.getOrderBilling.mockImplementation(() => {
+    mockService.getOrderBilling.mockImplementation(async () => {
       throw new Error('BUDGET_NOT_FOUND');
     });
     const { app } = await createApp();
@@ -224,7 +230,7 @@ describe('App', () => {
   });
 
   it('TC0014 - Should swallow publishEvent rejection after payment_failed', async () => {
-    mockService.approvePayment.mockImplementation(() => { throw new Error('PAY_ERR'); });
+    mockService.approvePayment.mockImplementation(async () => { throw new Error('PAY_ERR'); });
     (publishEvent as jest.Mock).mockRejectedValue(new Error('PUB_ERR'));
     await createApp();
     const handler = handlers.get('command.billing.generate');

@@ -1,33 +1,34 @@
 import { randomUUID } from 'node:crypto';
 import { Budget, Payment } from './domain';
+import { BillingRepository } from './billing.repository';
+import { InMemoryBillingRepository } from './infra/billing.repository';
 
 export class BillingService {
-  private readonly budgets = new Map<string, Budget>();
-  private readonly payments = new Map<string, Payment>();
   private readonly processedRefunds = new Set<string>();
   private readonly eventEmitter: (topic: string, payload: any) => void;
+  private readonly repository: BillingRepository;
 
-  constructor(eventEmitter: (topic: string, payload: any) => void) {
+  constructor(eventEmitter: (topic: string, payload: any) => void, repository: BillingRepository = new InMemoryBillingRepository()) {
     this.eventEmitter = eventEmitter;
+    this.repository = repository;
   }
 
-  generateBudget(orderId: string, estimatedTotal: number): Budget {
+  async generateBudget(orderId: string, estimatedTotal: number): Promise<Budget> {
     const budget: Budget = {
       id: randomUUID(),
       orderId,
       estimatedTotal,
       status: 'SENT',
     };
-    this.budgets.set(budget.id, budget);
-    return budget;
+    return this.repository.createBudget(budget);
   }
 
-  approvePayment(budgetId: string, amount: number): Payment {
-    const budget = this.budgets.get(budgetId);
+  async approvePayment(budgetId: string, amount: number): Promise<Payment> {
+    const budget = await this.repository.findBudgetById(budgetId);
     if (!budget) throw new Error('BUDGET_NOT_FOUND');
 
     // Idempotent: return existing payment if already confirmed
-    const existingPayment = [...this.payments.values()].find(item => item.budgetId === budgetId && item.status === 'CONFIRMED');
+    const existingPayment = await this.repository.findPaymentByBudgetId(budgetId);
     if (existingPayment) {
       return existingPayment;
     }
@@ -39,15 +40,14 @@ export class BillingService {
       status: 'CONFIRMED',
     };
 
-    this.payments.set(payment.id, payment);
-    budget.status = 'APPROVED';
+    await this.repository.createPayment(payment);
     this.eventEmitter('event.billing.payment_confirmed', { orderId: budget.orderId, paymentId: payment.id });
 
     return payment;
   }
 
-  refund(referenceId: string, reason: string): void {
-    const payment = this.resolvePayment(referenceId);
+  async refund(referenceId: string, reason: string): Promise<void> {
+    const payment = await this.resolvePayment(referenceId);
     if (!payment) throw new Error('PAYMENT_NOT_FOUND');
 
     // Idempotent: skip if already processed
@@ -57,8 +57,8 @@ export class BillingService {
 
     this.processedRefunds.add(payment.id);
 
-    const budget = this.budgets.get(payment.budgetId);
-    payment.status = 'FAILED';
+    const budget = await this.repository.findBudgetById(payment.budgetId);
+    await this.repository.updatePayment(payment.id, 'FAILED');
     this.eventEmitter('event.billing.refund_processed', {
       paymentId: payment.id,
       orderId: budget?.orderId,
@@ -66,27 +66,27 @@ export class BillingService {
     });
   }
 
-  getOrderBilling(orderId: string): { budget: Budget; payment?: Payment } {
-    const budget = [...this.budgets.values()].find(item => item.orderId === orderId);
+  async getOrderBilling(orderId: string): Promise<{ budget: Budget; payment?: Payment }> {
+    const budget = await this.repository.findBudgetByOrderId(orderId);
     if (!budget) {
       throw new Error('BUDGET_NOT_FOUND');
     }
 
-    const payment = [...this.payments.values()].find(item => item.budgetId === budget.id);
+    const payment = await this.repository.findPaymentByBudgetId(budget.id);
     return { budget, payment };
   }
 
-  private resolvePayment(referenceId: string): Payment | undefined {
-    const payment = this.payments.get(referenceId);
+  private async resolvePayment(referenceId: string): Promise<Payment | undefined> {
+    const payment = await this.repository.findPaymentById(referenceId);
     if (payment) {
       return payment;
     }
 
-    const budget = [...this.budgets.values()].find(item => item.orderId === referenceId);
+    const budget = await this.repository.findBudgetByOrderId(referenceId);
     if (!budget) {
       return undefined;
     }
 
-    return [...this.payments.values()].find(item => item.budgetId === budget.id);
+    return this.repository.findPaymentByBudgetId(budget.id);
   }
 }

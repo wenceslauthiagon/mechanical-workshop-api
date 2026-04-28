@@ -1,6 +1,8 @@
 import express from 'express';
 import { connectRabbitMQ, publishEvent, subscribeEvent } from './infra/rabbitmq';
 import { BillingService } from './billing.service';
+import { BillingPrismaRepository } from './infra/budget.prisma.repository';
+import { connectDatabase } from './infra/prisma.client';
 import { processPayment } from './infra/mercadopago.client';
 import { validateBudgetCreation, validatePaymentApproval, validateOrderId } from './infra/validators';
 import { errorHandler } from './infra/error-handler';
@@ -12,14 +14,24 @@ export async function createApp() {
   // Conectar event bus
   await connectRabbitMQ();
 
-  const service = new BillingService((topic: string, payload: any) => {
+  let service = new BillingService((topic: string, payload: any) => {
     publishEvent(topic, payload).catch(() => undefined);
   });
+
+  if (process.env.DATABASE_URL) {
+    const prisma = await connectDatabase();
+    service = new BillingService(
+      (topic: string, payload: any) => {
+        publishEvent(topic, payload).catch(() => undefined);
+      },
+      new BillingPrismaRepository(prisma as any),
+    );
+  }
 
   // Subscrever comandos do OS
   await subscribeEvent('command.billing.generate', async (payload: any) => {
     try {
-      const budget = service.generateBudget(payload.orderId, payload.estimatedTotal || 1500);
+      const budget = await service.generateBudget(payload.orderId, payload.estimatedTotal || 1500);
       const gatewayPayment = await processPayment(
         budget.estimatedTotal,
         `OS ${payload.orderId} - orçamento mecânica`,
@@ -29,7 +41,7 @@ export async function createApp() {
         throw new Error(`PAYMENT_NOT_APPROVED_${gatewayPayment.status.toUpperCase()}`);
       }
 
-      const payment = service.approvePayment(budget.id, budget.estimatedTotal);
+      const payment = await service.approvePayment(budget.id, budget.estimatedTotal);
       publishEvent('event.billing.payment_confirmed', { 
         orderId: payload.orderId,
         budgetId: budget.id,
@@ -48,7 +60,7 @@ export async function createApp() {
   // Subscrever pedidos de reembolso
   await subscribeEvent('command.billing.refund', async (payload: any) => {
     try {
-      service.refund(payload.orderId, payload.reason);
+      await service.refund(payload.orderId, payload.reason);
       publishEvent('event.billing.refunded', { orderId: payload.orderId }).catch(() => {});
     } catch (error) {
       publishEvent('event.billing.refund_failed', {
@@ -58,14 +70,14 @@ export async function createApp() {
     }
   });
 
-  app.post('/billing/budget', (req, res) => {
+  app.post('/billing/budget', async (req, res) => {
     const error = validateBudgetCreation(req.body.orderId, req.body.estimatedTotal);
     if (error) {
       return res.status(400).json({ message: error });
     }
 
     const { orderId, estimatedTotal } = req.body;
-    const budget = service.generateBudget(orderId, estimatedTotal);
+    const budget = await service.generateBudget(orderId, estimatedTotal);
     res.status(201).json(budget);
   });
 
@@ -84,7 +96,7 @@ export async function createApp() {
         });
       }
 
-      const payment = service.approvePayment(budgetId, amount);
+      const payment = await service.approvePayment(budgetId, amount);
       res.status(201).json({ ...payment, mercadopagoId: gatewayPayment.id });
     } catch (error) {
       res.status(404).json({
@@ -93,14 +105,14 @@ export async function createApp() {
     }
   });
 
-  app.get('/billing/order/:orderId', (req, res) => {
+  app.get('/billing/order/:orderId', async (req, res) => {
     const error = validateOrderId(req.params.orderId);
     if (error) {
       return res.status(400).json({ message: error });
     }
 
     try {
-      const result = service.getOrderBilling(req.params.orderId);
+      const result = await service.getOrderBilling(req.params.orderId);
       res.json(result);
     } catch (error) {
       res.status(404).json({

@@ -37,6 +37,7 @@ interface BillingPrismaClient {
   };
   payment: {
     create(args: { data: Omit<PrismaPayment, 'createdAt'> }): Promise<PrismaPayment>;
+    findUnique(args: { where: { id: string } }): Promise<PrismaPayment | null>;
     findFirst(args: { where: { budgetId: string } }): Promise<PrismaPayment | null>;
     update(args: { where: { id: string }; data: Partial<PrismaPayment> }): Promise<PrismaPayment>;
   };
@@ -86,6 +87,11 @@ export class BillingPrismaRepository {
 
   async findPaymentByBudgetId(budgetId: string): Promise<Payment | undefined> {
     const raw = await this.db.payment.findFirst({ where: { budgetId } });
+    return raw ? this.paymentToDomain(raw) : undefined;
+  }
+
+  async findPaymentById(id: string): Promise<Payment | undefined> {
+    const raw = await this.db.payment.findUnique({ where: { id } });
     return raw ? this.paymentToDomain(raw) : undefined;
   }
 
