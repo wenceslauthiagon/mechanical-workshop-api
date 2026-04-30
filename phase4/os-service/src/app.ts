@@ -60,18 +60,22 @@ export async function createApp() {
   });
 
   // Endpoints
-  app.post('/orders', async (req, res) => {
+  app.post('/orders', async (req, res, next) => {
     const error = validateOrderCreation(req.body.customerId, req.body.vehicleId, req.body.description);
     if (error) {
       return res.status(400).json({ message: error });
     }
 
-    const { customerId, vehicleId, description } = req.body;
-    const order = await service.open(customerId, vehicleId, description);
-    return res.status(201).json(order);
+    try {
+      const { customerId, vehicleId, description } = req.body;
+      const order = await service.open(customerId, vehicleId, description);
+      return res.status(201).json(order);
+    } catch (caughtError) {
+      return next(caughtError);
+    }
   });
 
-  app.get('/orders/:id', async (req, res) => {
+  app.get('/orders/:id', async (req, res, next) => {
     const error = validateOrderId(req.params.id);
     if (error) {
       return res.status(400).json({ message: error });
@@ -79,12 +83,15 @@ export async function createApp() {
 
     try {
       return res.json(await service.get(req.params.id));
-    } catch {
-      return res.status(404).json({ message: 'Order not found' });
+    } catch (caughtError) {
+      if ((caughtError as Error).message === 'ORDER_NOT_FOUND') {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+      return next(caughtError);
     }
   });
 
-  app.patch('/orders/:id/status', async (req, res) => {
+  app.patch('/orders/:id/status', async (req, res, next) => {
     const error = validateOrderId(req.params.id) || validateStatusUpdate(req.body.status);
     if (error) {
       return res.status(400).json({ message: error });
@@ -93,15 +100,18 @@ export async function createApp() {
     try {
       const updated = await service.mark(req.params.id, req.body.status, req.body.reason);
       return res.json(updated);
-    } catch (error) {
-      if (error instanceof Error && error.message === 'ORDER_INVALID_STATUS_TRANSITION') {
+    } catch (caughtError) {
+      if (caughtError instanceof Error && caughtError.message === 'ORDER_INVALID_STATUS_TRANSITION') {
         return res.status(409).json({ message: 'Invalid status transition' });
       }
-      return res.status(404).json({ message: 'Order not found' });
+      if ((caughtError as Error).message === 'ORDER_NOT_FOUND') {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+      return next(caughtError);
     }
   });
 
-  app.get('/orders/:id/history', async (req, res) => {
+  app.get('/orders/:id/history', async (req, res, next) => {
     const error = validateOrderId(req.params.id);
     if (error) {
       return res.status(400).json({ message: error });
@@ -110,8 +120,11 @@ export async function createApp() {
     try {
       const order = await service.get(req.params.id);
       return res.json({ orderId: order.id, history: order.history });
-    } catch {
-      return res.status(404).json({ message: 'Order not found' });
+    } catch (caughtError) {
+      if ((caughtError as Error).message === 'ORDER_NOT_FOUND') {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+      return next(caughtError);
     }
   });
 

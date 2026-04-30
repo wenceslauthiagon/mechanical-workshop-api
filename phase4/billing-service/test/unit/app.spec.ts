@@ -151,6 +151,21 @@ describe('App', () => {
     expect(response.body).toEqual({ message: 'BUDGET_NOT_FOUND' });
   });
 
+  it('TC0006A - Should return 500 on payment approve endpoint when unknown error occurs', async () => {
+    mockService.approvePayment.mockImplementation(async () => {
+      throw new Error('DB_ERROR');
+    });
+
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .post('/billing/payment/approve')
+      .send({ budgetId: randomUUID(), amount: 100 })
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
+  });
+
   it('TC0007 - Should return 402 when Mercado Pago does not approve endpoint payment', async () => {
     (processPayment as jest.Mock).mockResolvedValue({ id: 'mp-3', status: 'in_process' });
 
@@ -222,6 +237,19 @@ describe('App', () => {
     expect(response.body).toEqual({ message: 'BUDGET_NOT_FOUND' });
   });
 
+  it('TC0012A - Should return 500 when order billing fails with unknown error', async () => {
+    mockService.getOrderBilling.mockImplementation(async () => {
+      throw new Error('DB_ERROR');
+    });
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .get(`/billing/order/${randomUUID()}`)
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
+  });
+
   it('TC0013 - Should swallow publishEvent rejection after payment_confirmed', async () => {
     (publishEvent as jest.Mock).mockRejectedValue(new Error('PUB_ERR'));
     await createApp();
@@ -235,5 +263,20 @@ describe('App', () => {
     await createApp();
     const handler = handlers.get('command.billing.generate');
     await expect(handler?.({ orderId: 'o1', estimatedTotal: 500 })).resolves.toBeUndefined();
+  });
+
+  it('TC0015 - Should return 500 when budget creation fails with unknown error', async () => {
+    mockService.generateBudget.mockImplementation(async () => {
+      throw new Error('DB_ERROR');
+    });
+
+    const { app } = await createApp();
+
+    const response = await request(app)
+      .post('/billing/budget')
+      .send({ orderId: randomUUID(), estimatedTotal: 1000 })
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
   });
 });

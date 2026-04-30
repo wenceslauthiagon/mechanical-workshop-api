@@ -24,7 +24,7 @@ export async function createApp() {
       (topic: string, payload: any) => {
         publishEvent(topic, payload).catch(() => undefined);
       },
-      new BillingPrismaRepository(prisma as any),
+      new BillingPrismaRepository(prisma),
     );
   }
 
@@ -70,18 +70,22 @@ export async function createApp() {
     }
   });
 
-  app.post('/billing/budget', async (req, res) => {
+  app.post('/billing/budget', async (req, res, next) => {
     const error = validateBudgetCreation(req.body.orderId, req.body.estimatedTotal);
     if (error) {
       return res.status(400).json({ message: error });
     }
 
-    const { orderId, estimatedTotal } = req.body;
-    const budget = await service.generateBudget(orderId, estimatedTotal);
-    res.status(201).json(budget);
+    try {
+      const { orderId, estimatedTotal } = req.body;
+      const budget = await service.generateBudget(orderId, estimatedTotal);
+      res.status(201).json(budget);
+    } catch (caughtError) {
+      next(caughtError);
+    }
   });
 
-  app.post('/billing/payment/approve', async (req, res) => {
+  app.post('/billing/payment/approve', async (req, res, next) => {
     const error = validatePaymentApproval(req.body.budgetId, req.body.amount);
     if (error) {
       return res.status(400).json({ message: error });
@@ -98,14 +102,17 @@ export async function createApp() {
 
       const payment = await service.approvePayment(budgetId, amount);
       res.status(201).json({ ...payment, mercadopagoId: gatewayPayment.id });
-    } catch (error) {
-      res.status(404).json({
-        message: error instanceof Error ? error.message : 'Budget not found',
-      });
+    } catch (caughtError) {
+      if ((caughtError as Error).message === 'BUDGET_NOT_FOUND') {
+        return res.status(404).json({
+          message: 'BUDGET_NOT_FOUND',
+        });
+      }
+      next(caughtError);
     }
   });
 
-  app.get('/billing/order/:orderId', async (req, res) => {
+  app.get('/billing/order/:orderId', async (req, res, next) => {
     const error = validateOrderId(req.params.orderId);
     if (error) {
       return res.status(400).json({ message: error });
@@ -114,10 +121,13 @@ export async function createApp() {
     try {
       const result = await service.getOrderBilling(req.params.orderId);
       res.json(result);
-    } catch (error) {
-      res.status(404).json({
-        message: error instanceof Error ? error.message : 'BUDGET_NOT_FOUND',
-      });
+    } catch (caughtError) {
+      if ((caughtError as Error).message === 'BUDGET_NOT_FOUND') {
+        return res.status(404).json({
+          message: 'BUDGET_NOT_FOUND',
+        });
+      }
+      next(caughtError);
     }
   });
 

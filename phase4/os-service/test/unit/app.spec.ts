@@ -160,6 +160,18 @@ describe('App', () => {
     expect(response.body).toEqual({ message: 'customerId is required' });
   });
 
+  it('TC0010A - Should return 500 when post orders fails with unknown error', async () => {
+    const { app, service } = await createApp();
+    jest.spyOn(service, 'open').mockRejectedValueOnce(new Error('DB_ERROR'));
+
+    const response = await request(app)
+      .post('/orders')
+      .send({ customerId: 'cx', vehicleId: 'vx', description: 'desc' })
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
+  });
+
   it('TC0011 - Should return 400 when get order receives invalid id', async () => {
     const { app } = await createApp();
 
@@ -229,5 +241,36 @@ describe('App', () => {
     await expect(handler?.({ orderId: randomUUID() })).resolves.toBeUndefined();
 
     expect(publishEvent).not.toHaveBeenCalledWith('command.execution.start', expect.anything());
+  });
+
+  it('TC0018 - Should return 500 on get order when unknown error happens', async () => {
+    const { app, service } = await createApp();
+    jest.spyOn(service, 'get').mockRejectedValueOnce(new Error('DB_ERROR'));
+
+    const response = await request(app).get(`/orders/${randomUUID()}`).expect(500);
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
+  });
+
+  it('TC0019 - Should return 500 on patch status when unknown error happens', async () => {
+    const { app, service } = await createApp();
+    jest.spyOn(service, 'mark').mockRejectedValueOnce(new Error('DB_ERROR'));
+
+    const response = await request(app)
+      .patch(`/orders/${randomUUID()}/status`)
+      .send({ status: 'COMPLETED' })
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
+  });
+
+  it('TC0020 - Should return 500 on history when unknown error happens', async () => {
+    const { app, service } = await createApp();
+    jest.spyOn(service, 'get').mockRejectedValueOnce(new Error('DB_ERROR'));
+
+    const response = await request(app)
+      .get(`/orders/${randomUUID()}/history`)
+      .expect(500);
+
+    expect(response.body).toEqual({ message: 'Internal server error', code: 'INTERNAL_ERROR' });
   });
 });

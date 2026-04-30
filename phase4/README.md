@@ -94,6 +94,13 @@ O documento central para essa comprovação é `phase4/docs/ENTREGA_FASE4.md`.
 - Dockerfile + manifestos Kubernetes por serviço
 - integração com Mercado Pago via cliente dedicado com fallback local para desenvolvimento
 
+## Documentacao e evidencias
+
+- Arquitetura geral da fase: `phase4/docs/architecture.md`
+- Matriz de conformidade e checklist administrativo: `phase4/docs/ENTREGA_FASE4.md`
+- Collection Postman atualizada (3 servicos): `phase4/docs/Mechanical-Workshop-Phase4.postman_collection.json`
+- Evidencia de cobertura por servico: execute `npm --prefix phase4 run test:cov` e use os relatorios em `phase4/*/coverage/`
+
 ## CI/CD por microsserviço (executável no GitHub Actions)
 
 Os workflows válidos estão na raiz do repositório em `.github/workflows`:

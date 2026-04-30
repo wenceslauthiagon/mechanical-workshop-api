@@ -7,6 +7,7 @@
  */
 
 import { Budget, Payment } from '../domain';
+import { BillingRepository } from '../billing.repository';
 
 // ── Prisma-shape interfaces ──
 interface PrismaBudget {
@@ -28,7 +29,7 @@ interface PrismaPayment {
   createdAt: Date;
 }
 
-interface BillingPrismaClient {
+export interface BillingPrismaClient {
   budget: {
     create(args: { data: Omit<PrismaBudget, 'createdAt' | 'updatedAt' | 'payments'> }): Promise<PrismaBudget>;
     findFirst(args: { where: { orderId: string } }): Promise<PrismaBudget | null>;
@@ -43,7 +44,7 @@ interface BillingPrismaClient {
   };
 }
 
-export class BillingPrismaRepository {
+export class BillingPrismaRepository implements BillingRepository {
   constructor(private readonly db: BillingPrismaClient) {}
 
   async createBudget(budget: Budget): Promise<Budget> {
