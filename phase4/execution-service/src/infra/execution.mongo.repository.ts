@@ -21,7 +21,13 @@ interface MongoDocument {
 interface MongoCollection {
   insertOne(doc: MongoDocument): Promise<{ insertedId: string }>;
   findOne(filter: { _id?: string; orderId?: string }): Promise<MongoDocument | null>;
-  updateOne(filter: { _id: string }, update: { $set?: Partial<MongoDocument>; $push?: { notes: string } }): Promise<unknown>;
+  updateOne(filter: { _id: string }, update: { $set?: Partial<MongoDocument>; $push?: { notes: string } }): Promise<MongoUpdateResult>;
+}
+
+interface MongoUpdateResult {
+  acknowledged?: boolean;
+  matchedCount?: number;
+  modifiedCount?: number;
 }
 
 interface ExecutionMongoClient {

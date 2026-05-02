@@ -5,6 +5,7 @@ import { ExecutionMongoRepository } from './infra/execution.mongo.repository';
 import { connectMongo } from './infra/mongo.client';
 import { validateExecutionStart, validateExecutionStatusUpdate, validateExecutionId } from './infra/validators';
 import { errorHandler } from './infra/error-handler';
+import { ExecutionEventPayload, ExecutionTopicPayloadMap } from './infra/events';
 
 export async function createApp() {
   const app = express();
@@ -13,14 +14,14 @@ export async function createApp() {
   // Conectar event bus
   await connectRabbitMQ();
 
-  let service = new ExecutionService((topic: string, payload: any) => {
+  let service = new ExecutionService((topic: string, payload: ExecutionEventPayload) => {
     publishEvent(topic, payload).catch(() => undefined);
   });
 
   if (process.env.MONGODB_URL) {
     const client = await connectMongo();
     service = new ExecutionService(
-      (topic: string, payload: any) => {
+      (topic: string, payload: ExecutionEventPayload) => {
         publishEvent(topic, payload).catch(() => undefined);
       },
       new ExecutionMongoRepository(client, process.env.MONGODB_DB_NAME ?? 'execution_db'),
@@ -28,7 +29,7 @@ export async function createApp() {
   }
 
   // Subscrever comandos do OS
-  await subscribeEvent('command.execution.start', async (payload: any) => {
+  await subscribeEvent<'command.execution.start'>('command.execution.start', async (payload: ExecutionTopicPayloadMap['command.execution.start']) => {
     const { orderId } = payload;
     try {
       const record = await service.start(orderId);

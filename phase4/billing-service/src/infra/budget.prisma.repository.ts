@@ -69,6 +69,10 @@ export class BillingPrismaRepository implements BillingRepository {
     return raw ? this.budgetToDomain(raw) : undefined;
   }
 
+  async updateBudget(id: string, status: Budget['status']): Promise<void> {
+    await this.db.budget.update({ where: { id }, data: { status } });
+  }
+
   async createPayment(payment: Payment): Promise<Payment> {
     const created = await this.db.payment.create({
       data: {

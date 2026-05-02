@@ -66,7 +66,7 @@ describe('OS Service - Integration Tests', () => {
   });
 
   describe('PATCH /orders/:id/status', () => {
-    it('TC0001 - Should update order status to PAYMENT_CONFIRMED', async () => {
+    it('TC0001 - Should update order status from OPENED to BUDGET_PENDING', async () => {
       const createRes = await request(app)
         .post('/orders')
         .send({
@@ -78,10 +78,10 @@ describe('OS Service - Integration Tests', () => {
 
       const response = await request(app)
         .patch(`/orders/${createRes.body.id}/status`)
-        .send({ status: 'PAYMENT_CONFIRMED' })
+        .send({ status: 'BUDGET_PENDING' })
         .expect(200);
 
-      expect(response.body.status).toBe('PAYMENT_CONFIRMED');
+      expect(response.body.status).toBe('BUDGET_PENDING');
       expect(response.body.history).toHaveLength(2);
     });
 

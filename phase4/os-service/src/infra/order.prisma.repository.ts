@@ -29,7 +29,7 @@ interface PrismaServiceOrderHistory {
   createdAt: Date;
 }
 
-interface OsServicePrismaClient {
+export interface OsServicePrismaClient {
   serviceOrder: {
     create(args: { data: Omit<PrismaServiceOrder, 'createdAt' | 'updatedAt' | 'history'> }): Promise<PrismaServiceOrder>;
     findUnique(args: { where: { id: string }; include?: { history?: boolean } }): Promise<(PrismaServiceOrder & { history: PrismaServiceOrderHistory[] }) | null>;

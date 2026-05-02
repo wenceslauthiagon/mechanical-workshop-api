@@ -14,9 +14,10 @@ Foi adotado **Saga Orquestrado** com o `os-service` como coordenador do fluxo:
 
 1. Abrir OS
 2. Gerar orçamento
-3. Aprovar e processar pagamento (Mercado Pago)
-4. Enviar para execução
-5. Finalizar OS
+3. Aprovar orçamento (ação do cliente)
+4. Processar pagamento (Mercado Pago)
+5. Enviar para execução
+6. Finalizar OS
 
 Compensações em falha:
 
@@ -28,6 +29,9 @@ Compensações em falha:
 - RabbitMQ (exchange `workshop.events`, tipo topic)
 - Comandos e eventos por roteamento:
   - `command.billing.generate`
+  - `command.billing.approve`
+  - `event.billing.budget_generated`
+  - `event.billing.budget_generation_failed`
   - `event.billing.payment_confirmed`
   - `command.execution.start`
   - `event.execution.completed`

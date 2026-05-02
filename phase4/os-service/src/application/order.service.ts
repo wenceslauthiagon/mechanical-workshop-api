@@ -4,7 +4,7 @@ import { publishEvent } from '../infra/rabbitmq';
 import { OrderRepositoryPort } from './order-repository.port';
 
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  OPENED: ['BUDGET_PENDING', 'BUDGET_APPROVED', 'PAYMENT_CONFIRMED', 'CANCELLED'],
+  OPENED: ['BUDGET_PENDING', 'CANCELLED'],
   BUDGET_PENDING: ['BUDGET_APPROVED', 'CANCELLED'],
   BUDGET_APPROVED: ['PAYMENT_CONFIRMED', 'CANCELLED'],
   PAYMENT_CONFIRMED: ['IN_EXECUTION', 'COMPLETED', 'CANCELLED'],
@@ -32,6 +32,12 @@ export class OrderService {
     // Emitir comando para billing gerar orçamento
     publishEvent('command.billing.generate', { orderId: id, customerId, vehicleId }).catch(() => undefined);
 
+    return order;
+  }
+
+  async approveBudget(orderId: string): Promise<ServiceOrder> {
+    const order = await this.mark(orderId, 'BUDGET_APPROVED');
+    publishEvent('command.billing.approve', { orderId }).catch(() => undefined);
     return order;
   }
 

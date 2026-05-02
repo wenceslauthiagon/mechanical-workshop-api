@@ -1,7 +1,9 @@
 // RabbitMQ Event Bus - Mock local (substitua pela real em prod)
 // Em produção, importar amqplib e conectar de verdade
 
-type EventHandler = (payload: any) => void | Promise<void>;
+import { OsEventPayload, OsTopicPayloadMap } from './events';
+
+type EventHandler = (payload: OsEventPayload) => void | Promise<void>;
 
 const handlers = new Map<string, EventHandler[]>();
 
@@ -9,7 +11,7 @@ export async function connectRabbitMQ() {
   // no-op for local mock
 }
 
-export async function publishEvent(topic: string, payload: any) {
+export async function publishEvent<TTopic extends Extract<keyof OsTopicPayloadMap, string>>(topic: TTopic, payload: OsTopicPayloadMap[TTopic]) {
   const topicHandlers = handlers.get(topic) || [];
   for (const handler of topicHandlers) {
     try {
@@ -20,13 +22,16 @@ export async function publishEvent(topic: string, payload: any) {
   }
 }
 
-export async function subscribeEvent(topic: string, handler: EventHandler) {
+export async function subscribeEvent<TTopic extends Extract<keyof OsTopicPayloadMap, string>>(
+  topic: TTopic,
+  handler: (payload: OsTopicPayloadMap[TTopic]) => void | Promise<void>,
+) {
   if (!handlers.has(topic)) {
     handlers.set(topic, []);
   }
   const topicHandlers = handlers.get(topic);
   if (topicHandlers) {
-    topicHandlers.push(handler);
+    topicHandlers.push((payload: OsEventPayload) => handler(payload as OsTopicPayloadMap[TTopic]));
   }
 }
 

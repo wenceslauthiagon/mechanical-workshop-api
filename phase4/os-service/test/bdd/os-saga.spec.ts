@@ -17,10 +17,12 @@ describe('Saga Orchestration - OrderService', () => {
   });
 
   describe('Fluxo principal - OS aberta até conclusão', () => {
-    it('TC0001 - Should complete full lifecycle: OPENED -> PAYMENT_CONFIRMED -> COMPLETED', async () => {
+    it('TC0001 - Should complete full lifecycle: OPENED -> BUDGET_PENDING -> BUDGET_APPROVED -> PAYMENT_CONFIRMED -> COMPLETED', async () => {
       const order = await service.open(randomUUID(), randomUUID(), 'revisão geral');
       expect(order.status).toBe('OPENED');
 
+      await service.mark(order.id, 'BUDGET_PENDING');
+      await service.mark(order.id, 'BUDGET_APPROVED');
       await service.mark(order.id, 'PAYMENT_CONFIRMED');
       await service.mark(order.id, 'COMPLETED');
 
@@ -28,6 +30,8 @@ describe('Saga Orchestration - OrderService', () => {
       expect(final.status).toBe('COMPLETED');
       expect(final.history.map(h => h.status)).toEqual([
         'OPENED',
+        'BUDGET_PENDING',
+        'BUDGET_APPROVED',
         'PAYMENT_CONFIRMED',
         'COMPLETED',
       ]);
@@ -49,14 +53,16 @@ describe('Saga Orchestration - OrderService', () => {
   describe('Compensação - falha na execução', () => {
     it('TC0001 - Should cancel order when execution fails after payment confirmed', async () => {
       const order = await service.open(randomUUID(), randomUUID(), randomText());
+      await service.mark(order.id, 'BUDGET_PENDING');
+      await service.mark(order.id, 'BUDGET_APPROVED');
       await service.mark(order.id, 'PAYMENT_CONFIRMED');
 
       await service.mark(order.id, 'CANCELLED', 'Peças indisponíveis');
 
       const cancelled = await service.get(order.id);
       expect(cancelled.status).toBe('CANCELLED');
-      expect(cancelled.history).toHaveLength(3);
-      expect(cancelled.history[2].reason).toBe('Peças indisponíveis');
+      expect(cancelled.history).toHaveLength(5);
+      expect(cancelled.history[4].reason).toBe('Peças indisponíveis');
     });
   });
 });

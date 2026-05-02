@@ -2,30 +2,53 @@ import { randomUUID } from 'node:crypto';
 import { Budget, Payment } from './domain';
 import { BillingRepository } from './billing.repository';
 import { InMemoryBillingRepository } from './infra/billing.repository';
+import { BillingEventPayload } from './infra/events';
 
 export class BillingService {
   private readonly processedRefunds = new Set<string>();
-  private readonly eventEmitter: (topic: string, payload: any) => void;
+  private readonly eventEmitter: (topic: string, payload: BillingEventPayload) => void;
   private readonly repository: BillingRepository;
 
-  constructor(eventEmitter: (topic: string, payload: any) => void, repository: BillingRepository = new InMemoryBillingRepository()) {
+  constructor(eventEmitter: (topic: string, payload: BillingEventPayload) => void, repository: BillingRepository = new InMemoryBillingRepository()) {
     this.eventEmitter = eventEmitter;
     this.repository = repository;
   }
 
   async generateBudget(orderId: string, estimatedTotal: number): Promise<Budget> {
+    const existingBudget = await this.repository.findBudgetByOrderId(orderId);
+    if (existingBudget) {
+      this.eventEmitter('event.billing.budget_generated', {
+        orderId,
+        budgetId: existingBudget.id,
+        estimatedTotal: existingBudget.estimatedTotal,
+        status: existingBudget.status,
+      });
+      return existingBudget;
+    }
+
     const budget: Budget = {
       id: randomUUID(),
       orderId,
       estimatedTotal,
       status: 'SENT',
     };
-    return this.repository.createBudget(budget);
+    const createdBudget = await this.repository.createBudget(budget);
+    this.eventEmitter('event.billing.budget_generated', {
+      orderId,
+      budgetId: createdBudget.id,
+      estimatedTotal: createdBudget.estimatedTotal,
+      status: createdBudget.status,
+    });
+    return createdBudget;
   }
 
-  async approvePayment(budgetId: string, amount: number): Promise<Payment> {
+  async approvePayment(budgetId: string, amount: number, mercadopagoId?: string): Promise<Payment> {
     const budget = await this.repository.findBudgetById(budgetId);
     if (!budget) throw new Error('BUDGET_NOT_FOUND');
+
+    if (budget.status !== 'APPROVED') {
+      await this.repository.updateBudget(budget.id, 'APPROVED');
+    }
 
     // Idempotent: return existing payment if already confirmed
     const existingPayment = await this.repository.findPaymentByBudgetId(budgetId);
@@ -38,12 +61,35 @@ export class BillingService {
       budgetId,
       amount,
       status: 'CONFIRMED',
+      mercadopagoId,
     };
 
     await this.repository.createPayment(payment);
-    this.eventEmitter('event.billing.payment_confirmed', { orderId: budget.orderId, paymentId: payment.id });
+    this.eventEmitter('event.billing.payment_confirmed', {
+      orderId: budget.orderId,
+      budgetId,
+      paymentId: payment.id,
+      amount,
+      mercadopagoId,
+    });
 
     return payment;
+  }
+
+  async approveOrderPayment(orderId: string, mercadopagoId?: string): Promise<{ budget: Budget; payment: Payment }> {
+    const budget = await this.repository.findBudgetByOrderId(orderId);
+    if (!budget) {
+      throw new Error('BUDGET_NOT_FOUND');
+    }
+
+    const payment = await this.approvePayment(budget.id, budget.estimatedTotal, mercadopagoId);
+    return {
+      budget: {
+        ...budget,
+        status: 'APPROVED',
+      },
+      payment,
+    };
   }
 
   async refund(referenceId: string, reason: string): Promise<void> {

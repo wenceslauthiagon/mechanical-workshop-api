@@ -18,6 +18,18 @@ export class InMemoryBillingRepository implements BillingRepository {
     return this.budgets.get(id);
   }
 
+  async updateBudget(id: string, status: Budget['status']): Promise<void> {
+    const budget = this.budgets.get(id);
+    if (!budget) {
+      return;
+    }
+
+    this.budgets.set(id, {
+      ...budget,
+      status,
+    });
+  }
+
   async createPayment(payment: Payment): Promise<Payment> {
     this.payments.set(payment.id, payment);
     return payment;

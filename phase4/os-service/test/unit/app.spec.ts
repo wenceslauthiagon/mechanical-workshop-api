@@ -17,7 +17,7 @@ jest.mock('../../src/infra/rabbitmq', () => ({
 
 jest.mock('../../src/infra/prisma.client', () => ({
   connectDatabase: jest.fn(),
-  prisma: {},
+  getPrismaClient: jest.fn().mockReturnValue({}),
 }));
 
 jest.mock('../../src/infra/order.prisma.repository', () => ({
@@ -39,15 +39,30 @@ describe('App', () => {
   it('TC0001 - Should subscribe all saga topics on bootstrap', async () => {
     await createApp();
 
+    expect(subscribeEvent).toHaveBeenCalledWith('event.billing.budget_generated', expect.any(Function));
+    expect(subscribeEvent).toHaveBeenCalledWith('event.billing.budget_generation_failed', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('event.billing.payment_confirmed', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('event.billing.payment_failed', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('event.execution.completed', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('event.execution.failed', expect.any(Function));
   });
 
+  it('TC0001A - Should handle budget_generated and move order to BUDGET_PENDING', async () => {
+    const { service } = await createApp();
+    const order = await service.open('c0', 'v0', 'desc0');
+
+    const handler = handlers.get('event.billing.budget_generated');
+    await handler?.({ orderId: order.id, budgetId: randomUUID(), estimatedTotal: 1000 });
+
+    expect((await service.get(order.id)).status).toBe('BUDGET_PENDING');
+  });
+
   it('TC0002 - Should handle payment_confirmed and publish execution command', async () => {
     const { service } = await createApp();
     const order = await service.open('c1', 'v1', 'desc');
+    const budgetGeneratedHandler = handlers.get('event.billing.budget_generated');
+    await budgetGeneratedHandler?.({ orderId: order.id, budgetId: randomUUID(), estimatedTotal: 1000 });
+    await service.approveBudget(order.id);
 
     const handler = handlers.get('event.billing.payment_confirmed');
     await handler?.({ orderId: order.id });
@@ -71,6 +86,9 @@ describe('App', () => {
   it('TC0004 - Should handle execution.completed and complete order', async () => {
     const { service } = await createApp();
     const order = await service.open('c3', 'v3', 'desc3');
+    const budgetGeneratedHandler = handlers.get('event.billing.budget_generated');
+    await budgetGeneratedHandler?.({ orderId: order.id, budgetId: randomUUID(), estimatedTotal: 1000 });
+    await service.approveBudget(order.id);
     await service.mark(order.id, 'PAYMENT_CONFIRMED');
 
     const handler = handlers.get('event.execution.completed');
@@ -82,6 +100,10 @@ describe('App', () => {
   it('TC0005 - Should handle execution.failed and publish billing refund command', async () => {
     const { service } = await createApp();
     const order = await service.open('c4', 'v4', 'desc4');
+    const budgetGeneratedHandler = handlers.get('event.billing.budget_generated');
+    await budgetGeneratedHandler?.({ orderId: order.id, budgetId: randomUUID(), estimatedTotal: 1000 });
+    await service.approveBudget(order.id);
+    await service.mark(order.id, 'PAYMENT_CONFIRMED');
 
     const handler = handlers.get('event.execution.failed');
     await handler?.({ orderId: order.id, reason: 'broken' });
@@ -93,6 +115,9 @@ describe('App', () => {
   it('TC0008 - Should not publish duplicate execution command on repeated payment confirmation', async () => {
     const { service } = await createApp();
     const order = await service.open('c5', 'v5', 'desc5');
+    const budgetGeneratedHandler = handlers.get('event.billing.budget_generated');
+    await budgetGeneratedHandler?.({ orderId: order.id, budgetId: randomUUID(), estimatedTotal: 1000 });
+    await service.approveBudget(order.id);
 
     const handler = handlers.get('event.billing.payment_confirmed');
     await handler?.({ orderId: order.id });
@@ -112,6 +137,16 @@ describe('App', () => {
       .post('/orders')
       .send({ customerId: 'cx', vehicleId: 'vx', description: 'descx' })
       .expect(201);
+
+    await request(app)
+      .patch(`/orders/${create.body.id}/status`)
+      .send({ status: 'BUDGET_PENDING' })
+      .expect(200);
+
+    await request(app)
+      .patch(`/orders/${create.body.id}/status`)
+      .send({ status: 'BUDGET_APPROVED' })
+      .expect(200);
 
     await request(app)
       .patch(`/orders/${create.body.id}/status`)

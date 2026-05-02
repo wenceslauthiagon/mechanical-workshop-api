@@ -3,7 +3,7 @@ import { connectRabbitMQ, publishEvent, subscribeEvent } from './infra/rabbitmq'
 import { OrderRepository } from './infra/order.repository';
 import { OrderService } from './application/order.service';
 import { OrderPrismaRepository } from './infra/order.prisma.repository';
-import { connectDatabase, prisma } from './infra/prisma.client';
+import { connectDatabase, getPrismaClient } from './infra/prisma.client';
 import { OrderRepositoryPort } from './application/order-repository.port';
 import { validateOrderCreation, validateOrderId, validateStatusUpdate } from './infra/validators';
 import { errorHandler } from './infra/error-handler';
@@ -19,11 +19,16 @@ export async function createApp() {
   const usePrismaRepo = process.env.OS_USE_PRISMA_REPO === 'true';
   if (usePrismaRepo && process.env.DATABASE_URL) {
     await connectDatabase();
-    repo = new OrderPrismaRepository(prisma as unknown as any);
+    const prisma = getPrismaClient();
+    repo = new OrderPrismaRepository(prisma);
   }
   const service = new OrderService(repo);
 
-  const transitionIfNeeded = async (orderId: string, status: 'PAYMENT_CONFIRMED' | 'CANCELLED' | 'COMPLETED', reason?: string) => {
+  const transitionIfNeeded = async (
+    orderId: string,
+    status: 'BUDGET_PENDING' | 'BUDGET_APPROVED' | 'PAYMENT_CONFIRMED' | 'CANCELLED' | 'COMPLETED',
+    reason?: string,
+  ) => {
     try {
       const current = await service.get(orderId);
       if (current.status === status) {
@@ -37,6 +42,14 @@ export async function createApp() {
   };
 
   // Subscrever eventos dos outros serviços
+  await subscribeEvent('event.billing.budget_generated', async ({ orderId }) => {
+    await transitionIfNeeded(orderId, 'BUDGET_PENDING');
+  });
+
+  await subscribeEvent('event.billing.budget_generation_failed', async ({ orderId, reason }) => {
+    await transitionIfNeeded(orderId, 'CANCELLED', reason);
+  });
+
   await subscribeEvent('event.billing.payment_confirmed', async ({ orderId }) => {
     const changed = await transitionIfNeeded(orderId, 'PAYMENT_CONFIRMED');
     if (changed) {
@@ -99,6 +112,26 @@ export async function createApp() {
 
     try {
       const updated = await service.mark(req.params.id, req.body.status, req.body.reason);
+      return res.json(updated);
+    } catch (caughtError) {
+      if (caughtError instanceof Error && caughtError.message === 'ORDER_INVALID_STATUS_TRANSITION') {
+        return res.status(409).json({ message: 'Invalid status transition' });
+      }
+      if ((caughtError as Error).message === 'ORDER_NOT_FOUND') {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+      return next(caughtError);
+    }
+  });
+
+  app.post('/orders/:id/budget/approve', async (req, res, next) => {
+    const error = validateOrderId(req.params.id);
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
+    try {
+      const updated = await service.approveBudget(req.params.id);
       return res.json(updated);
     } catch (caughtError) {
       if (caughtError instanceof Error && caughtError.message === 'ORDER_INVALID_STATUS_TRANSITION') {

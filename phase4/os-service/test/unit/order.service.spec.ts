@@ -56,11 +56,11 @@ describe('OrderService', () => {
     it('TC0001 - Should update status and append to history', async () => {
       const order = await service.open(randomUUID(), randomUUID(), randomText());
 
-      const updated = await service.mark(order.id, 'PAYMENT_CONFIRMED');
+      const updated = await service.mark(order.id, 'BUDGET_PENDING');
 
-      expect(updated.status).toBe('PAYMENT_CONFIRMED');
+      expect(updated.status).toBe('BUDGET_PENDING');
       expect(updated.history).toHaveLength(2);
-      expect(updated.history[1].status).toBe('PAYMENT_CONFIRMED');
+      expect(updated.history[1].status).toBe('BUDGET_PENDING');
     });
 
     it('TC0002 - Should store reason in history when provided', async () => {
@@ -87,6 +87,8 @@ describe('OrderService', () => {
 
     it('TC0005 - Should reject invalid terminal transition', async () => {
       const order = await service.open(randomUUID(), randomUUID(), randomText());
+      await service.mark(order.id, 'BUDGET_PENDING');
+      await service.mark(order.id, 'BUDGET_APPROVED');
       await service.mark(order.id, 'PAYMENT_CONFIRMED');
       await service.mark(order.id, 'COMPLETED');
 

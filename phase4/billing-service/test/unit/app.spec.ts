@@ -10,6 +10,7 @@ const handlers = new Map<string, (payload: any) => Promise<void>>();
 const mockService = {
   generateBudget: jest.fn(),
   approvePayment: jest.fn(),
+  approveOrderPayment: jest.fn(),
   refund: jest.fn(),
   getOrderBilling: jest.fn(),
 };
@@ -53,6 +54,13 @@ describe('App', () => {
 
     mockService.generateBudget.mockResolvedValue({ id: budgetId, orderId, estimatedTotal: 1000, status: 'SENT' });
     mockService.approvePayment.mockResolvedValue({ id: paymentId, budgetId, amount: 1000, status: 'CONFIRMED' });
+    mockService.approveOrderPayment.mockResolvedValue({
+      budget: { id: budgetId, orderId, estimatedTotal: 1000, status: 'APPROVED' },
+      payment: { id: paymentId, budgetId, amount: 1000, status: 'CONFIRMED', mercadopagoId: 'mp-1' },
+    });
+    mockService.getOrderBilling.mockResolvedValue({
+      budget: { id: budgetId, orderId, estimatedTotal: 1000, status: 'SENT' },
+    });
     mockService.refund.mockResolvedValue(undefined);
   });
 
@@ -60,31 +68,28 @@ describe('App', () => {
     await createApp();
 
     expect(subscribeEvent).toHaveBeenCalledWith('command.billing.generate', expect.any(Function));
+    expect(subscribeEvent).toHaveBeenCalledWith('command.billing.approve', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('command.billing.refund', expect.any(Function));
   });
 
-  it('TC0002 - Should publish payment_confirmed when generate command succeeds', async () => {
+  it('TC0002 - Should generate budget when generate command succeeds', async () => {
     await createApp();
 
     const handler = handlers.get('command.billing.generate');
     await handler?.({ orderId, estimatedTotal: 1000 });
 
     expect(mockService.generateBudget).toHaveBeenCalledWith(orderId, 1000);
-    expect(mockService.approvePayment).toHaveBeenCalledWith(budgetId, 1000);
-    expect(publishEvent).toHaveBeenCalledWith(
-      'event.billing.payment_confirmed',
-      expect.objectContaining({ orderId, budgetId, paymentId, mercadopagoId: 'mp-1', amount: 1000 }),
-    );
+    expect(mockService.approvePayment).not.toHaveBeenCalled();
   });
 
-  it('TC0002A - Should publish payment_failed when Mercado Pago does not approve', async () => {
+  it('TC0002A - Should publish payment_failed when Mercado Pago does not approve on approve command', async () => {
     const failedOrderId = randomUUID();
     (processPayment as jest.Mock).mockResolvedValue({ id: 'mp-2', status: 'rejected' });
 
     await createApp();
 
-    const handler = handlers.get('command.billing.generate');
-    await handler?.({ orderId: failedOrderId, estimatedTotal: 1000 });
+    const handler = handlers.get('command.billing.approve');
+    await handler?.({ orderId: failedOrderId });
 
     expect(publishEvent).toHaveBeenCalledWith(
       'event.billing.payment_failed',
@@ -92,10 +97,10 @@ describe('App', () => {
     );
   });
 
-  it('TC0003 - Should publish payment_failed when generate command throws', async () => {
+  it('TC0003 - Should publish budget_generation_failed when generate command throws', async () => {
     const failedOrderId = randomUUID();
-    mockService.approvePayment.mockImplementation(async () => {
-      throw new Error('PAYMENT_ERROR');
+    mockService.generateBudget.mockImplementation(async () => {
+      throw new Error('BUDGET_ERROR');
     });
 
     await createApp();
@@ -104,9 +109,20 @@ describe('App', () => {
     await handler?.({ orderId: failedOrderId, estimatedTotal: 800 });
 
     expect(publishEvent).toHaveBeenCalledWith(
-      'event.billing.payment_failed',
-      expect.objectContaining({ orderId: failedOrderId, reason: 'PAYMENT_ERROR' }),
+      'event.billing.budget_generation_failed',
+      expect.objectContaining({ orderId: failedOrderId, reason: 'BUDGET_ERROR' }),
     );
+  });
+
+  it('TC0003A - Should call payment approval flow on approve command success', async () => {
+    await createApp();
+
+    const handler = handlers.get('command.billing.approve');
+    await handler?.({ orderId });
+
+    expect(mockService.getOrderBilling).toHaveBeenCalledWith(orderId);
+    expect(processPayment).toHaveBeenCalledWith(1000, expect.stringContaining(orderId));
+    expect(mockService.approveOrderPayment).toHaveBeenCalledWith(orderId, 'mp-1');
   });
 
   it('TC0004 - Should publish refunded event on refund command success', async () => {
@@ -258,11 +274,14 @@ describe('App', () => {
   });
 
   it('TC0014 - Should swallow publishEvent rejection after payment_failed', async () => {
-    mockService.approvePayment.mockImplementation(async () => { throw new Error('PAY_ERR'); });
+    mockService.getOrderBilling.mockResolvedValue({
+      budget: { id: budgetId, orderId: 'o1', estimatedTotal: 500, status: 'SENT' },
+    });
+    (processPayment as jest.Mock).mockResolvedValue({ id: 'mp-2', status: 'rejected' });
     (publishEvent as jest.Mock).mockRejectedValue(new Error('PUB_ERR'));
     await createApp();
-    const handler = handlers.get('command.billing.generate');
-    await expect(handler?.({ orderId: 'o1', estimatedTotal: 500 })).resolves.toBeUndefined();
+    const handler = handlers.get('command.billing.approve');
+    await expect(handler?.({ orderId: 'o1' })).resolves.toBeUndefined();
   });
 
   it('TC0015 - Should return 500 when budget creation fails with unknown error', async () => {

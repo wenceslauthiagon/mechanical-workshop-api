@@ -2,12 +2,13 @@ import { ExecutionRecord } from './domain';
 import { randomUUID } from 'node:crypto';
 import { ExecutionRepository } from './execution.repository';
 import { InMemoryExecutionRepository } from './infra/execution.repository';
+import { ExecutionEventPayload } from './infra/events';
 
 export class ExecutionService {
-  private readonly eventEmitter: (topic: string, payload: any) => void;
+  private readonly eventEmitter: (topic: string, payload: ExecutionEventPayload) => void;
   private readonly repository: ExecutionRepository;
 
-  constructor(eventEmitter: (topic: string, payload: any) => void, repository: ExecutionRepository = new InMemoryExecutionRepository()) {
+  constructor(eventEmitter: (topic: string, payload: ExecutionEventPayload) => void, repository: ExecutionRepository = new InMemoryExecutionRepository()) {
     this.eventEmitter = eventEmitter;
     this.repository = repository;
   }
