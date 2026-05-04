@@ -33,6 +33,12 @@ export async function createApp() {
     const { orderId } = payload;
     try {
       const record = await service.start(orderId);
+
+      publishEvent('event.execution.started', {
+        orderId,
+        executionId: record.id,
+        startedAt: record.startedAt,
+      }).catch(() => undefined);
       
       // Simular execução (1-3 segundos)
       const executionTime = Math.random() * 2000 + 1000;
@@ -72,6 +78,11 @@ export async function createApp() {
     const { orderId } = req.body;
     try {
       const record = await service.start(orderId);
+      publishEvent('event.execution.started', {
+        orderId,
+        executionId: record.id,
+        startedAt: record.startedAt,
+      }).catch(() => undefined);
       res.status(201).json(record);
     } catch {
       res.status(500).json({ message: 'Execution start failed' });

@@ -63,6 +63,10 @@ describe('App', () => {
     await handler?.({ orderId });
 
     expect(mockService.start).toHaveBeenCalledWith(orderId);
+    expect(publishEvent).toHaveBeenCalledWith(
+      'event.execution.started',
+      expect.objectContaining({ orderId, executionId }),
+    );
     expect(mockService.updateStatus).toHaveBeenCalledWith(executionId, 'COMPLETED', 'Diagnosis and repair completed');
     expect(publishEvent).toHaveBeenCalledWith(
       'event.execution.completed',
@@ -95,7 +99,12 @@ describe('App', () => {
       cb();
       return 0 as any;
     }) as any);
-    (publishEvent as jest.Mock).mockRejectedValueOnce(new Error('EVENT_PUBLISH_FAILED'));
+    (publishEvent as jest.Mock).mockImplementation(async (topic: string) => {
+      if (topic === 'event.execution.completed') {
+        throw new Error('EVENT_PUBLISH_FAILED');
+      }
+      return undefined;
+    });
 
     await createApp();
 
@@ -109,7 +118,12 @@ describe('App', () => {
     mockService.start.mockImplementation(async () => {
       throw new Error('START_FAILED');
     });
-    (publishEvent as jest.Mock).mockRejectedValueOnce(new Error('EVENT_PUBLISH_FAILED'));
+    (publishEvent as jest.Mock).mockImplementation(async (topic: string) => {
+      if (topic === 'event.execution.failed') {
+        throw new Error('EVENT_PUBLISH_FAILED');
+      }
+      return undefined;
+    });
 
     await createApp();
 
@@ -150,6 +164,10 @@ describe('App', () => {
       .expect(201);
 
     expect(mockService.start).toHaveBeenCalledWith(endpointOrderId);
+    expect(publishEvent).toHaveBeenCalledWith(
+      'event.execution.started',
+      expect.objectContaining({ orderId: endpointOrderId, executionId }),
+    );
     expect(response.body).toHaveProperty('id', executionId);
   });
 

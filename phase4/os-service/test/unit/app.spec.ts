@@ -43,6 +43,7 @@ describe('App', () => {
     expect(subscribeEvent).toHaveBeenCalledWith('event.billing.budget_generation_failed', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('event.billing.payment_confirmed', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('event.billing.payment_failed', expect.any(Function));
+    expect(subscribeEvent).toHaveBeenCalledWith('event.execution.started', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('event.execution.completed', expect.any(Function));
     expect(subscribeEvent).toHaveBeenCalledWith('event.execution.failed', expect.any(Function));
   });
@@ -95,6 +96,20 @@ describe('App', () => {
     await handler?.({ orderId: order.id });
 
     expect((await service.get(order.id)).status).toBe('COMPLETED');
+  });
+
+  it('TC0004A - Should handle execution.started and move order to IN_EXECUTION', async () => {
+    const { service } = await createApp();
+    const order = await service.open('c3a', 'v3a', 'desc3a');
+    const budgetGeneratedHandler = handlers.get('event.billing.budget_generated');
+    await budgetGeneratedHandler?.({ orderId: order.id, budgetId: randomUUID(), estimatedTotal: 1000 });
+    await service.approveBudget(order.id);
+    await service.mark(order.id, 'PAYMENT_CONFIRMED');
+
+    const handler = handlers.get('event.execution.started');
+    await handler?.({ orderId: order.id, executionId: randomUUID() });
+
+    expect((await service.get(order.id)).status).toBe('IN_EXECUTION');
   });
 
   it('TC0005 - Should handle execution.failed and publish billing refund command', async () => {

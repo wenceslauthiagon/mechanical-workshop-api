@@ -12,6 +12,7 @@ export interface OsTopicPayloadMap {
   'event.billing.budget_generation_failed': { orderId: string; reason?: string };
   'event.billing.payment_confirmed': { orderId: string };
   'event.billing.payment_failed': { orderId: string; reason?: string };
+  'event.execution.started': { orderId: string; executionId?: string; startedAt?: string };
   'event.execution.completed': { orderId: string };
   'event.execution.failed': { orderId: string; reason?: string };
   'command.execution.start': { orderId: string };

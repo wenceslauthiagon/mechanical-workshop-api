@@ -115,6 +115,55 @@ describe('OS Service - Integration Tests', () => {
     });
   });
 
+  describe('POST /orders/:id/budget/approve', () => {
+    it('TC0001 - Should approve budget after budget is pending', async () => {
+      const createRes = await request(app)
+        .post('/orders')
+        .send({
+          customerId: randomUUID(),
+          vehicleId: randomUUID(),
+          description: randomText(),
+        })
+        .expect(201);
+
+      await request(app)
+        .patch(`/orders/${createRes.body.id}/status`)
+        .send({ status: 'BUDGET_PENDING' })
+        .expect(200);
+
+      const response = await request(app)
+        .post(`/orders/${createRes.body.id}/budget/approve`)
+        .expect(200);
+
+      expect(response.body.status).toBe('BUDGET_APPROVED');
+    });
+
+    it('TC0002 - Should return 409 when budget approval transition is invalid', async () => {
+      const createRes = await request(app)
+        .post('/orders')
+        .send({
+          customerId: randomUUID(),
+          vehicleId: randomUUID(),
+          description: randomText(),
+        })
+        .expect(201);
+
+      const response = await request(app)
+        .post(`/orders/${createRes.body.id}/budget/approve`)
+        .expect(409);
+
+      expect(response.body).toEqual({ message: 'Invalid status transition' });
+    });
+
+    it('TC0003 - Should return 404 when order does not exist', async () => {
+      const response = await request(app)
+        .post(`/orders/${randomUUID()}/budget/approve`)
+        .expect(404);
+
+      expect(response.body).toEqual({ message: 'Order not found' });
+    });
+  });
+
   describe('GET /health', () => {
     it('TC0001 - Should return health status ok', async () => {
       const response = await request(app).get('/health').expect(200);

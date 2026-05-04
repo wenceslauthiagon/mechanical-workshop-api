@@ -31,11 +31,14 @@ Fluxo principal:
 
 1. `os-service` abre OS
 2. publica `command.billing.generate`
-3. `billing-service` processa orcamento/pagamento
-4. em sucesso publica `event.billing.payment_confirmed`
-5. `os-service` publica `command.execution.start`
-6. `execution-service` conclui e publica `event.execution.completed`
-7. `os-service` finaliza a OS
+3. `billing-service` gera orcamento e publica `event.billing.budget_generated`
+4. `os-service` marca `BUDGET_PENDING`
+5. aprovacao explicita do orcamento em `POST /orders/:id/budget/approve`
+6. `os-service` publica `command.billing.approve`
+7. `billing-service` confirma pagamento e publica `event.billing.payment_confirmed`
+8. `os-service` publica `command.execution.start`
+9. `execution-service` publica `event.execution.started` e depois `event.execution.completed`
+10. `os-service` finaliza a OS
 
 Compensacao:
 

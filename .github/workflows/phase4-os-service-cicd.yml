@@ -49,6 +49,14 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:cov
 
+      - name: Validate minimum coverage (80%)
+        run: |
+          if [ ! -f coverage/coverage-summary.json ]; then
+            echo "coverage-summary.json not found"
+            exit 1
+          fi
+          node -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8')).total;const min=80;for(const k of ['lines','statements','functions','branches']){if((s[k]?.pct ?? 0)<min){console.error('Coverage below threshold for '+k+': '+(s[k]?.pct ?? 0)+'% < '+min+'%');process.exit(1)}}console.log('Coverage threshold validated: >=80%')"
+
       - name: SonarQube scan
         uses: SonarSource/sonarqube-scan-action@v5
         with:

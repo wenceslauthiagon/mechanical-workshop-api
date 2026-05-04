@@ -34,6 +34,7 @@ Compensações em falha:
   - `event.billing.budget_generation_failed`
   - `event.billing.payment_confirmed`
   - `command.execution.start`
+  - `event.execution.started`
   - `event.execution.completed`
   - etc.
 

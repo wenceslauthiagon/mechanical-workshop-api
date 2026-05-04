@@ -26,7 +26,7 @@ export async function createApp() {
 
   const transitionIfNeeded = async (
     orderId: string,
-    status: 'BUDGET_PENDING' | 'BUDGET_APPROVED' | 'PAYMENT_CONFIRMED' | 'CANCELLED' | 'COMPLETED',
+    status: 'BUDGET_PENDING' | 'BUDGET_APPROVED' | 'PAYMENT_CONFIRMED' | 'IN_EXECUTION' | 'CANCELLED' | 'COMPLETED',
     reason?: string,
   ) => {
     try {
@@ -59,6 +59,10 @@ export async function createApp() {
 
   await subscribeEvent('event.billing.payment_failed', async ({ orderId, reason }) => {
     await transitionIfNeeded(orderId, 'CANCELLED', reason);
+  });
+
+  await subscribeEvent('event.execution.started', async ({ orderId }) => {
+    await transitionIfNeeded(orderId, 'IN_EXECUTION');
   });
 
   await subscribeEvent('event.execution.completed', async ({ orderId }) => {

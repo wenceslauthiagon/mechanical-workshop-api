@@ -17,13 +17,14 @@ describe('Saga Orchestration - OrderService', () => {
   });
 
   describe('Fluxo principal - OS aberta até conclusão', () => {
-    it('TC0001 - Should complete full lifecycle: OPENED -> BUDGET_PENDING -> BUDGET_APPROVED -> PAYMENT_CONFIRMED -> COMPLETED', async () => {
+    it('TC0001 - Should complete full lifecycle: OPENED -> BUDGET_PENDING -> BUDGET_APPROVED -> PAYMENT_CONFIRMED -> IN_EXECUTION -> COMPLETED', async () => {
       const order = await service.open(randomUUID(), randomUUID(), 'revisão geral');
       expect(order.status).toBe('OPENED');
 
       await service.mark(order.id, 'BUDGET_PENDING');
       await service.mark(order.id, 'BUDGET_APPROVED');
       await service.mark(order.id, 'PAYMENT_CONFIRMED');
+      await service.mark(order.id, 'IN_EXECUTION');
       await service.mark(order.id, 'COMPLETED');
 
       const final = await service.get(order.id);
@@ -33,6 +34,7 @@ describe('Saga Orchestration - OrderService', () => {
         'BUDGET_PENDING',
         'BUDGET_APPROVED',
         'PAYMENT_CONFIRMED',
+        'IN_EXECUTION',
         'COMPLETED',
       ]);
     });
