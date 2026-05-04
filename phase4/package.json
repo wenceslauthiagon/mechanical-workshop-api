@@ -7,6 +7,7 @@
     "test:billing": "npm --prefix ./billing-service test",
     "test:execution": "npm --prefix ./execution-service test",
     "test:os": "npm --prefix ./os-service test",
-    "test:cov": "npm --prefix ./billing-service run test:cov && npm --prefix ./execution-service run test:cov && npm --prefix ./os-service run test:cov"
+    "test:cov": "npm --prefix ./billing-service run test:cov && npm --prefix ./execution-service run test:cov && npm --prefix ./os-service run test:cov",
+    "validate:challenge": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/validate-phase4-challenge.ps1"
   }
 }
