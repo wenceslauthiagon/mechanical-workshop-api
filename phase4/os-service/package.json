@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx src/index.ts",
+    "apm:log": "tsx -e \"import './src/tracing.ts'\"",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "test": "jest --runInBand",

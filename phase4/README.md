@@ -65,6 +65,35 @@ npm install
 npm run dev
 ```
 
+## Datadog APM em desenvolvimento
+
+O APM está configurado nos 3 serviços e pode ser ativado via variáveis de ambiente:
+
+```powershell
+cd phase4/os-service
+$env:DD_TRACE_ENABLED='true'
+$env:DD_SERVICE='os-service'
+$env:DD_ENV='development'
+$env:DD_VERSION='dev'
+$env:DD_AGENT_HOST='localhost'
+$env:DD_TRACE_AGENT_PORT='8126'
+npm run dev
+```
+
+Para ver a configuração do Datadog no terminal sem iniciar o servidor:
+
+```powershell
+npm run apm:log
+```
+
+Output esperado:
+```
+Datadog APM habilitado (ambiente: development)
+{"service":"os-service","env":"development","version":"dev","agentHost":"localhost","agentPort":"8126","traceEnabled":true,"logsInjection":true,"runtimeMetrics":true}
+```
+
+Esse comando funciona em todos os 3 serviços com o mesmo padrão.
+
 ## Como comprovar execução em ambiente real
 
 Para evidência operacional da entrega, os itens abaixo devem constar no material final:
