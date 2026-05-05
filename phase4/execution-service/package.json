@@ -10,6 +10,7 @@
     "test:cov": "jest --coverage --runInBand"
   },
   "dependencies": {
+    "dd-trace": "^5.99.1",
     "express": "^4.19.2",
     "mongodb": "^6.13.1",
     "uuid": "^11.1.0"
