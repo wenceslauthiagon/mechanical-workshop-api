@@ -123,6 +123,7 @@ const openApiSpec = {
 
 export async function createApp() {
   const app = express();
+  app.disable('x-powered-by');
   app.use(express.json());
 
   app.use((req, res, next) => {
@@ -136,7 +137,7 @@ export async function createApp() {
     }
 
     const authorization = req.header('authorization');
-    if (!authorization || !authorization.startsWith('Bearer ')) {
+    if (authorization?.startsWith('Bearer ') !== true) {
       return res.status(401).json({ message: 'UNAUTHORIZED' });
     }
 

@@ -1,6 +1,6 @@
-FROM gcr.io/distroless/nodejs20-debian11:nonroot AS builder
+FROM node:20-bookworm-slim AS builder
 WORKDIR /app
-COPY --chown=nonroot:nonroot package*.json ./
+COPY package*.json ./
 RUN npm install
 COPY . .
 RUN npm run build
