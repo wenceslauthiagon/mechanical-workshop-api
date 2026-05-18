@@ -116,25 +116,57 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/billing-service:latest
             ghcr.io/${{ github.repository_owner }}/billing-service:${{ github.sha }}
 
-  deploy:
+  deploy-to-aks-staging:
+    name: Deploy to AKS Staging
+    if: github.event_name == 'push'
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    steps:
+      - name: Staging deployment simulation (no cloud cost)
+        run: |
+          echo "Deployment to AKS Staging simulated successfully."
+          echo "Service: $SERVICE_NAME"
+          echo "Image: $IMAGE_NAME:${{ github.sha }}"
+          echo "Environment: staging"
+
+  deploy-to-aks-production:
+    name: Deploy to AKS Production
+    if: github.event_name == 'push'
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Production deployment simulation (no cloud cost)
+        run: |
+          echo "Deployment to AKS Production simulated successfully."
+          echo "Service: $SERVICE_NAME"
+          echo "Image: $IMAGE_NAME:${{ github.sha }}"
+          echo "Environment: production"
+
+  deploy-with-terraform:
+    name: Deploy with Terraform
     if: github.event_name == 'push'
     needs: build-and-push-image
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Configure kubeconfig
+      - name: Terraform deployment simulation (no cloud cost)
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          echo "Terraform deployment simulated successfully."
+          echo "No cloud resources provisioned in this workflow."
 
-      - name: Deploy to Kubernetes
-        run: |
-          kubectl get namespace $K8S_NAMESPACE || kubectl create namespace $K8S_NAMESPACE
-          kubectl -n $K8S_NAMESPACE apply -f $SERVICE_PATH/k8s/deployment.yaml
-          kubectl -n $K8S_NAMESPACE set image deployment/$SERVICE_NAME $SERVICE_NAME=$IMAGE_NAME:${{ github.sha }}
-          kubectl -n $K8S_NAMESPACE rollout status deployment/$SERVICE_NAME
+  notify:
+    name: Notify Deployment
+    if: always() && github.event_name == 'push'
+    needs: [deploy-to-aks-staging, deploy-to-aks-production, deploy-with-terraform]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Success
+        if: needs.deploy-to-aks-staging.result == 'success' && needs.deploy-to-aks-production.result == 'success' && needs.deploy-with-terraform.result == 'success'
+        run: echo "Deployment successful!"
+
+      - name: Notify Failure
+        if: needs.deploy-to-aks-staging.result == 'failure' || needs.deploy-to-aks-production.result == 'failure' || needs.deploy-with-terraform.result == 'failure'
+        run: echo "Deployment failed."
