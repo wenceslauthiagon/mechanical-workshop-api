@@ -1,3 +1,6 @@
+import './tracing';
+import { config } from 'dotenv';
+config();
 import { createApp } from './app';
 
 (async () => {

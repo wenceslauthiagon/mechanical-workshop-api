@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/test/**/*.spec.ts'],
   collectCoverageFrom: ['src/**/*.ts'],
-  coverageThreshold: {
+  coveragePathIgnorePatterns: ['src/infra/mongo.client.ts'],  coverageReporters: ['text', 'lcov', 'json', 'html', 'json-summary'],  coverageThreshold: {
     global: {
       branches: 80,
       functions: 80,

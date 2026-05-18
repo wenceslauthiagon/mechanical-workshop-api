@@ -17,7 +17,7 @@ async function bootstrap() {
   // Workaround: prevent Swagger from crashing on circular metadata in some DTOs.
   // Keeps all routes visible while schemas are gradually normalized.
   const swaggerInternals = (await import(
-    '@nestjs/swagger/dist/services/schema-object-factory'
+    '@nestjs/swagger/dist/services/schema-object-factory.js'
   )) as {
     SchemaObjectFactory?: {
       prototype?: {

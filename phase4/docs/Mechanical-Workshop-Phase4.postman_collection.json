@@ -68,6 +68,18 @@
           }
         },
         {
+          "name": "Get Order History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{os_base_url}}/orders/{{order_id}}/history",
+              "host": ["{{os_base_url}}"],
+              "path": ["orders", "{{order_id}}", "history"]
+            }
+          }
+        },
+        {
           "name": "Update Order Status -> PAYMENT_CONFIRMED",
           "request": {
             "method": "PATCH",
@@ -181,6 +193,18 @@
               "path": ["billing", "payment", "approve"]
             }
           }
+        },
+        {
+          "name": "Get Billing by Order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{billing_base_url}}/billing/order/{{order_id}}",
+              "host": ["{{billing_base_url}}"],
+              "path": ["billing", "order", "{{order_id}}"]
+            }
+          }
         }
       ]
     },
@@ -252,6 +276,30 @@
               "raw": "{{execution_base_url}}/execution/{{execution_id}}/status",
               "host": ["{{execution_base_url}}"],
               "path": ["execution", "{{execution_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get Execution by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{execution_base_url}}/execution/{{execution_id}}",
+              "host": ["{{execution_base_url}}"],
+              "path": ["execution", "{{execution_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Execution by Order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{execution_base_url}}/execution/order/{{order_id}}",
+              "host": ["{{execution_base_url}}"],
+              "path": ["execution", "order", "{{order_id}}"]
             }
           }
         }

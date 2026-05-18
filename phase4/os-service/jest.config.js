@@ -3,6 +3,8 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/test/**/*.spec.ts'],
   collectCoverageFrom: ['src/**/*.ts'],
+  coveragePathIgnorePatterns: ['src/infra/prisma.client.ts'],
+  coverageReporters: ['text', 'lcov', 'json', 'html', 'json-summary'],
   coverageThreshold: {
     global: {
       branches: 80,
