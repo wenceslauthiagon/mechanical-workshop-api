@@ -1,13 +1,20 @@
-FROM gcr.io/distroless/nodejs20-debian11:nonroot AS builder
-WORKDIR /app
-COPY --chown=nonroot:nonroot package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+# syntax=docker/dockerfile:1
+FROM node:20-alpine AS base
 
-FROM gcr.io/distroless/nodejs20-debian11:nonroot
-WORKDIR /app
-COPY --from=builder --chown=nonroot:nonroot /app/dist ./dist
-COPY --from=builder --chown=nonroot:nonroot /app/node_modules ./node_modules
+WORKDIR /usr/src/app
+
+# Install dependencies
+COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm ci && npx prisma generate
+
+# Copy sources
+COPY . .
+
+# Build
+RUN npm run build && npm prune --omit=dev
+
+ENV NODE_ENV=production
 EXPOSE 3002
-CMD ["dist/index.js"]
+
+CMD ["npm", "start"]
