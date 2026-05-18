@@ -1,0 +1,36 @@
+// prisma/schema.prisma - Billing Service
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Budget {
+  id             String   @id @default(cuid())
+  orderId        String
+  estimatedTotal Float
+  status         String   @default("SENT") // DRAFT | SENT | APPROVED | REJECTED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  payments Payment[]
+
+  @@map("budgets")
+}
+
+model Payment {
+  id             String  @id @default(cuid())
+  budgetId       String
+  amount         Float
+  status         String  @default("PENDING") // PENDING | CONFIRMED | FAILED
+  mercadopagoId  String?
+  createdAt      DateTime @default(now())
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}

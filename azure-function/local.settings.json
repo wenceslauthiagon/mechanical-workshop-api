@@ -1,0 +1,10 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "DATABASE_URL": "postgresql://user:password@localhost:5432/workshop?schema=public",
+    "JWT_SECRET": "your-secret-key",
+    "JWT_EXPIRATION": "24h"
+  }
+}

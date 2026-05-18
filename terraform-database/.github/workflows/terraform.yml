@@ -11,7 +11,7 @@ on:
       - 'terraform-database/**'
 
 env:
-  TF_VERSION: '1.5.0'
+  TF_VERSION: 'latest'
   WORKING_DIR: terraform-database
   CLOUD_DEPLOY_ENABLED: 'false'
 

@@ -1,0 +1,172 @@
+name: Phase4 Billing Service CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'phase4/billing-service/**'
+      - '.github/workflows/phase4-billing-service-cicd.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'phase4/billing-service/**'
+      - '.github/workflows/phase4-billing-service-cicd.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  SERVICE_NAME: billing-service
+  SERVICE_PATH: phase4/billing-service
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/billing-service
+  K8S_NAMESPACE: workshop
+
+jobs:
+  build-test-quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.SERVICE_PATH }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: phase4/billing-service/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests with coverage
+        run: npm run test:cov
+
+      - name: Validate minimum coverage (80%)
+        run: |
+          if [ ! -f coverage/coverage-summary.json ]; then
+            echo "coverage-summary.json not found"
+            exit 1
+          fi
+          node -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8')).total;const min=80;for(const k of ['lines','statements','functions','branches']){if((s[k]?.pct ?? 0)<min){console.error('Coverage below threshold for '+k+': '+(s[k]?.pct ?? 0)+'% < '+min+'%');process.exit(1)}}console.log('Coverage threshold validated: >=80%')"
+
+      - name: Check SonarQube configuration
+        id: sonar_config
+        shell: bash
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          if [ -n "$SONAR_TOKEN" ] && [[ "$SONAR_HOST_URL" =~ ^https?:// ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping SonarQube: missing SONAR_TOKEN or invalid SONAR_HOST_URL."
+          fi
+
+      - name: SonarQube scan
+        if: steps.sonar_config.outputs.enabled == 'true'
+        uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          projectBaseDir: phase4/billing-service
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: SonarQube quality gate
+        if: steps.sonar_config.outputs.enabled == 'true'
+        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  build-and-push-image:
+    if: github.event_name == 'push'
+    needs: build-test-quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./phase4/billing-service
+          file: ./phase4/billing-service/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/billing-service:latest
+            ghcr.io/${{ github.repository_owner }}/billing-service:${{ github.sha }}
+
+  deploy-to-aks-staging:
+    name: Deploy to AKS Staging
+    if: github.event_name == 'push'
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    steps:
+      - name: Staging deployment simulation (no cloud cost)
+        run: |
+          echo "Deployment to AKS Staging simulated successfully."
+          echo "Service: $SERVICE_NAME"
+          echo "Image: $IMAGE_NAME:${{ github.sha }}"
+          echo "Environment: staging"
+
+  deploy-to-aks-production:
+    name: Deploy to AKS Production
+    if: github.event_name == 'push'
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Production deployment simulation (no cloud cost)
+        run: |
+          echo "Deployment to AKS Production simulated successfully."
+          echo "Service: $SERVICE_NAME"
+          echo "Image: $IMAGE_NAME:${{ github.sha }}"
+          echo "Environment: production"
+
+  deploy-with-terraform:
+    name: Deploy with Terraform
+    if: github.event_name == 'push'
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Terraform deployment simulation (no cloud cost)
+        run: |
+          echo "Terraform deployment simulated successfully."
+          echo "No cloud resources provisioned in this workflow."
+
+  notify:
+    name: Notify Deployment
+    if: always() && github.event_name == 'push'
+    needs: [deploy-to-aks-staging, deploy-to-aks-production, deploy-with-terraform]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Success
+        if: needs.deploy-to-aks-staging.result == 'success' && needs.deploy-to-aks-production.result == 'success' && needs.deploy-with-terraform.result == 'success'
+        run: echo "Deployment successful!"
+
+      - name: Notify Failure
+        if: needs.deploy-to-aks-staging.result == 'failure' || needs.deploy-to-aks-production.result == 'failure' || needs.deploy-with-terraform.result == 'failure'
+        run: echo "Deployment failed."

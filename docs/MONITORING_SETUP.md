@@ -136,7 +136,7 @@ sum:custom.service_orders.count{env:production} by {status}
 
 **CPU por Pod:**
 ```
-avg:kubernetes.cpu.usage{cluster_name:mechanical-workshop-prod,namespace:workshop} by {pod_name}
+avg:kubernetes.cpu.usage{cluster_name:mechanical-workshop-prod,namespace:mechanical-workshop} by {pod_name}
 ```
 
 ## 🚀 Configuração
@@ -145,12 +145,12 @@ avg:kubernetes.cpu.usage{cluster_name:mechanical-workshop-prod,namespace:worksho
 
 ```bash
 # Criar namespace
-kubectl create namespace workshop
+kubectl create namespace mechanical-workshop
 
 # Criar secret com API key
 kubectl create secret generic datadog-secret \
   --from-literal=api-key=<DD_API_KEY> \
-  -n workshop
+  -n mechanical-workshop
 
 # Aplicar configuração
 kubectl apply -f k8s/datadog-monitoring.yaml

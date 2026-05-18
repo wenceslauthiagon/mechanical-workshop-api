@@ -17,6 +17,7 @@ interface JWTPayload {
   customerId: string;
   document: string;
   type: string;
+  status: string;
   name: string;
   email: string;
 }
@@ -47,7 +48,7 @@ async function httpTrigger(
     }
 
     // Remover formatação do CPF
-    const cleanCPF = cpf.replace(/\D/g, "");
+    const cleanCPF = cpf.replaceAll(/\D/g, "");
 
     // Consultar cliente no banco
     const customer = await prisma.customer.findUnique({
@@ -58,6 +59,7 @@ async function httpTrigger(
         id: true,
         document: true,
         type: true,
+        isActive: true,
         name: true,
         email: true,
       },
@@ -86,12 +88,25 @@ async function httpTrigger(
       };
     }
 
+    // Verificar status do cliente
+    if (!customer.isActive) {
+      return {
+        status: 403,
+        jsonBody: {
+          message: "Cliente inativo",
+          error: "Forbidden",
+          statusCode: 403,
+        },
+      };
+    }
+
     // Gerar JWT
 
     const payload: JWTPayload = {
       customerId: customer.id,
       document: customer.document,
       type: customer.type,
+      status: "ACTIVE",
       name: customer.name,
       email: customer.email,
     };
@@ -131,7 +146,7 @@ async function httpTrigger(
 }
 
 function isValidCPF(cpf: string): boolean {
-  const cleanCPF = cpf.replace(/\D/g, "");
+  const cleanCPF = cpf.replaceAll(/\D/g, "");
 
   if (cleanCPF.length !== 11) {
     return false;
@@ -147,7 +162,7 @@ function isValidCPF(cpf: string): boolean {
   let remainder;
 
   for (let i = 1; i <= 9; i++) {
-    sum += parseInt(cleanCPF.substring(i - 1, i)) * (11 - i);
+    sum += Number.parseInt(cleanCPF.substring(i - 1, i), 10) * (11 - i);
   }
 
   remainder = (sum * 10) % 11;
@@ -155,13 +170,13 @@ function isValidCPF(cpf: string): boolean {
     remainder = 0;
   }
 
-  if (remainder !== parseInt(cleanCPF.substring(9, 10))) {
+  if (remainder !== Number.parseInt(cleanCPF.substring(9, 10), 10)) {
     return false;
   }
 
   sum = 0;
   for (let i = 1; i <= 10; i++) {
-    sum += parseInt(cleanCPF.substring(i - 1, i)) * (12 - i);
+    sum += Number.parseInt(cleanCPF.substring(i - 1, i), 10) * (12 - i);
   }
 
   remainder = (sum * 10) % 11;
@@ -169,7 +184,7 @@ function isValidCPF(cpf: string): boolean {
     remainder = 0;
   }
 
-  if (remainder !== parseInt(cleanCPF.substring(10, 11))) {
+  if (remainder !== Number.parseInt(cleanCPF.substring(10, 11), 10)) {
     return false;
   }
 

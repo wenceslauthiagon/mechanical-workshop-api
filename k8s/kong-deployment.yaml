@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kong-proxy
-  namespace: workshop
+  namespace: mechanical-workshop
   labels:
     app: kong
 spec:
@@ -23,7 +23,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kong-admin
-  namespace: workshop
+  namespace: mechanical-workshop
   labels:
     app: kong
 spec:
@@ -40,7 +40,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kong
-  namespace: workshop
+  namespace: mechanical-workshop
   labels:
     app: kong
 spec:
@@ -53,9 +53,10 @@ spec:
       labels:
         app: kong
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: kong
-          image: kong:3.5
+          image: kong:3.3
           env:
             - name: KONG_DATABASE
               value: "off"
@@ -73,6 +74,8 @@ spec:
               value: "0.0.0.0:8001"
             - name: KONG_PROXY_LISTEN
               value: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
+            - name: KONG_NGINX_WORKER_PROCESSES
+              value: "1"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -89,16 +92,14 @@ spec:
               containerPort: 8001
               protocol: TCP
           livenessProbe:
-            httpGet:
-              path: /status
+            tcpSocket:
               port: 8001
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
-            httpGet:
-              path: /status
+            tcpSocket:
               port: 8001
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -108,9 +109,11 @@ spec:
             requests:
               cpu: 250m
               memory: 512Mi
+              ephemeral-storage: 256Mi
             limits:
               cpu: 500m
               memory: 1Gi
+              ephemeral-storage: 512Mi
           volumeMounts:
             - name: kong-config
               mountPath: /kong/declarative
@@ -124,7 +127,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: kong-hpa
-  namespace: workshop
+  namespace: mechanical-workshop
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

@@ -3,6 +3,14 @@ import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+const demoIds = {
+  customerId: '11111111-1111-1111-1111-111111111111',
+  vehicleId: '22222222-2222-2222-2222-222222222222',
+  mechanicId: '33333333-3333-3333-3333-333333333333',
+  serviceId: '44444444-4444-4444-4444-444444444444',
+  partId: '55555555-5555-5555-5555-555555555555',
+};
+
 async function main() {
   console.log('Starting seed...');
 
@@ -15,6 +23,112 @@ async function main() {
       email: 'admin@oficina.com',
       passwordHash: hashedPassword,
       role: 'ADMIN',
+    },
+  });
+
+  await prisma.customer.upsert({
+    where: { document: '12345678901' },
+    update: {
+      name: 'Cliente Demo Oficina',
+      email: 'cliente.demo@oficina.com',
+      phone: '(11) 99999-0001',
+      address: 'Rua das Oficinas, 100 - Sao Paulo/SP',
+      type: 'PESSOA_FISICA',
+      additionalInfo: 'Cliente seed para demonstracao do fluxo principal',
+    },
+    create: {
+      id: demoIds.customerId,
+      document: '12345678901',
+      type: 'PESSOA_FISICA',
+      name: 'Cliente Demo Oficina',
+      email: 'cliente.demo@oficina.com',
+      phone: '(11) 99999-0001',
+      address: 'Rua das Oficinas, 100 - Sao Paulo/SP',
+      additionalInfo: 'Cliente seed para demonstracao do fluxo principal',
+    },
+  });
+
+  await prisma.vehicle.upsert({
+    where: { licensePlate: 'ABC1D23' },
+    update: {
+      customerId: demoIds.customerId,
+      brand: 'Toyota',
+      model: 'Corolla XEi',
+      year: 2020,
+      color: 'Prata',
+    },
+    create: {
+      id: demoIds.vehicleId,
+      licensePlate: 'ABC1D23',
+      customerId: demoIds.customerId,
+      brand: 'Toyota',
+      model: 'Corolla XEi',
+      year: 2020,
+      color: 'Prata',
+    },
+  });
+
+  await prisma.mechanic.upsert({
+    where: { email: 'mecanico.demo@oficina.com' },
+    update: {
+      name: 'Carlos Mec Demo',
+      phone: '(11) 98888-0002',
+      specialties: JSON.stringify(['MECANICA', 'ELETRICA', 'DIAGNOSTICO']),
+      isActive: true,
+      isAvailable: true,
+      experienceYears: 8,
+    },
+    create: {
+      id: demoIds.mechanicId,
+      name: 'Carlos Mec Demo',
+      email: 'mecanico.demo@oficina.com',
+      phone: '(11) 98888-0002',
+      specialties: JSON.stringify(['MECANICA', 'ELETRICA', 'DIAGNOSTICO']),
+      isActive: true,
+      isAvailable: true,
+      experienceYears: 8,
+    },
+  });
+
+  const demoServiceName = 'Servico Seed Demo - Diagnostico Completo';
+  const existingDemoService = await prisma.service.findFirst({
+    where: { name: demoServiceName },
+  });
+
+  if (!existingDemoService) {
+    await prisma.service.create({
+      data: {
+        id: demoIds.serviceId,
+        name: demoServiceName,
+        description: 'Servico fixo para criar ordem de servico no Swagger sem lookup previo',
+        price: 199.9,
+        estimatedMinutes: 90,
+        category: 'Diagnostico',
+      },
+    });
+  }
+
+  await prisma.part.upsert({
+    where: { partNumber: 'SEED-PART-001' },
+    update: {
+      name: 'Peca Seed Demo - Sensor Universal',
+      description: 'Peca fixa para criar ordem de servico no Swagger sem lookup previo',
+      price: 89.9,
+      stock: 25,
+      minStock: 5,
+      supplier: 'Seed Supplier',
+      isActive: true,
+    },
+    create: {
+      id: demoIds.partId,
+      name: 'Peca Seed Demo - Sensor Universal',
+      partNumber: 'SEED-PART-001',
+      description: 'Peca fixa para criar ordem de servico no Swagger sem lookup previo',
+      price: 89.9,
+      stock: 25,
+      minStock: 5,
+      supplier: 'Seed Supplier',
+      isActive: true,
     },
   });
 
@@ -312,6 +426,17 @@ async function main() {
   console.log(`- ${services.length} services created`);
   console.log(`- ${parts.length} parts created`);
   console.log('- 1 admin user created (username: admin, password: admin123)');
+  console.log('- 1 demo customer created/updated');
+  console.log('- 1 demo vehicle created/updated');
+  console.log('- 1 demo mechanic created/updated');
+  console.log('- Demo IDs for Swagger tests:');
+  console.log(`  customerId: ${demoIds.customerId}`);
+  console.log(`  vehicleId: ${demoIds.vehicleId}`);
+  console.log(`  mechanicId: ${demoIds.mechanicId}`);
+  console.log(`  serviceId: ${demoIds.serviceId}`);
+  console.log(`  partId: ${demoIds.partId}`);
+  console.log('  customer document: 12345678901');
+  console.log('  vehicle plate: ABC1D23');
 }
 
 main()

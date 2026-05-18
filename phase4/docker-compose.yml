@@ -1,0 +1,159 @@
+services:
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    container_name: phase4-datadog-agent
+    environment:
+      DD_API_KEY: ${DD_API_KEY:-}
+      DD_SITE: ${DD_SITE:-datadoghq.com}
+      DD_ENV: development
+      DD_APM_ENABLED: 'true'
+      DD_APM_NON_LOCAL_TRAFFIC: 'true'
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: 'true'
+      DD_LOGS_ENABLED: 'true'
+      DD_PROCESS_AGENT_ENABLED: 'true'
+    ports:
+      - '8126:8126'
+      - '8125:8125/udp'
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: phase4-rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-os:
+    image: postgres:16-alpine
+    container_name: phase4-postgres-os
+    environment:
+      POSTGRES_USER: os
+      POSTGRES_PASSWORD: ${OS_POSTGRES_PASSWORD:?OS_POSTGRES_PASSWORD is required}
+      POSTGRES_DB: os_db
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_os_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U os -d os_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-billing:
+    image: postgres:16-alpine
+    container_name: phase4-postgres-billing
+    environment:
+      POSTGRES_USER: billing
+      POSTGRES_PASSWORD: ${BILLING_POSTGRES_PASSWORD:?BILLING_POSTGRES_PASSWORD is required}
+      POSTGRES_DB: billing_db
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_billing_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U billing -d billing_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-execution:
+    image: mongo:7
+    container_name: phase4-mongo-execution
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: execution
+      MONGO_INITDB_ROOT_PASSWORD: ${EXECUTION_MONGO_ROOT_PASSWORD:?EXECUTION_MONGO_ROOT_PASSWORD is required}
+      MONGO_INITDB_DATABASE: execution_db
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_execution_data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.adminCommand("ping").ok']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  os-service:
+    build:
+      context: ./os-service
+    container_name: phase4-os-service
+    environment:
+      DATABASE_URL: postgresql://os:${OS_POSTGRES_PASSWORD:?OS_POSTGRES_PASSWORD is required}@postgres-os:5432/os_db
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      PORT: 3001
+      NODE_ENV: development
+      DD_TRACE_ENABLED: 'true'
+      DD_SERVICE: os-service
+      DD_ENV: development
+      DD_VERSION: dev
+      DD_AGENT_HOST: datadog-agent
+      DD_TRACE_AGENT_PORT: 8126
+    ports:
+      - '3001:3001'
+    depends_on:
+      datadog-agent:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      postgres-os:
+        condition: service_healthy
+
+  billing-service:
+    build:
+      context: ./billing-service
+    container_name: phase4-billing-service
+    environment:
+      DATABASE_URL: postgresql://billing:${BILLING_POSTGRES_PASSWORD:?BILLING_POSTGRES_PASSWORD is required}@postgres-billing:5432/billing_db
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      PORT: 3002
+      NODE_ENV: development
+      DD_TRACE_ENABLED: 'true'
+      DD_SERVICE: billing-service
+      DD_ENV: development
+      DD_VERSION: dev
+      DD_AGENT_HOST: datadog-agent
+      DD_TRACE_AGENT_PORT: 8126
+    ports:
+      - '3002:3002'
+    depends_on:
+      datadog-agent:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      postgres-billing:
+        condition: service_healthy
+
+  execution-service:
+    build:
+      context: ./execution-service
+    container_name: phase4-execution-service
+    environment:
+      MONGODB_URI: mongodb://execution:${EXECUTION_MONGO_ROOT_PASSWORD:?EXECUTION_MONGO_ROOT_PASSWORD is required}@mongo-execution:27017/execution_db?authSource=admin
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      PORT: 3003
+      NODE_ENV: development
+      DD_TRACE_ENABLED: 'true'
+      DD_SERVICE: execution-service
+      DD_ENV: development
+      DD_VERSION: dev
+      DD_AGENT_HOST: datadog-agent
+      DD_TRACE_AGENT_PORT: 8126
+    ports:
+      - '3003:3003'
+    depends_on:
+      datadog-agent:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      mongo-execution:
+        condition: service_healthy
+
+volumes:
+  postgres_os_data:
+  postgres_billing_data:
+  mongo_execution_data:

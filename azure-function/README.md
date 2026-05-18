@@ -6,6 +6,7 @@ Função serverless para autenticação de clientes via CPF, gerando tokens JWT 
 
 - ✅ Validação de CPF (algoritmo completo)
 - ✅ Consulta ao banco de dados PostgreSQL
+- ✅ Validação de status do cliente (ativo/inativo)
 - ✅ Verificação de tipo de cliente (Pessoa Física)
 - ✅ Geração de token JWT
 - ✅ Tratamento de erros robusto
