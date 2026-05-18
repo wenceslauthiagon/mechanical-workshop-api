@@ -1,12 +1,22 @@
 import { randomUUID } from 'node:crypto';
-import { OrderRepository } from '../infra/order.repository';
 import { OrderStatus, ServiceOrder } from '../domain/order';
 import { publishEvent } from '../infra/rabbitmq';
+import { OrderRepositoryPort } from './order-repository.port';
+
+const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  OPENED: ['BUDGET_PENDING', 'CANCELLED'],
+  BUDGET_PENDING: ['BUDGET_APPROVED', 'CANCELLED'],
+  BUDGET_APPROVED: ['PAYMENT_CONFIRMED', 'CANCELLED'],
+  PAYMENT_CONFIRMED: ['IN_EXECUTION', 'COMPLETED', 'CANCELLED'],
+  IN_EXECUTION: ['COMPLETED', 'CANCELLED'],
+  COMPLETED: [],
+  CANCELLED: [],
+};
 
 export class OrderService {
-  constructor(private readonly repo: OrderRepository) {}
+  constructor(private readonly repo: OrderRepositoryPort) {}
 
-  open(customerId: string, vehicleId: string, description: string): ServiceOrder {
+  async open(customerId: string, vehicleId: string, description: string): Promise<ServiceOrder> {
     const id = randomUUID();
     const order: ServiceOrder = {
       id,
@@ -17,30 +27,44 @@ export class OrderService {
       history: [{ status: 'OPENED', at: new Date().toISOString() }],
     };
 
-    this.repo.create(order);
-    
+    await this.repo.create(order);
+
     // Emitir comando para billing gerar orçamento
     publishEvent('command.billing.generate', { orderId: id, customerId, vehicleId }).catch(() => undefined);
 
     return order;
   }
 
-  mark(orderId: string, status: OrderStatus, reason?: string): ServiceOrder {
-    const order = this.repo.findById(orderId);
-    if (!order) throw new Error('ORDER_NOT_FOUND');
-
-    order.status = status;
-    order.history.push({ status, at: new Date().toISOString(), reason });
-    this.repo.save(order);
-    
-    // Emitir evento de mudança de status
-    publishEvent(`event.order.${status.toLowerCase()}`, { orderId, status, reason }).catch(() => undefined);
-    
+  async approveBudget(orderId: string): Promise<ServiceOrder> {
+    const order = await this.mark(orderId, 'BUDGET_APPROVED');
+    publishEvent('command.billing.approve', { orderId }).catch(() => undefined);
     return order;
   }
 
-  get(orderId: string): ServiceOrder {
-    const order = this.repo.findById(orderId);
+  async mark(orderId: string, status: OrderStatus, reason?: string): Promise<ServiceOrder> {
+    const order = await this.repo.findById(orderId);
+    if (!order) throw new Error('ORDER_NOT_FOUND');
+
+    if (order.status === status) {
+      return order;
+    }
+
+    if (!ALLOWED_TRANSITIONS[order.status].includes(status)) {
+      throw new Error('ORDER_INVALID_STATUS_TRANSITION');
+    }
+
+    order.status = status;
+    order.history.push({ status, at: new Date().toISOString(), reason });
+    await this.repo.save(order);
+
+    // Emitir evento de mudança de status
+    publishEvent(`event.order.${status.toLowerCase()}`, { orderId, status, reason }).catch(() => undefined);
+
+    return order;
+  }
+
+  async get(orderId: string): Promise<ServiceOrder> {
+    const order = await this.repo.findById(orderId);
     if (!order) throw new Error('ORDER_NOT_FOUND');
     return order;
   }

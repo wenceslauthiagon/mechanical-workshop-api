@@ -7,6 +7,7 @@
  */
 
 import { Budget, Payment } from '../domain';
+import { BillingRepository } from '../billing.repository';
 
 // ── Prisma-shape interfaces ──
 interface PrismaBudget {
@@ -28,7 +29,7 @@ interface PrismaPayment {
   createdAt: Date;
 }
 
-interface BillingPrismaClient {
+export interface BillingPrismaClient {
   budget: {
     create(args: { data: Omit<PrismaBudget, 'createdAt' | 'updatedAt' | 'payments'> }): Promise<PrismaBudget>;
     findFirst(args: { where: { orderId: string } }): Promise<PrismaBudget | null>;
@@ -37,12 +38,13 @@ interface BillingPrismaClient {
   };
   payment: {
     create(args: { data: Omit<PrismaPayment, 'createdAt'> }): Promise<PrismaPayment>;
+    findUnique(args: { where: { id: string } }): Promise<PrismaPayment | null>;
     findFirst(args: { where: { budgetId: string } }): Promise<PrismaPayment | null>;
     update(args: { where: { id: string }; data: Partial<PrismaPayment> }): Promise<PrismaPayment>;
   };
 }
 
-export class BillingPrismaRepository {
+export class BillingPrismaRepository implements BillingRepository {
   constructor(private readonly db: BillingPrismaClient) {}
 
   async createBudget(budget: Budget): Promise<Budget> {
@@ -67,6 +69,10 @@ export class BillingPrismaRepository {
     return raw ? this.budgetToDomain(raw) : undefined;
   }
 
+  async updateBudget(id: string, status: Budget['status']): Promise<void> {
+    await this.db.budget.update({ where: { id }, data: { status } });
+  }
+
   async createPayment(payment: Payment): Promise<Payment> {
     const created = await this.db.payment.create({
       data: {
@@ -86,6 +92,11 @@ export class BillingPrismaRepository {
 
   async findPaymentByBudgetId(budgetId: string): Promise<Payment | undefined> {
     const raw = await this.db.payment.findFirst({ where: { budgetId } });
+    return raw ? this.paymentToDomain(raw) : undefined;
+  }
+
+  async findPaymentById(id: string): Promise<Payment | undefined> {
+    const raw = await this.db.payment.findUnique({ where: { id } });
     return raw ? this.paymentToDomain(raw) : undefined;
   }
 

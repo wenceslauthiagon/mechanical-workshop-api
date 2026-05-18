@@ -14,9 +14,10 @@ Foi adotado **Saga Orquestrado** com o `os-service` como coordenador do fluxo:
 
 1. Abrir OS
 2. Gerar orçamento
-3. Aprovar e processar pagamento (Mercado Pago)
-4. Enviar para execução
-5. Finalizar OS
+3. Aprovar orçamento (ação do cliente)
+4. Processar pagamento (Mercado Pago)
+5. Enviar para execução
+6. Finalizar OS
 
 Compensações em falha:
 
@@ -28,14 +29,30 @@ Compensações em falha:
 - RabbitMQ (exchange `workshop.events`, tipo topic)
 - Comandos e eventos por roteamento:
   - `command.billing.generate`
+  - `command.billing.approve`
+  - `event.billing.budget_generated`
+  - `event.billing.budget_generation_failed`
   - `event.billing.payment_confirmed`
   - `command.execution.start`
+  - `event.execution.started`
   - `event.execution.completed`
   - etc.
 
 ## Como rodar local
 
 1. Suba infraestrutura local:
+
+Antes, copie as variaveis do compose:
+
+```bash
+cp phase4/.env.example phase4/.env
+```
+
+No PowerShell:
+
+```powershell
+Copy-Item phase4/.env.example phase4/.env
+```
 
 ```bash
 docker compose -f phase4/docker-compose.yml up -d
@@ -47,6 +64,35 @@ docker compose -f phase4/docker-compose.yml up -d
 npm install
 npm run dev
 ```
+
+## Datadog APM em desenvolvimento
+
+O APM está configurado nos 3 serviços e pode ser ativado via variáveis de ambiente:
+
+```powershell
+cd phase4/os-service
+$env:DD_TRACE_ENABLED='true'
+$env:DD_SERVICE='os-service'
+$env:DD_ENV='development'
+$env:DD_VERSION='dev'
+$env:DD_AGENT_HOST='localhost'
+$env:DD_TRACE_AGENT_PORT='8126'
+npm run dev
+```
+
+Para ver a configuração do Datadog no terminal sem iniciar o servidor:
+
+```powershell
+npm run apm:log
+```
+
+Output esperado:
+```
+Datadog APM habilitado (ambiente: development)
+{"service":"os-service","env":"development","version":"dev","agentHost":"localhost","agentPort":"8126","traceEnabled":true,"logsInjection":true,"runtimeMetrics":true}
+```
+
+Esse comando funciona em todos os 3 serviços com o mesmo padrão.
 
 ## Como comprovar execução em ambiente real
 
@@ -81,6 +127,38 @@ O documento central para essa comprovação é `phase4/docs/ENTREGA_FASE4.md`.
 - pipeline CI/CD por serviço
 - Dockerfile + manifestos Kubernetes por serviço
 - integração com Mercado Pago via cliente dedicado com fallback local para desenvolvimento
+
+## Documentacao e evidencias
+
+- Arquitetura geral da fase: `phase4/docs/architecture.md`
+- Matriz de conformidade e checklist administrativo: `phase4/docs/ENTREGA_FASE4.md`
+- Collection Postman atualizada (3 servicos): `phase4/docs/Mechanical-Workshop-Phase4.postman_collection.json`
+- Evidencia de cobertura por servico: execute `npm --prefix phase4 run test:cov` e use os relatorios em `phase4/*/coverage/`
+
+## CI/CD por microsserviço (executável no GitHub Actions)
+
+Os workflows válidos estão na raiz do repositório em `.github/workflows`:
+
+- `.github/workflows/phase4-os-service-cicd.yml`
+- `.github/workflows/phase4-billing-service-cicd.yml`
+- `.github/workflows/phase4-execution-service-cicd.yml`
+
+Cada pipeline executa:
+
+1. build
+2. testes com cobertura
+3. quality gate (SonarQube)
+4. build/push de imagem no GHCR
+5. deploy em Kubernetes
+
+## Checklist rápido de validação local
+
+1. Subir infraestrutura: `docker compose -f phase4/docker-compose.yml up -d`
+2. Rodar cobertura: `npm --prefix phase4 run test:cov`
+3. Subir serviços em dev:
+  - `npm --prefix phase4/os-service run dev`
+  - `npm --prefix phase4/billing-service run dev`
+  - `npm --prefix phase4/execution-service run dev`
 
 ## Repositórios por serviço
 

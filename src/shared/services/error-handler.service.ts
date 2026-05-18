@@ -40,13 +40,10 @@ export class ErrorHandlerService {
     const message = this.extractErrorMessage(error);
     const statusCode = this.extractStatusCode(error);
 
-    console.error(`[${statusCode}] ${message}`, error.stack);
-
     this.throwAppropriateException(message, statusCode);
   }
 
   generateException(message: string, statusCode: number): never {
-    console.error(`[${statusCode}] ${message}`);
     this.throwAppropriateException(message, statusCode);
   }
 

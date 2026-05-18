@@ -32,6 +32,7 @@ describe('BillingPrismaRepository', () => {
       },
       payment: {
         create: jest.fn(),
+        findUnique: jest.fn(),
         findFirst: jest.fn(),
         update: jest.fn(),
       },
@@ -119,6 +120,32 @@ describe('BillingPrismaRepository', () => {
       amount: 1500,
       status: 'CONFIRMED',
       mercadopagoId: undefined,
+    });
+    expect(missing).toBeUndefined();
+  });
+
+  it('TC0007 - Should update budget status', async () => {
+    db.budget.update.mockResolvedValue({ ...budgetRaw, status: 'APPROVED' });
+
+    await repo.updateBudget('b1', 'APPROVED');
+
+    expect(db.budget.update).toHaveBeenCalledWith({ where: { id: 'b1' }, data: { status: 'APPROVED' } });
+  });
+
+  it('TC0008 - Should find payment by id and map mercadopagoId string', async () => {
+    db.payment.findUnique
+      .mockResolvedValueOnce({ ...paymentRaw, mercadopagoId: 'mp-123' })
+      .mockResolvedValueOnce(null);
+
+    const found = await repo.findPaymentById('p1');
+    const missing = await repo.findPaymentById('p2');
+
+    expect(found).toEqual({
+      id: 'p1',
+      budgetId: 'b1',
+      amount: 1500,
+      status: 'CONFIRMED',
+      mercadopagoId: 'mp-123',
     });
     expect(missing).toBeUndefined();
   });

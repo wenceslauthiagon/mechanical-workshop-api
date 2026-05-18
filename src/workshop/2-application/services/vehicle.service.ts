@@ -39,7 +39,7 @@ export class VehicleService {
     }
 
     // Map DTO to Prisma format
-    const { plate, ...rest } = data;
+    const { plate, notes: _notes, ...rest } = data;
     const vehicle = await this.vehicleRepository.create({
       ...rest,
       licensePlate: plate,
@@ -119,9 +119,10 @@ export class VehicleService {
     }
 
     // Map DTO to Prisma format if plate is present
-    const updateData = data.plate
-      ? { ...data, licensePlate: data.plate, plate: undefined }
-      : data;
+    const { notes: _notes, ...vehicleData } = data;
+    const updateData = vehicleData.plate
+      ? { ...vehicleData, licensePlate: vehicleData.plate, plate: undefined }
+      : vehicleData;
     const updatedVehicle = await this.vehicleRepository.update(id, updateData);
     return this.mapToResponseDto(updatedVehicle);
   }

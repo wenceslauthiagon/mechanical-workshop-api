@@ -401,13 +401,33 @@ Feature: OS Saga Pattern Flow
 
 ## 8️⃣ Matriz de Comprovação
 
-Preencher antes de enviar para revisão:
+### Bancos de Dados Gerenciados ✅
+
+#### PostgreSQL (Neon)
+- **Provider**: Neon (PostgreSQL gerenciado na nuvem)
+- **Status**: ✅ Ativo e testado
+- **Conexão**: `postgresql://neondb_owner:***@ep-cold-recipe-apctn6a7-pooler.c-7.us-east-1.aws.neon.tech/neondb`
+- **Teste de conexão**: Validado com `SELECT NOW()` — sucesso
+- **Serviços conectados**: OS Service (Phase4), Billing Service (Phase4)
+- **Evidência**: Query de sucesso na data/hora do servidor
+
+#### MongoDB Atlas
+- **Provider**: MongoDB Atlas (Free Tier M0)
+- **Status**: ✅ Ativo e configurado
+- **Cluster**: `mechanical-workshop` (Region: AWS US East 1)
+- **Conexão**: `mongodb+srv://thiagocnwenceslau_db_user:***@cluster0.cdaciki.mongodb.net/?appName=Cluster0`
+- **Serviços conectados**: Execution Service (Phase4)
+- **Evidência**: Connection string gerada no Atlas Dashboard
+
+---
+
+### Matriz de Comprovação Completa
 
 | Item Avaliado | Evidência (URL/Print) | Status |
 |---|---|---|
+| ✅ PostgreSQL gerenciado | Neon: Conexão testada com sucesso (`SELECT NOW()`) | ✅ Completo |
+| ✅ MongoDB Atlas | Atlas M0 Free Tier: Cluster `mechanical-workshop` ativo | ✅ Completo |
 | ✅ Deploy em K8s | `[PREENCHER: kubectl get pods output]` | Pendente |
-| ✅ PostgreSQL RDS | `[PREENCHER: console screenshot]` | Pendente |
-| ✅ MongoDB Atlas | `[PREENCHER: console screenshot]` | Pendente |
 | ✅ CI/CD GitHub Actions | `[PREENCHER: workflow run link]` | Pendente |
 | ✅ Testes (cobertura ≥80%) | `[PREENCHER: npm run test:cov output]` | Pendente |
 | ✅ BDD Feature Files | `[PREENCHER: run dos testes Gherkin]` | Pendente |

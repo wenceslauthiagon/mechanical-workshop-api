@@ -34,4 +34,17 @@ describe('index', () => {
 
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
+
+  it('TC0003 - Should use default port 3002 when PORT is not set', async () => {
+    const listen = jest.fn();
+
+    jest.doMock('../../src/app', () => ({
+      createApp: jest.fn().mockResolvedValue({ app: { listen } }),
+    }));
+
+    await import('../../src/index');
+    await new Promise(resolve => setImmediate(resolve));
+
+    expect(listen).toHaveBeenCalledWith(3002);
+  });
 });
