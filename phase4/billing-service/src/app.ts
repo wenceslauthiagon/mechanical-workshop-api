@@ -15,9 +15,18 @@ const openApiSpec = {
   info: {
     title: 'Billing Service API',
     version: '1.0.0',
-    description: 'Endpoints para geração de orçamento e aprovação de pagamento (Mercado Pago/mock).',
+    description: 'Endpoints para geração de orçamento e aprovação de pagamento (Mercado Pago).',
   },
-  servers: [{ url: 'http://127.0.0.1:3002' }],
+  tags: [
+    {
+      name: 'Health',
+      description: 'Status do serviço',
+    },
+    {
+      name: 'Billing',
+      description: 'Operações de orçamento e integração de pagamento com Mercado Pago',
+    },
+  ],
   components: {
     securitySchemes: {
       bearerAuth: {
@@ -29,6 +38,7 @@ const openApiSpec = {
   paths: {
     '/health': {
       get: {
+        tags: ['Health'],
         summary: 'Health check',
         responses: {
           200: {
@@ -39,6 +49,7 @@ const openApiSpec = {
     },
     '/billing/budget': {
       post: {
+        tags: ['Billing'],
         summary: 'Criar orçamento',
         security: [{ bearerAuth: [] }],
         requestBody: {
@@ -67,8 +78,9 @@ const openApiSpec = {
     },
     '/billing/payment/approve': {
       post: {
+        tags: ['Billing'],
         summary: 'Aprovar pagamento',
-        description: 'Com MP_ACCESS_TOKEN usa Mercado Pago real; sem token usa fallback mock.',
+        description: 'Integração com Mercado Pago: com MP_ACCESS_TOKEN utiliza o gateway real; sem token aplica fallback mock para desenvolvimento local.',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -86,7 +98,7 @@ const openApiSpec = {
           },
         },
         responses: {
-          201: { description: 'Pagamento aprovado' },
+          201: { description: 'Pagamento aprovado (retorna mercadopagoId)' },
           400: { description: 'Payload inválido' },
           402: { description: 'Pagamento não aprovado' },
           404: { description: 'Orçamento não encontrado' },
@@ -98,6 +110,7 @@ const openApiSpec = {
     },
     '/billing/order/{orderId}': {
       get: {
+        tags: ['Billing'],
         summary: 'Consultar cobrança por orderId',
         security: [{ bearerAuth: [] }],
         parameters: [

@@ -6,7 +6,7 @@ export const NOTIFICATION_CONFIG = {
 
   GMAIL: {
     HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
-    PORT: parseInt(process.env.SMTP_PORT || '587'),
+    PORT: Number.parseInt(process.env.SMTP_PORT || '587'),
     SECURE: process.env.SMTP_SECURE === 'true',
     USER: process.env.SMTP_USER,
     PASS: process.env.SMTP_PASS,

@@ -156,9 +156,9 @@ export class ServiceOrderController {
 
   @Patch(':id/status')
   @ApiOperation({
-    summary: 'Atualizar status da ordem de serviço',
+    summary: 'Update service order status',
     description:
-      'Atualiza o status da ordem de serviço seguindo o fluxo: RECEBIDA → EM_DIAGNOSTICO → AGUARDANDO_APROVACAO → EM_EXECUCAO → FINALIZADA → ENTREGUE',
+      'Updates the service order status following the flow: RECEIVED → IN_DIAGNOSIS → AWAITING_APPROVAL → IN_EXECUTION → FINISHED → DELIVERED',
   })
   @ApiParam({
     name: 'id',
@@ -187,9 +187,9 @@ export class ServiceOrderController {
 
   @Patch(':id/approve')
   @ApiOperation({
-    summary: 'Aprovar orçamento da ordem de serviço',
+    summary: 'Approve service order budget',
     description:
-      'Aprova o orçamento e move a ordem de serviço para status EM_EXECUCAO',
+      'Approves the budget and moves the service order to IN_EXECUTION status',
   })
   @ApiParam({
     name: 'id',
