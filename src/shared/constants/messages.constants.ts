@@ -187,9 +187,9 @@ export const API_DESCRIPTIONS = {
   LIST_SERVICE_ORDERS: 'Retorna todas as ordens de serviço do sistema',
   FIND_SERVICE_ORDER: 'Retorna os detalhes completos de uma ordem de serviço',
   UPDATE_SERVICE_ORDER_STATUS:
-    'Atualiza o status da ordem de serviço seguindo o fluxo: RECEBIDA → EM_DIAGNOSTICO → AGUARDANDO_APROVACAO → EM_EXECUCAO → FINALIZADA → ENTREGUE',
+    'Updates the service order status following the flow: RECEIVED → IN_DIAGNOSIS → AWAITING_APPROVAL → IN_EXECUTION → FINISHED → DELIVERED',
   APPROVE_SERVICE_ORDER:
-    'Aprova o orçamento e move a ordem de serviço para status EM_EXECUCAO',
+    'Approves the budget and moves the service order to IN_EXECUTION status',
   SERVICE_ORDER_STATUS_HISTORY:
     'Retorna o histórico completo de mudanças de status da ordem de serviço',
   FIND_SERVICE_ORDERS_BY_CLIENT:
