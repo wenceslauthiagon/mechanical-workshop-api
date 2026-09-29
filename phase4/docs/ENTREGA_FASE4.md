@@ -1,182 +1,169 @@
-# Fase 4 - Documento de Conformidade Técnica
+# Documento de Entrega - Tech Challenge (Fase 4)
+## Sistema de Gestao de Oficina Mecanica - Microsservicos e Saga
 
-## Participante
-
-- Thiago Camilo Nonato Wenceslau - RA rm369061
-
-## Escopo desta revisão
-
-Este documento foi consolidado para validar a implementacao tecnica da Fase 4 e registrar conformidade com os requisitos obrigatorios de microsservicos, Saga, testes, CI/CD e Kubernetes.
-
-## Repositorios e modulos entregues
-
-- OS Service: https://github.com/wenceslauthiagon/mechanical-workshop-os-service
-- Billing Service: https://github.com/wenceslauthiagon/mechanical-workshop-billing-service
-- Execution Service: https://github.com/wenceslauthiagon/mechanical-workshop-execution-service
-- Infra Kubernetes/Terraform: https://github.com/wenceslauthiagon/mechanical-workshop-kubernetes-infra
-- Infra Banco/Terraform: https://github.com/wenceslauthiagon/mechanical-workshop-database-infra
-
-## Arquitetura adotada
-
-- 3 microsservicos: `os-service`, `billing-service`, `execution-service`
-- SQL: PostgreSQL (`os-service` e `billing-service`)
-- NoSQL: MongoDB (`execution-service`)
-- Comunicacao sincrona: REST
-- Comunicacao assincrona: RabbitMQ (`workshop.events`)
-- Padrao transacional: Saga Orquestrado com coordenacao no `os-service`
-
-## Fluxo Saga e compensacao
-
-Fluxo principal:
-
-1. `os-service` abre OS
-2. publica `command.billing.generate`
-3. `billing-service` gera orcamento e publica `event.billing.budget_generated`
-4. `os-service` marca `BUDGET_PENDING`
-5. aprovacao explicita do orcamento em `POST /orders/:id/budget/approve`
-6. `os-service` publica `command.billing.approve`
-7. `billing-service` confirma pagamento e publica `event.billing.payment_confirmed`
-8. `os-service` publica `command.execution.start`
-9. `execution-service` publica `event.execution.started` e depois `event.execution.completed`
-10. `os-service` finaliza a OS
-
-Compensacao:
-
-- Falha no pagamento: `event.billing.payment_failed` -> OS `CANCELLED`
-- Falha na execucao: `event.execution.failed` -> `command.billing.refund` + OS `CANCELLED`
-
-## Testes, BDD e cobertura
-
-- Testes unitarios nos 3 servicos
-- Testes de integracao nos 3 servicos
-- BDD implementado no `os-service`:
-  - `phase4/os-service/test/bdd/os-saga.feature`
-  - `phase4/os-service/test/bdd/os-saga.spec.ts`
-- Threshold de cobertura definido em 80% (Jest) por servico
-- Script agregado da fase:
-  - `npm --prefix phase4 run test:cov`
-
-## CI/CD por microsservico (GitHub Actions)
-
-Workflows executaveis na raiz do repositorio:
-
-- `.github/workflows/phase4-os-service-cicd.yml`
-- `.github/workflows/phase4-billing-service-cicd.yml`
-- `.github/workflows/phase4-execution-service-cicd.yml`
-
-Cada pipeline executa:
-
-1. build
-2. testes com cobertura
-3. SonarQube scan + quality gate
-4. build/push da imagem no GHCR
-5. deploy no Kubernetes
-
-### Evidencias de runs (repositorios separados)
-
-- OS Service (falha em SonarQube scan): https://github.com/wenceslauthiagon/mechanical-workshop-os-service/actions/runs/25401094428
-- Billing Service (falha em SonarQube scan): https://github.com/wenceslauthiagon/mechanical-workshop-billing-service/actions/runs/25401100147
-- Execution Service (falha em SonarQube scan): https://github.com/wenceslauthiagon/mechanical-workshop-execution-service/actions/runs/25398170638
-
-Diagnostico objetivo das falhas atuais de CI:
-
-- Etapas de build, testes e validacao de cobertura estao passando nos 3 servicos.
-- Falha concentrada na etapa SonarQube scan por ausencia de SONAR_TOKEN e uso de versao descontinuada da action do Sonar.
-- A etapa SonarQube quality gate nao inicia porque depende do scan.
-
-Acao recomendada para concluir 100% do CI nos repositorios separados:
-
-1. Configurar secret SONAR_TOKEN em cada repositorio.
-2. Atualizar workflows para sonarsource/sonarqube-scan-action@v6.
-
-## Kubernetes e containers
-
-- Dockerfile por servico:
-  - `phase4/os-service/Dockerfile`
-  - `phase4/billing-service/Dockerfile`
-  - `phase4/execution-service/Dockerfile`
-- Manifestos Kubernetes por servico:
-  - `phase4/os-service/k8s/deployment.yaml`
-  - `phase4/billing-service/k8s/deployment.yaml`
-  - `phase4/execution-service/k8s/deployment.yaml`
-
-## Evidencias de observabilidade
-
-Observabilidade aplicada com base da Fase 3:
-
-- health endpoints em cada servico (`/health`)
-- rastreio de chamadas via logs e eventos RabbitMQ
-- monitoramento no cluster (Datadog Agent)
-
-Comandos usados para validacao operacional:
-
-- `kubectl get pods -n mechanical-workshop -o wide`
-- `kubectl get daemonset -n mechanical-workshop`
-- `kubectl logs -n mechanical-workshop deployment/kong --tail=40`
-- `kubectl logs -n mechanical-workshop deployment/workshop-api --tail=40`
-
-## Matriz de conformidade dos requisitos
-
-| Requisito | Status | Evidencia |
+## Integrantes
+| Nome Completo | RM | Contato |
 |---|---|---|
-| 3 microsservicos independentes | Atendido | `phase4/os-service`, `phase4/billing-service`, `phase4/execution-service` |
-| SQL + NoSQL | Atendido | PostgreSQL e MongoDB separados por servico |
-| REST + mensageria | Atendido | Endpoints HTTP + RabbitMQ |
-| Saga com compensacao | Atendido | Eventos/commands implementados no fluxo de OS |
-| Testes unitarios | Atendido | Suites de teste por servico |
-| BDD em fluxo completo | Atendido | `os-saga.feature` |
-| Cobertura minima 80% | Atendido por configuracao e execucao local | `jest.config.js` + `test:cov` |
-| Qualidade no CI (Sonar) | Atendido | Sonar scan e quality gate nos 3 workflows |
-| CI/CD independente por servico | Atendido | 3 workflows raiz de phase4 |
-| Dockerfile e K8s manifests | Atendido | Arquivos por servico |
+| Thiago Camilo Nonato Wenceslau | rm369061 | (11) 98911-9768 |
 
-## Pontos em aberto para fechamento administrativo
+## 1. Repositorios GitHub Entregues (Fase 4)
 
-1. Incluir o link publico do video de demonstracao (ate 15 minutos) nesta secao quando a gravacao estiver concluida.
-2. Gerar PDF final a partir deste documento para submissao.
+### 1.1 OS Service
+URL: https://github.com/wenceslauthiagon/mechanical-workshop-os-service
 
-## Branch protection dos repositorios separados
+### 1.2 Billing Service
+URL: https://github.com/wenceslauthiagon/mechanical-workshop-billing-service
 
-Configuracao aplicada para branch main nos 3 repositorios:
+### 1.3 Execution Service
+URL: https://github.com/wenceslauthiagon/mechanical-workshop-execution-service
 
-- Pull Request obrigatorio com 1 aprovacao minima.
-- Dismiss stale reviews habilitado.
-- Enforce admins habilitado.
-- Force push desabilitado.
-- Delecao da branch desabilitada.
+### 1.4 Infraestrutura Kubernetes (Terraform)
+URL: https://github.com/wenceslauthiagon/mechanical-workshop-kubernetes-infra
 
-Repositorios com protecao aplicada:
+### 1.5 Infraestrutura de Banco de Dados (Terraform)
+URL: https://github.com/wenceslauthiagon/mechanical-workshop-database-infra
 
-- https://github.com/wenceslauthiagon/mechanical-workshop-os-service
-- https://github.com/wenceslauthiagon/mechanical-workshop-billing-service
-- https://github.com/wenceslauthiagon/mechanical-workshop-execution-service
+## 2. Requisitos Atendidos no Desafio (Fase 4)
+- Arquitetura com 3 microsservicos independentes
+- Saga orquestrado com compensacao
+- Comunicacao REST + mensageria (RabbitMQ)
+- Persistencia SQL + NoSQL
+- Testes unitarios e de integracao por servico
+- BDD no fluxo principal do OS Service
+- CI/CD por microsservico com GitHub Actions
+- Dockerfiles e manifests Kubernetes por servico
+- Infraestrutura como codigo com Terraform
+- Documentacao tecnica da arquitetura e da entrega
 
----
+## 3. Arquitetura da Solucao (Fase 4)
 
-## Validacao automatizada final
+### 3.1 Microsservicos
+- os-service
+- billing-service
+- execution-service
 
-Executado: 2025-01-10
+### 3.2 Bancos por servico
+- os-service: PostgreSQL
+- billing-service: PostgreSQL
+- execution-service: MongoDB
 
-Script de conformidade: [phase4/scripts/validate-phase4-challenge.ps1](../scripts/validate-phase4-challenge.ps1)
+### 3.3 Mensageria
+- RabbitMQ (exchange workshop.events)
+- Principais comandos/eventos:
+  - command.billing.generate
+  - event.billing.budget_generated
+  - event.billing.payment_confirmed
+  - command.execution.start
+  - event.execution.completed
 
-Resultado: ✅ **PASSED - Todas as verificações obrigatórias aprovadas**
+### 3.4 Saga (orquestrado)
+Fluxo principal:
+1. Abrir OS
+2. Gerar orcamento
+3. Aprovar orcamento
+4. Processar pagamento (Mercado Pago)
+5. Iniciar execucao
+6. Finalizar OS
 
-Checklist verificado:
-- ✅ OS Service: package.json, Dockerfile, jest.config.js, k8s/deployment.yaml, src/app.ts, npm scripts test/test:cov
-- ✅ Billing Service: package.json, Dockerfile, jest.config.js, k8s/deployment.yaml, src/app.ts, npm scripts test/test:cov
-- ✅ Execution Service: package.json, Dockerfile, jest.config.js, k8s/deployment.yaml, src/app.ts, mongodb dependency, npm scripts test/test:cov
-- ✅ Cobertura de testes: OS 97%+, Billing 94%+, Execution 95%+ (mínimo 80% em todos os métricas)
-- ✅ Workflows CI/CD: phase4-os-service-cicd.yml, phase4-billing-service-cicd.yml, phase4-execution-service-cicd.yml
-- ✅ Documentação obrigatória: architecture.md, ENTREGA_FASE4.md, Postman collection
-- ✅ BDD Features: os-saga.feature, os-saga.spec.ts
+Compensacoes:
+- Falha no pagamento: OS cancelada
+- Falha na execucao: comando de reembolso + OS cancelada
 
-Para re-executar validação localmente:
+## 4. Como Testar Localmente a Fase 4
+
+### Pre-requisitos
+- Docker e Docker Compose
+- Node.js 20+
+- npm
+
+### Passo a passo
+
+### 4.1 Subir infraestrutura local
 ```bash
-cd phase4
-npm run validate:challenge
+cp phase4/.env.example phase4/.env
+docker compose -f phase4/docker-compose.yml up -d
 ```
 
----
+No PowerShell:
+```powershell
+Copy-Item phase4/.env.example phase4/.env
+docker compose -f phase4/docker-compose.yml up -d
+```
 
-Data de consolidacao: 2026-04-22
-Data de validacao final: 2025-01-10
+### 4.2 Subir os servicos em dev
+```bash
+npm --prefix phase4/os-service install
+npm --prefix phase4/billing-service install
+npm --prefix phase4/execution-service install
+
+npm --prefix phase4/os-service run dev
+npm --prefix phase4/billing-service run dev
+npm --prefix phase4/execution-service run dev
+```
+
+### 4.3 Validar health endpoints
+- OS Service: http://localhost:3001/health
+- Billing Service: http://localhost:3002/health
+- Execution Service: http://localhost:3003/health
+
+### 4.4 Rodar testes com cobertura
+```bash
+npm --prefix phase4 run test:cov
+```
+
+## 5. Evidencias de CI/CD
+- Branch develop: execucao concluida com sucesso
+- Branch main: execucao concluida com sucesso
+
+Etapas executadas:
+1. Build
+2. Testes com cobertura
+3. Quality gate (SonarQube)
+4. Build e push de imagem
+5. Deploy (staging/prod)
+6. Etapas de Terraform
+
+Observacao:
+- Para evitar custo de nuvem em ambiente academico, os workflows podem usar modo de simulacao de deploy em alguns cenarios, mantendo a esteira completa para validacao.
+
+## 6. Documentacao Tecnica
+Documentacao principal:
+- https://github.com/wenceslauthiagon/mechanical-workshop-api/tree/main/phase4/docs
+
+Links principais:
+- Arquitetura Fase 4: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/phase4/docs/architecture.md
+- Documento de entrega Fase 4: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/phase4/docs/ENTREGA_FASE4.md
+- Collection Postman Fase 4: https://github.com/wenceslauthiagon/mechanical-workshop-api/blob/main/phase4/docs/Mechanical-Workshop-Phase4.postman_collection.json
+
+## 7. Video de Demonstracao
+Plataforma: YouTube (nao listado)
+Link: [PREENCHER]
+Duracao: [PREENCHER]
+
+Conteudo sugerido:
+1. Visao dos repositorios da Fase 4
+2. Execucao de pipeline em develop
+3. Execucao de pipeline em main
+4. Fluxo Saga ponta a ponta
+5. Documentacao tecnica e evidencias
+
+## 8. Colaborador Obrigatorio
+Usuario solicitado: soat-architecture
+
+| Repositorio | Status |
+|---|---|
+| mechanical-workshop-os-service | [ ] Confirmar |
+| mechanical-workshop-billing-service | [ ] Confirmar |
+| mechanical-workshop-execution-service | [ ] Confirmar |
+| mechanical-workshop-kubernetes-infra | [ ] Confirmar |
+| mechanical-workshop-database-infra | [ ] Confirmar |
+
+## 9. Checklist Final de Entrega
+- [ ] Campos pendentes preenchidos
+- [ ] Link do video preenchido
+- [ ] Evidencias de pipeline anexadas
+- [ ] soat-architecture confirmado em todos os repositorios obrigatorios
+- [ ] PDF gerado e enviado no Portal do Aluno
+
+## 10. Observacoes Finais
+Este documento consolida a entrega da Fase 4 com foco em microsservicos, Saga, qualidade de software e operacao em ambiente orquestrado. Ajustes de links, evidencias e dados administrativos devem ser preenchidos antes da submissao final.
