@@ -51,7 +51,7 @@ export class ScheduleWalkRemindersUseCase {
       for (let week = 0; week < 12; week++) {
         for (const dayOfWeek of input.daysOfWeek) {
           const dueDate = new Date();
-          dueDate.setDate(dueDate.getDate() + (week * 7) + (dayOfWeek - dueDate.getDay()));
+          dueDate.setDate(dueDate.getDate() + week * 7 + (dayOfWeek - dueDate.getDay()));
           dueDate.setHours(hours, minutes, 0, 0);
 
           if (dueDate > new Date()) {

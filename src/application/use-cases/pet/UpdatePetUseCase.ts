@@ -8,7 +8,7 @@ export class UpdatePetUseCase {
 
   async execute(id: string, data: UpdatePetData): Promise<Pet> {
     const pet = await this.petRepository.findById(id);
-    
+
     if (!pet) {
       throw new NotFoundError('Pet', id);
     }

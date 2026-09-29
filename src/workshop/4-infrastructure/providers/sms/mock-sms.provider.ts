@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NOTIFICATION_CONSTANTS } from '../../../../shared/constants/notification.constants';
-import type {
-  ISmsProvider,
-  SmsData,
-} from '../../../3-domain/interfaces/notification.interface';
+import type { ISmsProvider, SmsData } from '../../../3-domain/interfaces/notification.interface';
 
 @Injectable()
 export class MockSmsProvider implements ISmsProvider {
@@ -20,9 +17,7 @@ export class MockSmsProvider implements ISmsProvider {
         },
       );
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, NOTIFICATION_CONSTANTS.SMS.MOCK_DELAY),
-      );
+      await new Promise((resolve) => setTimeout(resolve, NOTIFICATION_CONSTANTS.SMS.MOCK_DELAY));
 
       this.logger.log(
         `${NOTIFICATION_CONSTANTS.MESSAGES.MOCK_SMS_PREFIX} ${NOTIFICATION_CONSTANTS.MESSAGES.SMS_SENT_SUCCESS} to ${data.phone}`,
@@ -37,9 +32,7 @@ export class MockSmsProvider implements ISmsProvider {
           message: data.message,
         },
       );
-      throw new Error(
-        `${NOTIFICATION_CONSTANTS.MESSAGES.SMS_SENT_ERROR}: ${err.message}`,
-      );
+      throw new Error(`${NOTIFICATION_CONSTANTS.MESSAGES.SMS_SENT_ERROR}: ${err.message}`);
     }
   }
 

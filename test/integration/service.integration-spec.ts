@@ -65,12 +65,10 @@ describe('Service Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
   });
@@ -143,15 +141,11 @@ describe('Service Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
-      expect(
-        response.body.every((service: any) => service.isActive === true),
-      ).toBe(true);
+      expect(response.body.every((service: any) => service.isActive === true)).toBe(true);
     });
 
     it('TC0006 - Should update service', async () => {
-      const updatedPrice = parseFloat(
-        faker.commerce.price({ min: 100, max: 700, dec: 2 }),
-      );
+      const updatedPrice = parseFloat(faker.commerce.price({ min: 100, max: 700, dec: 2 }));
       const updatedMinutes = faker.number.int({ min: 60, max: 300 });
 
       const response = await request(app.getHttpServer())

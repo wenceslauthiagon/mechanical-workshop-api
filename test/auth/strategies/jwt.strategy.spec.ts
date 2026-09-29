@@ -71,8 +71,7 @@ describe('JwtStrategy', () => {
     strategy = module.get<JwtStrategy>(JwtStrategy);
     authService = module.get<jest.Mocked<AuthService>>(AuthService);
     configService = module.get<jest.Mocked<ConfigService>>(ConfigService);
-    errorHandler =
-      module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
+    errorHandler = module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
   });
 
   it('Should be defined', () => {
@@ -82,11 +81,7 @@ describe('JwtStrategy', () => {
 
   it('Should instantiate with service dependencies', () => {
     configService.get.mockReturnValue(mockJwtSecret);
-    const testStrategy = new JwtStrategy(
-      authService,
-      configService,
-      errorHandler,
-    );
+    const testStrategy = new JwtStrategy(authService, configService, errorHandler);
     expect(testStrategy).toBeDefined();
   });
 
@@ -96,9 +91,7 @@ describe('JwtStrategy', () => {
 
       const result = await strategy.validate(mockJwtPayload);
 
-      expect(authService.validateJwtPayload).toHaveBeenCalledWith(
-        mockJwtPayload,
-      );
+      expect(authService.validateJwtPayload).toHaveBeenCalledWith(mockJwtPayload);
       expect(result).toEqual(mockUser);
     });
 
@@ -108,13 +101,9 @@ describe('JwtStrategy', () => {
         throw new Error('Token inválido');
       });
 
-      await expect(strategy.validate(mockJwtPayload)).rejects.toThrow(
-        'Token inválido',
-      );
+      await expect(strategy.validate(mockJwtPayload)).rejects.toThrow('Token inválido');
 
-      expect(authService.validateJwtPayload).toHaveBeenCalledWith(
-        mockJwtPayload,
-      );
+      expect(authService.validateJwtPayload).toHaveBeenCalledWith(mockJwtPayload);
       expect(errorHandler.handleError).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Token inválido',
@@ -126,13 +115,9 @@ describe('JwtStrategy', () => {
       const mockError = new Error('Database connection error');
       authService.validateJwtPayload.mockRejectedValue(mockError);
 
-      await expect(strategy.validate(mockJwtPayload)).rejects.toThrow(
-        mockError,
-      );
+      await expect(strategy.validate(mockJwtPayload)).rejects.toThrow(mockError);
 
-      expect(authService.validateJwtPayload).toHaveBeenCalledWith(
-        mockJwtPayload,
-      );
+      expect(authService.validateJwtPayload).toHaveBeenCalledWith(mockJwtPayload);
     });
   });
 
@@ -142,11 +127,7 @@ describe('JwtStrategy', () => {
         get: jest.fn().mockReturnValue(mockJwtSecret),
       };
 
-      const testStrategy = new JwtStrategy(
-        authService,
-        mockConfig as any,
-        errorHandler,
-      );
+      const testStrategy = new JwtStrategy(authService, mockConfig as any, errorHandler);
 
       expect(mockConfig.get).toHaveBeenCalledWith('JWT_SECRET');
       expect(testStrategy).toBeDefined();
@@ -157,11 +138,7 @@ describe('JwtStrategy', () => {
         get: jest.fn().mockReturnValue(undefined),
       };
 
-      const testStrategy = new JwtStrategy(
-        authService,
-        mockConfig as any,
-        errorHandler,
-      );
+      const testStrategy = new JwtStrategy(authService, mockConfig as any, errorHandler);
 
       expect(mockConfig.get).toHaveBeenCalledWith('JWT_SECRET');
       expect(testStrategy).toBeDefined();

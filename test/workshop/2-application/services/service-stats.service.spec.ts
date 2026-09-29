@@ -33,9 +33,9 @@ describe('ServiceStatsService', () => {
     mechanicId: faker.string.uuid(),
     status: ServiceOrderStatus.FINISHED,
     estimatedTimeHours: 2.0,
-    totalServicePrice: 500.00,
-    totalPartsPrice: 200.00,
-    totalPrice: 700.00,
+    totalServicePrice: 500.0,
+    totalPartsPrice: 200.0,
+    totalPrice: 700.0,
     estimatedCompletionDate: faker.date.future(),
     startedAt,
     completedAt,
@@ -107,9 +107,7 @@ describe('ServiceStatsService', () => {
 
       serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
       serviceRepository.findAll.mockResolvedValue([mockService]);
-      prismaService.serviceOrderItem.findMany.mockResolvedValue(
-        mockServiceItems,
-      );
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(mockServiceItems);
 
       const result = await service.getServiceExecutionStats();
 
@@ -169,9 +167,7 @@ describe('ServiceStatsService', () => {
 
       serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
       serviceRepository.findAll.mockResolvedValue([]);
-      prismaService.serviceOrderItem.findMany.mockResolvedValue(
-        mockServiceItems,
-      );
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(mockServiceItems);
 
       const result = await service.getServiceExecutionStats();
 
@@ -208,17 +204,13 @@ describe('ServiceStatsService', () => {
 
       serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
       serviceRepository.findAll.mockResolvedValue([mockService1, mockService2]);
-      prismaService.serviceOrderItem.findMany.mockResolvedValue(
-        mockServiceItems,
-      );
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(mockServiceItems);
 
       const result = await service.getServiceExecutionStats();
 
       expect(result.length).toBeGreaterThan(0);
       expect(result).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ serviceId: mockService1.id }),
-        ]),
+        expect.arrayContaining([expect.objectContaining({ serviceId: mockService1.id })]),
       );
     });
 
@@ -258,10 +250,7 @@ describe('ServiceStatsService', () => {
         },
       ];
 
-      serviceOrderRepository.findCompletedOrders.mockResolvedValue([
-        mockOrder1,
-        mockOrder2,
-      ]);
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder1, mockOrder2]);
       serviceRepository.findAll.mockResolvedValue([mockService1, mockService2]);
       prismaService.serviceOrderItem.findMany
         .mockResolvedValueOnce(mockServiceItems1)
@@ -296,9 +285,7 @@ describe('ServiceStatsService', () => {
 
       serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
       serviceRepository.findAll.mockResolvedValue([mockService]);
-      prismaService.serviceOrderItem.findMany.mockResolvedValue(
-        mockServiceItems,
-      );
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(mockServiceItems);
 
       const result = await service.getServiceExecutionStats();
 
@@ -348,10 +335,7 @@ describe('ServiceStatsService', () => {
         completedAt: null,
       };
 
-      serviceOrderRepository.findCompletedOrders.mockResolvedValue([
-        validOrder,
-        invalidOrder,
-      ]);
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue([validOrder, invalidOrder]);
 
       const result = await service.getOverallStats();
 
@@ -412,9 +396,7 @@ describe('ServiceStatsService', () => {
 
       serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
       serviceRepository.findAll.mockResolvedValue([mockService]);
-      prismaService.serviceOrderItem.findMany.mockResolvedValue(
-        mockServiceItems,
-      );
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(mockServiceItems);
 
       const result = await service.getServiceById(mockService.id);
 
@@ -454,9 +436,7 @@ describe('ServiceStatsService', () => {
 
       serviceOrderRepository.findCompletedOrders.mockResolvedValue([mockOrder]);
       serviceRepository.findAll.mockResolvedValue([mockService]);
-      prismaService.serviceOrderItem.findMany.mockResolvedValue(
-        mockServiceItems,
-      );
+      prismaService.serviceOrderItem.findMany.mockResolvedValue(mockServiceItems);
 
       const result = await service.getServiceStats('2025-01-01', '2025-12-31');
 
@@ -484,9 +464,7 @@ describe('ServiceStatsService', () => {
 
   describe('getTopServices', () => {
     it('TC0001 - Should return top 10 services by default', async () => {
-      const mockServices = Array.from({ length: 15 }, () =>
-        createMockService(),
-      );
+      const mockServices = Array.from({ length: 15 }, () => createMockService());
       const startedAt = new Date('2025-01-01T08:00:00');
       const completedAt = new Date('2025-01-01T10:00:00');
 
@@ -508,9 +486,7 @@ describe('ServiceStatsService', () => {
         };
       });
 
-      serviceOrderRepository.findCompletedOrders.mockResolvedValue(
-        mockOrders.map((o) => o.order),
-      );
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue(mockOrders.map((o) => o.order));
       serviceRepository.findAll.mockResolvedValue(mockServices);
       prismaService.serviceOrderItem.findMany.mockResolvedValue(
         mockOrders.flatMap((o) => o.serviceItems),
@@ -523,9 +499,7 @@ describe('ServiceStatsService', () => {
     });
 
     it('TC0002 - Should return top N services with custom limit', async () => {
-      const mockServices = Array.from({ length: 10 }, () =>
-        createMockService(),
-      );
+      const mockServices = Array.from({ length: 10 }, () => createMockService());
       const startedAt = new Date('2025-01-01T08:00:00');
       const completedAt = new Date('2025-01-01T10:00:00');
 
@@ -547,9 +521,7 @@ describe('ServiceStatsService', () => {
         };
       });
 
-      serviceOrderRepository.findCompletedOrders.mockResolvedValue(
-        mockOrders.map((o) => o.order),
-      );
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue(mockOrders.map((o) => o.order));
       serviceRepository.findAll.mockResolvedValue(mockServices);
       prismaService.serviceOrderItem.findMany.mockResolvedValue(
         mockOrders.flatMap((o) => o.serviceItems),
@@ -562,9 +534,7 @@ describe('ServiceStatsService', () => {
     });
 
     it('TC0003 - Should return services sorted by totalCompletedOrders', async () => {
-      const mockServices = Array.from({ length: 5 }, () =>
-        createMockService(),
-      );
+      const mockServices = Array.from({ length: 5 }, () => createMockService());
       const startedAt = new Date('2025-01-01T08:00:00');
       const completedAt = new Date('2025-01-01T10:00:00');
 
@@ -588,9 +558,7 @@ describe('ServiceStatsService', () => {
         });
       });
 
-      serviceOrderRepository.findCompletedOrders.mockResolvedValue(
-        mockOrders.map((o) => o.order),
-      );
+      serviceOrderRepository.findCompletedOrders.mockResolvedValue(mockOrders.map((o) => o.order));
       serviceRepository.findAll.mockResolvedValue(mockServices);
       prismaService.serviceOrderItem.findMany.mockResolvedValue(
         mockOrders.flatMap((o) => o.serviceItems),

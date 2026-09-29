@@ -35,9 +35,7 @@ async function bootstrap() {
     const originalCreateNotBuiltInTypeReference =
       schemaFactoryPrototype.createNotBuiltInTypeReference;
 
-    schemaFactoryPrototype.createNotBuiltInTypeReference = function (
-      ...args: unknown[]
-    ) {
+    schemaFactoryPrototype.createNotBuiltInTypeReference = function (...args: unknown[]) {
       try {
         return originalCreateNotBuiltInTypeReference.apply(this, args);
       } catch (error) {
@@ -65,7 +63,10 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000', 'http://localhost:3001'],
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? false
+        : ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
   });
 
@@ -129,7 +130,7 @@ async function bootstrap() {
   const host = process.env.HOST || '0.0.0.0';
 
   await app.listen(port, host);
-  
+
   // Evidence Log para Terminal
   logger.log('═══════════════════════════════════════════════════════════');
   logger.log(`✅ API INICIADA COM SUCESSO`);

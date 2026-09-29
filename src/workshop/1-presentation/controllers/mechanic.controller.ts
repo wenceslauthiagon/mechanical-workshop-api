@@ -25,9 +25,7 @@ export class MechanicController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(
-    @Body() createMechanicDto: CreateMechanicDto,
-  ): Promise<MechanicResponseDto> {
+  async create(@Body() createMechanicDto: CreateMechanicDto): Promise<MechanicResponseDto> {
     const mechanic = await this.mechanicService.create(createMechanicDto);
     return new MechanicResponseDto(mechanic);
   }
@@ -56,9 +54,7 @@ export class MechanicController {
   }
 
   @Get('by-specialty')
-  async findBySpecialty(
-    @Query('specialty') specialty: string,
-  ): Promise<MechanicResponseDto[]> {
+  async findBySpecialty(@Query('specialty') specialty: string): Promise<MechanicResponseDto[]> {
     const mechanics = await this.mechanicService.findBySpecialty(specialty);
     return mechanics.map((mechanic) => new MechanicResponseDto(mechanic));
   }
@@ -91,9 +87,7 @@ export class MechanicController {
 
   @Put(':id/toggle-availability')
   @HttpCode(HttpStatus.OK)
-  async toggleAvailability(
-    @Param('id') id: string,
-  ): Promise<MechanicResponseDto> {
+  async toggleAvailability(@Param('id') id: string): Promise<MechanicResponseDto> {
     const mechanic = await this.mechanicService.toggleAvailability(id);
     return new MechanicResponseDto(mechanic);
   }
@@ -113,8 +107,7 @@ export class MechanicController {
     @Query('specialties') specialties: string,
   ): Promise<MechanicResponseDto | null> {
     const specialtyArray = specialties.split(',').map((s) => s.trim());
-    const mechanic =
-      await this.mechanicService.findBestMechanicForService(specialtyArray);
+    const mechanic = await this.mechanicService.findBestMechanicForService(specialtyArray);
     return mechanic ? new MechanicResponseDto(mechanic) : null;
   }
 

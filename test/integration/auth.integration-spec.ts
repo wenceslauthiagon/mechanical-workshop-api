@@ -85,12 +85,10 @@ describe('Auth Integration Tests', () => {
 
   describe('login flow', () => {
     it('TC0001 - Should login successfully with valid ADMIN credentials', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          username: mockAdmin.username,
-          password: mockAdmin.password,
-        });
+      const response = await request(app.getHttpServer()).post('/auth/login').send({
+        username: mockAdmin.username,
+        password: mockAdmin.password,
+      });
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('access_token');
@@ -104,12 +102,10 @@ describe('Auth Integration Tests', () => {
     });
 
     it('TC0002 - Should login successfully with valid EMPLOYEE credentials', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          username: mockEmployee.username,
-          password: mockEmployee.password,
-        });
+      const response = await request(app.getHttpServer()).post('/auth/login').send({
+        username: mockEmployee.username,
+        password: mockEmployee.password,
+      });
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('access_token');
@@ -178,23 +174,19 @@ describe('Auth Integration Tests', () => {
     });
 
     it('TC0001 - Should not login with invalid username', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          username: 'nonexistent',
-          password: mockAdmin.password,
-        });
+      const response = await request(app.getHttpServer()).post('/auth/login').send({
+        username: 'nonexistent',
+        password: mockAdmin.password,
+      });
 
       expect(response.status).toBe(401);
     });
 
     it('TC0002 - Should not login with invalid password', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          username: mockAdmin.username,
-          password: 'wrongpassword',
-        });
+      const response = await request(app.getHttpServer()).post('/auth/login').send({
+        username: mockAdmin.username,
+        password: 'wrongpassword',
+      });
 
       expect(response.status).toBe(401);
     });
@@ -247,9 +239,7 @@ describe('Auth Integration Tests', () => {
         role: 'EMPLOYEE',
       };
 
-      const response = await request(app.getHttpServer())
-        .post('/auth/users')
-        .send(newUser);
+      const response = await request(app.getHttpServer()).post('/auth/users').send(newUser);
 
       expect(response.status).toBe(401);
     });
@@ -289,11 +279,9 @@ describe('Auth Integration Tests', () => {
     });
 
     it('TC0010 - Should not login with missing credentials', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          username: mockAdmin.username,
-        });
+      const response = await request(app.getHttpServer()).post('/auth/login').send({
+        username: mockAdmin.username,
+      });
 
       expect(response.status).toBe(400);
     });

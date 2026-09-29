@@ -149,12 +149,8 @@ describe('Mechanic', () => {
       const result = mechanic.toggleAvailability();
       const afterToggle = new Date();
 
-      expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(
-        beforeToggle.getTime(),
-      );
-      expect(result.updatedAt.getTime()).toBeLessThanOrEqual(
-        afterToggle.getTime(),
-      );
+      expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeToggle.getTime());
+      expect(result.updatedAt.getTime()).toBeLessThanOrEqual(afterToggle.getTime());
     });
   });
 
@@ -191,23 +187,17 @@ describe('Mechanic', () => {
       const result = mechanic.updateSpecialties(['Nova Especialidade']);
       const afterUpdate = new Date();
 
-      expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(
-        beforeUpdate.getTime(),
-      );
-      expect(result.updatedAt.getTime()).toBeLessThanOrEqual(
-        afterUpdate.getTime(),
-      );
+      expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime());
+      expect(result.updatedAt.getTime()).toBeLessThanOrEqual(afterUpdate.getTime());
     });
   });
 
   describe('hasSpecialty', () => {
     it('TC0001 - Should return true when mechanic has specialty', () => {
-      const mechanic = new Mechanic(
-        mechanicData.id,
-        mechanicData.name,
-        mechanicData.email,
-        ['Motor', 'Freios'],
-      );
+      const mechanic = new Mechanic(mechanicData.id, mechanicData.name, mechanicData.email, [
+        'Motor',
+        'Freios',
+      ]);
 
       const result = mechanic.hasSpecialty('Motor');
 
@@ -215,12 +205,9 @@ describe('Mechanic', () => {
     });
 
     it('TC0002 - Should return false when mechanic does not have specialty', () => {
-      const mechanic = new Mechanic(
-        mechanicData.id,
-        mechanicData.name,
-        mechanicData.email,
-        ['Motor'],
-      );
+      const mechanic = new Mechanic(mechanicData.id, mechanicData.name, mechanicData.email, [
+        'Motor',
+      ]);
 
       const result = mechanic.hasSpecialty('Freios');
 
@@ -230,12 +217,10 @@ describe('Mechanic', () => {
 
   describe('isQualifiedFor', () => {
     it('TC0001 - Should return true when mechanic has at least one required specialty', () => {
-      const mechanic = new Mechanic(
-        mechanicData.id,
-        mechanicData.name,
-        mechanicData.email,
-        ['Motor', 'Freios'],
-      );
+      const mechanic = new Mechanic(mechanicData.id, mechanicData.name, mechanicData.email, [
+        'Motor',
+        'Freios',
+      ]);
 
       const result = mechanic.isQualifiedFor(['Motor', 'Suspensão']);
 
@@ -243,12 +228,9 @@ describe('Mechanic', () => {
     });
 
     it('TC0002 - Should return false when mechanic has no required specialties', () => {
-      const mechanic = new Mechanic(
-        mechanicData.id,
-        mechanicData.name,
-        mechanicData.email,
-        ['Motor'],
-      );
+      const mechanic = new Mechanic(mechanicData.id, mechanicData.name, mechanicData.email, [
+        'Motor',
+      ]);
 
       const result = mechanic.isQualifiedFor(['Freios', 'Suspensão']);
 

@@ -7,7 +7,7 @@ export class GetOwnerByIdUseCase {
 
   async execute(id: string): Promise<Owner> {
     const owner = await this.ownerRepository.findById(id);
-    
+
     if (!owner) {
       throw new NotFoundError('Owner', id);
     }

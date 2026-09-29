@@ -73,12 +73,10 @@ describe('Public Service Order Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
 
@@ -88,7 +86,9 @@ describe('Public Service Order Integration Tests', () => {
       .send(mockCustomer);
 
     if (customerResponse.status !== 201) {
-      throw new Error(`Failed to create customer: ${customerResponse.status} - ${JSON.stringify(customerResponse.body)}`);
+      throw new Error(
+        `Failed to create customer: ${customerResponse.status} - ${JSON.stringify(customerResponse.body)}`,
+      );
     }
     customerId = customerResponse.body.id;
 
@@ -101,7 +101,9 @@ describe('Public Service Order Integration Tests', () => {
       });
 
     if (vehicleResponse.status !== 201) {
-      throw new Error(`Failed to create vehicle: ${vehicleResponse.status} - ${JSON.stringify(vehicleResponse.body)}`);
+      throw new Error(
+        `Failed to create vehicle: ${vehicleResponse.status} - ${JSON.stringify(vehicleResponse.body)}`,
+      );
     }
     vehicleId = vehicleResponse.body.id;
 
@@ -117,7 +119,9 @@ describe('Public Service Order Integration Tests', () => {
       });
 
     if (serviceOrderResponse.status !== 201) {
-      throw new Error(`Failed to create service order: ${serviceOrderResponse.status} - ${JSON.stringify(serviceOrderResponse.body)}`);
+      throw new Error(
+        `Failed to create service order: ${serviceOrderResponse.status} - ${JSON.stringify(serviceOrderResponse.body)}`,
+      );
     }
     serviceOrderId = serviceOrderResponse.body.id;
     orderNumber = serviceOrderResponse.body.orderNumber;
@@ -170,9 +174,7 @@ describe('Public Service Order Integration Tests', () => {
       expect(response.body.length).toBeGreaterThan(0);
       expect(response.body[0]).toHaveProperty('id', serviceOrderId);
       expect(response.body[0]).toHaveProperty('orderNumber', orderNumber);
-      expect(response.body[0].vehicle.licensePlate).toBe(
-        mockVehicle.plate,
-      );
+      expect(response.body[0].vehicle.licensePlate).toBe(mockVehicle.plate);
     });
   });
 

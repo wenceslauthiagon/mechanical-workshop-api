@@ -144,17 +144,11 @@ export class ServiceOrderAggregate {
   }
 
   get totalServicePrice(): Money {
-    return this._services.reduce(
-      (total, service) => total.add(service.totalPrice),
-      new Money(0),
-    );
+    return this._services.reduce((total, service) => total.add(service.totalPrice), new Money(0));
   }
 
   get totalPartsPrice(): Money {
-    return this._parts.reduce(
-      (total, part) => total.add(part.totalPrice),
-      new Money(0),
-    );
+    return this._parts.reduce((total, part) => total.add(part.totalPrice), new Money(0));
   }
 
   get totalPrice(): Money {
@@ -163,9 +157,7 @@ export class ServiceOrderAggregate {
 
   addService(serviceItem: ServiceOrderItem): void {
     this.ensureCanBeModified();
-    const existingIndex = this._services.findIndex(
-      (s) => s.serviceId === serviceItem.serviceId,
-    );
+    const existingIndex = this._services.findIndex((s) => s.serviceId === serviceItem.serviceId);
 
     if (existingIndex >= 0) {
       this._services[existingIndex] = serviceItem;
@@ -181,9 +173,7 @@ export class ServiceOrderAggregate {
 
   addPart(partItem: PartOrderItem): void {
     this.ensureCanBeModified();
-    const existingIndex = this._parts.findIndex(
-      (p) => p.partId === partItem.partId,
-    );
+    const existingIndex = this._parts.findIndex((p) => p.partId === partItem.partId);
 
     if (existingIndex >= 0) {
       this._parts[existingIndex] = partItem;
@@ -228,26 +218,19 @@ export class ServiceOrderAggregate {
     if ((this._status as string) !== ServiceOrderStatus.FINISHED) {
       throw new Error('Só é possível entregar ordens finalizadas');
     }
-    this.changeStatus(
-      ServiceOrderStatus.DELIVERED,
-      'Veículo entregue ao cliente',
-    );
+    this.changeStatus(ServiceOrderStatus.DELIVERED, 'Veículo entregue ao cliente');
   }
 
   private ensureCanBeModified(): void {
     if ((this._status as string) === ServiceOrderStatus.DELIVERED) {
-      throw new Error(
-        'Não é possível modificar ordens de serviço já entregues',
-      );
+      throw new Error('Não é possível modificar ordens de serviço já entregues');
     }
   }
 
   private validateStatusTransition(newStatus: ServiceOrderStatus): void {
     const validTransitions: Record<ServiceOrderStatus, ServiceOrderStatus[]> = {
       [ServiceOrderStatus.RECEIVED]: [ServiceOrderStatus.IN_DIAGNOSIS],
-      [ServiceOrderStatus.IN_DIAGNOSIS]: [
-        ServiceOrderStatus.AWAITING_APPROVAL,
-      ],
+      [ServiceOrderStatus.IN_DIAGNOSIS]: [ServiceOrderStatus.AWAITING_APPROVAL],
       [ServiceOrderStatus.AWAITING_APPROVAL]: [
         ServiceOrderStatus.IN_EXECUTION,
         ServiceOrderStatus.IN_DIAGNOSIS,
@@ -259,9 +242,7 @@ export class ServiceOrderAggregate {
 
     const allowedTransitions = validTransitions[this._status] || [];
     if (!allowedTransitions.includes(newStatus)) {
-      throw new Error(
-        `Transição de status inválida: ${this._status} → ${newStatus}`,
-      );
+      throw new Error(`Transição de status inválida: ${this._status} → ${newStatus}`);
     }
   }
 }

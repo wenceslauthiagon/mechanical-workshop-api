@@ -1,5 +1,8 @@
 import { VeterinaryVisit } from '@domain/entities/VeterinaryVisit';
-import { IVeterinaryVisitRepository, CreateVeterinaryVisitData } from '@domain/repositories/IVeterinaryVisitRepository';
+import {
+  IVeterinaryVisitRepository,
+  CreateVeterinaryVisitData,
+} from '@domain/repositories/IVeterinaryVisitRepository';
 import { IPetRepository } from '@domain/repositories/IPetRepository';
 import { NotFoundError } from '@shared/errors/DomainError';
 

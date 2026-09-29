@@ -8,7 +8,7 @@ export class Money {
 
   constructor(amount: number | string | Decimal, currency: string = 'BRL') {
     const decimalAmount = new Decimal(amount);
-    
+
     if (decimalAmount.isNegative()) {
       throw new Error('Valor monetário não pode ser negativo');
     }

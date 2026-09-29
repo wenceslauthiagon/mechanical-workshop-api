@@ -21,18 +21,10 @@ describe('PublicServiceOrderController', () => {
     vehicleId: faker.string.uuid(),
     description: faker.lorem.paragraph(),
     status: ServiceOrderStatus.IN_EXECUTION,
-    totalServicePrice: faker.number
-      .float({ min: 100, max: 500, fractionDigits: 2 })
-      .toFixed(2),
-    totalPartsPrice: faker.number
-      .float({ min: 50, max: 300, fractionDigits: 2 })
-      .toFixed(2),
-    totalPrice: faker.number
-      .float({ min: 150, max: 800, fractionDigits: 2 })
-      .toFixed(2),
-    estimatedTimeHours: faker.number
-      .float({ min: 1, max: 8, fractionDigits: 1 })
-      .toFixed(1),
+    totalServicePrice: faker.number.float({ min: 100, max: 500, fractionDigits: 2 }).toFixed(2),
+    totalPartsPrice: faker.number.float({ min: 50, max: 300, fractionDigits: 2 }).toFixed(2),
+    totalPrice: faker.number.float({ min: 150, max: 800, fractionDigits: 2 }).toFixed(2),
+    estimatedTimeHours: faker.number.float({ min: 1, max: 8, fractionDigits: 1 }).toFixed(1),
     estimatedCompletionDate: faker.date.future(),
     startedAt: faker.date.past(),
     completedAt: null,
@@ -83,9 +75,7 @@ describe('PublicServiceOrderController', () => {
 
   it('Should be defined', () => {
     expect(publicServiceOrderController).toBeDefined();
-    expect(publicServiceOrderController).toBeInstanceOf(
-      PublicServiceOrderController,
-    );
+    expect(publicServiceOrderController).toBeInstanceOf(PublicServiceOrderController);
     expect(serviceOrderService).toBeDefined();
   });
 
@@ -97,16 +87,11 @@ describe('PublicServiceOrderController', () => {
 
   describe('findByOrderNumber', () => {
     it('TC0001 - Should find service order by order number successfully', async () => {
-      serviceOrderService.findByOrderNumber.mockResolvedValue(
-        mockServiceOrderData,
-      );
+      serviceOrderService.findByOrderNumber.mockResolvedValue(mockServiceOrderData);
 
-      const result =
-        await publicServiceOrderController.findByOrderNumber(mockOrderNumber);
+      const result = await publicServiceOrderController.findByOrderNumber(mockOrderNumber);
 
-      expect(serviceOrderService.findByOrderNumber).toHaveBeenCalledWith(
-        mockOrderNumber,
-      );
+      expect(serviceOrderService.findByOrderNumber).toHaveBeenCalledWith(mockOrderNumber);
       expect(result).toEqual(mockServiceOrderData);
       expect(result.orderNumber).toBe(mockOrderNumber);
       expect(result.status).toBe(ServiceOrderStatus.IN_EXECUTION);
@@ -117,17 +102,10 @@ describe('PublicServiceOrderController', () => {
         new Error('Ordem de serviço não encontrada'),
       );
 
-      await expect(
-        publicServiceOrderController.findByOrderNumber(mockOrderNumber),
-      ).rejects.toThrow(
-        new HttpException(
-          'Ordem de serviço não encontrada',
-          HttpStatus.NOT_FOUND,
-        ),
+      await expect(publicServiceOrderController.findByOrderNumber(mockOrderNumber)).rejects.toThrow(
+        new HttpException('Ordem de serviço não encontrada', HttpStatus.NOT_FOUND),
       );
-      expect(serviceOrderService.findByOrderNumber).toHaveBeenCalledWith(
-        mockOrderNumber,
-      );
+      expect(serviceOrderService.findByOrderNumber).toHaveBeenCalledWith(mockOrderNumber);
     });
 
     it('TC0003 - Should handle invalid order number format', async () => {
@@ -138,15 +116,8 @@ describe('PublicServiceOrderController', () => {
 
       await expect(
         publicServiceOrderController.findByOrderNumber(invalidOrderNumber),
-      ).rejects.toThrow(
-        new HttpException(
-          'Ordem de serviço não encontrada',
-          HttpStatus.NOT_FOUND,
-        ),
-      );
-      expect(serviceOrderService.findByOrderNumber).toHaveBeenCalledWith(
-        invalidOrderNumber,
-      );
+      ).rejects.toThrow(new HttpException('Ordem de serviço não encontrada', HttpStatus.NOT_FOUND));
+      expect(serviceOrderService.findByOrderNumber).toHaveBeenCalledWith(invalidOrderNumber);
     });
 
     it('TC0004 - Should handle empty order number', async () => {
@@ -157,31 +128,19 @@ describe('PublicServiceOrderController', () => {
 
       await expect(
         publicServiceOrderController.findByOrderNumber(emptyOrderNumber),
-      ).rejects.toThrow(
-        new HttpException(
-          'Ordem de serviço não encontrada',
-          HttpStatus.NOT_FOUND,
-        ),
-      );
-      expect(serviceOrderService.findByOrderNumber).toHaveBeenCalledWith(
-        emptyOrderNumber,
-      );
+      ).rejects.toThrow(new HttpException('Ordem de serviço não encontrada', HttpStatus.NOT_FOUND));
+      expect(serviceOrderService.findByOrderNumber).toHaveBeenCalledWith(emptyOrderNumber);
     });
   });
 
   describe('findByCustomerDocument', () => {
     it('TC0001 - Should find service orders by customer document successfully', async () => {
       const mockServiceOrders = [mockServiceOrderData];
-      serviceOrderService.findByCustomerDocument.mockResolvedValue(
-        mockServiceOrders,
-      );
+      serviceOrderService.findByCustomerDocument.mockResolvedValue(mockServiceOrders);
 
-      const result =
-        await publicServiceOrderController.findByCustomerDocument(mockDocument);
+      const result = await publicServiceOrderController.findByCustomerDocument(mockDocument);
 
-      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(
-        mockDocument,
-      );
+      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(mockDocument);
       expect(result).toEqual(mockServiceOrders);
       expect(result).toHaveLength(1);
       expect(result[0].customer?.document).toBe(mockDocument);
@@ -195,16 +154,11 @@ describe('PublicServiceOrderController', () => {
         status: ServiceOrderStatus.FINISHED,
       };
       const mockServiceOrders = [mockServiceOrderData, secondServiceOrder];
-      serviceOrderService.findByCustomerDocument.mockResolvedValue(
-        mockServiceOrders,
-      );
+      serviceOrderService.findByCustomerDocument.mockResolvedValue(mockServiceOrders);
 
-      const result =
-        await publicServiceOrderController.findByCustomerDocument(mockDocument);
+      const result = await publicServiceOrderController.findByCustomerDocument(mockDocument);
 
-      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(
-        mockDocument,
-      );
+      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(mockDocument);
       expect(result).toHaveLength(2);
       expect(result[0].orderNumber).toBe(mockOrderNumber);
       expect(result[1].orderNumber).toBe('OS-2025-002');
@@ -218,33 +172,21 @@ describe('PublicServiceOrderController', () => {
       await expect(
         publicServiceOrderController.findByCustomerDocument(mockDocument),
       ).rejects.toThrow(
-        new HttpException(
-          'Cliente não encontrado ou sem ordens de serviço',
-          HttpStatus.NOT_FOUND,
-        ),
+        new HttpException('Cliente não encontrado ou sem ordens de serviço', HttpStatus.NOT_FOUND),
       );
-      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(
-        mockDocument,
-      );
+      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(mockDocument);
     });
 
     it('TC0004 - Should handle invalid document format', async () => {
       const invalidDocument = '123';
-      serviceOrderService.findByCustomerDocument.mockRejectedValue(
-        new Error('Documento inválido'),
-      );
+      serviceOrderService.findByCustomerDocument.mockRejectedValue(new Error('Documento inválido'));
 
       await expect(
         publicServiceOrderController.findByCustomerDocument(invalidDocument),
       ).rejects.toThrow(
-        new HttpException(
-          'Cliente não encontrado ou sem ordens de serviço',
-          HttpStatus.NOT_FOUND,
-        ),
+        new HttpException('Cliente não encontrado ou sem ordens de serviço', HttpStatus.NOT_FOUND),
       );
-      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(
-        invalidDocument,
-      );
+      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(invalidDocument);
     });
 
     it('TC0005 - Should handle customer with no service orders', async () => {
@@ -255,30 +197,20 @@ describe('PublicServiceOrderController', () => {
       await expect(
         publicServiceOrderController.findByCustomerDocument(mockDocument),
       ).rejects.toThrow(
-        new HttpException(
-          'Cliente não encontrado ou sem ordens de serviço',
-          HttpStatus.NOT_FOUND,
-        ),
+        new HttpException('Cliente não encontrado ou sem ordens de serviço', HttpStatus.NOT_FOUND),
       );
-      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(
-        mockDocument,
-      );
+      expect(serviceOrderService.findByCustomerDocument).toHaveBeenCalledWith(mockDocument);
     });
   });
 
   describe('findByVehiclePlate', () => {
     it('TC0001 - Should find service orders by vehicle plate successfully', async () => {
       const mockServiceOrders = [mockServiceOrderData];
-      serviceOrderService.findByVehiclePlate.mockResolvedValue(
-        mockServiceOrders,
-      );
+      serviceOrderService.findByVehiclePlate.mockResolvedValue(mockServiceOrders);
 
-      const result =
-        await publicServiceOrderController.findByVehiclePlate(mockLicensePlate);
+      const result = await publicServiceOrderController.findByVehiclePlate(mockLicensePlate);
 
-      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(
-        mockLicensePlate,
-      );
+      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(mockLicensePlate);
       expect(result).toEqual(mockServiceOrders);
       expect(result).toHaveLength(1);
       expect(result[0].vehicle?.licensePlate).toBe(mockLicensePlate);
@@ -294,56 +226,35 @@ describe('PublicServiceOrderController', () => {
         deliveredAt: faker.date.recent(),
       };
       const mockServiceOrders = [mockServiceOrderData, secondServiceOrder];
-      serviceOrderService.findByVehiclePlate.mockResolvedValue(
-        mockServiceOrders,
-      );
+      serviceOrderService.findByVehiclePlate.mockResolvedValue(mockServiceOrders);
 
-      const result =
-        await publicServiceOrderController.findByVehiclePlate(mockLicensePlate);
+      const result = await publicServiceOrderController.findByVehiclePlate(mockLicensePlate);
 
-      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(
-        mockLicensePlate,
-      );
+      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(mockLicensePlate);
       expect(result).toHaveLength(2);
       expect(result[0].status).toBe(ServiceOrderStatus.IN_EXECUTION);
       expect(result[1].status).toBe(ServiceOrderStatus.DELIVERED);
     });
 
     it('TC0003 - Should throw HttpException when vehicle plate not found', async () => {
-      serviceOrderService.findByVehiclePlate.mockRejectedValue(
-        new Error('Veículo não encontrado'),
-      );
+      serviceOrderService.findByVehiclePlate.mockRejectedValue(new Error('Veículo não encontrado'));
 
       await expect(
         publicServiceOrderController.findByVehiclePlate(mockLicensePlate),
       ).rejects.toThrow(
-        new HttpException(
-          'Veículo não encontrado ou sem ordens de serviço',
-          HttpStatus.NOT_FOUND,
-        ),
+        new HttpException('Veículo não encontrado ou sem ordens de serviço', HttpStatus.NOT_FOUND),
       );
-      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(
-        mockLicensePlate,
-      );
+      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(mockLicensePlate);
     });
 
     it('TC0004 - Should handle invalid license plate format', async () => {
       const invalidPlate = 'INVALID';
-      serviceOrderService.findByVehiclePlate.mockRejectedValue(
-        new Error('Placa inválida'),
-      );
+      serviceOrderService.findByVehiclePlate.mockRejectedValue(new Error('Placa inválida'));
 
-      await expect(
-        publicServiceOrderController.findByVehiclePlate(invalidPlate),
-      ).rejects.toThrow(
-        new HttpException(
-          'Veículo não encontrado ou sem ordens de serviço',
-          HttpStatus.NOT_FOUND,
-        ),
+      await expect(publicServiceOrderController.findByVehiclePlate(invalidPlate)).rejects.toThrow(
+        new HttpException('Veículo não encontrado ou sem ordens de serviço', HttpStatus.NOT_FOUND),
       );
-      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(
-        invalidPlate,
-      );
+      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(invalidPlate);
     });
 
     it('TC0005 - Should handle vehicle with no service orders', async () => {
@@ -354,33 +265,19 @@ describe('PublicServiceOrderController', () => {
       await expect(
         publicServiceOrderController.findByVehiclePlate(mockLicensePlate),
       ).rejects.toThrow(
-        new HttpException(
-          'Veículo não encontrado ou sem ordens de serviço',
-          HttpStatus.NOT_FOUND,
-        ),
+        new HttpException('Veículo não encontrado ou sem ordens de serviço', HttpStatus.NOT_FOUND),
       );
-      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(
-        mockLicensePlate,
-      );
+      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(mockLicensePlate);
     });
 
     it('TC0006 - Should handle empty license plate', async () => {
       const emptyPlate = '';
-      serviceOrderService.findByVehiclePlate.mockRejectedValue(
-        new Error('Placa é obrigatória'),
-      );
+      serviceOrderService.findByVehiclePlate.mockRejectedValue(new Error('Placa é obrigatória'));
 
-      await expect(
-        publicServiceOrderController.findByVehiclePlate(emptyPlate),
-      ).rejects.toThrow(
-        new HttpException(
-          'Veículo não encontrado ou sem ordens de serviço',
-          HttpStatus.NOT_FOUND,
-        ),
+      await expect(publicServiceOrderController.findByVehiclePlate(emptyPlate)).rejects.toThrow(
+        new HttpException('Veículo não encontrado ou sem ordens de serviço', HttpStatus.NOT_FOUND),
       );
-      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(
-        emptyPlate,
-      );
+      expect(serviceOrderService.findByVehiclePlate).toHaveBeenCalledWith(emptyPlate);
     });
   });
 });

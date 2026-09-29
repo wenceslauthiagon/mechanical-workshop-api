@@ -222,9 +222,7 @@ describe('BudgetController', () => {
 
       const result = await controller.findByServiceOrder(mockServiceOrderId);
 
-      expect(budgetService.findByServiceOrderId).toHaveBeenCalledWith(
-        mockServiceOrderId,
-      );
+      expect(budgetService.findByServiceOrderId).toHaveBeenCalledWith(mockServiceOrderId);
       expect(result).toHaveLength(1);
       expect(result[0]).toBeInstanceOf(BudgetResponseDto);
     });
@@ -234,9 +232,7 @@ describe('BudgetController', () => {
 
       const result = await controller.findByServiceOrder(mockServiceOrderId);
 
-      expect(budgetService.findByServiceOrderId).toHaveBeenCalledWith(
-        mockServiceOrderId,
-      );
+      expect(budgetService.findByServiceOrderId).toHaveBeenCalledWith(mockServiceOrderId);
       expect(result).toHaveLength(0);
     });
   });
@@ -301,15 +297,11 @@ describe('BudgetController', () => {
 
   describe('findOneEnriched', () => {
     it('TC0001 - Should return budget with relations by ID', async () => {
-      budgetService.findByIdWithRelations.mockResolvedValue(
-        mockBudgetWithRelations,
-      );
+      budgetService.findByIdWithRelations.mockResolvedValue(mockBudgetWithRelations);
 
       const result = await controller.findOneEnriched(mockBudgetId);
 
-      expect(budgetService.findByIdWithRelations).toHaveBeenCalledWith(
-        mockBudgetId,
-      );
+      expect(budgetService.findByIdWithRelations).toHaveBeenCalledWith(mockBudgetId);
       expect(result).toBe(mockBudgetWithRelations);
     });
 
@@ -317,27 +309,19 @@ describe('BudgetController', () => {
       const error = new Error('Budget not found');
       budgetService.findByIdWithRelations.mockRejectedValue(error);
 
-      await expect(controller.findOneEnriched('invalid-id')).rejects.toThrow(
-        error,
-      );
-      expect(budgetService.findByIdWithRelations).toHaveBeenCalledWith(
-        'invalid-id',
-      );
+      await expect(controller.findOneEnriched('invalid-id')).rejects.toThrow(error);
+      expect(budgetService.findByIdWithRelations).toHaveBeenCalledWith('invalid-id');
     });
   });
 
   describe('findByCustomerEnriched', () => {
     it('TC0001 - Should return customer budgets with relations', async () => {
       const mockEnrichedBudgets = [mockBudgetWithRelations];
-      budgetService.findByCustomerIdWithRelations.mockResolvedValue(
-        mockEnrichedBudgets,
-      );
+      budgetService.findByCustomerIdWithRelations.mockResolvedValue(mockEnrichedBudgets);
 
       const result = await controller.findByCustomerEnriched(mockCustomerId);
 
-      expect(budgetService.findByCustomerIdWithRelations).toHaveBeenCalledWith(
-        mockCustomerId,
-      );
+      expect(budgetService.findByCustomerIdWithRelations).toHaveBeenCalledWith(mockCustomerId);
       expect(result).toHaveLength(1);
       expect(result[0]).toBe(mockBudgetWithRelations);
     });
@@ -346,25 +330,20 @@ describe('BudgetController', () => {
       const error = new Error('Service error');
       budgetService.findByCustomerIdWithRelations.mockRejectedValue(error);
 
-      await expect(
-        controller.findByCustomerEnriched(mockCustomerId),
-      ).rejects.toThrow(error);
+      await expect(controller.findByCustomerEnriched(mockCustomerId)).rejects.toThrow(error);
     });
   });
 
   describe('findByServiceOrderEnriched', () => {
     it('TC0001 - Should return service order budgets with relations', async () => {
       const mockEnrichedBudgets = [mockBudgetWithRelations];
-      budgetService.findByServiceOrderIdWithRelations.mockResolvedValue(
-        mockEnrichedBudgets,
+      budgetService.findByServiceOrderIdWithRelations.mockResolvedValue(mockEnrichedBudgets);
+
+      const result = await controller.findByServiceOrderEnriched(mockServiceOrderId);
+
+      expect(budgetService.findByServiceOrderIdWithRelations).toHaveBeenCalledWith(
+        mockServiceOrderId,
       );
-
-      const result =
-        await controller.findByServiceOrderEnriched(mockServiceOrderId);
-
-      expect(
-        budgetService.findByServiceOrderIdWithRelations,
-      ).toHaveBeenCalledWith(mockServiceOrderId);
       expect(result).toHaveLength(1);
       expect(result[0]).toBe(mockBudgetWithRelations);
     });
@@ -372,12 +351,11 @@ describe('BudgetController', () => {
     it('TC0002 - Should return empty array when no enriched budgets found for service order', async () => {
       budgetService.findByServiceOrderIdWithRelations.mockResolvedValue([]);
 
-      const result =
-        await controller.findByServiceOrderEnriched(mockServiceOrderId);
+      const result = await controller.findByServiceOrderEnriched(mockServiceOrderId);
 
-      expect(
-        budgetService.findByServiceOrderIdWithRelations,
-      ).toHaveBeenCalledWith(mockServiceOrderId);
+      expect(budgetService.findByServiceOrderIdWithRelations).toHaveBeenCalledWith(
+        mockServiceOrderId,
+      );
       expect(result).toHaveLength(0);
     });
   });

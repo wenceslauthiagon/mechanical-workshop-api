@@ -9,7 +9,7 @@ export class ServiceOrderController {
     private createUseCase: CreateServiceOrderUseCase,
     private getStatusUseCase: GetServiceOrderStatusUseCase,
     private approveUseCase: ApproveBudgetUseCase,
-    private listUseCase: ListServiceOrdersUseCase
+    private listUseCase: ListServiceOrdersUseCase,
   ) {}
 
   async create(req: Request, res: Response) {

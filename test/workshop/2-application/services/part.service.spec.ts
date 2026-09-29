@@ -166,13 +166,9 @@ describe('PartService', () => {
         throw new Error(ERROR_MESSAGES.PART_NOT_FOUND);
       });
 
-      await expect(service.findById(partId)).rejects.toThrow(
-        ERROR_MESSAGES.PART_NOT_FOUND,
-      );
+      await expect(service.findById(partId)).rejects.toThrow(ERROR_MESSAGES.PART_NOT_FOUND);
 
-      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.PART_NOT_FOUND,
-      );
+      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(ERROR_MESSAGES.PART_NOT_FOUND);
     });
   });
 
@@ -183,9 +179,7 @@ describe('PartService', () => {
 
       const result = await service.findByPartNumber(mockPart.partNumber);
 
-      expect(partRepository.findByPartNumber).toHaveBeenCalledWith(
-        mockPart.partNumber,
-      );
+      expect(partRepository.findByPartNumber).toHaveBeenCalledWith(mockPart.partNumber);
       expect(result).toEqual(mockPart);
     });
 
@@ -200,9 +194,7 @@ describe('PartService', () => {
         ERROR_MESSAGES.PART_NOT_FOUND,
       );
 
-      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.PART_NOT_FOUND,
-      );
+      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(ERROR_MESSAGES.PART_NOT_FOUND);
     });
   });
 
@@ -267,9 +259,7 @@ describe('PartService', () => {
         ERROR_MESSAGES.PART_NOT_FOUND,
       );
 
-      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.PART_NOT_FOUND,
-      );
+      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(ERROR_MESSAGES.PART_NOT_FOUND);
     });
 
     it('TC0003 - Should throw error when partNumber already exists', async () => {
@@ -309,9 +299,7 @@ describe('PartService', () => {
 
       const result = await service.update(partId, updateDto);
 
-      expect(partRepository.findByPartNumber).toHaveBeenCalledWith(
-        updateDto.partNumber,
-      );
+      expect(partRepository.findByPartNumber).toHaveBeenCalledWith(updateDto.partNumber);
       expect(result).toEqual(updatedPart);
     });
 
@@ -446,9 +434,7 @@ describe('PartService', () => {
         ERROR_MESSAGES.PART_NOT_FOUND,
       );
 
-      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.PART_NOT_FOUND,
-      );
+      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(ERROR_MESSAGES.PART_NOT_FOUND);
     });
 
     it('TC0004 - Should throw error when resulting stock would be negative', async () => {
@@ -495,13 +481,9 @@ describe('PartService', () => {
         throw new Error(ERROR_MESSAGES.PART_NOT_FOUND);
       });
 
-      await expect(service.remove(partId)).rejects.toThrow(
-        ERROR_MESSAGES.PART_NOT_FOUND,
-      );
+      await expect(service.remove(partId)).rejects.toThrow(ERROR_MESSAGES.PART_NOT_FOUND);
 
-      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
-        ERROR_MESSAGES.PART_NOT_FOUND,
-      );
+      expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(ERROR_MESSAGES.PART_NOT_FOUND);
     });
   });
 });

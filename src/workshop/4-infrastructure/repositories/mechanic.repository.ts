@@ -258,9 +258,7 @@ export class MechanicRepository implements IMechanicRepository {
     });
 
     if (!mechanic) {
-      this.errorHandler.handleNotFoundError(
-        MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
     }
 
     const updatedMechanic = await this.prisma.mechanic.update({
@@ -293,9 +291,7 @@ export class MechanicRepository implements IMechanicRepository {
     });
 
     if (!mechanic) {
-      this.errorHandler.handleNotFoundError(
-        MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
     }
 
     const serviceOrders = await this.prisma.serviceOrder.findMany({
@@ -316,9 +312,7 @@ export class MechanicRepository implements IMechanicRepository {
         so.completedAt >= startOfMonth,
     ).length;
 
-    const completedOrders = serviceOrders.filter(
-      (so) => so.completedAt && so.startedAt,
-    );
+    const completedOrders = serviceOrders.filter((so) => so.completedAt && so.startedAt);
 
     let averageCompletionTime = 0;
     if (completedOrders.length > 0) {
@@ -338,10 +332,7 @@ export class MechanicRepository implements IMechanicRepository {
     };
   }
 
-  async assignToServiceOrder(
-    mechanicId: string,
-    serviceOrderId?: string,
-  ): Promise<void> {
+  async assignToServiceOrder(mechanicId: string, serviceOrderId?: string): Promise<void> {
     // If a serviceOrderId was provided, associate the mechanic with the service order
     // Do NOT mark as unavailable yet - that happens when OS enters EM_EXECUCAO
     if (serviceOrderId) {
@@ -383,5 +374,3 @@ export class MechanicRepository implements IMechanicRepository {
     };
   }
 }
-
-

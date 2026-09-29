@@ -131,9 +131,7 @@ describe('VehicleService', () => {
       };
       customerRepository.findById.mockResolvedValue(null);
 
-      await expect(service.create(createDto)).rejects.toThrow(
-        ERROR_MESSAGES.CLIENT_NOT_FOUND,
-      );
+      await expect(service.create(createDto)).rejects.toThrow(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     });
 
     it('TC0003 - Should throw error for duplicate plate', async () => {
@@ -207,9 +205,7 @@ describe('VehicleService', () => {
         throw new Error(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
       });
 
-      await expect(service.findById(vehicleId)).rejects.toThrow(
-        ERROR_MESSAGES.VEHICLE_NOT_FOUND,
-      );
+      await expect(service.findById(vehicleId)).rejects.toThrow(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
 
       expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
         ERROR_MESSAGES.VEHICLE_NOT_FOUND,
@@ -230,9 +226,7 @@ describe('VehicleService', () => {
 
       const result = await service.findByCustomerId(customerId);
 
-      expect(vehicleRepository.findByCustomerId).toHaveBeenCalledWith(
-        customerId,
-      );
+      expect(vehicleRepository.findByCustomerId).toHaveBeenCalledWith(customerId);
       expect(result).toHaveLength(2);
       expect(result[0].customerId).toBe(customerId);
     });
@@ -247,9 +241,7 @@ describe('VehicleService', () => {
 
       const result = await service.findByLicensePlate(mockVehicle.licensePlate);
 
-      expect(vehicleRepository.findByPlate).toHaveBeenCalledWith(
-        mockVehicle.licensePlate,
-      );
+      expect(vehicleRepository.findByPlate).toHaveBeenCalledWith(mockVehicle.licensePlate);
       expect(result.plate).toBe(mockVehicle.licensePlate);
       expect(result.customerId).toBe(mockVehicle.customerId);
     });
@@ -289,10 +281,7 @@ describe('VehicleService', () => {
       const result = await service.update(vehicleId, updateDto);
 
       expect(vehicleRepository.findById).toHaveBeenCalledWith(vehicleId);
-      expect(vehicleRepository.update).toHaveBeenCalledWith(
-        vehicleId,
-        updateDto,
-      );
+      expect(vehicleRepository.update).toHaveBeenCalledWith(vehicleId, updateDto);
       expect(result.brand).toBe(updateDto.brand);
     });
 
@@ -369,9 +358,7 @@ describe('VehicleService', () => {
       await service.remove(vehicleId);
 
       expect(vehicleRepository.findById).toHaveBeenCalledWith(vehicleId);
-      expect(vehicleRepository.hasServiceOrders).toHaveBeenCalledWith(
-        vehicleId,
-      );
+      expect(vehicleRepository.hasServiceOrders).toHaveBeenCalledWith(vehicleId);
       expect(vehicleRepository.delete).toHaveBeenCalledWith(vehicleId);
     });
 
@@ -382,9 +369,7 @@ describe('VehicleService', () => {
         throw new Error(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
       });
 
-      await expect(service.remove(vehicleId)).rejects.toThrow(
-        ERROR_MESSAGES.VEHICLE_NOT_FOUND,
-      );
+      await expect(service.remove(vehicleId)).rejects.toThrow(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
 
       expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
         ERROR_MESSAGES.VEHICLE_NOT_FOUND,
@@ -410,4 +395,3 @@ describe('VehicleService', () => {
     });
   });
 });
-

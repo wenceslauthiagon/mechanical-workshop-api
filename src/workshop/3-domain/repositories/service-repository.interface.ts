@@ -1,13 +1,8 @@
 import { Service } from '@prisma/client';
 
 export interface IServiceRepository {
-  create(
-    data: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Service>;
-  findAll(filters?: {
-    category?: string;
-    active?: boolean;
-  }): Promise<Service[]>;
+  create(data: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>): Promise<Service>;
+  findAll(filters?: { category?: string; active?: boolean }): Promise<Service[]>;
   findMany(
     skip: number,
     take: number,

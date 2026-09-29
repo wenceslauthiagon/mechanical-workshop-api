@@ -203,7 +203,10 @@ describe('ServiceOrderService', () => {
 
     it('TC0004 - Should throw error when vehicle does not belong to customer', async () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: 'different-id' });
+      repositories.vehicle.findById.mockResolvedValue({
+        ...mockVehicle,
+        customerId: 'different-id',
+      });
 
       await expect(service.create(createDto)).rejects.toThrow('Exception');
       expect(services.errorHandler.generateException).toHaveBeenCalled();
@@ -211,7 +214,10 @@ describe('ServiceOrderService', () => {
 
     it('TC0005 - Should throw error when service not found', async () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.vehicle.findById.mockResolvedValue({
+        ...mockVehicle,
+        customerId: mockCustomer.id,
+      });
       repositories.service.findById.mockResolvedValue(null);
 
       await expect(service.create(createDto)).rejects.toThrow('Not found');
@@ -220,7 +226,10 @@ describe('ServiceOrderService', () => {
 
     it('TC0006 - Should throw error when service is inactive', async () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.vehicle.findById.mockResolvedValue({
+        ...mockVehicle,
+        customerId: mockCustomer.id,
+      });
       repositories.service.findById.mockResolvedValue({ ...mockService, isActive: false });
 
       await expect(service.create(createDto)).rejects.toThrow();
@@ -228,7 +237,10 @@ describe('ServiceOrderService', () => {
 
     it('TC0007 - Should throw error when part not found', async () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.vehicle.findById.mockResolvedValue({
+        ...mockVehicle,
+        customerId: mockCustomer.id,
+      });
       repositories.service.findById.mockResolvedValue(mockService);
       repositories.part.findById.mockResolvedValue(null);
 
@@ -238,7 +250,10 @@ describe('ServiceOrderService', () => {
 
     it('TC0008 - Should throw error when part is inactive', async () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.vehicle.findById.mockResolvedValue({
+        ...mockVehicle,
+        customerId: mockCustomer.id,
+      });
       repositories.service.findById.mockResolvedValue(mockService);
       repositories.part.findById.mockResolvedValue({ ...mockPart, isActive: false });
 
@@ -247,7 +262,10 @@ describe('ServiceOrderService', () => {
 
     it('TC0009 - Should throw error when insufficient stock for part', async () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.vehicle.findById.mockResolvedValue({ ...mockVehicle, customerId: mockCustomer.id });
+      repositories.vehicle.findById.mockResolvedValue({
+        ...mockVehicle,
+        customerId: mockCustomer.id,
+      });
       repositories.service.findById.mockResolvedValue(mockService);
       repositories.part.findById.mockResolvedValue({ ...mockPart, stock: 1 });
 
@@ -262,30 +280,30 @@ describe('ServiceOrderService', () => {
         services: [{ serviceId: mockService.id, quantity: 1 }],
         parts: [{ partId: mockPart.id, quantity: 2 }],
       };
-      
+
       // Clear previous mocks
       repositories.customer.findById.mockClear();
       repositories.vehicle.findById.mockClear();
       repositories.service.findById.mockClear();
       repositories.part.findById.mockClear();
-      
+
       // Setup mocks for create flow
       repositories.customer.findById
-        .mockResolvedValueOnce(mockCustomer)  // create validation
-        .mockResolvedValue(mockCustomer);     // findById after create
-      
+        .mockResolvedValueOnce(mockCustomer) // create validation
+        .mockResolvedValue(mockCustomer); // findById after create
+
       repositories.vehicle.findById
-        .mockResolvedValueOnce({ ...mockVehicle, customerId: mockCustomer.id })  // create validation
-        .mockResolvedValue(mockVehicle);  // findById after create
-      
+        .mockResolvedValueOnce({ ...mockVehicle, customerId: mockCustomer.id }) // create validation
+        .mockResolvedValue(mockVehicle); // findById after create
+
       // Service findById called twice: validation + item creation
-      repositories.service.findById
-        .mockImplementation(() => Promise.resolve(mockService));
-      
-      // Part findById called twice: validation + item creation  
-      repositories.part.findById
-        .mockImplementation(() => Promise.resolve({ ...mockPart, stock: 10, isActive: true }));
-      
+      repositories.service.findById.mockImplementation(() => Promise.resolve(mockService));
+
+      // Part findById called twice: validation + item creation
+      repositories.part.findById.mockImplementation(() =>
+        Promise.resolve({ ...mockPart, stock: 10, isActive: true }),
+      );
+
       repositories.serviceOrder.countByYear.mockResolvedValue(0);
       repositories.serviceOrder.create.mockResolvedValue(mockServiceOrder);
       repositories.serviceOrder.addServiceItem.mockResolvedValue(undefined);
@@ -328,9 +346,7 @@ describe('ServiceOrderService', () => {
 
     it('TC0002 - Should handle service order not found', async () => {
       repositories.serviceOrder.findById.mockResolvedValue(null);
-      await expect(service.findById(faker.string.uuid())).rejects.toThrow(
-        'Not found',
-      );
+      await expect(service.findById(faker.string.uuid())).rejects.toThrow('Not found');
     });
 
     it('TC0003 - Should handle missing customer data', async () => {
@@ -365,9 +381,7 @@ describe('ServiceOrderService', () => {
   describe('findByCustomer', () => {
     it('TC0001 - Should return service orders by customer', async () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
-      repositories.serviceOrder.findByCustomerId.mockResolvedValue([
-        mockServiceOrder,
-      ]);
+      repositories.serviceOrder.findByCustomerId.mockResolvedValue([mockServiceOrder]);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
       services.mechanic.findById.mockResolvedValue(mockMechanic);
       services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
@@ -376,16 +390,12 @@ describe('ServiceOrderService', () => {
       const result = await service.findByCustomer(mockCustomer.id);
 
       expect(result).toHaveLength(1);
-      expect(repositories.serviceOrder.findByCustomerId).toHaveBeenCalledWith(
-        mockCustomer.id,
-      );
+      expect(repositories.serviceOrder.findByCustomerId).toHaveBeenCalledWith(mockCustomer.id);
     });
 
     it('TC0002 - Should handle customer not found', async () => {
       repositories.customer.findById.mockResolvedValue(null);
-      await expect(service.findByCustomer(faker.string.uuid())).rejects.toThrow(
-        'Not found',
-      );
+      await expect(service.findByCustomer(faker.string.uuid())).rejects.toThrow('Not found');
     });
   });
 
@@ -411,9 +421,7 @@ describe('ServiceOrderService', () => {
       services.mechanic.assignToServiceOrder.mockResolvedValue(undefined);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
 
       const result = await service.updateStatus(mockServiceOrder.id, updateDtoWithMechanic);
 
@@ -427,9 +435,9 @@ describe('ServiceOrderService', () => {
 
     it('TC0002 - Should handle service order not found', async () => {
       repositories.serviceOrder.findById.mockResolvedValue(null);
-      await expect(
-        service.updateStatus(faker.string.uuid(), updateDto),
-      ).rejects.toThrow('Not found');
+      await expect(service.updateStatus(faker.string.uuid(), updateDto)).rejects.toThrow(
+        'Not found',
+      );
     });
 
     it('TC0003 - Should handle missing mechanic for EM_EXECUCAO', async () => {
@@ -441,19 +449,12 @@ describe('ServiceOrderService', () => {
         status: ServiceOrderStatus.IN_DIAGNOSIS,
         mechanicId: null,
       };
-      repositories.serviceOrder.findById.mockResolvedValue(
-        orderWithoutMechanic,
-      );
+      repositories.serviceOrder.findById.mockResolvedValue(orderWithoutMechanic);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
 
-      const result = await service.updateStatus(
-        mockServiceOrder.id,
-        updateDtoWithoutMechanic,
-      );
+      const result = await service.updateStatus(mockServiceOrder.id, updateDtoWithoutMechanic);
 
       expect(result).toBeDefined();
     });
@@ -493,9 +494,7 @@ describe('ServiceOrderService', () => {
       services.mechanic.releaseFromServiceOrder.mockResolvedValue(undefined);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
 
       await service.updateStatus(mockServiceOrder.id, finalizadaDto);
 
@@ -517,9 +516,7 @@ describe('ServiceOrderService', () => {
       services.mechanic.releaseFromServiceOrder.mockResolvedValue(undefined);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
 
       await service.updateStatus(mockServiceOrder.id, entregueDto);
 
@@ -538,9 +535,7 @@ describe('ServiceOrderService', () => {
       repositories.serviceOrder.findById.mockResolvedValue(orderAguardando);
       repositories.serviceOrder.updateStatus.mockResolvedValue(undefined);
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
 
       const result = await service.approveOrder(mockServiceOrder.id);
 
@@ -550,40 +545,30 @@ describe('ServiceOrderService', () => {
 
     it('TC0002 - Should handle service order not found', async () => {
       repositories.serviceOrder.findById.mockResolvedValue(null);
-      await expect(service.approveOrder(faker.string.uuid())).rejects.toThrow(
-        'Not found',
-      );
+      await expect(service.approveOrder(faker.string.uuid())).rejects.toThrow('Not found');
     });
 
     it('TC0003 - Should handle invalid status for approval', async () => {
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
-      await expect(service.approveOrder(mockServiceOrder.id)).rejects.toThrow(
-        'Exception',
-      );
+      await expect(service.approveOrder(mockServiceOrder.id)).rejects.toThrow('Exception');
     });
   });
 
   describe('getStatusHistory', () => {
     it('TC0001 - Should return status history', async () => {
-      const mockHistory = [
-        { id: faker.string.uuid(), status: ServiceOrderStatus.RECEIVED },
-      ];
+      const mockHistory = [{ id: faker.string.uuid(), status: ServiceOrderStatus.RECEIVED }];
       repositories.serviceOrder.findById.mockResolvedValue(mockServiceOrder);
       repositories.serviceOrder.getStatusHistory.mockResolvedValue(mockHistory);
 
       const result = await service.getStatusHistory(mockServiceOrder.id);
 
       expect(result).toEqual(mockHistory);
-      expect(repositories.serviceOrder.getStatusHistory).toHaveBeenCalledWith(
-        mockServiceOrder.id,
-      );
+      expect(repositories.serviceOrder.getStatusHistory).toHaveBeenCalledWith(mockServiceOrder.id);
     });
 
     it('TC0002 - Should handle service order not found', async () => {
       repositories.serviceOrder.findById.mockResolvedValue(null);
-      await expect(
-        service.getStatusHistory(faker.string.uuid()),
-      ).rejects.toThrow('Not found');
+      await expect(service.getStatusHistory(faker.string.uuid())).rejects.toThrow('Not found');
     });
   });
   describe('findAll', () => {
@@ -633,18 +618,14 @@ describe('ServiceOrderService', () => {
   });
   describe('findByOrderNumber', () => {
     it('TC0001 - Should find service order by order number', async () => {
-      repositories.serviceOrder.findByOrderNumber.mockResolvedValue(
-        mockServiceOrder,
-      );
+      repositories.serviceOrder.findByOrderNumber.mockResolvedValue(mockServiceOrder);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
       services.mechanic.findById.mockResolvedValue(mockMechanic);
       services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
       services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
 
-      const result = await service.findByOrderNumber(
-        mockServiceOrder.orderNumber,
-      );
+      const result = await service.findByOrderNumber(mockServiceOrder.orderNumber);
 
       expect(result).toBeDefined();
       expect(repositories.serviceOrder.findByOrderNumber).toHaveBeenCalledWith(
@@ -654,39 +635,29 @@ describe('ServiceOrderService', () => {
 
     it('TC0002 - Should handle service order not found by order number', async () => {
       repositories.serviceOrder.findByOrderNumber.mockResolvedValue(null);
-      await expect(service.findByOrderNumber('OS-2025-9999')).rejects.toThrow(
-        'Not found',
-      );
+      await expect(service.findByOrderNumber('OS-2025-9999')).rejects.toThrow('Not found');
     });
   });
 
   describe('findByCustomerDocument', () => {
     it('TC0001 - Should find service orders by customer document', async () => {
       repositories.customer.findByDocument.mockResolvedValue(mockCustomer);
-      repositories.serviceOrder.findByCustomerId.mockResolvedValue([
-        mockServiceOrder,
-      ]);
+      repositories.serviceOrder.findByCustomerId.mockResolvedValue([mockServiceOrder]);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
       services.mechanic.findById.mockResolvedValue(mockMechanic);
       services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
       services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
 
-      const result = await service.findByCustomerDocument(
-        mockCustomer.document,
-      );
+      const result = await service.findByCustomerDocument(mockCustomer.document);
 
       expect(result).toHaveLength(1);
-      expect(repositories.customer.findByDocument).toHaveBeenCalledWith(
-        mockCustomer.document,
-      );
+      expect(repositories.customer.findByDocument).toHaveBeenCalledWith(mockCustomer.document);
     });
 
     it('TC0002 - Should handle customer not found by document', async () => {
       repositories.customer.findByDocument.mockResolvedValue(null);
-      await expect(
-        service.findByCustomerDocument('99999999999'),
-      ).rejects.toThrow('Not found');
+      await expect(service.findByCustomerDocument('99999999999')).rejects.toThrow('Not found');
     });
 
     it('TC0003 - Should clean document before searching', async () => {
@@ -695,18 +666,14 @@ describe('ServiceOrderService', () => {
 
       await service.findByCustomerDocument('123.456.789-10');
 
-      expect(repositories.customer.findByDocument).toHaveBeenCalledWith(
-        '12345678910',
-      );
+      expect(repositories.customer.findByDocument).toHaveBeenCalledWith('12345678910');
     });
   });
 
   describe('findByVehiclePlate', () => {
     it('TC0001 - Should find service orders by vehicle plate', async () => {
       repositories.vehicle.findByPlate.mockResolvedValue(mockVehicle);
-      repositories.serviceOrder.findByVehicleId.mockResolvedValue([
-        mockServiceOrder,
-      ]);
+      repositories.serviceOrder.findByVehicleId.mockResolvedValue([mockServiceOrder]);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
       services.mechanic.findById.mockResolvedValue(mockMechanic);
@@ -716,22 +683,17 @@ describe('ServiceOrderService', () => {
       const result = await service.findByVehiclePlate(mockVehicle.licensePlate);
 
       expect(result).toHaveLength(1);
-      expect(repositories.vehicle.findByPlate).toHaveBeenCalledWith(
-        mockVehicle.licensePlate,
-      );
+      expect(repositories.vehicle.findByPlate).toHaveBeenCalledWith(mockVehicle.licensePlate);
     });
 
     it('TC0002 - Should handle vehicle not found by plate', async () => {
       repositories.vehicle.findByPlate.mockResolvedValue(null);
-      await expect(service.findByVehiclePlate('XXX-9999')).rejects.toThrow(
-        'Not found',
-      );
+      await expect(service.findByVehiclePlate('XXX-9999')).rejects.toThrow('Not found');
     });
   });
 
   describe('updateStatus - AGUARDANDO_APROVACAO', () => {
     it('TC0001 - Should update status to AGUARDANDO_APROVACAO', async () => {
-      
       const orderEmDiagnostico = {
         ...mockServiceOrder,
         status: ServiceOrderStatus.IN_DIAGNOSIS,
@@ -741,12 +703,8 @@ describe('ServiceOrderService', () => {
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      services.notification.sendServiceOrderStatusNotification.mockResolvedValue(
-        undefined,
-      );
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
+      services.notification.sendServiceOrderStatusNotification.mockResolvedValue(undefined);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
 
       const updateDto = {
         status: ServiceOrderStatus.AWAITING_APPROVAL,
@@ -756,9 +714,7 @@ describe('ServiceOrderService', () => {
 
       expect(result).toBeDefined();
       expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
-      expect(
-        services.notification.sendServiceOrderStatusNotification,
-      ).toHaveBeenCalled();
+      expect(services.notification.sendServiceOrderStatusNotification).toHaveBeenCalled();
     });
 
     it('TC0002 - Should handle notification error gracefully', async () => {
@@ -773,16 +729,9 @@ describe('ServiceOrderService', () => {
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
       repositories.customer.findById.mockResolvedValue(customerWithEmail);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
-      services.notification.sendServiceOrderStatusNotification.mockResolvedValue(
-        undefined,
-      );
-      services.email.sendStatusChangeNotification.mockRejectedValue(
-        new Error('Email failed'),
-      );
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
-
+      services.notification.sendServiceOrderStatusNotification.mockResolvedValue(undefined);
+      services.email.sendStatusChangeNotification.mockRejectedValue(new Error('Email failed'));
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
     });
 
     it('TC0003 - Should skip notification if customer or vehicle not found', async () => {
@@ -795,9 +744,7 @@ describe('ServiceOrderService', () => {
       repositories.serviceOrder.addStatusHistory.mockResolvedValue(undefined);
       repositories.customer.findById.mockResolvedValue(null);
       repositories.vehicle.findById.mockResolvedValue(null);
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
 
       const updateDto = {
         status: ServiceOrderStatus.AWAITING_APPROVAL,
@@ -806,13 +753,10 @@ describe('ServiceOrderService', () => {
       const result = await service.updateStatus(mockServiceOrder.id, updateDto);
 
       expect(result).toBeDefined();
-      expect(
-        services.notification.sendServiceOrderStatusNotification,
-      ).not.toHaveBeenCalled();
+      expect(services.notification.sendServiceOrderStatusNotification).not.toHaveBeenCalled();
     });
 
     it('TC0004 - Should handle push notification error gracefully', async () => {
-      
       const orderEmDiagnostico = {
         ...mockServiceOrder,
         status: ServiceOrderStatus.IN_DIAGNOSIS,
@@ -827,9 +771,7 @@ describe('ServiceOrderService', () => {
       services.notification.sendServiceOrderStatusNotification.mockRejectedValue(
         new Error('Push notification failed'),
       );
-      jest
-        .spyOn(service, 'findById')
-        .mockResolvedValue(mockServiceOrder as any);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockServiceOrder as any);
 
       const updateDto = {
         status: ServiceOrderStatus.AWAITING_APPROVAL,
@@ -855,9 +797,9 @@ describe('ServiceOrderService', () => {
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderRecebida);
 
-      await expect(
-        service.updateStatus(mockServiceOrder.id, invalidDto),
-      ).rejects.toThrow('Exception');
+      await expect(service.updateStatus(mockServiceOrder.id, invalidDto)).rejects.toThrow(
+        'Exception',
+      );
     });
 
     it('TC0002 - Should throw error when trying to go back to RECEBIDA', async () => {
@@ -871,9 +813,9 @@ describe('ServiceOrderService', () => {
       };
       repositories.serviceOrder.findById.mockResolvedValue(orderEmDiagnostico);
 
-      await expect(
-        service.updateStatus(mockServiceOrder.id, invalidDto),
-      ).rejects.toThrow('Exception');
+      await expect(service.updateStatus(mockServiceOrder.id, invalidDto)).rejects.toThrow(
+        'Exception',
+      );
     });
   });
 
@@ -900,12 +842,8 @@ describe('ServiceOrderService', () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
       services.mechanic.findById.mockResolvedValue(mockMechanic);
-      services.prisma.serviceOrderItem.findMany.mockResolvedValue([
-        mockServiceItem,
-      ]);
-      services.prisma.serviceOrderPart.findMany.mockResolvedValue([
-        mockPartItem,
-      ]);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([mockServiceItem]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([mockPartItem]);
       repositories.service.findById.mockResolvedValue(mockService);
       repositories.part.findById.mockResolvedValue(mockPart);
 
@@ -930,9 +868,7 @@ describe('ServiceOrderService', () => {
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
       services.mechanic.findById.mockResolvedValue(mockMechanic);
-      services.prisma.serviceOrderItem.findMany.mockResolvedValue([
-        mockServiceItem,
-      ]);
+      services.prisma.serviceOrderItem.findMany.mockResolvedValue([mockServiceItem]);
       services.prisma.serviceOrderPart.findMany.mockResolvedValue([]);
       repositories.service.findById.mockResolvedValue(null);
 
@@ -957,9 +893,7 @@ describe('ServiceOrderService', () => {
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
       services.mechanic.findById.mockResolvedValue(mockMechanic);
       services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
-      services.prisma.serviceOrderPart.findMany.mockResolvedValue([
-        mockPartItem,
-      ]);
+      services.prisma.serviceOrderPart.findMany.mockResolvedValue([mockPartItem]);
       repositories.part.findById.mockResolvedValue(null);
 
       const result = await service.findById(mockServiceOrder.id);
@@ -994,9 +928,7 @@ describe('ServiceOrderService', () => {
 
     it('TC0003 - Should handle missing mechanic', async () => {
       const orderWithoutMechanic = { ...mockServiceOrder, mechanicId: null };
-      repositories.serviceOrder.findById.mockResolvedValue(
-        orderWithoutMechanic,
-      );
+      repositories.serviceOrder.findById.mockResolvedValue(orderWithoutMechanic);
       repositories.customer.findById.mockResolvedValue(mockCustomer);
       repositories.vehicle.findById.mockResolvedValue(mockVehicle);
       services.prisma.serviceOrderItem.findMany.mockResolvedValue([]);
@@ -1082,6 +1014,3 @@ describe('ServiceOrderService', () => {
     });
   });
 });
-
-
-

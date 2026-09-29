@@ -18,8 +18,12 @@ export const errorHandler = (
     return;
   }
 
-  logger.error('Error Handler', `${ERROR_MESSAGES.INTERNAL_SERVER_ERROR} - ${err.stack}`, 'ErrorHandler');
-  
+  logger.error(
+    'Error Handler',
+    `${ERROR_MESSAGES.INTERNAL_SERVER_ERROR} - ${err.stack}`,
+    'ErrorHandler',
+  );
+
   res.status(500).json({
     error: 'InternalServerErrorException',
     message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,

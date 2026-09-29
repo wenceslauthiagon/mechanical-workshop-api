@@ -63,12 +63,10 @@ describe('Customer Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
   });
@@ -88,9 +86,7 @@ describe('Customer Integration Tests', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(mockCustomer.name);
       expect(response.body.email).toBe(mockCustomer.email);
-      expect(response.body.document).toBe(
-        mockCustomer.document.replace(/\D/g, ''),
-      );
+      expect(response.body.document).toBe(mockCustomer.document.replace(/\D/g, ''));
       expect(response.body.type).toBe(mockCustomer.type);
 
       customerId = response.body.id;
@@ -122,9 +118,7 @@ describe('Customer Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.document).toBe(
-        mockCustomer.document.replace(/\D/g, ''),
-      );
+      expect(response.body.document).toBe(mockCustomer.document.replace(/\D/g, ''));
       expect(response.body.id).toBe(customerId);
     });
 

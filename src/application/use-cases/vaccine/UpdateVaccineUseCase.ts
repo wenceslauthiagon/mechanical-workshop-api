@@ -8,7 +8,7 @@ export class UpdateVaccineUseCase {
 
   async execute(id: string, data: UpdateVaccineData): Promise<Vaccine> {
     const vaccine = await this.vaccineRepository.findById(id);
-    
+
     if (!vaccine) {
       throw new NotFoundError('Vaccine', id);
     }

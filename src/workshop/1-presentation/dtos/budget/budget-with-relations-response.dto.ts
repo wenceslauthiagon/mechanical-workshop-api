@@ -148,7 +148,13 @@ export class BudgetWithRelationsResponseDto {
   @ApiProperty({
     description: 'Dados atualizados do cliente',
     type: Object,
-    example: { id: 'uuid', name: 'João Silva', document: '12345678900', email: 'joao@email.com', phone: '(11)99999-9999' },
+    example: {
+      id: 'uuid',
+      name: 'João Silva',
+      document: '12345678900',
+      email: 'joao@email.com',
+      phone: '(11)99999-9999',
+    },
   })
   customer!: {
     id: string;
@@ -161,7 +167,12 @@ export class BudgetWithRelationsResponseDto {
   @ApiProperty({
     description: 'Dados atualizados da ordem de serviço',
     type: Object,
-    example: { id: 'uuid', orderNumber: 'OS-2023-0001', status: 'OPEN', description: 'Descrição da OS' },
+    example: {
+      id: 'uuid',
+      orderNumber: 'OS-2023-0001',
+      status: 'OPEN',
+      description: 'Descrição da OS',
+    },
   })
   serviceOrder!: {
     id: string;

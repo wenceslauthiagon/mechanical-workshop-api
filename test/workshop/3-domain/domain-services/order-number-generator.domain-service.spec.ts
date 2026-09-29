@@ -202,4 +202,3 @@ describe('Legacy methods', () => {
     });
   });
 });
-

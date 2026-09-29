@@ -61,15 +61,11 @@ describe('ServiceStatsController', () => {
 
   describe('getServiceStats', () => {
     it('TC0001 - Should return service execution statistics', async () => {
-      serviceStatsService.getServiceStats.mockResolvedValue(
-        mockServiceStats,
-      );
+      serviceStatsService.getServiceStats.mockResolvedValue(mockServiceStats);
 
       const result = await controller.getServiceStats();
 
-      expect(
-        serviceStatsService.getServiceStats,
-      ).toHaveBeenCalledWith(undefined, undefined);
+      expect(serviceStatsService.getServiceStats).toHaveBeenCalledWith(undefined, undefined);
       expect(result).toEqual(mockServiceStats);
       expect(result).toHaveLength(2);
     });
@@ -79,9 +75,7 @@ describe('ServiceStatsController', () => {
 
       const result = await controller.getServiceStats();
 
-      expect(
-        serviceStatsService.getServiceStats,
-      ).toHaveBeenCalledWith(undefined, undefined);
+      expect(serviceStatsService.getServiceStats).toHaveBeenCalledWith(undefined, undefined);
       expect(result).toEqual([]);
       expect(result).toHaveLength(0);
     });
@@ -91,9 +85,7 @@ describe('ServiceStatsController', () => {
       serviceStatsService.getServiceStats.mockRejectedValue(mockError);
 
       await expect(controller.getServiceStats()).rejects.toThrow(mockError);
-      expect(
-        serviceStatsService.getServiceStats,
-      ).toHaveBeenCalledWith(undefined, undefined);
+      expect(serviceStatsService.getServiceStats).toHaveBeenCalledWith(undefined, undefined);
     });
   });
 

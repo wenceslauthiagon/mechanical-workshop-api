@@ -326,10 +326,7 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      so.changeStatus(
-        ServiceOrderStatus.IN_DIAGNOSIS,
-        'Iniciando diagnóstico',
-      );
+      so.changeStatus(ServiceOrderStatus.IN_DIAGNOSIS, 'Iniciando diagnóstico');
 
       expect(so.status).toBe(ServiceOrderStatus.IN_DIAGNOSIS);
       expect(so.statusHistory[1].notes).toBe('Iniciando diagnóstico');
@@ -446,9 +443,7 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      expect(() => so.finish()).toThrow(
-        'Só é possível finalizar ordens em execução',
-      );
+      expect(() => so.finish()).toThrow('Só é possível finalizar ordens em execução');
     });
   });
 
@@ -482,12 +477,7 @@ describe('ServiceOrderAggregate', () => {
         faker.lorem.sentence(),
       );
 
-      expect(() => so.deliver()).toThrow(
-        'Só é possível entregar ordens finalizadas',
-      );
+      expect(() => so.deliver()).toThrow('Só é possível entregar ordens finalizadas');
     });
   });
 });
-
-
-

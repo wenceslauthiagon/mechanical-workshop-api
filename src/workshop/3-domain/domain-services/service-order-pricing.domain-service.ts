@@ -52,7 +52,7 @@ export class ServiceOrderPricingDomainService {
 
   private calculateSubtotal(items: PriceItem[]): Money {
     if (items.length === 0) return new Money(0);
-    
+
     return items.reduce((total, item) => {
       const itemTotal = item.unitPrice.multiply(item.quantity);
       return total.add(itemTotal);
@@ -65,7 +65,11 @@ export class ServiceOrderPricingDomainService {
     }, 0);
   }
 
-  calculateEstimatedCompletionDate(startDate: Date, estimatedMinutes: number, workingHoursPerDay: number = 8): Date {
+  calculateEstimatedCompletionDate(
+    startDate: Date,
+    estimatedMinutes: number,
+    workingHoursPerDay: number = 8,
+  ): Date {
     const workingMinutesPerDay = workingHoursPerDay * 60;
     const daysNeeded = Math.ceil(estimatedMinutes / workingMinutesPerDay);
     const completionDate = new Date(startDate);

@@ -23,9 +23,7 @@ describe('Money', () => {
     });
 
     it('TC0004 - Should throw error for negative amount', () => {
-      expect(() => new Money(-10)).toThrow(
-        'Valor monetário não pode ser negativo',
-      );
+      expect(() => new Money(-10)).toThrow('Valor monetário não pode ser negativo');
     });
 
     it('TC0005 - Should throw error for invalid currency', () => {
@@ -74,9 +72,7 @@ describe('Money', () => {
       const money1 = new Money(100, 'BRL');
       const money2 = new Money(50, 'USD');
 
-      expect(() => money1.add(money2)).toThrow(
-        'Operação entre moedas diferentes: BRL e USD',
-      );
+      expect(() => money1.add(money2)).toThrow('Operação entre moedas diferentes: BRL e USD');
     });
   });
 
@@ -94,9 +90,7 @@ describe('Money', () => {
       const money1 = new Money(100, 'BRL');
       const money2 = new Money(30, 'USD');
 
-      expect(() => money1.subtract(money2)).toThrow(
-        'Operação entre moedas diferentes: BRL e USD',
-      );
+      expect(() => money1.subtract(money2)).toThrow('Operação entre moedas diferentes: BRL e USD');
     });
   });
 
@@ -112,9 +106,7 @@ describe('Money', () => {
     it('TC0002 - Should throw error for negative factor', () => {
       const money = new Money(100);
 
-      expect(() => money.multiply(-2)).toThrow(
-        'Fator de multiplicação não pode ser negativo',
-      );
+      expect(() => money.multiply(-2)).toThrow('Fator de multiplicação não pode ser negativo');
     });
   });
 
@@ -292,4 +284,3 @@ describe('Money', () => {
     });
   });
 });
-

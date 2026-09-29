@@ -14,8 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly errorHandler: ErrorHandlerService,
   ) {
     const jwtSecret =
-      configService.get<string>('JWT_SECRET') ||
-      'default-jwt-secret-fallback-key-12345';
+      configService.get<string>('JWT_SECRET') || 'default-jwt-secret-fallback-key-12345';
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

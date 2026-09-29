@@ -30,8 +30,7 @@ export class ServiceStatsService {
   ) {}
 
   async getServiceExecutionStats(): Promise<ServiceExecutionStats[]> {
-    const completedOrders =
-      await this.serviceOrderRepository.findCompletedOrders();
+    const completedOrders = await this.serviceOrderRepository.findCompletedOrders();
 
     const services = await this.serviceRepository.findAll();
 
@@ -49,20 +48,15 @@ export class ServiceStatsService {
     for (const order of completedOrders) {
       if (!order.startedAt || !order.completedAt) continue;
 
-      const executionTimeMs =
-        order.completedAt.getTime() - order.startedAt.getTime();
-      const executionTimeHours =
-        executionTimeMs / 3600000;
+      const executionTimeMs = order.completedAt.getTime() - order.startedAt.getTime();
+      const executionTimeHours = executionTimeMs / 3600000;
 
       // Fetch service items for this order
       const serviceItems = await this.prisma.serviceOrderItem.findMany({
         where: { serviceOrderId: order.id },
       });
 
-      const totalQuantity = serviceItems.reduce(
-        (sum, item) => sum + item.quantity,
-        0,
-      );
+      const totalQuantity = serviceItems.reduce((sum, item) => sum + item.quantity, 0);
 
       for (const serviceItem of serviceItems) {
         const serviceId = serviceItem.serviceId;
@@ -82,10 +76,8 @@ export class ServiceStatsService {
         }
 
         const stats = statsMap.get(serviceId)!;
-        const estimatedTimeForQuantity =
-          (stats.estimatedMinutes * quantity) / 60;
-        const proportionalExecutionTime =
-          (executionTimeHours * quantity) / totalQuantity;
+        const estimatedTimeForQuantity = (stats.estimatedMinutes * quantity) / 60;
+        const proportionalExecutionTime = (executionTimeHours * quantity) / totalQuantity;
 
         stats.totalExecutionTime += proportionalExecutionTime;
         stats.totalEstimatedTime += estimatedTimeForQuantity;
@@ -105,8 +97,7 @@ export class ServiceStatsService {
           ? Math.max(
               0,
               100 -
-                (Math.abs(averageExecutionHours - averageEstimatedHours) /
-                  averageEstimatedHours) *
+                (Math.abs(averageExecutionHours - averageEstimatedHours) / averageEstimatedHours) *
                   100,
             )
           : 0;
@@ -121,14 +112,11 @@ export class ServiceStatsService {
       });
     }
 
-    return result.sort(
-      (a, b) => b.totalCompletedOrders - a.totalCompletedOrders,
-    );
+    return result.sort((a, b) => b.totalCompletedOrders - a.totalCompletedOrders);
   }
 
   async getOverallStats(): Promise<OverallStats> {
-    const completedOrders =
-      await this.serviceOrderRepository.findCompletedOrders();
+    const completedOrders = await this.serviceOrderRepository.findCompletedOrders();
 
     if (completedOrders.length === 0) {
       return {
@@ -146,10 +134,8 @@ export class ServiceStatsService {
     for (const order of completedOrders) {
       if (!order.startedAt || !order.completedAt) continue;
 
-      const executionTimeMs =
-        order.completedAt.getTime() - order.startedAt.getTime();
-      const executionTimeHours =
-        executionTimeMs / 3600000;
+      const executionTimeMs = order.completedAt.getTime() - order.startedAt.getTime();
+      const executionTimeHours = executionTimeMs / 3600000;
 
       totalExecutionTime += executionTimeHours;
       totalEstimatedTime += Number(order.estimatedTimeHours);
@@ -163,9 +149,7 @@ export class ServiceStatsService {
         ? Math.max(
             0,
             100 -
-              (Math.abs(averageExecutionTime - averageEstimatedTime) /
-                averageEstimatedTime) *
-                100,
+              (Math.abs(averageExecutionTime - averageEstimatedTime) / averageEstimatedTime) * 100,
           )
         : 0;
 
@@ -177,9 +161,7 @@ export class ServiceStatsService {
     };
   }
 
-  async getServiceById(
-    serviceId: string,
-  ): Promise<ServiceExecutionStats | null> {
+  async getServiceById(serviceId: string): Promise<ServiceExecutionStats | null> {
     const stats = await this.getServiceExecutionStats();
     return stats.find((stat) => stat.serviceId === serviceId) || null;
   }
@@ -203,8 +185,6 @@ export class ServiceStatsService {
 
   async getTopServices(limit: number = 10): Promise<ServiceExecutionStats[]> {
     const stats = await this.getServiceExecutionStats();
-    return stats
-      .sort((a, b) => b.totalCompletedOrders - a.totalCompletedOrders)
-      .slice(0, limit);
+    return stats.sort((a, b) => b.totalCompletedOrders - a.totalCompletedOrders).slice(0, limit);
   }
 }

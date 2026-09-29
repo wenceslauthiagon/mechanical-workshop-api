@@ -9,13 +9,7 @@ const createMockServiceData = () => ({
   description: faker.commerce.productDescription(),
   price: faker.number.float({ min: 50, max: 500 }),
   estimatedMinutes: faker.number.int({ min: 30, max: 240 }),
-  category: faker.helpers.arrayElement([
-    'Manutenção',
-    'Suspensão',
-    'Freios',
-    'Elétrica',
-    'Motor',
-  ]),
+  category: faker.helpers.arrayElement(['Manutenção', 'Suspensão', 'Freios', 'Elétrica', 'Motor']),
   isActive: true,
 });
 
@@ -62,10 +56,7 @@ describe('Service Repository Integration Tests', () => {
       expect(service).toHaveProperty('id');
       expect(service.name).toBe(serviceData.name);
       expect(service.description).toBe(serviceData.description);
-      expect(Number(service.price)).toBeCloseTo(
-        Number(serviceData.price),
-        2,
-      );
+      expect(Number(service.price)).toBeCloseTo(Number(serviceData.price), 2);
       expect(service.estimatedMinutes).toBe(serviceData.estimatedMinutes);
       expect(service.category).toBe(serviceData.category);
       expect(service.isActive).toBe(true);
@@ -163,9 +154,7 @@ describe('Service Repository Integration Tests', () => {
     });
 
     it('TC0007 - Should return null when service not found by ID', async () => {
-      const service = await serviceRepository.findById(
-        '00000000-0000-0000-0000-000000000000',
-      );
+      const service = await serviceRepository.findById('00000000-0000-0000-0000-000000000000');
 
       expect(service).toBeNull();
     });
@@ -205,9 +194,7 @@ describe('Service Repository Integration Tests', () => {
       });
 
       expect(updatedService.id).toBe(updateServiceId);
-      expect(updatedService.description).toBe(
-        'Troca dos 4 pneus com alinhamento',
-      );
+      expect(updatedService.description).toBe('Troca dos 4 pneus com alinhamento');
     });
 
     it('TC0003 - Should update service to inactive', async () => {

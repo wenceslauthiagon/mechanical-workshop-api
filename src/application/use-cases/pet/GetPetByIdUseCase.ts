@@ -7,7 +7,7 @@ export class GetPetByIdUseCase {
 
   async execute(id: string): Promise<Pet> {
     const pet = await this.petRepository.findById(id);
-    
+
     if (!pet) {
       throw new NotFoundError('Pet', id);
     }

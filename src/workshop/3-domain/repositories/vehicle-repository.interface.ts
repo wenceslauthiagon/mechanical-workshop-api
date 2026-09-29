@@ -1,9 +1,7 @@
 import { Vehicle } from '@prisma/client';
 
 export interface IVehicleRepository {
-  create(
-    data: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Vehicle>;
+  create(data: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>): Promise<Vehicle>;
   findAll(): Promise<Vehicle[]>;
   findMany(skip: number, take: number): Promise<Vehicle[]>;
   count(): Promise<number>;

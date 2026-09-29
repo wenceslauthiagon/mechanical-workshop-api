@@ -7,9 +7,7 @@ import { IPartRepository } from '../../3-domain/repositories/part-repository.int
 export class PartRepository implements IPartRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    data: Omit<Part, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Part> {
+  async create(data: Omit<Part, 'id' | 'createdAt' | 'updatedAt'>): Promise<Part> {
     return this.prisma.part.create({
       data,
     });

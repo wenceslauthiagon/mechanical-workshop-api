@@ -37,9 +37,7 @@ export class BudgetController {
     description: 'Orçamento criado com sucesso',
     type: BudgetResponseDto,
   })
-  async create(
-    @Body() createBudgetDto: CreateBudgetDto,
-  ): Promise<BudgetResponseDto> {
+  async create(@Body() createBudgetDto: CreateBudgetDto): Promise<BudgetResponseDto> {
     const budget = await this.budgetService.create(createBudgetDto);
     return new BudgetResponseDto(budget);
   }
@@ -96,8 +94,7 @@ export class BudgetController {
   async findByServiceOrder(
     @Param('serviceOrderId') serviceOrderId: string,
   ): Promise<BudgetResponseDto[]> {
-    const budgets =
-      await this.budgetService.findByServiceOrderId(serviceOrderId);
+    const budgets = await this.budgetService.findByServiceOrderId(serviceOrderId);
     return budgets.map((budget) => new BudgetResponseDto(budget));
   }
 
@@ -134,8 +131,7 @@ export class BudgetController {
   })
   @ApiResponse({
     status: 200,
-    description:
-      'Lista de orçamentos com dados frescos de clientes, OS e itens',
+    description: 'Lista de orçamentos com dados frescos de clientes, OS e itens',
     schema: {
       type: 'array',
       items: { type: 'object' },
@@ -157,9 +153,7 @@ export class BudgetController {
       type: 'object',
     },
   })
-  async findOneEnriched(
-    @Param('id') id: string,
-  ): Promise<BudgetWithRelationsResponseDto> {
+  async findOneEnriched(@Param('id') id: string): Promise<BudgetWithRelationsResponseDto> {
     return await this.budgetService.findByIdWithRelations(id);
   }
 
@@ -198,8 +192,6 @@ export class BudgetController {
   async findByServiceOrderEnriched(
     @Param('serviceOrderId') serviceOrderId: string,
   ): Promise<BudgetWithRelationsResponseDto[]> {
-    return await this.budgetService.findByServiceOrderIdWithRelations(
-      serviceOrderId,
-    );
+    return await this.budgetService.findByServiceOrderIdWithRelations(serviceOrderId);
   }
 }

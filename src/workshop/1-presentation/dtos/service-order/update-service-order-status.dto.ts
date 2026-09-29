@@ -22,8 +22,7 @@ export class UpdateServiceOrderStatusDto {
 
   @ApiProperty({
     description: 'Observações sobre a mudança de status',
-    example:
-      'Diagnóstico concluído, problemas identificados no sistema de freios',
+    example: 'Diagnóstico concluído, problemas identificados no sistema de freios',
     required: false,
   })
   @IsOptional()

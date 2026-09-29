@@ -66,8 +66,7 @@ describe('JwtAuthGuard (Infrastructure)', () => {
 
     guard = module.get<JwtAuthGuard>(JwtAuthGuard);
     jwtService = module.get<jest.Mocked<JwtService>>(JwtService);
-    errorHandler =
-      module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
+    errorHandler = module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
   });
 
   it('Should be defined', () => {
@@ -102,9 +101,7 @@ describe('JwtAuthGuard (Infrastructure)', () => {
         throw new Error('Access token not found');
       });
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        'Access token not found',
-      );
+      await expect(guard.canActivate(context)).rejects.toThrow('Access token not found');
 
       expect(errorHandler.handleError).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -121,9 +118,7 @@ describe('JwtAuthGuard (Infrastructure)', () => {
         throw new Error('Access token not found');
       });
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        'Access token not found',
-      );
+      await expect(guard.canActivate(context)).rejects.toThrow('Access token not found');
 
       expect(errorHandler.handleError).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -140,9 +135,7 @@ describe('JwtAuthGuard (Infrastructure)', () => {
         throw new Error('Access token not found');
       });
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        'Access token not found',
-      );
+      await expect(guard.canActivate(context)).rejects.toThrow('Access token not found');
 
       expect(errorHandler.handleError).toHaveBeenCalledWith(
         expect.objectContaining({

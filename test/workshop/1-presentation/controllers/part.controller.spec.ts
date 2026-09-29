@@ -33,8 +33,7 @@ describe('PartController', () => {
     name: faker.commerce.productName(),
     description: faker.lorem.sentence(),
     partNumber: mockPartNumber,
-    price: Number(faker.number
-      .float({ min: 10, max: 500, fractionDigits: 2 }).toFixed(2)),
+    price: Number(faker.number.float({ min: 10, max: 500, fractionDigits: 2 }).toFixed(2)),
     stock: faker.number.int({ min: 0, max: 200 }),
     minStock: faker.number.int({ min: 5, max: 20 }),
     supplier: mockSupplier,
@@ -43,9 +42,7 @@ describe('PartController', () => {
   const mockUpdatePartDto: UpdatePartDto = {
     name: faker.commerce.productName(),
     description: faker.lorem.sentence(),
-    price: faker.number
-      .float({ min: 10, max: 500, fractionDigits: 2 })
-      .toFixed(2),
+    price: faker.number.float({ min: 10, max: 500, fractionDigits: 2 }).toFixed(2),
     stock: faker.number.int({ min: 0, max: 200 }),
     minStock: faker.number.int({ min: 5, max: 20 }),
     supplier: faker.company.name(),
@@ -94,12 +91,12 @@ describe('PartController', () => {
       const createdPart = {
         ...mockPartData,
         name: mockCreatePartDto.name,
-        description: mockCreatePartDto.description ,
-        partNumber: mockCreatePartDto.partNumber ,
+        description: mockCreatePartDto.description,
+        partNumber: mockCreatePartDto.partNumber,
         price: mockCreatePartDto.price,
         stock: mockCreatePartDto.stock,
         minStock: mockCreatePartDto.minStock,
-        supplier: mockCreatePartDto.supplier ,
+        supplier: mockCreatePartDto.supplier,
       };
       partService.create.mockResolvedValue(createdPart);
 
@@ -125,9 +122,7 @@ describe('PartController', () => {
       const mockError = new Error('Falha ao criar peça');
       partService.create.mockRejectedValue(mockError);
 
-      await expect(partController.create(mockCreatePartDto)).rejects.toThrow(
-        mockError,
-      );
+      await expect(partController.create(mockCreatePartDto)).rejects.toThrow(mockError);
       expect(partService.create).toHaveBeenCalledWith(mockCreatePartDto);
     });
 
@@ -135,9 +130,7 @@ describe('PartController', () => {
       const mockError = new Error('Número da peça já existe');
       partService.create.mockRejectedValue(mockError);
 
-      await expect(partController.create(mockCreatePartDto)).rejects.toThrow(
-        mockError,
-      );
+      await expect(partController.create(mockCreatePartDto)).rejects.toThrow(mockError);
       expect(partService.create).toHaveBeenCalledWith(mockCreatePartDto);
     });
   });
@@ -185,10 +178,10 @@ describe('PartController', () => {
 
       const result = await partController.findAll(undefined, undefined, true);
 
-      expect(partService.findAll).toHaveBeenCalledWith({ 
+      expect(partService.findAll).toHaveBeenCalledWith({
         supplier: undefined,
         active: undefined,
-        lowStock: true 
+        lowStock: true,
       });
       expect(result).toHaveLength(1);
     });
@@ -227,14 +220,9 @@ describe('PartController', () => {
 
       partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await partController.findAllPaginated(
-        paginationDto as any,
-      );
+      const result = await partController.findAllPaginated(paginationDto as any);
 
-      expect(partService.findAllPaginated).toHaveBeenCalledWith(
-        paginationDto,
-        {},
-      );
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {});
       expect(result.data).toHaveLength(1);
       expect(result.data[0].id).toBe(mockPartData.id);
       expect(result.pagination.totalRecords).toBe(1);
@@ -250,10 +238,7 @@ describe('PartController', () => {
 
       partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await partController.findAllPaginated(
-        paginationDto as any,
-        mockSupplier,
-      );
+      const result = await partController.findAllPaginated(paginationDto as any, mockSupplier);
 
       expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
         supplier: mockSupplier,
@@ -272,11 +257,7 @@ describe('PartController', () => {
 
       partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await partController.findAllPaginated(
-        paginationDto as any,
-        undefined,
-        true,
-      );
+      const result = await partController.findAllPaginated(paginationDto as any, undefined, true);
 
       expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
         active: true,
@@ -318,14 +299,9 @@ describe('PartController', () => {
 
       partService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await partController.findAllPaginated(
-        paginationDto as any,
-      );
+      const result = await partController.findAllPaginated(paginationDto as any);
 
-      expect(partService.findAllPaginated).toHaveBeenCalledWith(
-        paginationDto,
-        {},
-      );
+      expect(partService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {});
       expect(result.data).toHaveLength(0);
       expect(result.pagination.totalRecords).toBe(0);
     });
@@ -387,9 +363,7 @@ describe('PartController', () => {
       const mockError = new Error('Fornecedor não encontrado');
       partService.findBySupplier.mockRejectedValue(mockError);
 
-      await expect(partController.findBySupplier(mockSupplier)).rejects.toThrow(
-        mockError,
-      );
+      await expect(partController.findBySupplier(mockSupplier)).rejects.toThrow(mockError);
       expect(partService.findBySupplier).toHaveBeenCalledWith(mockSupplier);
     });
   });
@@ -409,9 +383,7 @@ describe('PartController', () => {
       const mockError = new Error('Peça não encontrada');
       partService.findById.mockRejectedValue(mockError);
 
-      await expect(partController.findOne(mockPartId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(partController.findOne(mockPartId)).rejects.toThrow(mockError);
       expect(partService.findById).toHaveBeenCalledWith(mockPartId);
     });
 
@@ -421,9 +393,7 @@ describe('PartController', () => {
       const mockError = new Error('UUID inválido');
       partService.findById.mockRejectedValue(mockError);
 
-      await expect(partController.findOne(invalidId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(partController.findOne(invalidId)).rejects.toThrow(mockError);
       expect(partService.findById).toHaveBeenCalledWith(invalidId);
     });
   });
@@ -443,9 +413,7 @@ describe('PartController', () => {
       const mockError = new Error('Peça não encontrada');
       partService.findByPartNumber.mockRejectedValue(mockError);
 
-      await expect(
-        partController.findByPartNumber(mockPartNumber),
-      ).rejects.toThrow(mockError);
+      await expect(partController.findByPartNumber(mockPartNumber)).rejects.toThrow(mockError);
       expect(partService.findByPartNumber).toHaveBeenCalledWith(mockPartNumber);
     });
 
@@ -454,12 +422,8 @@ describe('PartController', () => {
       const mockError = new Error('Número da peça inválido');
       partService.findByPartNumber.mockRejectedValue(mockError);
 
-      await expect(
-        partController.findByPartNumber(invalidPartNumber),
-      ).rejects.toThrow(mockError);
-      expect(partService.findByPartNumber).toHaveBeenCalledWith(
-        invalidPartNumber,
-      );
+      await expect(partController.findByPartNumber(invalidPartNumber)).rejects.toThrow(mockError);
+      expect(partService.findByPartNumber).toHaveBeenCalledWith(invalidPartNumber);
     });
   });
 
@@ -468,10 +432,8 @@ describe('PartController', () => {
       const updatedPart = {
         ...mockPartData,
         name: mockUpdatePartDto.name || mockPartData.name,
-        description: mockUpdatePartDto.description ,
-        price: mockUpdatePartDto.price
-          ? parseFloat(mockUpdatePartDto.price)
-          : mockPartData.price,
+        description: mockUpdatePartDto.description,
+        price: mockUpdatePartDto.price ? parseFloat(mockUpdatePartDto.price) : mockPartData.price,
         stock: mockUpdatePartDto.stock || mockPartData.stock,
         minStock: mockUpdatePartDto.minStock || mockPartData.minStock,
         supplier: mockUpdatePartDto.supplier || mockPartData.supplier,
@@ -480,10 +442,7 @@ describe('PartController', () => {
 
       const result = await partController.update(mockPartId, mockUpdatePartDto);
 
-      expect(partService.update).toHaveBeenCalledWith(
-        mockPartId,
-        mockUpdatePartDto,
-      );
+      expect(partService.update).toHaveBeenCalledWith(mockPartId, mockUpdatePartDto);
       expect(result.id).toBe(mockPartId);
       expect(result.price).toBe(updatedPart.price.toString());
     });
@@ -492,26 +451,16 @@ describe('PartController', () => {
       const mockError = new Error('Peça não encontrada');
       partService.update.mockRejectedValue(mockError);
 
-      await expect(
-        partController.update(mockPartId, mockUpdatePartDto),
-      ).rejects.toThrow(mockError);
-      expect(partService.update).toHaveBeenCalledWith(
-        mockPartId,
-        mockUpdatePartDto,
-      );
+      await expect(partController.update(mockPartId, mockUpdatePartDto)).rejects.toThrow(mockError);
+      expect(partService.update).toHaveBeenCalledWith(mockPartId, mockUpdatePartDto);
     });
 
     it('TC0003 - Should handle duplicate part number during update', async () => {
       const mockError = new Error('Número da peça já existe');
       partService.update.mockRejectedValue(mockError);
 
-      await expect(
-        partController.update(mockPartId, mockUpdatePartDto),
-      ).rejects.toThrow(mockError);
-      expect(partService.update).toHaveBeenCalledWith(
-        mockPartId,
-        mockUpdatePartDto,
-      );
+      await expect(partController.update(mockPartId, mockUpdatePartDto)).rejects.toThrow(mockError);
+      expect(partService.update).toHaveBeenCalledWith(mockPartId, mockUpdatePartDto);
     });
   });
 
@@ -526,10 +475,7 @@ describe('PartController', () => {
 
       const result = await partController.updateStock(mockPartId, quantity);
 
-      expect(partService.updateStock).toHaveBeenCalledWith(
-        mockPartId,
-        quantity,
-      );
+      expect(partService.updateStock).toHaveBeenCalledWith(mockPartId, quantity);
       expect(result.stock).toBe(mockPartData.stock + quantity);
     });
 
@@ -543,10 +489,7 @@ describe('PartController', () => {
 
       const result = await partController.updateStock(mockPartId, quantity);
 
-      expect(partService.updateStock).toHaveBeenCalledWith(
-        mockPartId,
-        quantity,
-      );
+      expect(partService.updateStock).toHaveBeenCalledWith(mockPartId, quantity);
       expect(result.stock).toBe(mockPartData.stock + quantity);
     });
 
@@ -555,13 +498,8 @@ describe('PartController', () => {
       const mockError = new Error('Peça não encontrada');
       partService.updateStock.mockRejectedValue(mockError);
 
-      await expect(
-        partController.updateStock(mockPartId, quantity),
-      ).rejects.toThrow(mockError);
-      expect(partService.updateStock).toHaveBeenCalledWith(
-        mockPartId,
-        quantity,
-      );
+      await expect(partController.updateStock(mockPartId, quantity)).rejects.toThrow(mockError);
+      expect(partService.updateStock).toHaveBeenCalledWith(mockPartId, quantity);
     });
 
     it('TC0004 - Should handle insufficient stock error', async () => {
@@ -569,13 +507,8 @@ describe('PartController', () => {
       const mockError = new Error('Estoque insuficiente');
       partService.updateStock.mockRejectedValue(mockError);
 
-      await expect(
-        partController.updateStock(mockPartId, quantity),
-      ).rejects.toThrow(mockError);
-      expect(partService.updateStock).toHaveBeenCalledWith(
-        mockPartId,
-        quantity,
-      );
+      await expect(partController.updateStock(mockPartId, quantity)).rejects.toThrow(mockError);
+      expect(partService.updateStock).toHaveBeenCalledWith(mockPartId, quantity);
     });
   });
 
@@ -595,9 +528,7 @@ describe('PartController', () => {
       const mockError = new Error('Peça não encontrada');
       partService.remove.mockRejectedValue(mockError);
 
-      await expect(partController.remove(mockPartId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(partController.remove(mockPartId)).rejects.toThrow(mockError);
       expect(partService.remove).toHaveBeenCalledWith(mockPartId);
     });
 
@@ -605,13 +536,8 @@ describe('PartController', () => {
       const mockError = new Error('Peça já está inativa');
       partService.remove.mockRejectedValue(mockError);
 
-      await expect(partController.remove(mockPartId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(partController.remove(mockPartId)).rejects.toThrow(mockError);
       expect(partService.remove).toHaveBeenCalledWith(mockPartId);
     });
   });
 });
-
-
-

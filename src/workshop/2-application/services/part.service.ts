@@ -17,13 +17,9 @@ export class PartService {
 
   async create(data: CreatePartDto): Promise<PartBase> {
     if (data.partNumber) {
-      const existingPart = await this.partRepository.findByPartNumber(
-        data.partNumber,
-      );
+      const existingPart = await this.partRepository.findByPartNumber(data.partNumber);
       if (existingPart) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS);
       }
     }
 
@@ -37,7 +33,7 @@ export class PartService {
       supplier: data.supplier ?? null,
       isActive: true,
     });
-    
+
     return {
       ...partFromDb,
       description: partFromDb.description ?? undefined,
@@ -51,7 +47,7 @@ export class PartService {
     lowStock?: boolean;
   }): Promise<PartBase[]> {
     const parts = await this.partRepository.findAll(filters);
-    return parts.map(part => ({
+    return parts.map((part) => ({
       ...part,
       description: part.description ?? undefined,
       supplier: part.supplier ?? undefined,
@@ -67,15 +63,11 @@ export class PartService {
     },
   ): Promise<PaginatedResponseDto<PartBase>> {
     const [parts, total] = await Promise.all([
-      this.partRepository.findMany(
-        paginationDto.skip,
-        paginationDto.take,
-        filters,
-      ),
+      this.partRepository.findMany(paginationDto.skip, paginationDto.take, filters),
       this.partRepository.count(filters),
     ]);
 
-    const mappedParts = parts.map(part => ({
+    const mappedParts = parts.map((part) => ({
       ...part,
       description: part.description ?? undefined,
       supplier: part.supplier ?? undefined,
@@ -115,7 +107,7 @@ export class PartService {
 
   async findBySupplier(supplier: string): Promise<PartBase[]> {
     const parts = await this.partRepository.findBySupplier(supplier);
-    return parts.map(part => ({
+    return parts.map((part) => ({
       ...part,
       description: part.description ?? undefined,
       supplier: part.supplier ?? undefined,
@@ -124,7 +116,7 @@ export class PartService {
 
   async findLowStock(): Promise<PartBase[]> {
     const parts = await this.partRepository.findLowStock();
-    return parts.map(part => ({
+    return parts.map((part) => ({
       ...part,
       description: part.description ?? undefined,
       supplier: part.supplier ?? undefined,
@@ -138,13 +130,9 @@ export class PartService {
     }
 
     if (data.partNumber && data.partNumber !== part.partNumber) {
-      const existingPart = await this.partRepository.findByPartNumber(
-        data.partNumber,
-      );
+      const existingPart = await this.partRepository.findByPartNumber(data.partNumber);
       if (existingPart && existingPart.id !== id) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.PART_NUMBER_ALREADY_EXISTS);
       }
     }
 

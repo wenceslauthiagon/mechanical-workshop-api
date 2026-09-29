@@ -3,7 +3,9 @@ import { WeightHistoryController } from '@infrastructure/api/controllers/WeightH
 import { validateRequest } from '@infrastructure/api/middlewares/validateRequest';
 import { recordWeightSchema } from '@infrastructure/api/dtos/WeightHistoryDTO';
 
-export function createWeightHistoryRoutes(weightHistoryController: WeightHistoryController): Router {
+export function createWeightHistoryRoutes(
+  weightHistoryController: WeightHistoryController,
+): Router {
   const router = Router();
 
   /**

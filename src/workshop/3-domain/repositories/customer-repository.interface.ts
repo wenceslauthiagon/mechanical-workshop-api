@@ -1,9 +1,7 @@
 import { Customer, Vehicle } from '@prisma/client';
 
 export interface ICustomerRepository {
-  create(
-    data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Customer>;
+  create(data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>): Promise<Customer>;
   findAll(): Promise<Customer[]>;
   findMany(skip: number, take: number): Promise<Customer[]>;
   count(): Promise<number>;

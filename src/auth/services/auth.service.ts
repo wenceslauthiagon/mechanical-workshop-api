@@ -41,11 +41,11 @@ export class AuthService {
 
   async login(loginDto: any) {
     const user = await this.validateUser(loginDto.username, loginDto.password);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
     const payload = { username: user.username, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
@@ -60,7 +60,7 @@ export class AuthService {
 
   async createUser(userData: CreateUserData) {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-    
+
     const user = await this.prisma.user.create({
       data: {
         username: userData.username,

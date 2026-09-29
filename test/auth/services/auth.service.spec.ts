@@ -150,7 +150,7 @@ describe('AuthService', () => {
     it('TC0001 - Should create user successfully', async () => {
       const hashedPassword = faker.string.alphanumeric(60);
       jest.spyOn(mockedBcrypt, 'hash').mockResolvedValue(hashedPassword as never);
-      
+
       const userData = {
         username: mockUsername,
         password: mockPassword,

@@ -89,8 +89,7 @@ export class ServiceOrderController {
   @Get('all')
   @ApiOperation({
     summary: 'Listar todas as ordens de serviço (sem paginação)',
-    description:
-      'Retorna todas as ordens de serviço - use com cuidado em produção',
+    description: 'Retorna todas as ordens de serviço - use com cuidado em produção',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -148,9 +147,7 @@ export class ServiceOrderController {
     status: HttpStatus.NOT_FOUND,
     description: 'Ordem de serviço não encontrada',
   })
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<ServiceOrderResponseDto> {
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ServiceOrderResponseDto> {
     return this.serviceOrderService.findById(id);
   }
 
@@ -188,8 +185,7 @@ export class ServiceOrderController {
   @Patch(':id/approve')
   @ApiOperation({
     summary: 'Approve service order budget',
-    description:
-      'Approves the budget and moves the service order to IN_EXECUTION status',
+    description: 'Approves the budget and moves the service order to IN_EXECUTION status',
   })
   @ApiParam({
     name: 'id',
@@ -209,17 +205,14 @@ export class ServiceOrderController {
     status: HttpStatus.NOT_FOUND,
     description: 'Ordem de serviço não encontrada',
   })
-  async approveOrder(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<ServiceOrderResponseDto> {
+  async approveOrder(@Param('id', ParseUUIDPipe) id: string): Promise<ServiceOrderResponseDto> {
     return this.serviceOrderService.approveOrder(id);
   }
 
   @Get(':id/status-history')
   @ApiOperation({
     summary: 'Histórico de status da ordem de serviço',
-    description:
-      'Retorna o histórico completo de mudanças de status da ordem de serviço',
+    description: 'Retorna o histórico completo de mudanças de status da ordem de serviço',
   })
   @ApiParam({
     name: 'id',

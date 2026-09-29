@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ServiceOrderService } from '../../2-application/services/service-order.service';
 import { ServiceOrderResponseDto } from '../dtos/service-order/service-order-response.dto';
@@ -40,10 +34,7 @@ export class PublicServiceOrderController {
     try {
       return await this.serviceOrderService.findByOrderNumber(orderNumber);
     } catch {
-      throw new HttpException(
-        'Ordem de serviço não encontrada',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('Ordem de serviço não encontrada', HttpStatus.NOT_FOUND);
     }
   }
 

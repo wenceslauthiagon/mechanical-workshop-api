@@ -148,9 +148,7 @@ describe('BudgetEntity', () => {
       });
 
       const expectedDate = new Date(beforeCreation);
-      expectedDate.setDate(
-        expectedDate.getDate() + BUDGET_CONSTANTS.DEFAULT_VALUES.VALID_DAYS,
-      );
+      expectedDate.setDate(expectedDate.getDate() + BUDGET_CONSTANTS.DEFAULT_VALUES.VALID_DAYS);
 
       expect(budget.validUntil.getDate()).toBe(expectedDate.getDate());
     });
@@ -225,9 +223,7 @@ describe('BudgetEntity', () => {
         BudgetStatus.DRAFT,
       );
 
-      expect(() => budget.approve()).toThrow(
-        BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_APPROVED,
-      );
+      expect(() => budget.approve()).toThrow(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_APPROVED);
     });
 
     it('TC0003 - Should throw error when budget is expired', () => {
@@ -248,9 +244,7 @@ describe('BudgetEntity', () => {
         new Date(),
       );
 
-      expect(() => budget.approve()).toThrow(
-        BUDGET_CONSTANTS.MESSAGES.EXPIRED_CANNOT_BE_APPROVED,
-      );
+      expect(() => budget.approve()).toThrow(BUDGET_CONSTANTS.MESSAGES.EXPIRED_CANNOT_BE_APPROVED);
     });
   });
 
@@ -290,9 +284,7 @@ describe('BudgetEntity', () => {
         BudgetStatus.DRAFT,
       );
 
-      expect(() => budget.reject()).toThrow(
-        BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_REJECTED,
-      );
+      expect(() => budget.reject()).toThrow(BUDGET_CONSTANTS.MESSAGES.ONLY_SENT_CAN_BE_REJECTED);
     });
   });
 
@@ -331,9 +323,7 @@ describe('BudgetEntity', () => {
         BudgetStatus.SENT,
       );
 
-      expect(() => budget.send()).toThrow(
-        BUDGET_CONSTANTS.MESSAGES.ONLY_DRAFT_CAN_BE_SENT,
-      );
+      expect(() => budget.send()).toThrow(BUDGET_CONSTANTS.MESSAGES.ONLY_DRAFT_CAN_BE_SENT);
     });
   });
 

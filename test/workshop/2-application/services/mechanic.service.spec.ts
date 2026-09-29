@@ -193,9 +193,7 @@ describe('MechanicService', () => {
       const error = new Error('DB error');
       mechanicRepository.findById.mockRejectedValue(error);
 
-      await expect(service.findById(mockMechanic.id)).rejects.toThrow(
-        'DB error',
-      );
+      await expect(service.findById(mockMechanic.id)).rejects.toThrow('DB error');
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -237,9 +235,7 @@ describe('MechanicService', () => {
       const result = await service.findBySpecialty(specialty);
 
       expect(result).toEqual(mechanics);
-      expect(mechanicRepository.findBySpecialty).toHaveBeenCalledWith(
-        specialty,
-      );
+      expect(mechanicRepository.findBySpecialty).toHaveBeenCalledWith(specialty);
     });
 
     it('TC0002 - Should return empty array when no mechanics have the specialty', async () => {
@@ -254,9 +250,7 @@ describe('MechanicService', () => {
       const error = new Error('DB error');
       mechanicRepository.findBySpecialty.mockRejectedValue(error);
 
-      await expect(service.findBySpecialty('Motor')).rejects.toThrow(
-        'DB error',
-      );
+      await expect(service.findBySpecialty('Motor')).rejects.toThrow('DB error');
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -284,10 +278,7 @@ describe('MechanicService', () => {
       const result = await service.update(mockMechanic.id, updateDto);
 
       expect(result).toEqual(updatedMechanic);
-      expect(mechanicRepository.update).toHaveBeenCalledWith(
-        mockMechanic.id,
-        updateDto,
-      );
+      expect(mechanicRepository.update).toHaveBeenCalledWith(mockMechanic.id, updateDto);
     });
 
     it('TC0002 - Should throw error when mechanic not found', async () => {
@@ -307,9 +298,7 @@ describe('MechanicService', () => {
 
       await service.update(mockMechanic.id, dtoWithEmail);
 
-      expect(mechanicRepository.findByEmail).toHaveBeenCalledWith(
-        'novo@email.com',
-      );
+      expect(mechanicRepository.findByEmail).toHaveBeenCalledWith('novo@email.com');
       expect(mechanicRepository.update).toHaveBeenCalled();
     });
 
@@ -322,9 +311,9 @@ describe('MechanicService', () => {
       };
       mechanicRepository.findByEmail.mockResolvedValue(existingMechanic);
 
-      await expect(
-        service.update(mockMechanic.id, dtoWithEmail),
-      ).rejects.toThrow(MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS);
+      await expect(service.update(mockMechanic.id, dtoWithEmail)).rejects.toThrow(
+        MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS,
+      );
       expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
         MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS,
       );
@@ -351,9 +340,7 @@ describe('MechanicService', () => {
       const error = new Error('DB error');
       mechanicRepository.update.mockRejectedValue(error);
 
-      await expect(service.update(mockMechanic.id, updateDto)).rejects.toThrow(
-        'DB error',
-      );
+      await expect(service.update(mockMechanic.id, updateDto)).rejects.toThrow('DB error');
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -364,16 +351,12 @@ describe('MechanicService', () => {
       mechanicRepository.findById
         .mockResolvedValueOnce(mockMechanic)
         .mockResolvedValueOnce(unavailableMechanic);
-      mechanicRepository.toggleAvailability.mockResolvedValue(
-        unavailableMechanic,
-      );
+      mechanicRepository.toggleAvailability.mockResolvedValue(unavailableMechanic);
 
       const result = await service.toggleAvailability(mockMechanic.id);
 
       expect(result).toEqual(unavailableMechanic);
-      expect(mechanicRepository.toggleAvailability).toHaveBeenCalledWith(
-        mockMechanic.id,
-      );
+      expect(mechanicRepository.toggleAvailability).toHaveBeenCalledWith(mockMechanic.id);
     });
 
     it('TC0002 - Should throw error when mechanic not found', async () => {
@@ -389,9 +372,7 @@ describe('MechanicService', () => {
       mechanicRepository.findById.mockResolvedValue(mockMechanic);
       mechanicRepository.toggleAvailability.mockRejectedValue(error);
 
-      await expect(service.toggleAvailability(mockMechanic.id)).rejects.toThrow(
-        'DB error',
-      );
+      await expect(service.toggleAvailability(mockMechanic.id)).rejects.toThrow('DB error');
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -433,9 +414,7 @@ describe('MechanicService', () => {
       const result = await service.getWorkload(mockMechanic.id);
 
       expect(result).toEqual(mockWorkload);
-      expect(mechanicRepository.getWorkload).toHaveBeenCalledWith(
-        mockMechanic.id,
-      );
+      expect(mechanicRepository.getWorkload).toHaveBeenCalledWith(mockMechanic.id);
     });
 
     it('TC0002 - Should throw error when mechanic not found', async () => {
@@ -452,9 +431,7 @@ describe('MechanicService', () => {
       mechanicRepository.findById.mockResolvedValue(mockMechanic);
       mechanicRepository.getWorkload.mockRejectedValue(error);
 
-      await expect(service.getWorkload(mockMechanic.id)).rejects.toThrow(
-        'DB error',
-      );
+      await expect(service.getWorkload(mockMechanic.id)).rejects.toThrow('DB error');
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -477,9 +454,9 @@ describe('MechanicService', () => {
     it('TC0002 - Should throw error when mechanic not found', async () => {
       mechanicRepository.findById.mockResolvedValue(null);
 
-      await expect(
-        service.assignToServiceOrder('invalid-id', serviceOrderId),
-      ).rejects.toThrow(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
+      await expect(service.assignToServiceOrder('invalid-id', serviceOrderId)).rejects.toThrow(
+        MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
+      );
       expect(mechanicRepository.assignToServiceOrder).not.toHaveBeenCalled();
     });
 
@@ -487,9 +464,9 @@ describe('MechanicService', () => {
       const unavailableMechanic = { ...mockMechanic, isAvailable: false };
       mechanicRepository.findById.mockResolvedValue(unavailableMechanic);
 
-      await expect(
-        service.assignToServiceOrder(mockMechanic.id, serviceOrderId),
-      ).rejects.toThrow(MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE);
+      await expect(service.assignToServiceOrder(mockMechanic.id, serviceOrderId)).rejects.toThrow(
+        MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE,
+      );
       expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
         MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE,
       );
@@ -501,9 +478,9 @@ describe('MechanicService', () => {
       mechanicRepository.findById.mockResolvedValue(mockMechanic);
       mechanicRepository.assignToServiceOrder.mockRejectedValue(error);
 
-      await expect(
-        service.assignToServiceOrder(mockMechanic.id, serviceOrderId),
-      ).rejects.toThrow('DB error');
+      await expect(service.assignToServiceOrder(mockMechanic.id, serviceOrderId)).rejects.toThrow(
+        'DB error',
+      );
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -515,9 +492,7 @@ describe('MechanicService', () => {
 
       await service.markAsUnavailable(mockMechanic.id);
 
-      expect(mechanicRepository.markAsUnavailable).toHaveBeenCalledWith(
-        mockMechanic.id,
-      );
+      expect(mechanicRepository.markAsUnavailable).toHaveBeenCalledWith(mockMechanic.id);
     });
 
     it('TC0002 - Should throw error when mechanic not found', async () => {
@@ -534,9 +509,7 @@ describe('MechanicService', () => {
       mechanicRepository.findById.mockResolvedValue(mockMechanic);
       mechanicRepository.markAsUnavailable.mockRejectedValue(error);
 
-      await expect(service.markAsUnavailable(mockMechanic.id)).rejects.toThrow(
-        'DB error',
-      );
+      await expect(service.markAsUnavailable(mockMechanic.id)).rejects.toThrow('DB error');
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -548,17 +521,15 @@ describe('MechanicService', () => {
 
       await service.releaseFromServiceOrder(mockMechanic.id);
 
-      expect(mechanicRepository.releaseFromServiceOrder).toHaveBeenCalledWith(
-        mockMechanic.id,
-      );
+      expect(mechanicRepository.releaseFromServiceOrder).toHaveBeenCalledWith(mockMechanic.id);
     });
 
     it('TC0002 - Should throw error when mechanic not found', async () => {
       mechanicRepository.findById.mockResolvedValue(null);
 
-      await expect(
-        service.releaseFromServiceOrder('invalid-id'),
-      ).rejects.toThrow(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
+      await expect(service.releaseFromServiceOrder('invalid-id')).rejects.toThrow(
+        MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
+      );
       expect(mechanicRepository.releaseFromServiceOrder).not.toHaveBeenCalled();
     });
 
@@ -567,9 +538,7 @@ describe('MechanicService', () => {
       mechanicRepository.findById.mockResolvedValue(mockMechanic);
       mechanicRepository.releaseFromServiceOrder.mockRejectedValue(error);
 
-      await expect(
-        service.releaseFromServiceOrder(mockMechanic.id),
-      ).rejects.toThrow('DB error');
+      await expect(service.releaseFromServiceOrder(mockMechanic.id)).rejects.toThrow('DB error');
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });
@@ -578,10 +547,7 @@ describe('MechanicService', () => {
     const requiredSpecialties = ['Motor', 'Freios'];
 
     beforeEach(() => {
-      mechanicRepository.findAll.mockResolvedValue([
-        mockMechanic,
-        mockMechanic2,
-      ]);
+      mechanicRepository.findAll.mockResolvedValue([mockMechanic, mockMechanic2]);
     });
 
     it('TC0001 - Should return mechanic with lowest workload', async () => {
@@ -597,8 +563,7 @@ describe('MechanicService', () => {
           averageCompletionTime: 36,
         });
 
-      const result =
-        await service.findBestMechanicForService(requiredSpecialties);
+      const result = await service.findBestMechanicForService(requiredSpecialties);
 
       expect(result).toBeDefined();
       expect(result?.specialties).toContain('Motor');
@@ -613,8 +578,7 @@ describe('MechanicService', () => {
         { ...mockMechanic2, specialties: ['Elétrica'] },
       ]);
 
-      const result =
-        await service.findBestMechanicForService(requiredSpecialties);
+      const result = await service.findBestMechanicForService(requiredSpecialties);
 
       expect(result).toBeNull();
       expect(mechanicRepository.getWorkload).not.toHaveBeenCalled();
@@ -626,8 +590,7 @@ describe('MechanicService', () => {
         { ...mockMechanic2, isAvailable: false },
       ]);
 
-      const result =
-        await service.findBestMechanicForService(requiredSpecialties);
+      const result = await service.findBestMechanicForService(requiredSpecialties);
 
       expect(result).toBeNull();
       expect(mechanicRepository.getWorkload).not.toHaveBeenCalled();
@@ -644,8 +607,7 @@ describe('MechanicService', () => {
         averageCompletionTime: 24,
       });
 
-      const result =
-        await service.findBestMechanicForService(requiredSpecialties);
+      const result = await service.findBestMechanicForService(requiredSpecialties);
 
       expect(result).toBeDefined();
       expect(result?.id).toBe(mockMechanic.id);
@@ -663,8 +625,7 @@ describe('MechanicService', () => {
         averageCompletionTime: 12,
       });
 
-      const result =
-        await service.findBestMechanicForService(requiredSpecialties);
+      const result = await service.findBestMechanicForService(requiredSpecialties);
 
       expect(result).toBeDefined();
       expect(result?.id).toBe(mockMechanic2.id);
@@ -675,9 +636,9 @@ describe('MechanicService', () => {
       const error = new Error('DB error');
       mechanicRepository.findAll.mockRejectedValue(error);
 
-      await expect(
-        service.findBestMechanicForService(requiredSpecialties),
-      ).rejects.toThrow('DB error');
+      await expect(service.findBestMechanicForService(requiredSpecialties)).rejects.toThrow(
+        'DB error',
+      );
       expect(errorHandler.handleError).toHaveBeenCalledWith(error);
     });
 
@@ -689,8 +650,7 @@ describe('MechanicService', () => {
         averageCompletionTime: 24,
       });
 
-      const result =
-        await service.findBestMechanicForService(requiredSpecialties);
+      const result = await service.findBestMechanicForService(requiredSpecialties);
 
       expect(result).toBeDefined();
       expect(result?.id).toBe(mockMechanic.id);

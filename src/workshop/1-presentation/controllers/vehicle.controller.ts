@@ -40,8 +40,7 @@ export class VehicleController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Criar novo veículo',
-    description:
-      'Cria um novo veículo vinculado a um cliente com validação de placa',
+    description: 'Cria um novo veículo vinculado a um cliente com validação de placa',
   })
   @ApiBody({ type: CreateVehicleDto })
   @ApiResponse({
@@ -57,9 +56,7 @@ export class VehicleController {
     status: HttpStatus.NOT_FOUND,
     description: 'Cliente não encontrado',
   })
-  async create(
-    @Body() createVehicleDto: CreateVehicleDto,
-  ): Promise<VehicleResponseDto> {
+  async create(@Body() createVehicleDto: CreateVehicleDto): Promise<VehicleResponseDto> {
     return await this.vehicleService.create(createVehicleDto);
   }
 
@@ -81,8 +78,7 @@ export class VehicleController {
   @Get('all')
   @ApiOperation({
     summary: 'Listar todos os veículos (sem paginação)',
-    description:
-      'Retorna lista completa de veículos - use com cuidado em produção',
+    description: 'Retorna lista completa de veículos - use com cuidado em produção',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -112,9 +108,7 @@ export class VehicleController {
     status: HttpStatus.NOT_FOUND,
     description: 'Veículo não encontrado',
   })
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<VehicleResponseDto> {
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<VehicleResponseDto> {
     return await this.vehicleService.findById(id);
   }
 
@@ -162,9 +156,7 @@ export class VehicleController {
     status: HttpStatus.NOT_FOUND,
     description: 'Veículo não encontrado',
   })
-  async findByPlate(
-    @Param('licensePlate') licensePlate: string,
-  ): Promise<VehicleResponseDto> {
+  async findByPlate(@Param('licensePlate') licensePlate: string): Promise<VehicleResponseDto> {
     return await this.vehicleService.findByLicensePlate(licensePlate);
   }
 

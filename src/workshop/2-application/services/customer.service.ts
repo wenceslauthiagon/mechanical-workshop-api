@@ -21,27 +21,18 @@ export class CustomerService {
     try {
       normalizedDocument = DocumentUtils.validateAndNormalize(data.document);
     } catch (error) {
-      this.errorHandler.handleValueObjectError(
-        error,
-        ERROR_MESSAGES.INVALID_DOCUMENT,
-      );
+      this.errorHandler.handleValueObjectError(error, ERROR_MESSAGES.INVALID_DOCUMENT);
     }
 
-    const existingEmailCustomer = await this.customerRepository.findByEmail(
-      data.email,
-    );
+    const existingEmailCustomer = await this.customerRepository.findByEmail(data.email);
     if (existingEmailCustomer) {
-      this.errorHandler.handleConflictError(
-        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
-      );
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     const existingDocumentCustomer =
       await this.customerRepository.findByDocument(normalizedDocument);
     if (existingDocumentCustomer) {
-      this.errorHandler.handleConflictError(
-        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
-      );
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
     }
 
     const customerData = {
@@ -57,9 +48,7 @@ export class CustomerService {
     return this.customerRepository.findAll();
   }
 
-  async findAllPaginated(
-    paginationDto: PaginationDto,
-  ): Promise<PaginatedResponseDto<Customer>> {
+  async findAllPaginated(paginationDto: PaginationDto): Promise<PaginatedResponseDto<Customer>> {
     const { skip, take, page = 0, size = 10 } = paginationDto;
 
     const [customers, total] = await Promise.all([
@@ -80,8 +69,7 @@ export class CustomerService {
 
   async findByDocument(document: string): Promise<Customer> {
     const normalizedDocument = DocumentUtils.normalize(document);
-    const customer =
-      await this.customerRepository.findByDocument(normalizedDocument);
+    const customer = await this.customerRepository.findByDocument(normalizedDocument);
     if (!customer) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
@@ -103,13 +91,9 @@ export class CustomerService {
     }
 
     if (data.email && data.email !== customer.email) {
-      const existingCustomer = await this.customerRepository.findByEmail(
-        data.email,
-      );
+      const existingCustomer = await this.customerRepository.findByEmail(data.email);
       if (existingCustomer) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
       }
     }
 
@@ -118,31 +102,20 @@ export class CustomerService {
       try {
         normalizedDocument = DocumentUtils.validateAndNormalize(data.document);
       } catch (error) {
-        this.errorHandler.handleValueObjectError(
-          error,
-          ERROR_MESSAGES.INVALID_DOCUMENT,
-        );
+        this.errorHandler.handleValueObjectError(error, ERROR_MESSAGES.INVALID_DOCUMENT);
       }
-      const existingCustomer =
-        await this.customerRepository.findByDocument(normalizedDocument);
+      const existingCustomer = await this.customerRepository.findByDocument(normalizedDocument);
       if (existingCustomer) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
       }
     }
 
     let normalizedDocumentForUpdate: string | undefined;
     if (data.document) {
       try {
-        normalizedDocumentForUpdate = DocumentUtils.validateAndNormalize(
-          data.document,
-        );
+        normalizedDocumentForUpdate = DocumentUtils.validateAndNormalize(data.document);
       } catch (error) {
-        this.errorHandler.handleValueObjectError(
-          error,
-          ERROR_MESSAGES.INVALID_DOCUMENT,
-        );
+        this.errorHandler.handleValueObjectError(error, ERROR_MESSAGES.INVALID_DOCUMENT);
       }
     }
 

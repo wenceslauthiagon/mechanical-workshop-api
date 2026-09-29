@@ -145,9 +145,7 @@ describe('PublicBudgetController', () => {
       const error = new Error('Cannot approve this budget');
       budgetService.approveBudget.mockRejectedValue(error);
 
-      await expect(controller.approveBudget(mockBudgetId)).rejects.toThrow(
-        error,
-      );
+      await expect(controller.approveBudget(mockBudgetId)).rejects.toThrow(error);
       expect(budgetService.approveBudget).toHaveBeenCalledWith(mockBudgetId);
     });
   });
@@ -168,9 +166,7 @@ describe('PublicBudgetController', () => {
       const error = new Error('Cannot reject this budget');
       budgetService.rejectBudget.mockRejectedValue(error);
 
-      await expect(controller.rejectBudget(mockBudgetId)).rejects.toThrow(
-        error,
-      );
+      await expect(controller.rejectBudget(mockBudgetId)).rejects.toThrow(error);
       expect(budgetService.rejectBudget).toHaveBeenCalledWith(mockBudgetId);
     });
   });
@@ -217,9 +213,7 @@ describe('PublicBudgetController', () => {
       const error = new Error('Budget not found');
       budgetService.findById.mockRejectedValue(error);
 
-      await expect(controller.getBudgetStatus('invalid-id')).rejects.toThrow(
-        error,
-      );
+      await expect(controller.getBudgetStatus('invalid-id')).rejects.toThrow(error);
       expect(budgetService.findById).toHaveBeenCalledWith('invalid-id');
     });
 

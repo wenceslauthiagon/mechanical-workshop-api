@@ -41,9 +41,11 @@ const SERVER_CONTEXT = 'ServerStartup';
 
 const SERVER_MESSAGES = {
   RUNNING: (port: string | number): string => `Running on http://localhost:${port}`,
-  HEALTH_CHECK: (port: string | number): string => `Health check: http://localhost:${port}${API_ROUTES.HEALTH}`,
+  HEALTH_CHECK: (port: string | number): string =>
+    `Health check: http://localhost:${port}${API_ROUTES.HEALTH}`,
   API_BASE: (port: string | number): string => `API Base: http://localhost:${port}/api`,
-  API_DOCS: (port: string | number): string => `API Docs: http://localhost:${port}${API_ROUTES.DOCS}`,
+  API_DOCS: (port: string | number): string =>
+    `API Docs: http://localhost:${port}${API_ROUTES.DOCS}`,
   STARTUP_FAILED: 'Failed to start',
 };
 
@@ -55,10 +57,14 @@ app.use(cors());
 app.use(express.json());
 
 // Swagger Documentation
-app.use(API_ROUTES.DOCS, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Pet Management API Docs',
-}));
+app.use(
+  API_ROUTES.DOCS,
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Pet Management API Docs',
+  }),
+);
 
 /**
  * @swagger
@@ -82,9 +88,9 @@ app.use(API_ROUTES.DOCS, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
  *                   format: date-time
  */
 app.get(API_ROUTES.HEALTH, (_req: Request, res: Response) => {
-  res.status(HTTP_STATUS_OK).json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString() 
+  res.status(HTTP_STATUS_OK).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -93,7 +99,10 @@ app.use(API_ROUTES.OWNERS, createOwnerRoutes(container.ownerController));
 app.use(API_ROUTES.PETS, createPetRoutes(container.petController));
 app.use(API_ROUTES.VACCINES, createVaccineRoutes(container.vaccineController));
 app.use(API_ROUTES.MEDICATIONS, createMedicationRoutes(container.medicationController));
-app.use(API_ROUTES.VETERINARY_VISITS, createVeterinaryVisitRoutes(container.veterinaryVisitController));
+app.use(
+  API_ROUTES.VETERINARY_VISITS,
+  createVeterinaryVisitRoutes(container.veterinaryVisitController),
+);
 app.use(API_ROUTES.REMINDERS, createReminderRoutes(container.reminderController));
 app.use(API_ROUTES.WEIGHT_HISTORY, createWeightHistoryRoutes(container.weightHistoryController));
 app.use(API_ROUTES.ALLERGIES, createAllergyRoutes(container.allergyController));

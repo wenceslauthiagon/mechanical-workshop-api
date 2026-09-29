@@ -1,9 +1,7 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 export function generateValidCPF(): string {
-  const numbers = Array.from({ length: 9 }, () =>
-    faker.number.int({ min: 0, max: 9 }),
-  );
+  const numbers = Array.from({ length: 9 }, () => faker.number.int({ min: 0, max: 9 }));
 
   let sum = 0;
   for (let i = 0; i < 9; i++) {

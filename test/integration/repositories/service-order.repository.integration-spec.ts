@@ -7,9 +7,7 @@ import { ServiceOrderStatus } from '../../../src/shared/enums/service-order-stat
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 function generateValidCPF(): string {
-  const numbers = Array.from({ length: 9 }, () =>
-    faker.number.int({ min: 0, max: 9 }),
-  );
+  const numbers = Array.from({ length: 9 }, () => faker.number.int({ min: 0, max: 9 }));
 
   // Calculate first digit
   let sum = 0;
@@ -70,17 +68,10 @@ describe('Service Order Repository Integration Tests', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PrismaService,
-        ServiceOrderRepository,
-        CustomerRepository,
-        VehicleRepository,
-      ],
+      providers: [PrismaService, ServiceOrderRepository, CustomerRepository, VehicleRepository],
     }).compile();
 
-    serviceOrderRepository = module.get<ServiceOrderRepository>(
-      ServiceOrderRepository,
-    );
+    serviceOrderRepository = module.get<ServiceOrderRepository>(ServiceOrderRepository);
     customerRepository = module.get<CustomerRepository>(CustomerRepository);
     vehicleRepository = module.get<VehicleRepository>(VehicleRepository);
     prisma = module.get<PrismaService>(PrismaService);
@@ -184,24 +175,21 @@ describe('Service Order Repository Integration Tests', () => {
     });
 
     it('TC0001 - Should find service order by ID', async () => {
-      const serviceOrder =
-        await serviceOrderRepository.findById(serviceOrderId);
+      const serviceOrder = await serviceOrderRepository.findById(serviceOrderId);
 
       expect(serviceOrder).toBeDefined();
       expect(serviceOrder?.id).toBe(serviceOrderId);
     });
 
     it('TC0002 - Should find service order by order number', async () => {
-      const serviceOrder =
-        await serviceOrderRepository.findByOrderNumber(orderNumber);
+      const serviceOrder = await serviceOrderRepository.findByOrderNumber(orderNumber);
 
       expect(serviceOrder).toBeDefined();
       expect(serviceOrder?.orderNumber).toBe(orderNumber);
     });
 
     it('TC0003 - Should find service orders by customer ID', async () => {
-      const serviceOrders =
-        await serviceOrderRepository.findByCustomerId(customerId);
+      const serviceOrders = await serviceOrderRepository.findByCustomerId(customerId);
 
       expect(serviceOrders).toBeDefined();
       expect(Array.isArray(serviceOrders)).toBe(true);
@@ -236,27 +224,21 @@ describe('Service Order Repository Integration Tests', () => {
     });
 
     it('TC0001 - Should update service order status', async () => {
-      const updatedOrder = await serviceOrderRepository.updateStatus(
-        serviceOrderId,
-        {
-          status: ServiceOrderStatus.IN_DIAGNOSIS,
-        },
-      );
+      const updatedOrder = await serviceOrderRepository.updateStatus(serviceOrderId, {
+        status: ServiceOrderStatus.IN_DIAGNOSIS,
+      });
 
       expect(updatedOrder.status).toBe(ServiceOrderStatus.IN_DIAGNOSIS);
     });
 
     it('TC0002 - Should update service order prices', async () => {
-      const updatedOrder = await serviceOrderRepository.updateTotals(
-        serviceOrderId,
-        {
-          totalServicePrice: 250.0,
-          totalPartsPrice: 150.0,
-          totalPrice: 400.0,
-          estimatedTimeHours: 4.0,
-          estimatedCompletionDate: new Date('2025-10-27'),
-        },
-      );
+      const updatedOrder = await serviceOrderRepository.updateTotals(serviceOrderId, {
+        totalServicePrice: 250.0,
+        totalPartsPrice: 150.0,
+        totalPrice: 400.0,
+        estimatedTimeHours: 4.0,
+        estimatedCompletionDate: new Date('2025-10-27'),
+      });
 
       expect(Number(updatedOrder.totalServicePrice)).toBe(250.0);
       expect(Number(updatedOrder.totalPartsPrice)).toBe(150.0);
@@ -264,39 +246,30 @@ describe('Service Order Repository Integration Tests', () => {
     });
 
     it('TC0003 - Should set started date when status changes to EM_EXECUCAO', async () => {
-      const updatedOrder = await serviceOrderRepository.updateStatus(
-        serviceOrderId,
-        {
-          status: ServiceOrderStatus.IN_EXECUTION,
-          startedAt: new Date(),
-        },
-      );
+      const updatedOrder = await serviceOrderRepository.updateStatus(serviceOrderId, {
+        status: ServiceOrderStatus.IN_EXECUTION,
+        startedAt: new Date(),
+      });
 
       expect(updatedOrder.status).toBe(ServiceOrderStatus.IN_EXECUTION);
       expect(updatedOrder.startedAt).toBeDefined();
     });
 
     it('TC0004 - Should set completed date when status changes to FINALIZADA', async () => {
-      const updatedOrder = await serviceOrderRepository.updateStatus(
-        serviceOrderId,
-        {
-          status: ServiceOrderStatus.FINISHED,
-          completedAt: new Date(),
-        },
-      );
+      const updatedOrder = await serviceOrderRepository.updateStatus(serviceOrderId, {
+        status: ServiceOrderStatus.FINISHED,
+        completedAt: new Date(),
+      });
 
       expect(updatedOrder.status).toBe(ServiceOrderStatus.FINISHED);
       expect(updatedOrder.completedAt).toBeDefined();
     });
 
     it('TC0005 - Should set delivered date when status changes to ENTREGUE', async () => {
-      const updatedOrder = await serviceOrderRepository.updateStatus(
-        serviceOrderId,
-        {
-          status: ServiceOrderStatus.DELIVERED,
-          deliveredAt: new Date(),
-        },
-      );
+      const updatedOrder = await serviceOrderRepository.updateStatus(serviceOrderId, {
+        status: ServiceOrderStatus.DELIVERED,
+        deliveredAt: new Date(),
+      });
 
       expect(updatedOrder.status).toBe(ServiceOrderStatus.DELIVERED);
       expect(updatedOrder.deliveredAt).toBeDefined();
@@ -310,11 +283,8 @@ describe('Service Order Repository Integration Tests', () => {
 
       await serviceOrderRepository.delete(serviceOrder.id);
 
-      const deletedOrder = await serviceOrderRepository.findById(
-        serviceOrder.id,
-      );
+      const deletedOrder = await serviceOrderRepository.findById(serviceOrder.id);
       expect(deletedOrder).toBeNull();
     });
   });
 });
-

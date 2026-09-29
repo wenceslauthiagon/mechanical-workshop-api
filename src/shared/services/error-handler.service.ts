@@ -48,11 +48,7 @@ export class ErrorHandlerService {
   }
 
   private extractErrorMessage(error: any): string {
-    return (
-      error?.message ||
-      error?.response?.message ||
-      ERROR_MESSAGES.UNEXPECTED_ERROR
-    );
+    return error?.message || error?.response?.message || ERROR_MESSAGES.UNEXPECTED_ERROR;
   }
 
   private extractStatusCode(error: any): number {
@@ -64,10 +60,7 @@ export class ErrorHandlerService {
     );
   }
 
-  private throwAppropriateException(
-    message: string,
-    statusCode: number,
-  ): never {
+  private throwAppropriateException(message: string, statusCode: number): never {
     switch (statusCode) {
       case this.statusCodes.BadRequest:
         throw new BadRequestException(message);
@@ -150,25 +143,19 @@ export class ErrorHandlerService {
    * Extrai mensagem apropriada para erros de constraint do Prisma
    */
   private extractPrismaConstraintMessage(error: any): string {
-    if (error?.message?.includes('service_order_id')) {
-      return BUDGET_CONSTANTS.MESSAGES.ALREADY_EXISTS_FOR_SERVICE_ORDER;
-    }
-    if (error?.message?.includes('part_number')) {
-      return 'Já existe uma peça com este número';
-    }
-    if (error?.message?.includes('document')) {
-      return 'Já existe um cliente com este documento';
-    }
-    if (error?.message?.includes('license_plate')) {
-      return 'Já existe um veículo com esta placa';
-    }
-    if (error?.message?.includes('email')) {
-      return ERROR_MESSAGES.EMAIL_ALREADY_EXISTS;
-    }
-    if (error?.message?.includes('username')) {
-      return 'Já existe um usuário com este nome de usuário';
-    }
+    const message = error?.message;
 
-    return 'Dados duplicados encontrados. Verifique os campos únicos.';
+    const constraints: Array<[string, string]> = [
+      ['service_order_id', BUDGET_CONSTANTS.MESSAGES.ALREADY_EXISTS_FOR_SERVICE_ORDER],
+      ['part_number', BUDGET_CONSTANTS.MESSAGES.ALREADY_EXISTS_FOR_PART_NUMBER],
+      ['document', BUDGET_CONSTANTS.MESSAGES.ALREADY_EXISTS_FOR_DOCUMENT],
+      ['license_plate', BUDGET_CONSTANTS.MESSAGES.ALREADY_EXISTS_FOR_LICENSE_PLATE],
+      ['email', ERROR_MESSAGES.EMAIL_ALREADY_EXISTS],
+      ['username', BUDGET_CONSTANTS.MESSAGES.ALREADY_EXISTS_FOR_USERNAME],
+    ];
+
+    const constraint = constraints.find(([field]) => message?.includes(field));
+
+    return constraint?.[1] ?? 'Dados duplicados encontrados. Verifique os campos únicos.';
   }
 }
