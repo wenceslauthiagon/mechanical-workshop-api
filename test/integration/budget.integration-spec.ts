@@ -59,12 +59,10 @@ describe('Budget Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
 
@@ -109,7 +107,7 @@ describe('Budget Integration Tests', () => {
 
     if (serviceOrderResponse.status !== 201) {
       throw new Error(
-        `Failed to create service order: ${serviceOrderResponse.status} - ${JSON.stringify(serviceOrderResponse.body)}`
+        `Failed to create service order: ${serviceOrderResponse.status} - ${JSON.stringify(serviceOrderResponse.body)}`,
       );
     }
 
@@ -205,9 +203,7 @@ describe('Budget Integration Tests', () => {
 
   describe('public budget flow', () => {
     it('TC0001 - Should view budget publicly', async () => {
-      const response = await request(app.getHttpServer()).get(
-        `/public/budgets/${budgetId}`,
-      );
+      const response = await request(app.getHttpServer()).get(`/public/budgets/${budgetId}`);
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(budgetId);
@@ -215,9 +211,7 @@ describe('Budget Integration Tests', () => {
     });
 
     it('TC0002 - Should check budget status', async () => {
-      const response = await request(app.getHttpServer()).get(
-        `/public/budgets/${budgetId}/status`,
-      );
+      const response = await request(app.getHttpServer()).get(`/public/budgets/${budgetId}/status`);
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(budgetId);

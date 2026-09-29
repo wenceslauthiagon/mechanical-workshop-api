@@ -147,15 +147,11 @@ describe('ServiceOrderController', () => {
           totalRecords: 1,
         },
       };
-      serviceOrderService.findAllPaginatedWithPriority.mockResolvedValue(
-        mockPaginatedResponse,
-      );
+      serviceOrderService.findAllPaginatedWithPriority.mockResolvedValue(mockPaginatedResponse);
 
       const result = await controller.findAllWithPriority(paginationDto);
 
-      expect(
-        serviceOrderService.findAllPaginatedWithPriority,
-      ).toHaveBeenCalledWith(paginationDto);
+      expect(serviceOrderService.findAllPaginatedWithPriority).toHaveBeenCalledWith(paginationDto);
       expect(result).toEqual(mockPaginatedResponse);
       expect(result.data).toEqual(mockServiceOrders);
     });
@@ -167,9 +163,7 @@ describe('ServiceOrderController', () => {
 
       const result = await controller.findOne(mockServiceOrderId);
 
-      expect(serviceOrderService.findById).toHaveBeenCalledWith(
-        mockServiceOrderId,
-      );
+      expect(serviceOrderService.findById).toHaveBeenCalledWith(mockServiceOrderId);
       expect(result).toEqual(mockServiceOrder);
     });
   });
@@ -181,9 +175,7 @@ describe('ServiceOrderController', () => {
 
       const result = await controller.findByCustomer(mockCustomerId);
 
-      expect(serviceOrderService.findByCustomer).toHaveBeenCalledWith(
-        mockCustomerId,
-      );
+      expect(serviceOrderService.findByCustomer).toHaveBeenCalledWith(mockCustomerId);
       expect(result).toEqual(mockServiceOrders);
     });
   });
@@ -219,9 +211,7 @@ describe('ServiceOrderController', () => {
 
       const result = await controller.approveOrder(mockServiceOrderId);
 
-      expect(serviceOrderService.approveOrder).toHaveBeenCalledWith(
-        mockServiceOrderId,
-      );
+      expect(serviceOrderService.approveOrder).toHaveBeenCalledWith(mockServiceOrderId);
       expect(result).toEqual(approvedServiceOrder);
     });
   });
@@ -241,9 +231,7 @@ describe('ServiceOrderController', () => {
 
       const result = await controller.getStatusHistory(mockServiceOrderId);
 
-      expect(serviceOrderService.getStatusHistory).toHaveBeenCalledWith(
-        mockServiceOrderId,
-      );
+      expect(serviceOrderService.getStatusHistory).toHaveBeenCalledWith(mockServiceOrderId);
       expect(result).toEqual(mockHistory);
     });
   });

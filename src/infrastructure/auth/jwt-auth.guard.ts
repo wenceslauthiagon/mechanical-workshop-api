@@ -27,9 +27,7 @@ export class JwtAuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      this.errorHandler.handleError(
-        new Error(ERROR_MESSAGES.ACCESS_TOKEN_NOT_FOUND),
-      );
+      this.errorHandler.handleError(new Error(ERROR_MESSAGES.ACCESS_TOKEN_NOT_FOUND));
     }
 
     try {

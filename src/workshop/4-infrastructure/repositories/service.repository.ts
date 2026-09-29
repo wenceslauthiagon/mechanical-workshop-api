@@ -7,16 +7,11 @@ import { IServiceRepository } from '../../3-domain/repositories/service-reposito
 export class ServiceRepository implements IServiceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    data: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Service> {
+  async create(data: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>): Promise<Service> {
     return this.prisma.service.create({ data });
   }
 
-  async findAll(filters?: {
-    category?: string;
-    active?: boolean;
-  }): Promise<Service[]> {
+  async findAll(filters?: { category?: string; active?: boolean }): Promise<Service[]> {
     const where: {
       category?: string;
       isActive?: boolean;
@@ -65,10 +60,7 @@ export class ServiceRepository implements IServiceRepository {
     });
   }
 
-  async count(filters?: {
-    category?: string;
-    active?: boolean;
-  }): Promise<number> {
+  async count(filters?: { category?: string; active?: boolean }): Promise<number> {
     const where: {
       category?: string;
       isActive?: boolean;

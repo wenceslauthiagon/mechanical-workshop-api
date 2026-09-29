@@ -172,9 +172,7 @@ describe('Part Repository Integration Tests', () => {
     });
 
     it('TC0008 - Should return null when part not found by ID', async () => {
-      const part = await partRepository.findById(
-        '00000000-0000-0000-0000-000000000000',
-      );
+      const part = await partRepository.findById('00000000-0000-0000-0000-000000000000');
 
       expect(part).toBeNull();
     });
@@ -190,11 +188,13 @@ describe('Part Repository Integration Tests', () => {
 
     it('TC0001 - Should update part price', async () => {
       const newPrice = parseFloat(
-        faker.number.float({
-          min: 50,
-          max: 100,
-          fractionDigits: 2,
-        }).toFixed(2)
+        faker.number
+          .float({
+            min: 50,
+            max: 100,
+            fractionDigits: 2,
+          })
+          .toFixed(2),
       );
       const updatedPart = await partRepository.update(updatePartId, {
         price: newPrice,
@@ -206,10 +206,7 @@ describe('Part Repository Integration Tests', () => {
 
     it('TC0002 - Should update part stock', async () => {
       const newStock = faker.number.int({ min: 50, max: 100 });
-      const updatedPart = await partRepository.updateStock(
-        updatePartId,
-        newStock,
-      );
+      const updatedPart = await partRepository.updateStock(updatePartId, newStock);
 
       expect(updatedPart.id).toBe(updatePartId);
       expect(updatedPart.stock).toBe(newStock);
@@ -226,11 +223,13 @@ describe('Part Repository Integration Tests', () => {
 
     it('TC0004 - Should update multiple part fields', async () => {
       const newPrice = parseFloat(
-        faker.number.float({
-          min: 60,
-          max: 120,
-          fractionDigits: 2,
-        }).toFixed(2)
+        faker.number
+          .float({
+            min: 60,
+            max: 120,
+            fractionDigits: 2,
+          })
+          .toFixed(2),
       );
       const newMinStock = faker.number.int({ min: 10, max: 20 });
 
@@ -258,4 +257,3 @@ describe('Part Repository Integration Tests', () => {
     });
   });
 });
-

@@ -15,12 +15,7 @@ describe('ServiceService', () => {
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
     price: parseFloat(faker.finance.amount({ min: 50, max: 500, dec: 2 })),
-    category: faker.helpers.arrayElement([
-      'Mecânica',
-      'Elétrica',
-      'Funilaria',
-      'Pintura',
-    ]),
+    category: faker.helpers.arrayElement(['Mecânica', 'Elétrica', 'Funilaria', 'Pintura']),
     estimatedMinutes: faker.number.int({ min: 30, max: 480 }),
     isActive: true,
     createdAt: faker.date.past(),
@@ -161,9 +156,7 @@ describe('ServiceService', () => {
         throw new Error(ERROR_MESSAGES.SERVICE_NOT_FOUND);
       });
 
-      await expect(service.findById(serviceId)).rejects.toThrow(
-        ERROR_MESSAGES.SERVICE_NOT_FOUND,
-      );
+      await expect(service.findById(serviceId)).rejects.toThrow(ERROR_MESSAGES.SERVICE_NOT_FOUND);
 
       expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
         ERROR_MESSAGES.SERVICE_NOT_FOUND,
@@ -319,9 +312,7 @@ describe('ServiceService', () => {
         throw new Error(ERROR_MESSAGES.SERVICE_NOT_FOUND);
       });
 
-      await expect(service.remove(serviceId)).rejects.toThrow(
-        ERROR_MESSAGES.SERVICE_NOT_FOUND,
-      );
+      await expect(service.remove(serviceId)).rejects.toThrow(ERROR_MESSAGES.SERVICE_NOT_FOUND);
 
       expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
         ERROR_MESSAGES.SERVICE_NOT_FOUND,

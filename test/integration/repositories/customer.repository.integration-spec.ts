@@ -138,9 +138,7 @@ describe('Customer Repository Integration Tests', () => {
     });
 
     it('TC0004 - Should return null for non-existent customer', async () => {
-      const customer = await repository.findById(
-        '00000000-0000-0000-0000-000000000000',
-      );
+      const customer = await repository.findById('00000000-0000-0000-0000-000000000000');
 
       expect(customer).toBeNull();
     });

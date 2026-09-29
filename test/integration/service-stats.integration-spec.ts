@@ -50,12 +50,10 @@ describe('Service Stats Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
   });
@@ -116,25 +114,19 @@ describe('Service Stats Integration Tests', () => {
 
   describe('validate service stats authorization', () => {
     it('TC0001 - Should not access stats without authentication', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/service-stats',
-      );
+      const response = await request(app.getHttpServer()).get('/service-stats');
 
       expect(response.status).toBe(401);
     });
 
     it('TC0002 - Should not access overall stats without authentication', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/service-stats/top-services',
-      );
+      const response = await request(app.getHttpServer()).get('/service-stats/top-services');
 
       expect(response.status).toBe(401);
     });
 
     it('TC0003 - Should not access specific service stats without authentication', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/service-stats',
-      );
+      const response = await request(app.getHttpServer()).get('/service-stats');
 
       expect(response.status).toBe(401);
     });

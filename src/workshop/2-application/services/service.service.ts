@@ -18,9 +18,7 @@ export class ServiceService {
   async create(data: CreateServiceDto): Promise<ServiceBase> {
     const existingService = await this.serviceRepository.findByName(data.name);
     if (existingService) {
-      this.errorHandler.handleConflictError(
-        ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS,
-      );
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
     }
 
     return this.serviceRepository.create({
@@ -33,10 +31,7 @@ export class ServiceService {
     });
   }
 
-  async findAll(filters?: {
-    category?: string;
-    active?: boolean;
-  }): Promise<ServiceBase[]> {
+  async findAll(filters?: { category?: string; active?: boolean }): Promise<ServiceBase[]> {
     return this.serviceRepository.findAll(filters);
   }
 
@@ -48,11 +43,7 @@ export class ServiceService {
     },
   ): Promise<PaginatedResponseDto<ServiceBase>> {
     const [services, total] = await Promise.all([
-      this.serviceRepository.findMany(
-        paginationDto.skip,
-        paginationDto.take,
-        filters,
-      ),
+      this.serviceRepository.findMany(paginationDto.skip, paginationDto.take, filters),
       this.serviceRepository.count(filters),
     ]);
 
@@ -83,13 +74,9 @@ export class ServiceService {
     }
 
     if (data.name && service.name !== data.name) {
-      const existingService = await this.serviceRepository.findByName(
-        data.name,
-      );
+      const existingService = await this.serviceRepository.findByName(data.name);
       if (existingService && existingService.id !== id) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.SERVICE_NAME_ALREADY_EXISTS);
       }
     }
 

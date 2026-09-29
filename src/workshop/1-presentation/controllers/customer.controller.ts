@@ -53,7 +53,11 @@ export class CustomerController {
         email: { type: 'string', example: 'joao@email.com' },
         phone: { type: 'string', example: '(11) 99999-9999' },
         address: { type: 'string', example: 'Rua A, 123 - São Paulo/SP' },
-        type: { type: 'string', enum: ['PESSOA_FISICA', 'PESSOA_JURIDICA'], example: 'PESSOA_FISICA' },
+        type: {
+          type: 'string',
+          enum: ['PESSOA_FISICA', 'PESSOA_JURIDICA'],
+          example: 'PESSOA_FISICA',
+        },
         document: { type: 'string', example: '12345678901' },
         additionalInfo: { type: 'string', nullable: true, example: 'Cliente preferencial' },
       },
@@ -66,9 +70,7 @@ export class CustomerController {
   })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 409, description: 'Email ou documento já cadastrado' })
-  async create(
-    @Body() createCustomerDto: CreateCustomerDto,
-  ): Promise<CustomerResponseDto> {
+  async create(@Body() createCustomerDto: CreateCustomerDto): Promise<CustomerResponseDto> {
     const customer = await this.customerService.create(createCustomerDto);
     return this.mapToResponseDto(customer);
   }
@@ -96,8 +98,7 @@ export class CustomerController {
   @Get('all')
   @ApiOperation({
     summary: 'Listar todos os clientes (sem paginação)',
-    description:
-      'Retorna lista completa de clientes cadastrados - use com cuidado em produção',
+    description: 'Retorna lista completa de clientes cadastrados - use com cuidado em produção',
   })
   @ApiResponse({
     status: 200,
@@ -121,9 +122,7 @@ export class CustomerController {
     type: CustomerResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
-  async findByDocument(
-    @Param('document') document: string,
-  ): Promise<CustomerResponseDto> {
+  async findByDocument(@Param('document') document: string): Promise<CustomerResponseDto> {
     const customer = await this.customerService.findByDocument(document);
     return this.mapToResponseDto(customer);
   }
@@ -140,9 +139,7 @@ export class CustomerController {
     type: CustomerResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<CustomerResponseDto> {
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<CustomerResponseDto> {
     const customer = await this.customerService.findById(id);
     return this.mapToResponseDto(customer);
   }
@@ -161,7 +158,11 @@ export class CustomerController {
         email: { type: 'string', example: 'joao@email.com' },
         phone: { type: 'string', example: '(11) 99999-9999' },
         address: { type: 'string', example: 'Rua A, 123 - São Paulo/SP' },
-        type: { type: 'string', enum: ['PESSOA_FISICA', 'PESSOA_JURIDICA'], example: 'PESSOA_FISICA' },
+        type: {
+          type: 'string',
+          enum: ['PESSOA_FISICA', 'PESSOA_JURIDICA'],
+          example: 'PESSOA_FISICA',
+        },
         document: { type: 'string', example: '12345678901' },
         additionalInfo: { type: 'string', nullable: true, example: 'Cliente preferencial' },
       },

@@ -62,8 +62,7 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
 
     const sortedOrders = orders
       .sort((a, b) => {
-        const priorityDiff =
-          (statusPriority[a.status] || 999) - (statusPriority[b.status] || 999);
+        const priorityDiff = (statusPriority[a.status] || 999) - (statusPriority[b.status] || 999);
         if (priorityDiff !== 0) return priorityDiff;
         return a.createdAt.getTime() - b.createdAt.getTime();
       })

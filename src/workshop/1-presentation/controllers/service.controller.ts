@@ -93,8 +93,7 @@ export class ServiceController {
   @Get('all')
   @ApiOperation({
     summary: 'Listar todos os serviços (sem paginação)',
-    description:
-      'Retorna lista completa de serviços - use com cuidado em produção',
+    description: 'Retorna lista completa de serviços - use com cuidado em produção',
   })
   @ApiQuery({
     name: 'category',
@@ -111,10 +110,7 @@ export class ServiceController {
     status: HttpStatus.OK,
     description: 'Lista completa de serviços retornada com sucesso',
   })
-  async findAll(
-    @Query('category') category?: string,
-    @Query('active') active?: boolean,
-  ) {
+  async findAll(@Query('category') category?: string, @Query('active') active?: boolean) {
     return await this.serviceService.findAll({ category, active });
   }
 
@@ -181,10 +177,7 @@ export class ServiceController {
     status: HttpStatus.NOT_FOUND,
     description: 'Serviço não encontrado',
   })
-  async update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateServiceDto: UpdateServiceDto,
-  ) {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateServiceDto: UpdateServiceDto) {
     return await this.serviceService.update(id, updateServiceDto);
   }
 

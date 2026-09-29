@@ -64,10 +64,7 @@ export interface IMechanicRepository {
     averageCompletionTime: number;
   }>;
 
-  assignToServiceOrder(
-    mechanicId: string,
-    serviceOrderId?: string,
-  ): Promise<void>;
+  assignToServiceOrder(mechanicId: string, serviceOrderId?: string): Promise<void>;
 
   markAsUnavailable(mechanicId: string): Promise<void>;
 

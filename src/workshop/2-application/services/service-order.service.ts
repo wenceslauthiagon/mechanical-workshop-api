@@ -14,10 +14,7 @@ import type { IPartRepository } from '../../3-domain/repositories/part-repositor
 import { NotificationService } from './notification.service';
 import { MechanicService } from './mechanic.service';
 import { PrismaService } from '../../../prisma/prisma.service';
-import {
-  ERROR_MESSAGES,
-  NOTES_MESSAGES,
-} from '../../../shared/constants/messages.constants';
+import { ERROR_MESSAGES, NOTES_MESSAGES } from '../../../shared/constants/messages.constants';
 import { MECHANIC_CONSTANTS } from '../../../shared/constants/mechanic.constants';
 import { PaginationDto, PaginatedResponseDto } from '../../../shared';
 
@@ -62,9 +59,7 @@ export class ServiceOrderService {
 
     if (data.services && data.services.length > 0) {
       for (const serviceItem of data.services) {
-        const service = await this.serviceRepository.findById(
-          serviceItem.serviceId,
-        );
+        const service = await this.serviceRepository.findById(serviceItem.serviceId);
         if (!service) {
           this.errorHandler.handleNotFoundError(
             `Servi+�o ${serviceItem.serviceId} n+�o encontrado`,
@@ -120,18 +115,14 @@ export class ServiceOrderService {
       estimatedCompletionDate: new Date(),
     };
 
-    const serviceOrder =
-      await this.serviceOrderRepository.create(serviceOrderData);
+    const serviceOrder = await this.serviceOrderRepository.create(serviceOrderData);
 
     if (data.services && data.services.length > 0) {
       for (const serviceItem of data.services) {
-        const service = await this.serviceRepository.findById(
-          serviceItem.serviceId,
-        );
+        const service = await this.serviceRepository.findById(serviceItem.serviceId);
         const itemTotalPrice = Number(service!.price) * serviceItem.quantity;
         totalServicePrice += itemTotalPrice;
-        estimatedTimeHours +=
-          (service!.estimatedMinutes * serviceItem.quantity) / 60;
+        estimatedTimeHours += (service!.estimatedMinutes * serviceItem.quantity) / 60;
 
         await this.serviceOrderRepository.addServiceItem({
           serviceOrderId: serviceOrder.id,
@@ -157,18 +148,13 @@ export class ServiceOrderService {
           totalPrice: itemTotalPrice,
         });
 
-        await this.partRepository.updateStock(
-          partItem.partId,
-          part!.stock - partItem.quantity,
-        );
+        await this.partRepository.updateStock(partItem.partId, part!.stock - partItem.quantity);
       }
     }
 
     const estimatedCompletionDate = new Date();
     const totalHoursWithBuffer = estimatedTimeHours * 1.2;
-    estimatedCompletionDate.setHours(
-      estimatedCompletionDate.getHours() + totalHoursWithBuffer,
-    );
+    estimatedCompletionDate.setHours(estimatedCompletionDate.getHours() + totalHoursWithBuffer);
 
     const totalPrice = totalServicePrice + totalPartsPrice;
     await this.serviceOrderRepository.updateTotals(serviceOrder.id, {
@@ -235,9 +221,7 @@ export class ServiceOrderService {
   async findById(id: string): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      this.errorHandler.handleNotFoundError(
-        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
     return await this.mapToResponseDto(serviceOrder);
   }
@@ -248,8 +232,7 @@ export class ServiceOrderService {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
-    const serviceOrders =
-      await this.serviceOrderRepository.findByCustomerId(customerId);
+    const serviceOrders = await this.serviceOrderRepository.findByCustomerId(customerId);
     const responsePromises = serviceOrders.map((serviceOrder) =>
       this.mapToResponseDto(serviceOrder),
     );
@@ -262,9 +245,7 @@ export class ServiceOrderService {
   ): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      this.errorHandler.handleNotFoundError(
-        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
 
     this.validateStatusTransition(serviceOrder.status, data.status);
@@ -281,20 +262,13 @@ export class ServiceOrderService {
     switch (data.status) {
       case ServiceOrderStatus.IN_EXECUTION: {
         if (data.mechanicId) {
-          const mechanicAvailable = await this.mechanicService.checkAvailability(
-            data.mechanicId,
-          );
+          const mechanicAvailable = await this.mechanicService.checkAvailability(data.mechanicId);
           if (!mechanicAvailable) {
-            this.errorHandler.handleBusinessRuleError(
-              MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE,
-            );
+            this.errorHandler.handleBusinessRuleError(MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE);
           }
-          await this.mechanicService.assignToServiceOrder(
-            data.mechanicId,
-            id,
-          );
+          await this.mechanicService.assignToServiceOrder(data.mechanicId, id);
         }
-        
+
         if (!serviceOrder.startedAt) {
           updateData.startedAt = now;
         }
@@ -326,12 +300,8 @@ export class ServiceOrderService {
       notes: data.notes || `Status alterado para ${data.status}`,
     });
 
-    const customer = await this.customerRepository.findById(
-      serviceOrder.customerId,
-    );
-    const vehicle = await this.vehicleRepository.findById(
-      serviceOrder.vehicleId,
-    );
+    const customer = await this.customerRepository.findById(serviceOrder.customerId);
+    const vehicle = await this.vehicleRepository.findById(serviceOrder.vehicleId);
 
     if (customer && vehicle) {
       const vehicleInfo = `${vehicle.brand} ${vehicle.model} - ${vehicle.licensePlate}`;
@@ -360,9 +330,7 @@ export class ServiceOrderService {
             statusMessage: data.notes || `Status alterado para ${data.status}`,
           });
         } catch (error: any) {
-          this.logger.warn(
-            `Failed to send email notification: ${error.message}`,
-          );
+          this.logger.warn(`Failed to send email notification: ${error.message}`);
         }
       }
     }
@@ -373,12 +341,10 @@ export class ServiceOrderService {
   async approveOrder(id: string): Promise<ServiceOrderResponseDto> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      this.errorHandler.handleNotFoundError(
-        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
 
-    if (serviceOrder.status as string !== ServiceOrderStatus.AWAITING_APPROVAL) {
+    if ((serviceOrder.status as string) !== ServiceOrderStatus.AWAITING_APPROVAL) {
       this.errorHandler.generateException(
         ERROR_MESSAGES.SERVICE_ORDER_NOT_AWAITING_APPROVAL,
         HttpStatus.BAD_REQUEST,
@@ -403,57 +369,41 @@ export class ServiceOrderService {
   async getStatusHistory(id: string) {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
     if (!serviceOrder) {
-      this.errorHandler.handleNotFoundError(
-        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
 
     return this.serviceOrderRepository.getStatusHistory(id);
   }
 
-  async findByOrderNumber(
-    orderNumber: string,
-  ): Promise<ServiceOrderResponseDto> {
-    const serviceOrder =
-      await this.serviceOrderRepository.findByOrderNumber(orderNumber);
+  async findByOrderNumber(orderNumber: string): Promise<ServiceOrderResponseDto> {
+    const serviceOrder = await this.serviceOrderRepository.findByOrderNumber(orderNumber);
     if (!serviceOrder) {
-      this.errorHandler.handleNotFoundError(
-        ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(ERROR_MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
     return this.mapToResponseDto(serviceOrder);
   }
 
-  async findByCustomerDocument(
-    document: string,
-  ): Promise<ServiceOrderResponseDto[]> {
+  async findByCustomerDocument(document: string): Promise<ServiceOrderResponseDto[]> {
     const cleanDocument = document.replace(/[^\d]/g, '');
-    const customer =
-      await this.customerRepository.findByDocument(cleanDocument);
+    const customer = await this.customerRepository.findByDocument(cleanDocument);
     if (!customer) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
-    const serviceOrders = await this.serviceOrderRepository.findByCustomerId(
-      customer.id,
-    );
+    const serviceOrders = await this.serviceOrderRepository.findByCustomerId(customer.id);
     const responsePromises = serviceOrders.map((serviceOrder) =>
       this.mapToResponseDto(serviceOrder),
     );
     return Promise.all(responsePromises);
   }
 
-  async findByVehiclePlate(
-    licensePlate: string,
-  ): Promise<ServiceOrderResponseDto[]> {
+  async findByVehiclePlate(licensePlate: string): Promise<ServiceOrderResponseDto[]> {
     const vehicle = await this.vehicleRepository.findByPlate(licensePlate);
     if (!vehicle) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
     }
 
-    const serviceOrders = await this.serviceOrderRepository.findByVehicleId(
-      vehicle.id,
-    );
+    const serviceOrders = await this.serviceOrderRepository.findByVehicleId(vehicle.id);
     const responsePromises = serviceOrders.map((serviceOrder) =>
       this.mapToResponseDto(serviceOrder),
     );
@@ -466,10 +416,7 @@ export class ServiceOrderService {
     return `OS-${year}-${String(count + 1).padStart(6, '0')}`;
   }
 
-  private validateStatusTransition(
-    currentStatus: string,
-    newStatus: string,
-  ): void {
+  private validateStatusTransition(currentStatus: string, newStatus: string): void {
     const validTransitions: Record<string, string[]> = {
       [ServiceOrderStatus.RECEIVED]: [ServiceOrderStatus.IN_DIAGNOSIS],
       [ServiceOrderStatus.IN_DIAGNOSIS]: [
@@ -494,16 +441,10 @@ export class ServiceOrderService {
     }
   }
 
-  private async mapToResponseDto(
-    serviceOrder: ServiceOrder,
-  ): Promise<ServiceOrderResponseDto> {
+  private async mapToResponseDto(serviceOrder: ServiceOrder): Promise<ServiceOrderResponseDto> {
     // Fetch related data separately to ensure freshness
-    const customer = await this.customerRepository.findById(
-      serviceOrder.customerId,
-    );
-    const vehicle = await this.vehicleRepository.findById(
-      serviceOrder.vehicleId,
-    );
+    const customer = await this.customerRepository.findById(serviceOrder.customerId);
+    const vehicle = await this.vehicleRepository.findById(serviceOrder.vehicleId);
 
     // Fetch service order items separately
     const serviceItems = await this.prisma.serviceOrderItem.findMany({
@@ -598,4 +539,3 @@ export class ServiceOrderService {
     };
   }
 }
-

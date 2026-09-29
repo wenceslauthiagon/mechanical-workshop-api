@@ -22,15 +22,10 @@ export class VehicleService {
   async create(data: CreateVehicleDto): Promise<VehicleResponseDto> {
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
-      this.errorHandler.generateException(
-        ERROR_MESSAGES.CLIENT_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
+      this.errorHandler.generateException(ERROR_MESSAGES.CLIENT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    const existingVehicle = await this.vehicleRepository.findByPlate(
-      data.plate,
-    );
+    const existingVehicle = await this.vehicleRepository.findByPlate(data.plate);
     if (existingVehicle) {
       this.errorHandler.generateException(
         ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS,
@@ -38,8 +33,7 @@ export class VehicleService {
       );
     }
 
-    // Map DTO to Prisma format
-    const { plate, notes: _notes, ...rest } = data;
+    const { plate, ...rest } = data;
     const vehicle = await this.vehicleRepository.create({
       ...rest,
       licensePlate: plate,
@@ -63,9 +57,7 @@ export class VehicleService {
       this.vehicleRepository.count(),
     ]);
 
-    const vehiclesWithCustomers = vehicles.map((vehicle) =>
-      this.mapToResponseDto(vehicle),
-    );
+    const vehiclesWithCustomers = vehicles.map((vehicle) => this.mapToResponseDto(vehicle));
 
     return new PaginatedResponseDto(vehiclesWithCustomers, page, size, total);
   }
@@ -91,10 +83,7 @@ export class VehicleService {
     return this.mapToResponseDto(vehicle);
   }
 
-  async update(
-    id: string,
-    data: UpdateVehicleDto,
-  ): Promise<VehicleResponseDto> {
+  async update(id: string, data: UpdateVehicleDto): Promise<VehicleResponseDto> {
     const vehicle = await this.vehicleRepository.findById(id);
     if (!vehicle) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.VEHICLE_NOT_FOUND);
@@ -108,18 +97,14 @@ export class VehicleService {
     }
 
     if (data.plate && data.plate !== vehicle.licensePlate) {
-      const existingVehicle = await this.vehicleRepository.findByPlate(
-        data.plate,
-      );
+      const existingVehicle = await this.vehicleRepository.findByPlate(data.plate);
       if (existingVehicle) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.LICENSE_PLATE_ALREADY_EXISTS);
       }
     }
 
     // Map DTO to Prisma format if plate is present
-    const { notes: _notes, ...vehicleData } = data;
+    const { ...vehicleData } = data;
     const updateData = vehicleData.plate
       ? { ...vehicleData, licensePlate: vehicleData.plate, plate: undefined }
       : vehicleData;
@@ -135,17 +120,13 @@ export class VehicleService {
 
     const hasServiceOrders = await this.vehicleRepository.hasServiceOrders(id);
     if (hasServiceOrders) {
-      this.errorHandler.handleConflictError(
-        ERROR_MESSAGES.VEHICLE_HAS_SERVICE_ORDERS,
-      );
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.VEHICLE_HAS_SERVICE_ORDERS);
     }
 
     await this.vehicleRepository.delete(id);
   }
 
-  private mapToResponseDto(
-    vehicle: Vehicle,
-  ): VehicleResponseDto {
+  private mapToResponseDto(vehicle: Vehicle): VehicleResponseDto {
     return {
       id: vehicle.id,
       plate: vehicle.licensePlate,
@@ -159,5 +140,3 @@ export class VehicleService {
     };
   }
 }
-
-

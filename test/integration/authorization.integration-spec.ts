@@ -115,21 +115,17 @@ describe('Authorization RBAC Integration Tests', () => {
       },
     });
 
-    const adminLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: mockAdmin.username,
-        password: mockAdmin.password,
-      });
+    const adminLoginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: mockAdmin.username,
+      password: mockAdmin.password,
+    });
 
     adminToken = adminLoginResponse.body.access_token;
 
-    const employeeLoginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: mockEmployee.username,
-        password: mockEmployee.password,
-      });
+    const employeeLoginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: mockEmployee.username,
+      password: mockEmployee.password,
+    });
 
     employeeToken = employeeLoginResponse.body.access_token;
   });
@@ -296,25 +292,19 @@ describe('Authorization RBAC Integration Tests', () => {
     });
 
     it('TC0001 - Should not create customer without authentication', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/api/customers')
-        .send(mockCustomer);
+      const response = await request(app.getHttpServer()).post('/api/customers').send(mockCustomer);
 
       expect(response.status).toBe(401);
     });
 
     it('TC0002 - Should not create service without authentication', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/api/services')
-        .send(mockService);
+      const response = await request(app.getHttpServer()).post('/api/services').send(mockService);
 
       expect(response.status).toBe(401);
     });
 
     it('TC0003 - Should not create part without authentication', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/api/parts')
-        .send(mockPart);
+      const response = await request(app.getHttpServer()).post('/api/parts').send(mockPart);
 
       expect(response.status).toBe(401);
     });

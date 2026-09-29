@@ -112,9 +112,7 @@ describe('CustomerController', () => {
 
       const result = await customerController.create(mockCreateCustomerDto);
 
-      expect(customerService.create).toHaveBeenCalledWith(
-        mockCreateCustomerDto,
-      );
+      expect(customerService.create).toHaveBeenCalledWith(mockCreateCustomerDto);
       expect(result).toEqual(mockCustomerResponseDto);
     });
 
@@ -122,12 +120,8 @@ describe('CustomerController', () => {
       const mockError = new Error('Falha ao criar cliente');
       customerService.create.mockRejectedValue(mockError);
 
-      await expect(
-        customerController.create(mockCreateCustomerDto),
-      ).rejects.toThrow(mockError);
-      expect(customerService.create).toHaveBeenCalledWith(
-        mockCreateCustomerDto,
-      );
+      await expect(customerController.create(mockCreateCustomerDto)).rejects.toThrow(mockError);
+      expect(customerService.create).toHaveBeenCalledWith(mockCreateCustomerDto);
     });
 
     it('TC0003 - Should handle invalid customer data', async () => {
@@ -135,9 +129,7 @@ describe('CustomerController', () => {
       const mockError = new Error('Email inválido');
       customerService.create.mockRejectedValue(mockError);
 
-      await expect(customerController.create(invalidData)).rejects.toThrow(
-        mockError,
-      );
+      await expect(customerController.create(invalidData)).rejects.toThrow(mockError);
       expect(customerService.create).toHaveBeenCalledWith(invalidData);
     });
   });
@@ -182,13 +174,9 @@ describe('CustomerController', () => {
 
       customerService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await customerController.findAllPaginated(
-        paginationDto as any,
-      );
+      const result = await customerController.findAllPaginated(paginationDto as any);
 
-      expect(customerService.findAllPaginated).toHaveBeenCalledWith(
-        paginationDto,
-      );
+      expect(customerService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
       expect(result.data).toHaveLength(1);
       expect(result.data[0]).toEqual(mockCustomerResponseDto);
       expect(result.pagination.totalRecords).toBe(1);
@@ -203,13 +191,9 @@ describe('CustomerController', () => {
 
       customerService.findAllPaginated.mockResolvedValue(mockPaginatedResult);
 
-      const result = await customerController.findAllPaginated(
-        paginationDto as any,
-      );
+      const result = await customerController.findAllPaginated(paginationDto as any);
 
-      expect(customerService.findAllPaginated).toHaveBeenCalledWith(
-        paginationDto,
-      );
+      expect(customerService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
       expect(result.data).toHaveLength(0);
       expect(result.pagination.totalRecords).toBe(0);
     });
@@ -229,9 +213,7 @@ describe('CustomerController', () => {
       const mockError = new Error('Cliente não encontrado');
       customerService.findByDocument.mockRejectedValue(mockError);
 
-      await expect(
-        customerController.findByDocument(mockDocument),
-      ).rejects.toThrow(mockError);
+      await expect(customerController.findByDocument(mockDocument)).rejects.toThrow(mockError);
       expect(customerService.findByDocument).toHaveBeenCalledWith(mockDocument);
     });
 
@@ -240,12 +222,8 @@ describe('CustomerController', () => {
       const mockError = new Error('Documento inválido');
       customerService.findByDocument.mockRejectedValue(mockError);
 
-      await expect(
-        customerController.findByDocument(invalidDocument),
-      ).rejects.toThrow(mockError);
-      expect(customerService.findByDocument).toHaveBeenCalledWith(
-        invalidDocument,
-      );
+      await expect(customerController.findByDocument(invalidDocument)).rejects.toThrow(mockError);
+      expect(customerService.findByDocument).toHaveBeenCalledWith(invalidDocument);
     });
   });
 
@@ -263,9 +241,7 @@ describe('CustomerController', () => {
       const mockError = new Error('Cliente não encontrado');
       customerService.findById.mockRejectedValue(mockError);
 
-      await expect(customerController.findOne(mockCustomerId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(customerController.findOne(mockCustomerId)).rejects.toThrow(mockError);
       expect(customerService.findById).toHaveBeenCalledWith(mockCustomerId);
     });
 
@@ -274,9 +250,7 @@ describe('CustomerController', () => {
       const mockError = new Error('ID inválido');
       customerService.findById.mockRejectedValue(mockError);
 
-      await expect(customerController.findOne(invalidId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(customerController.findOne(invalidId)).rejects.toThrow(mockError);
       expect(customerService.findById).toHaveBeenCalledWith(invalidId);
     });
   });
@@ -286,15 +260,9 @@ describe('CustomerController', () => {
       const updatedCustomer = { ...mockCustomerData, ...mockUpdateCustomerDto };
       customerService.update.mockResolvedValue(updatedCustomer);
 
-      const result = await customerController.update(
-        mockCustomerId,
-        mockUpdateCustomerDto,
-      );
+      const result = await customerController.update(mockCustomerId, mockUpdateCustomerDto);
 
-      expect(customerService.update).toHaveBeenCalledWith(
-        mockCustomerId,
-        mockUpdateCustomerDto,
-      );
+      expect(customerService.update).toHaveBeenCalledWith(mockCustomerId, mockUpdateCustomerDto);
       expect(result).toEqual({
         ...mockCustomerResponseDto,
         ...mockUpdateCustomerDto,
@@ -308,10 +276,7 @@ describe('CustomerController', () => {
       await expect(
         customerController.update(mockCustomerId, mockUpdateCustomerDto),
       ).rejects.toThrow(mockError);
-      expect(customerService.update).toHaveBeenCalledWith(
-        mockCustomerId,
-        mockUpdateCustomerDto,
-      );
+      expect(customerService.update).toHaveBeenCalledWith(mockCustomerId, mockUpdateCustomerDto);
     });
 
     it('TC0003 - Should handle duplicate email error during update', async () => {
@@ -321,10 +286,7 @@ describe('CustomerController', () => {
       await expect(
         customerController.update(mockCustomerId, mockUpdateCustomerDto),
       ).rejects.toThrow(mockError);
-      expect(customerService.update).toHaveBeenCalledWith(
-        mockCustomerId,
-        mockUpdateCustomerDto,
-      );
+      expect(customerService.update).toHaveBeenCalledWith(mockCustomerId, mockUpdateCustomerDto);
     });
   });
 
@@ -341,9 +303,7 @@ describe('CustomerController', () => {
       const mockError = new Error('Cliente não encontrado');
       customerService.remove.mockRejectedValue(mockError);
 
-      await expect(customerController.remove(mockCustomerId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(customerController.remove(mockCustomerId)).rejects.toThrow(mockError);
       expect(customerService.remove).toHaveBeenCalledWith(mockCustomerId);
     });
 
@@ -351,9 +311,7 @@ describe('CustomerController', () => {
       const mockError = new Error('Cliente possui veículos cadastrados');
       customerService.remove.mockRejectedValue(mockError);
 
-      await expect(customerController.remove(mockCustomerId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(customerController.remove(mockCustomerId)).rejects.toThrow(mockError);
       expect(customerService.remove).toHaveBeenCalledWith(mockCustomerId);
     });
   });
@@ -385,9 +343,7 @@ describe('CustomerController', () => {
       const error = new Error('Customer not found');
       customerService.findById.mockRejectedValue(error);
 
-      await expect(customerController.findOne('invalid-id')).rejects.toThrow(
-        error,
-      );
+      await expect(customerController.findOne('invalid-id')).rejects.toThrow(error);
     });
   });
 });

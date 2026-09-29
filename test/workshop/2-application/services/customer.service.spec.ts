@@ -122,9 +122,7 @@ describe('CustomerService', () => {
         throw new Error('Invalid document');
       });
 
-      await expect(service.create(createDto)).rejects.toThrow(
-        ERROR_MESSAGES.INVALID_DOCUMENT,
-      );
+      await expect(service.create(createDto)).rejects.toThrow(ERROR_MESSAGES.INVALID_DOCUMENT);
       expect(errorHandler.handleValueObjectError).toHaveBeenCalled();
     });
 
@@ -141,9 +139,7 @@ describe('CustomerService', () => {
       jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('12345678901');
       customerRepository.findByEmail.mockResolvedValue(mockCustomer);
 
-      await expect(service.create(createDto)).rejects.toThrow(
-        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
-      );
+      await expect(service.create(createDto)).rejects.toThrow(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
       expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
         ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
       );
@@ -204,9 +200,7 @@ describe('CustomerService', () => {
     it('TC0002 - Should throw error when customer not found', async () => {
       customerRepository.findById.mockResolvedValue(null);
 
-      await expect(service.findById('invalid-id')).rejects.toThrow(
-        ERROR_MESSAGES.CLIENT_NOT_FOUND,
-      );
+      await expect(service.findById('invalid-id')).rejects.toThrow(ERROR_MESSAGES.CLIENT_NOT_FOUND);
       expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
         ERROR_MESSAGES.CLIENT_NOT_FOUND,
       );
@@ -229,9 +223,7 @@ describe('CustomerService', () => {
 
       expect(result).toEqual(mockCustomer);
       expect(DocumentUtils.normalize).toHaveBeenCalledWith('123.456.789-01');
-      expect(customerRepository.findByDocument).toHaveBeenCalledWith(
-        '12345678901',
-      );
+      expect(customerRepository.findByDocument).toHaveBeenCalledWith('12345678901');
     });
 
     it('TC0002 - Should throw error when customer not found', async () => {
@@ -253,9 +245,7 @@ describe('CustomerService', () => {
       const result = await service.findByEmail(mockCustomer.email);
 
       expect(result).toEqual(mockCustomer);
-      expect(customerRepository.findByEmail).toHaveBeenCalledWith(
-        mockCustomer.email,
-      );
+      expect(customerRepository.findByEmail).toHaveBeenCalledWith(mockCustomer.email);
     });
 
     it('TC0002 - Should throw error when customer not found', async () => {
@@ -304,9 +294,9 @@ describe('CustomerService', () => {
     it('TC0002 - Should throw error when customer not found', async () => {
       customerRepository.findById.mockResolvedValue(null);
 
-      await expect(
-        service.update('invalid-id', updateCustomerDto),
-      ).rejects.toThrow(ERROR_MESSAGES.CLIENT_NOT_FOUND);
+      await expect(service.update('invalid-id', updateCustomerDto)).rejects.toThrow(
+        ERROR_MESSAGES.CLIENT_NOT_FOUND,
+      );
       expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
         ERROR_MESSAGES.CLIENT_NOT_FOUND,
       );
@@ -318,9 +308,7 @@ describe('CustomerService', () => {
 
       await service.update(mockCustomer.id, dtoWithEmail);
 
-      expect(customerRepository.findByEmail).toHaveBeenCalledWith(
-        'novo@email.com',
-      );
+      expect(customerRepository.findByEmail).toHaveBeenCalledWith('novo@email.com');
       expect(customerRepository.update).toHaveBeenCalled();
     });
 
@@ -336,9 +324,9 @@ describe('CustomerService', () => {
       };
       customerRepository.findByEmail.mockResolvedValue(existingCustomer);
 
-      await expect(
-        service.update(mockCustomer.id, dtoWithEmail),
-      ).rejects.toThrow(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+      await expect(service.update(mockCustomer.id, dtoWithEmail)).rejects.toThrow(
+        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+      );
       expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
         ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
       );
@@ -357,19 +345,13 @@ describe('CustomerService', () => {
 
     it('TC0006 - Should update document when new document is different', async () => {
       const dtoWithDocument = { ...updateCustomerDto, document: '98765432100' };
-      jest
-        .spyOn(DocumentUtils, 'validateAndNormalize')
-        .mockReturnValue('98765432100');
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('98765432100');
       customerRepository.findByDocument.mockResolvedValue(null);
 
       await service.update(mockCustomer.id, dtoWithDocument);
 
-      expect(DocumentUtils.validateAndNormalize).toHaveBeenCalledWith(
-        '98765432100',
-      );
-      expect(customerRepository.findByDocument).toHaveBeenCalledWith(
-        '98765432100',
-      );
+      expect(DocumentUtils.validateAndNormalize).toHaveBeenCalledWith('98765432100');
+      expect(customerRepository.findByDocument).toHaveBeenCalledWith('98765432100');
       expect(customerRepository.update).toHaveBeenCalledWith(
         mockCustomer.id,
         expect.objectContaining({
@@ -380,15 +362,13 @@ describe('CustomerService', () => {
 
     it('TC0007 - Should throw error when new document is invalid', async () => {
       const dtoWithDocument = { ...updateCustomerDto, document: 'invalid' };
-      jest
-        .spyOn(DocumentUtils, 'validateAndNormalize')
-        .mockImplementation(() => {
-          throw new Error('Invalid document');
-        });
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockImplementation(() => {
+        throw new Error('Invalid document');
+      });
 
-      await expect(
-        service.update(mockCustomer.id, dtoWithDocument),
-      ).rejects.toThrow(ERROR_MESSAGES.INVALID_DOCUMENT);
+      await expect(service.update(mockCustomer.id, dtoWithDocument)).rejects.toThrow(
+        ERROR_MESSAGES.INVALID_DOCUMENT,
+      );
       expect(errorHandler.handleValueObjectError).toHaveBeenCalledWith(
         expect.any(Error),
         ERROR_MESSAGES.INVALID_DOCUMENT,
@@ -402,14 +382,12 @@ describe('CustomerService', () => {
         id: 'another-id',
         document: '98765432100',
       };
-      jest
-        .spyOn(DocumentUtils, 'validateAndNormalize')
-        .mockReturnValue('98765432100');
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue('98765432100');
       customerRepository.findByDocument.mockResolvedValue(existingCustomer);
 
-      await expect(
-        service.update(mockCustomer.id, dtoWithDocument),
-      ).rejects.toThrow(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
+      await expect(service.update(mockCustomer.id, dtoWithDocument)).rejects.toThrow(
+        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
+      );
       expect(errorHandler.handleConflictError).toHaveBeenCalledWith(
         ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
       );
@@ -420,9 +398,7 @@ describe('CustomerService', () => {
         ...updateCustomerDto,
         document: mockCustomer.document,
       };
-      jest
-        .spyOn(DocumentUtils, 'validateAndNormalize')
-        .mockReturnValue(mockCustomer.document);
+      jest.spyOn(DocumentUtils, 'validateAndNormalize').mockReturnValue(mockCustomer.document);
 
       await service.update(mockCustomer.id, dtoWithSameDocument);
 
@@ -441,9 +417,9 @@ describe('CustomerService', () => {
           throw new Error('Invalid document format');
         });
 
-      await expect(
-        service.update(mockCustomer.id, dtoWithDocument),
-      ).rejects.toThrow(ERROR_MESSAGES.INVALID_DOCUMENT);
+      await expect(service.update(mockCustomer.id, dtoWithDocument)).rejects.toThrow(
+        ERROR_MESSAGES.INVALID_DOCUMENT,
+      );
       expect(errorHandler.handleValueObjectError).toHaveBeenCalledWith(
         expect.any(Error),
         ERROR_MESSAGES.INVALID_DOCUMENT,
@@ -493,9 +469,7 @@ describe('CustomerService', () => {
     it('TC0002 - Should throw error when customer not found', async () => {
       customerRepository.findById.mockResolvedValue(null);
 
-      await expect(service.remove('invalid-id')).rejects.toThrow(
-        ERROR_MESSAGES.CLIENT_NOT_FOUND,
-      );
+      await expect(service.remove('invalid-id')).rejects.toThrow(ERROR_MESSAGES.CLIENT_NOT_FOUND);
       expect(errorHandler.handleNotFoundError).toHaveBeenCalledWith(
         ERROR_MESSAGES.CLIENT_NOT_FOUND,
       );
@@ -504,9 +478,7 @@ describe('CustomerService', () => {
 
     it('TC0003 - Should throw error when customer has vehicles', async () => {
       customerRepository.findById.mockResolvedValue(mockCustomer);
-      customerRepository.findVehiclesByCustomerId.mockResolvedValue([
-        mockVehicle,
-      ]);
+      customerRepository.findVehiclesByCustomerId.mockResolvedValue([mockVehicle]);
 
       await expect(service.remove(mockCustomer.id)).rejects.toThrow(
         ERROR_MESSAGES.CLIENT_HAS_VEHICLES,
@@ -523,9 +495,7 @@ describe('CustomerService', () => {
 
       await service.remove(mockCustomer.id);
 
-      expect(customerRepository.findVehiclesByCustomerId).toHaveBeenCalledWith(
-        mockCustomer.id,
-      );
+      expect(customerRepository.findVehiclesByCustomerId).toHaveBeenCalledWith(mockCustomer.id);
       expect(customerRepository.delete).toHaveBeenCalledWith(mockCustomer.id);
     });
   });

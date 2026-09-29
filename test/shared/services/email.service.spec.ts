@@ -68,9 +68,7 @@ describe('EmailService', () => {
       expect(loggerLogSpy).toHaveBeenCalledWith(
         `Sending email to ${options.to}: ${options.subject}`,
       );
-      expect(loggerDebugSpy).toHaveBeenCalledWith(
-        `Email content: ${options.text}`,
-      );
+      expect(loggerDebugSpy).toHaveBeenCalledWith(`Email content: ${options.text}`);
     });
 
     it('TC0002 - Should send email without html', async () => {

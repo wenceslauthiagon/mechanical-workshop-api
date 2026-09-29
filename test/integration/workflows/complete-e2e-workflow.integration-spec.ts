@@ -134,9 +134,7 @@ describe('Complete E2E Workflow Integration Tests', () => {
 
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(mockCustomer.name);
-      expect(response.body.document).toBe(
-        mockCustomer.document.replace(/\D/g, ''),
-      );
+      expect(response.body.document).toBe(mockCustomer.document.replace(/\D/g, ''));
       customerId = response.body.id;
     });
 
@@ -495,4 +493,3 @@ describe('Complete E2E Workflow Integration Tests', () => {
     });
   });
 });
-

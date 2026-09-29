@@ -7,9 +7,7 @@ import { IVehicleRepository } from '../../3-domain/repositories/vehicle-reposito
 export class VehicleRepository implements IVehicleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    data: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Vehicle> {
+  async create(data: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>): Promise<Vehicle> {
     return this.prisma.vehicle.create({
       data,
     });

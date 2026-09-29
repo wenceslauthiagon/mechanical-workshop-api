@@ -7,9 +7,7 @@ import { ServiceOrderStatus } from '../../../src/shared/enums/service-order-stat
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 function generateValidCPF(): string {
-  const numbers = Array.from({ length: 9 }, () =>
-    faker.number.int({ min: 0, max: 9 }),
-  );
+  const numbers = Array.from({ length: 9 }, () => faker.number.int({ min: 0, max: 9 }));
 
   // Calculate first digit
   let sum = 0;
@@ -211,9 +209,7 @@ describe('Vehicle Repository Integration Tests', () => {
     });
 
     it('TC0005 - Should return null when vehicle not found by ID', async () => {
-      const vehicle = await vehicleRepository.findById(
-        '00000000-0000-0000-0000-000000000000',
-      );
+      const vehicle = await vehicleRepository.findById('00000000-0000-0000-0000-000000000000');
 
       expect(vehicle).toBeNull();
     });
@@ -333,16 +329,13 @@ describe('Vehicle Repository Integration Tests', () => {
     });
 
     it('TC0001 - Should return true when vehicle has service orders', async () => {
-      const hasOrders =
-        await vehicleRepository.hasServiceOrders(vehicleWithOrderId);
+      const hasOrders = await vehicleRepository.hasServiceOrders(vehicleWithOrderId);
 
       expect(hasOrders).toBe(true);
     });
 
     it('TC0002 - Should return false when vehicle has no service orders', async () => {
-      const hasOrders = await vehicleRepository.hasServiceOrders(
-        vehicleWithoutOrderId,
-      );
+      const hasOrders = await vehicleRepository.hasServiceOrders(vehicleWithoutOrderId);
 
       expect(hasOrders).toBe(false);
     });

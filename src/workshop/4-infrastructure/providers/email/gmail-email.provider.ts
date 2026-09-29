@@ -33,27 +33,20 @@ export class GmailEmailProvider implements IEmailProvider {
 
       this.logger.log(NOTIFICATION_CONSTANTS.MESSAGES.TRANSPORTER_INITIALIZED);
     } catch (error) {
-      this.logger.error(
-        NOTIFICATION_CONSTANTS.MESSAGES.TRANSPORTER_FAILED,
-        error,
-      );
+      this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.TRANSPORTER_FAILED, error);
     }
   }
 
   async sendEmail(data: EmailData): Promise<void> {
     // Skip sending real emails in test environment
     if (process.env.NODE_ENV === 'test') {
-      this.logger.log(
-        `[TEST MODE] Would send email to ${data.to}: ${data.subject}`,
-      );
+      this.logger.log(`[TEST MODE] Would send email to ${data.to}: ${data.subject}`);
       return;
     }
 
     try {
       if (!this.transporter) {
-        throw new Error(
-          NOTIFICATION_CONSTANTS.MESSAGES.TRANSPORTER_NOT_INITIALIZED,
-        );
+        throw new Error(NOTIFICATION_CONSTANTS.MESSAGES.TRANSPORTER_NOT_INITIALIZED);
       }
 
       const mailOptions = {
@@ -67,27 +60,19 @@ export class GmailEmailProvider implements IEmailProvider {
 
       const result = await this.transporter.sendMail(mailOptions);
 
-      this.logger.log(
-        `${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_SUCCESS} to ${data.to}`,
-        {
-          messageId: result.messageId,
-          to: data.to,
-          subject: data.subject,
-        },
-      );
+      this.logger.log(`${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_SUCCESS} to ${data.to}`, {
+        messageId: result.messageId,
+        to: data.to,
+        subject: data.subject,
+      });
     } catch (error) {
       const err = error as Error;
-      this.logger.error(
-        `${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_ERROR} to ${data.to}`,
-        {
-          error: err.message,
-          to: data.to,
-          subject: data.subject,
-        },
-      );
-      throw new Error(
-        `${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_ERROR}: ${err.message}`,
-      );
+      this.logger.error(`${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_ERROR} to ${data.to}`, {
+        error: err.message,
+        to: data.to,
+        subject: data.subject,
+      });
+      throw new Error(`${NOTIFICATION_CONSTANTS.MESSAGES.EMAIL_SENT_ERROR}: ${err.message}`);
     }
   }
 
@@ -107,10 +92,7 @@ export class GmailEmailProvider implements IEmailProvider {
       this.logger.log(NOTIFICATION_CONSTANTS.MESSAGES.CONNECTION_VERIFIED);
       return true;
     } catch (error) {
-      this.logger.error(
-        NOTIFICATION_CONSTANTS.MESSAGES.CONNECTION_FAILED,
-        error,
-      );
+      this.logger.error(NOTIFICATION_CONSTANTS.MESSAGES.CONNECTION_FAILED, error);
       return false;
     }
   }

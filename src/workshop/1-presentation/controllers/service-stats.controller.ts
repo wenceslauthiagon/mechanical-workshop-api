@@ -16,7 +16,10 @@ export class ServiceStatsController {
   @Get()
   @Roles(UserRole.ADMIN, UserRole.EMPLOYEE)
   @ApiOperation({ summary: 'Get service execution statistics' })
-  async getServiceStats(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+  async getServiceStats(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
     return this.serviceStatsService.getServiceStats(startDate, endDate);
   }
 

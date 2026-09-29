@@ -212,15 +212,9 @@ describe('MechanicController', () => {
       const updatedMechanic = { ...mockMechanic, ...mockUpdateMechanicDto };
       mechanicService.update.mockResolvedValue(updatedMechanic);
 
-      const result = await controller.update(
-        mockMechanicId,
-        mockUpdateMechanicDto,
-      );
+      const result = await controller.update(mockMechanicId, mockUpdateMechanicDto);
 
-      expect(mechanicService.update).toHaveBeenCalledWith(
-        mockMechanicId,
-        mockUpdateMechanicDto,
-      );
+      expect(mechanicService.update).toHaveBeenCalledWith(mockMechanicId, mockUpdateMechanicDto);
       expect(result).toBeInstanceOf(MechanicResponseDto);
     });
 
@@ -228,13 +222,8 @@ describe('MechanicController', () => {
       const error = new Error('Update failed');
       mechanicService.update.mockRejectedValue(error);
 
-      await expect(
-        controller.update(mockMechanicId, mockUpdateMechanicDto),
-      ).rejects.toThrow(error);
-      expect(mechanicService.update).toHaveBeenCalledWith(
-        mockMechanicId,
-        mockUpdateMechanicDto,
-      );
+      await expect(controller.update(mockMechanicId, mockUpdateMechanicDto)).rejects.toThrow(error);
+      expect(mechanicService.update).toHaveBeenCalledWith(mockMechanicId, mockUpdateMechanicDto);
     });
   });
 
@@ -245,9 +234,7 @@ describe('MechanicController', () => {
 
       const result = await controller.toggleAvailability(mockMechanicId);
 
-      expect(mechanicService.toggleAvailability).toHaveBeenCalledWith(
-        mockMechanicId,
-      );
+      expect(mechanicService.toggleAvailability).toHaveBeenCalledWith(mockMechanicId);
       expect(result).toBeInstanceOf(MechanicResponseDto);
     });
   });
@@ -256,18 +243,13 @@ describe('MechanicController', () => {
     it('TC0001 - Should assign mechanic to service order', async () => {
       mechanicService.assignToServiceOrder.mockResolvedValue(undefined);
 
-      const result = await controller.assignToServiceOrder(
-        mockMechanicId,
-        mockServiceOrderId,
-      );
+      const result = await controller.assignToServiceOrder(mockMechanicId, mockServiceOrderId);
 
       expect(mechanicService.assignToServiceOrder).toHaveBeenCalledWith(
         mockMechanicId,
         mockServiceOrderId,
       );
-      expect(result.message).toBe(
-        SERVICE_ORDER_CONSTANTS.MESSAGES.MECHANIC_ASSIGNED,
-      );
+      expect(result.message).toBe(SERVICE_ORDER_CONSTANTS.MESSAGES.MECHANIC_ASSIGNED);
     });
 
     it('TC0002 - Should throw error when assignment fails', async () => {
@@ -287,16 +269,11 @@ describe('MechanicController', () => {
   describe('findBestMechanicForService', () => {
     it('TC0001 - Should return best mechanic for given specialties', async () => {
       const specialties = 'Motor,Freios';
-      mechanicService.findBestMechanicForService.mockResolvedValue(
-        mockMechanic,
-      );
+      mechanicService.findBestMechanicForService.mockResolvedValue(mockMechanic);
 
       const result = await controller.findBestMechanicForService(specialties);
 
-      expect(mechanicService.findBestMechanicForService).toHaveBeenCalledWith([
-        'Motor',
-        'Freios',
-      ]);
+      expect(mechanicService.findBestMechanicForService).toHaveBeenCalledWith(['Motor', 'Freios']);
       expect(result).toBeInstanceOf(MechanicResponseDto);
     });
 

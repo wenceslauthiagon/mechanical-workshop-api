@@ -12,7 +12,7 @@ describe('Service Orders API', () => {
         clientContact: '999999999',
         vehicle: { plate: 'ABC-1234', model: 'Fiesta' },
         services: [{ code: 'S1', description: 'Troca de óleo' }],
-        parts: [{ code: 'P1', description: 'Filtro' }]
+        parts: [{ code: 'P1', description: 'Filtro' }],
       });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('id');

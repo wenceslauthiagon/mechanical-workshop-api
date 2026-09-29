@@ -1,7 +1,9 @@
 import { WeightHistory } from '@domain/entities/WeightHistory';
 
 export interface IWeightHistoryRepository {
-  create(weightHistory: Omit<WeightHistory, 'id' | 'createdAt' | 'updatedAt'>): Promise<WeightHistory>;
+  create(
+    weightHistory: Omit<WeightHistory, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<WeightHistory>;
   findById(id: string): Promise<WeightHistory | null>;
   findByPetId(petId: string): Promise<WeightHistory[]>;
   findLatestByPetId(petId: string): Promise<WeightHistory | null>;

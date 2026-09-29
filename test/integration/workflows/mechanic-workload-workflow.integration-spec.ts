@@ -81,12 +81,10 @@ describe('Mechanic Workload Workflow Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
   });
@@ -104,9 +102,7 @@ describe('Mechanic Workload Workflow Integration Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.specialties).toEqual(
-        expect.arrayContaining(['Motor', 'Freios']),
-      );
+      expect(response.body.specialties).toEqual(expect.arrayContaining(['Motor', 'Freios']));
       mechanicId1 = response.body.id;
     });
 
@@ -118,9 +114,7 @@ describe('Mechanic Workload Workflow Integration Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.specialties).toEqual(
-        expect.arrayContaining(['Suspensão', 'Elétrica']),
-      );
+      expect(response.body.specialties).toEqual(expect.arrayContaining(['Suspensão', 'Elétrica']));
       mechanicId2 = response.body.id;
     });
 
@@ -154,9 +148,7 @@ describe('Mechanic Workload Workflow Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThanOrEqual(2);
-      expect(
-        response.body.every((m: any) => m.specialties.includes('Motor')),
-      ).toBe(true);
+      expect(response.body.every((m: any) => m.specialties.includes('Motor'))).toBe(true);
     });
 
     it('TC0006 - Should get mechanic details by ID', async () => {
@@ -217,9 +209,7 @@ describe('Mechanic Workload Workflow Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.every((m: any) => m.isAvailable === true)).toBe(
-        true,
-      );
+      expect(response.body.every((m: any) => m.isAvailable === true)).toBe(true);
     });
   });
 

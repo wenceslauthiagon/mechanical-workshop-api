@@ -51,8 +51,7 @@ describe('JwtAuthGuard', () => {
     }).compile();
 
     guard = module.get<JwtAuthGuard>(JwtAuthGuard);
-    errorHandler =
-      module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
+    errorHandler = module.get<jest.Mocked<ErrorHandlerService>>(ErrorHandlerService);
   });
 
   it('Should be defined', () => {
@@ -116,9 +115,7 @@ describe('JwtAuthGuard', () => {
         throw new Error('Unauthorized');
       });
 
-      expect(() => guard.handleRequest(null, undefined)).toThrow(
-        'Unauthorized',
-      );
+      expect(() => guard.handleRequest(null, undefined)).toThrow('Unauthorized');
 
       expect(errorHandler.handleError).toHaveBeenCalledWith(
         expect.objectContaining({

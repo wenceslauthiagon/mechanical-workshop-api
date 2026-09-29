@@ -65,12 +65,10 @@ describe('Part Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: testPassword,
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: testPassword,
+    });
 
     authToken = loginResponse.body.access_token;
   });
@@ -148,9 +146,7 @@ describe('Part Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.every((part: any) => part.isActive === true)).toBe(
-        true,
-      );
+      expect(response.body.every((part: any) => part.isActive === true)).toBe(true);
     });
 
     it('TC0007 - Should update part', async () => {
@@ -200,9 +196,7 @@ describe('Part Integration Tests', () => {
         .send({ quantity: removeQuantity });
 
       expect(response.status).toBe(200);
-      expect(response.body.stock).toBe(
-        initialStock.body.stock + removeQuantity,
-      );
+      expect(response.body.stock).toBe(initialStock.body.stock + removeQuantity);
     });
 
     it('TC0010 - Should delete part (soft delete)', async () => {

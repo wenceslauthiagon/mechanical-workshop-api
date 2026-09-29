@@ -66,12 +66,10 @@ describe('Service Order Complete Workflow Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
   });
@@ -499,4 +497,3 @@ describe('Service Order Complete Workflow Integration Tests', () => {
     });
   });
 });
-

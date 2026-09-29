@@ -91,12 +91,7 @@ export class CustomerAggregate {
     return this._additionalInfo;
   }
 
-  updatePersonalInfo(
-    name: string,
-    phone: string,
-    address: string,
-    additionalInfo?: string,
-  ): void {
+  updatePersonalInfo(name: string, phone: string, address: string, additionalInfo?: string): void {
     if (name.trim().length < 2) {
       throw new Error('Nome deve ter pelo menos 2 caracteres');
     }
@@ -122,9 +117,7 @@ export class CustomerAggregate {
 
     // Validar se o tipo de cliente está compatível com o documento
     const isCompany = document.value.length === 14;
-    const expectedType = isCompany
-      ? CustomerType.PESSOA_JURIDICA
-      : CustomerType.PESSOA_FISICA;
+    const expectedType = isCompany ? CustomerType.PESSOA_JURIDICA : CustomerType.PESSOA_FISICA;
 
     if (this._type !== expectedType) {
       throw new Error(

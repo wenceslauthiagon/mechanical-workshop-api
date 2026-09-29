@@ -161,15 +161,11 @@ describe('Mechanic Repository Integration Tests', () => {
       expect(mechanics).toBeDefined();
       expect(Array.isArray(mechanics)).toBe(true);
       expect(mechanics.length).toBeGreaterThan(0);
-      expect(mechanics.every((m) => m.specialties.includes('Motor'))).toBe(
-        true,
-      );
+      expect(mechanics.every((m) => m.specialties.includes('Motor'))).toBe(true);
     });
 
     it('TC0006 - Should return null when mechanic not found by ID', async () => {
-      const mechanic = await mechanicRepository.findById(
-        '00000000-0000-0000-0000-000000000000',
-      );
+      const mechanic = await mechanicRepository.findById('00000000-0000-0000-0000-000000000000');
 
       expect(mechanic).toBeNull();
     });
@@ -191,36 +187,28 @@ describe('Mechanic Repository Integration Tests', () => {
     });
 
     it('TC0001 - Should update mechanic name', async () => {
-      const updatedMechanic = await mechanicRepository.update(
-        updateMechanicId,
-        {
-          name: 'Roberto Alves Silva',
-        },
-      );
+      const updatedMechanic = await mechanicRepository.update(updateMechanicId, {
+        name: 'Roberto Alves Silva',
+      });
 
       expect(updatedMechanic.id).toBe(updateMechanicId);
       expect(updatedMechanic.name).toBe('Roberto Alves Silva');
     });
 
     it('TC0002 - Should update mechanic specialties', async () => {
-      const updatedMechanic = await mechanicRepository.update(
-        updateMechanicId,
-        {
-          specialties: ['Transmissão', 'Embreagem'],
-        },
-      );
+      const updatedMechanic = await mechanicRepository.update(updateMechanicId, {
+        specialties: ['Transmissão', 'Embreagem'],
+      });
 
       expect(updatedMechanic.id).toBe(updateMechanicId);
       expect(updatedMechanic.specialties).toEqual(['Transmissão', 'Embreagem']);
     });
 
     it('TC0003 - Should toggle mechanic availability', async () => {
-      const initialMechanic =
-        await mechanicRepository.findById(updateMechanicId);
+      const initialMechanic = await mechanicRepository.findById(updateMechanicId);
       const initialAvailability = initialMechanic?.isAvailable;
 
-      const updatedMechanic =
-        await mechanicRepository.toggleAvailability(updateMechanicId);
+      const updatedMechanic = await mechanicRepository.toggleAvailability(updateMechanicId);
 
       expect(updatedMechanic.id).toBe(updateMechanicId);
       expect(updatedMechanic.isAvailable).toBe(!initialAvailability);

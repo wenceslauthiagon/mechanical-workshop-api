@@ -7,7 +7,8 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: 'Pet Management API',
       version: version,
-      description: 'API completa para gerenciamento de pets, incluindo vacinas, medicações, consultas veterinárias, lembretes e histórico de peso',
+      description:
+        'API completa para gerenciamento de pets, incluindo vacinas, medicações, consultas veterinárias, lembretes e histórico de peso',
       contact: {
         name: 'API Support',
       },
@@ -71,11 +72,32 @@ const options: swaggerJsdoc.Options = {
         },
         Medication: {
           type: 'object',
-          required: ['name', 'type', 'dosage', 'frequency', 'startDate', 'endDate', 'veterinarianName', 'petId'],
+          required: [
+            'name',
+            'type',
+            'dosage',
+            'frequency',
+            'startDate',
+            'endDate',
+            'veterinarianName',
+            'petId',
+          ],
           properties: {
             id: { type: 'string', format: 'uuid' },
             name: { type: 'string' },
-            type: { type: 'string', enum: ['ANTIBIOTIC', 'ANTI_INFLAMMATORY', 'ANALGESIC', 'ANTIPARASITIC', 'VITAMIN', 'FLEA_TICK_CONTROL', 'DEWORMER', 'OTHER'] },
+            type: {
+              type: 'string',
+              enum: [
+                'ANTIBIOTIC',
+                'ANTI_INFLAMMATORY',
+                'ANALGESIC',
+                'ANTIPARASITIC',
+                'VITAMIN',
+                'FLEA_TICK_CONTROL',
+                'DEWORMER',
+                'OTHER',
+              ],
+            },
             dosage: { type: 'string' },
             frequency: { type: 'string' },
             startDate: { type: 'string', format: 'date' },
@@ -113,9 +135,20 @@ const options: swaggerJsdoc.Options = {
             title: { type: 'string' },
             description: { type: 'string', nullable: true },
             dueDate: { type: 'string', format: 'date-time' },
-            type: { 
-              type: 'string', 
-              enum: ['VACCINE', 'MEDICATION', 'VETERINARY_VISIT', 'DEWORMING', 'FLEA_TICK_TREATMENT', 'WEIGHT_CHECK', 'GROOMING', 'WALK', 'EXERCISE', 'OTHER'] 
+            type: {
+              type: 'string',
+              enum: [
+                'VACCINE',
+                'MEDICATION',
+                'VETERINARY_VISIT',
+                'DEWORMING',
+                'FLEA_TICK_TREATMENT',
+                'WEIGHT_CHECK',
+                'GROOMING',
+                'WALK',
+                'EXERCISE',
+                'OTHER',
+              ],
             },
             status: { type: 'string', enum: ['PENDING', 'SENT', 'COMPLETED', 'CANCELLED'] },
             relatedEntityId: { type: 'string', format: 'uuid', nullable: true },

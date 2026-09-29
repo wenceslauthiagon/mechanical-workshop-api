@@ -142,10 +142,7 @@ describe('ServiceOrderPricingDomainService', () => {
       const startDate = new Date('2024-10-20T12:00:00Z');
       const estimatedMinutes = 480;
 
-      const result = service.calculateEstimatedCompletionDate(
-        startDate,
-        estimatedMinutes,
-      );
+      const result = service.calculateEstimatedCompletionDate(startDate, estimatedMinutes);
 
       expect(result.getTime()).toBeGreaterThan(startDate.getTime());
     });

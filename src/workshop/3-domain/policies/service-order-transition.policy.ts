@@ -1,22 +1,14 @@
 import { ServiceOrderStatus } from '../../../shared/enums/service-order-status.enum';
 
 export interface ServiceOrderPolicy {
-  canTransition(
-    fromStatus: ServiceOrderStatus,
-    toStatus: ServiceOrderStatus,
-  ): boolean;
+  canTransition(fromStatus: ServiceOrderStatus, toStatus: ServiceOrderStatus): boolean;
   getValidTransitions(fromStatus: ServiceOrderStatus): ServiceOrderStatus[];
 }
 
 export class DefaultServiceOrderPolicy implements ServiceOrderPolicy {
-  private readonly validTransitions: Record<
-    ServiceOrderStatus,
-    ServiceOrderStatus[]
-  > = {
+  private readonly validTransitions: Record<ServiceOrderStatus, ServiceOrderStatus[]> = {
     [ServiceOrderStatus.RECEIVED]: [ServiceOrderStatus.IN_DIAGNOSIS],
-    [ServiceOrderStatus.IN_DIAGNOSIS]: [
-      ServiceOrderStatus.AWAITING_APPROVAL,
-    ],
+    [ServiceOrderStatus.IN_DIAGNOSIS]: [ServiceOrderStatus.AWAITING_APPROVAL],
     [ServiceOrderStatus.AWAITING_APPROVAL]: [
       ServiceOrderStatus.IN_EXECUTION,
       ServiceOrderStatus.IN_DIAGNOSIS,
@@ -26,10 +18,7 @@ export class DefaultServiceOrderPolicy implements ServiceOrderPolicy {
     [ServiceOrderStatus.DELIVERED]: [],
   };
 
-  canTransition(
-    fromStatus: ServiceOrderStatus,
-    toStatus: ServiceOrderStatus,
-  ): boolean {
+  canTransition(fromStatus: ServiceOrderStatus, toStatus: ServiceOrderStatus): boolean {
     const allowedTransitions = this.validTransitions[fromStatus] || [];
     return allowedTransitions.includes(toStatus);
   }

@@ -3,9 +3,7 @@ import { VeterinaryVisitController } from '../controllers/VeterinaryVisitControl
 import { validateRequest } from '../middlewares/validateRequest';
 import { createVeterinaryVisitSchema } from '../dtos/VeterinaryVisitDTO';
 
-export const createVeterinaryVisitRoutes = (
-  visitController: VeterinaryVisitController,
-): Router => {
+export const createVeterinaryVisitRoutes = (visitController: VeterinaryVisitController): Router => {
   const router = Router();
 
   /**

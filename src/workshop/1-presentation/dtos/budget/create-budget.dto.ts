@@ -1,12 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNumber,
-  IsArray,
-  IsOptional,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsString, IsNumber, IsArray, IsOptional, Min, Max } from 'class-validator';
 import { BudgetItem } from '../../../3-domain/repositories/budget.repository.interface';
 
 export class CreateBudgetDto {
@@ -54,4 +47,3 @@ export class CreateBudgetDto {
   @Max(90)
   validDays?: number;
 }
-

@@ -81,12 +81,7 @@ describe('CustomerAggregate', () => {
     it('TC0001 - Should update personal info with additionalInfo', () => {
       const newAdditionalInfo = faker.lorem.sentence();
 
-      customer.updatePersonalInfo(
-        'João Silva',
-        '11999887766',
-        'Rua Nova, 456',
-        newAdditionalInfo,
-      );
+      customer.updatePersonalInfo('João Silva', '11999887766', 'Rua Nova, 456', newAdditionalInfo);
 
       expect(customer.name).toBe('João Silva');
       expect(customer.additionalInfo).toBe(newAdditionalInfo.trim());

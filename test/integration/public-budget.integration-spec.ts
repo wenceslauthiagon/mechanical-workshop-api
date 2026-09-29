@@ -60,12 +60,10 @@ describe('Public Budget Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
 
@@ -160,9 +158,7 @@ describe('Public Budget Integration Tests', () => {
 
   describe('public budget access', () => {
     it('TC0001 - Should view public budget without authentication', async () => {
-      const response = await request(app.getHttpServer()).get(
-        `/public/budgets/${sentBudgetId}`,
-      );
+      const response = await request(app.getHttpServer()).get(`/public/budgets/${sentBudgetId}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('id', sentBudgetId);
@@ -185,9 +181,7 @@ describe('Public Budget Integration Tests', () => {
 
     it('TC0003 - Should not access non-existent budget', async () => {
       const fakeId = faker.string.uuid();
-      const response = await request(app.getHttpServer()).get(
-        `/public/budgets/${fakeId}`,
-      );
+      const response = await request(app.getHttpServer()).get(`/public/budgets/${fakeId}`);
 
       expect(response.status).toBe(404);
     });
@@ -216,9 +210,7 @@ describe('Public Budget Integration Tests', () => {
 
       const draftId = createResponse.body.id;
 
-      const response = await request(app.getHttpServer()).get(
-        `/public/budgets/${draftId}`,
-      );
+      const response = await request(app.getHttpServer()).get(`/public/budgets/${draftId}`);
 
       expect(response.status).toBe(404);
     });
@@ -402,17 +394,13 @@ describe('Public Budget Integration Tests', () => {
 
   describe('public budget validation rules', () => {
     it('TC0001 - Should not approve budget with invalid ID format', async () => {
-      const response = await request(app.getHttpServer()).put(
-        '/public/budgets/invalid-id/approve',
-      );
+      const response = await request(app.getHttpServer()).put('/public/budgets/invalid-id/approve');
 
       expect([400, 404, 500]).toContain(response.status);
     });
 
     it('TC0002 - Should not reject budget with invalid ID format', async () => {
-      const response = await request(app.getHttpServer()).put(
-        '/public/budgets/invalid-id/reject',
-      );
+      const response = await request(app.getHttpServer()).put('/public/budgets/invalid-id/reject');
 
       expect([400, 404, 500]).toContain(response.status);
     });

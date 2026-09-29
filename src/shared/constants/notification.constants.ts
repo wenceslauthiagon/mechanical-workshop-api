@@ -51,11 +51,9 @@ export const NOTIFICATION_CONSTANTS = {
     UNSUPPORTED_PROVIDER: 'Provedor não suportado',
     BUDGET_READY_SUCCESS: 'Notificação de orçamento pronto enviada com sucesso',
     BUDGET_READY_ERROR: 'Falha ao enviar notificação de orçamento pronto',
-    BUDGET_APPROVED_SUCCESS:
-      'Notificação de orçamento aprovado enviada com sucesso',
+    BUDGET_APPROVED_SUCCESS: 'Notificação de orçamento aprovado enviada com sucesso',
     BUDGET_APPROVED_ERROR: 'Falha ao enviar notificação de orçamento aprovado',
-    BUDGET_REJECTED_SUCCESS:
-      'Notificação de orçamento rejeitado enviada com sucesso',
+    BUDGET_REJECTED_SUCCESS: 'Notificação de orçamento rejeitado enviada com sucesso',
     BUDGET_REJECTED_ERROR: 'Falha ao enviar notificação de orçamento rejeitado',
     SERVICE_ORDER_SUCCESS: 'Notificação de status da OS enviada com sucesso',
     SERVICE_ORDER_ERROR: 'Falha ao enviar notificação de status da OS',

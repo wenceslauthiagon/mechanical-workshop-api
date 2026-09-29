@@ -9,13 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiBody, ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import { LoginDto } from '../dto/login.dto';
@@ -193,12 +187,9 @@ export class AuthController {
     return this.userService.findAll();
   }
 
-  private removeConfirmPassword(
-    dto: CreateUserDto,
-  ): Omit<CreateUserDto, 'confirmPassword'> {
+  private removeConfirmPassword(dto: CreateUserDto): Omit<CreateUserDto, 'confirmPassword'> {
     const { confirmPassword, ...userData } = dto;
     void confirmPassword;
     return userData;
   }
 }
-

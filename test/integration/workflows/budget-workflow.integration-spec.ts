@@ -87,12 +87,10 @@ describe('Budget Workflow Integration Tests', () => {
       },
     });
 
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.access_token;
   });
@@ -247,9 +245,7 @@ describe('Budget Workflow Integration Tests', () => {
     });
 
     it('TC0011 - Should access budget via public API', async () => {
-      const response = await request(app.getHttpServer()).get(
-        `/public/budgets/${budgetId}`,
-      );
+      const response = await request(app.getHttpServer()).get(`/public/budgets/${budgetId}`);
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(budgetId);

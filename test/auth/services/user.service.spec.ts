@@ -55,9 +55,7 @@ describe('UserService', () => {
     const mockPrismaService = {
       user: {
         create: jest.fn().mockImplementation(() => Promise.resolve(mockUser)),
-        findUnique: jest
-          .fn()
-          .mockImplementation(() => Promise.resolve(mockUser)),
+        findUnique: jest.fn().mockImplementation(() => Promise.resolve(mockUser)),
         findFirst: jest.fn().mockImplementation(() => Promise.resolve(null)),
         findMany: jest.fn().mockImplementation(() => Promise.resolve([mockUser])),
         update: jest.fn().mockImplementation(() => Promise.resolve(mockUser)),
@@ -123,9 +121,9 @@ describe('UserService', () => {
         throw new Error('Usuários já existem');
       });
 
-      await expect(
-        service.createFirstAdmin(mockCreateUserData),
-      ).rejects.toThrow('Usuários já existem');
+      await expect(service.createFirstAdmin(mockCreateUserData)).rejects.toThrow(
+        'Usuários já existem',
+      );
 
       expect(prismaService.user.count).toHaveBeenCalled();
       expect(errorHandler.handleConflictError).toHaveBeenCalled();
@@ -142,10 +140,7 @@ describe('UserService', () => {
 
       expect(prismaService.user.findFirst).toHaveBeenCalledWith({
         where: {
-          OR: [
-            { username: mockCreateUserData.username },
-            { email: mockCreateUserData.email },
-          ],
+          OR: [{ username: mockCreateUserData.username }, { email: mockCreateUserData.email }],
         },
       });
       expect(mockedBcrypt.hash).toHaveBeenCalledWith(mockCreateUserData.password, 10);
@@ -167,9 +162,7 @@ describe('UserService', () => {
         throw new Error('Nome de usuário já existe');
       });
 
-      await expect(service.create(mockCreateUserData)).rejects.toThrow(
-        'Nome de usuário já existe',
-      );
+      await expect(service.create(mockCreateUserData)).rejects.toThrow('Nome de usuário já existe');
 
       expect(prismaService.user.findFirst).toHaveBeenCalled();
       expect(errorHandler.handleConflictError).toHaveBeenCalled();
@@ -182,9 +175,7 @@ describe('UserService', () => {
         throw new Error('E-mail já cadastrado');
       });
 
-      await expect(service.create(mockCreateUserData)).rejects.toThrow(
-        'E-mail já cadastrado',
-      );
+      await expect(service.create(mockCreateUserData)).rejects.toThrow('E-mail já cadastrado');
 
       expect(prismaService.user.findFirst).toHaveBeenCalled();
       expect(errorHandler.handleConflictError).toHaveBeenCalled();
@@ -202,9 +193,7 @@ describe('UserService', () => {
         throw new Error('username já existe');
       });
 
-      await expect(service.create(mockCreateUserData)).rejects.toThrow(
-        'username já existe',
-      );
+      await expect(service.create(mockCreateUserData)).rejects.toThrow('username já existe');
 
       expect(errorHandler.handleConflictError).toHaveBeenCalled();
     });
@@ -266,10 +255,7 @@ describe('UserService', () => {
 
       const result = await service.validatePassword(mockUser, mockPassword);
 
-      expect(mockedBcrypt.compare).toHaveBeenCalledWith(
-        mockPassword,
-        mockUser.passwordHash,
-      );
+      expect(mockedBcrypt.compare).toHaveBeenCalledWith(mockPassword, mockUser.passwordHash);
       expect(result).toBe(true);
     });
 
@@ -278,10 +264,7 @@ describe('UserService', () => {
 
       const result = await service.validatePassword(mockUser, 'wrongpassword');
 
-      expect(mockedBcrypt.compare).toHaveBeenCalledWith(
-        'wrongpassword',
-        mockUser.passwordHash,
-      );
+      expect(mockedBcrypt.compare).toHaveBeenCalledWith('wrongpassword', mockUser.passwordHash);
       expect(result).toBe(false);
     });
   });
@@ -363,9 +346,7 @@ describe('UserService', () => {
   describe('deactivate', () => {
     it('TC0001 - Should deactivate user successfully', async () => {
       const deactivatedUser = { ...mockSafeUser, isActive: false };
-      (prismaService.user.update as jest.Mock).mockResolvedValue(
-        deactivatedUser,
-      );
+      (prismaService.user.update as jest.Mock).mockResolvedValue(deactivatedUser);
 
       const result = await service.deactivate(mockUserId);
 

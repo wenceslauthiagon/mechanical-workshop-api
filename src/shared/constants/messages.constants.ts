@@ -2,19 +2,18 @@ export const ERROR_MESSAGES = {
   // General
   UNEXPECTED_ERROR: 'An unexpected error occurred',
   INTERNAL_SERVER_ERROR: 'Erro interno do servidor',
-  
+
   // Validation
   VALIDATION_FAILED: 'Validation failed',
   INVALID_INPUT: 'Invalid input data',
-  
+
   // Auth
   TOKEN_EXPIRED: 'Token inválido ou expirado',
   INVALID_TOKEN: 'Token inválido',
   ACCESS_TOKEN_NOT_FOUND: 'Access token not found',
   INVALID_ACCESS_TOKEN: 'Invalid access token',
   ACCESS_DENIED_ADMIN_REQUIRED: 'Acesso negado - Role ADMIN necessário',
-  PASSWORD_CONFIRMATION_MISMATCH:
-    'A confirmação de senha deve ser igual à senha',
+  PASSWORD_CONFIRMATION_MISMATCH: 'A confirmação de senha deve ser igual à senha',
   USERS_ALREADY_EXIST:
     'Já existem usuários no sistema. Use o endpoint padrão para criar novos usuários.',
   USERNAME_ALREADY_EXISTS: 'Username já está em uso. Por favor, escolha outro.',
@@ -26,41 +25,34 @@ export const ERROR_MESSAGES = {
   EMAIL_ALREADY_EXISTS: 'Email já cadastrado no sistema',
   DOCUMENT_ALREADY_EXISTS: 'CPF/CNPJ já cadastrado no sistema',
   INVALID_DOCUMENT: 'Documento inválido. Informe um CPF ou CNPJ válido',
-  CLIENT_HAS_VEHICLES:
-    'Não é possível remover cliente com veículos cadastrados',
+  CLIENT_HAS_VEHICLES: 'Não é possível remover cliente com veículos cadastrados',
   CLIENT_HAS_REGISTERED_VEHICLES: 'Cliente possui veículos cadastrados',
   EMAIL_OR_DOCUMENT_ALREADY_EXISTS: 'Email ou documento já cadastrado',
   CLIENT_CREATE_ERROR: 'Erro ao criar cliente',
   CLIENT_UPDATE_ERROR: 'Erro ao atualizar cliente',
   CLIENT_DELETE_ERROR: 'Erro ao remover cliente',
-  CLIENT_OR_NO_SERVICE_ORDERS:
-    'Cliente não encontrado ou sem ordens de serviço',
+  CLIENT_OR_NO_SERVICE_ORDERS: 'Cliente não encontrado ou sem ordens de serviço',
 
   // Veículo
   VEHICLE_NOT_FOUND: 'Veículo não encontrado',
   LICENSE_PLATE_ALREADY_EXISTS: 'Placa já cadastrada no sistema',
   VEHICLE_NOT_BELONGS_TO_CLIENT: 'Veículo não pertence ao cliente informado',
-  VEHICLE_HAS_SERVICE_ORDERS:
-    'Não é possível remover veículo com ordens de serviço vinculadas',
+  VEHICLE_HAS_SERVICE_ORDERS: 'Não é possível remover veículo com ordens de serviço vinculadas',
   VEHICLE_WITH_SERVICE_ORDERS: 'Veículo possui ordens de serviço vinculadas',
-  VEHICLE_OR_NO_SERVICE_ORDERS:
-    'Veículo não encontrado ou sem ordens de serviço',
+  VEHICLE_OR_NO_SERVICE_ORDERS: 'Veículo não encontrado ou sem ordens de serviço',
 
   // Ordem de Serviço
   SERVICE_ORDER_NOT_FOUND: 'Ordem de serviço não encontrada',
-  SERVICE_ORDER_NOT_AWAITING_APPROVAL:
-    'Ordem de serviço não está aguardando aprovação',
+  SERVICE_ORDER_NOT_AWAITING_APPROVAL: 'Ordem de serviço não está aguardando aprovação',
   MECHANIC_REQUIRED_FOR_EXECUTION:
     'Para iniciar a execução, é necessário atrelar um mecânico à ordem de serviço.',
-  MECHANIC_BUSY_WITH_OTHER_ORDER:
-    'Mecânico já está ocupado executando outra ordem de serviço.',
+  MECHANIC_BUSY_WITH_OTHER_ORDER: 'Mecânico já está ocupado executando outra ordem de serviço.',
 
   // Serviço
   SERVICE_NOT_FOUND: 'Serviço não encontrado',
   SERVICE_NAME_ALREADY_EXISTS: 'Serviço com este nome já existe',
   SERVICE_ALREADY_REGISTERED: 'Serviço já cadastrado',
-  SERVICE_NOT_FOUND_OR_NO_EXECUTION_DATA:
-    'Serviço não encontrado ou sem dados de execução',
+  SERVICE_NOT_FOUND_OR_NO_EXECUTION_DATA: 'Serviço não encontrado ou sem dados de execução',
   SERVICE_NOT_FOUND_OR_INSUFFICIENT_DATA:
     'Serviço não encontrado ou sem dados de execução suficientes',
 
@@ -75,8 +67,7 @@ export const ERROR_MESSAGES = {
   INVALID_DATA: 'Dados inválidos',
   INVALID_DATA_PROVIDED: 'Dados inválidos fornecidos',
   INVALID_STATUS_TRANSITION: 'Transição de status inválida',
-  INVALID_LICENSE_PLATE_FORMAT:
-    'Placa deve estar no formato ABC-1234 ou ABC1D23 (Mercosul)',
+  INVALID_LICENSE_PLATE_FORMAT: 'Placa deve estar no formato ABC-1234 ou ABC1D23 (Mercosul)',
 } as const;
 
 export const SUCCESS_MESSAGES = {
@@ -108,8 +99,7 @@ export const SUCCESS_MESSAGES = {
   SERVICE_ORDER_APPROVED: 'Orçamento aprovado com sucesso',
   SERVICE_ORDER_HISTORY: 'Histórico de status retornado com sucesso',
   SERVICE_ORDERS_LISTED: 'Lista de ordens de serviço retornada com sucesso',
-  CLIENT_SERVICE_ORDERS_LISTED:
-    'Ordens de serviço do cliente retornadas com sucesso',
+  CLIENT_SERVICE_ORDERS_LISTED: 'Ordens de serviço do cliente retornadas com sucesso',
   VEHICLE_SERVICE_ORDERS_LISTED: 'Lista de ordens de serviço do veículo',
 
   // Autenticação
@@ -126,8 +116,7 @@ export const SUCCESS_MESSAGES = {
 
 export const NOTES_MESSAGES = {
   SERVICE_ORDER_CREATED: 'Ordem de serviço criada',
-  BUDGET_APPROVED_EXECUTION_STARTED:
-    'Orçamento aprovado pelo cliente - Iniciando execução',
+  BUDGET_APPROVED_EXECUTION_STARTED: 'Orçamento aprovado pelo cliente - Iniciando execução',
 } as const;
 
 export const FIELD_DESCRIPTIONS = {
@@ -188,12 +177,10 @@ export const API_DESCRIPTIONS = {
   FIND_SERVICE_ORDER: 'Retorna os detalhes completos de uma ordem de serviço',
   UPDATE_SERVICE_ORDER_STATUS:
     'Updates the service order status following the flow: RECEIVED → IN_DIAGNOSIS → AWAITING_APPROVAL → IN_EXECUTION → FINISHED → DELIVERED',
-  APPROVE_SERVICE_ORDER:
-    'Approves the budget and moves the service order to IN_EXECUTION status',
+  APPROVE_SERVICE_ORDER: 'Approves the budget and moves the service order to IN_EXECUTION status',
   SERVICE_ORDER_STATUS_HISTORY:
     'Retorna o histórico completo de mudanças de status da ordem de serviço',
-  FIND_SERVICE_ORDERS_BY_CLIENT:
-    'Retorna todas as ordens de serviço de um cliente específico',
+  FIND_SERVICE_ORDERS_BY_CLIENT: 'Retorna todas as ordens de serviço de um cliente específico',
 
   // API Pública
   PUBLIC_FIND_BY_ORDER_NUMBER:
@@ -208,12 +195,10 @@ export const API_DESCRIPTIONS = {
     'Retorna estatísticas de tempo de execução para cada serviço, incluindo tempo médio, precisão das estimativas e total de ordens concluídas.',
   GENERAL_SYSTEM_STATS:
     'Retorna estatísticas gerais incluindo total de ordens concluídas, tempo médio de execução e precisão geral das estimativas.',
-  SPECIFIC_SERVICE_STATS:
-    'Retorna estatísticas detalhadas de execução para um serviço específico.',
+  SPECIFIC_SERVICE_STATS: 'Retorna estatísticas detalhadas de execução para um serviço específico.',
 
   // Health Check
-  HEALTH_CHECK_API:
-    'Endpoint para verificar se a API está funcionando corretamente',
+  HEALTH_CHECK_API: 'Endpoint para verificar se a API está funcionando corretamente',
 } as const;
 
 export const API_SUMMARY = {
@@ -258,8 +243,7 @@ export const API_SUMMARY = {
   // API Pública
   PUBLIC_FIND_BY_ORDER_NUMBER: 'Consultar OS por número (API Pública)',
   PUBLIC_FIND_BY_DOCUMENT: 'Consultar OS por CPF/CNPJ (API Pública)',
-  PUBLIC_FIND_BY_LICENSE_PLATE:
-    'Consultar OS por placa do veículo (API Pública)',
+  PUBLIC_FIND_BY_LICENSE_PLATE: 'Consultar OS por placa do veículo (API Pública)',
 
   // Estatísticas
   SERVICE_EXECUTION_STATS: 'Estatísticas de execução por serviço',
@@ -297,10 +281,8 @@ export const HEALTH_CHECK_RESPONSES = {
 } as const;
 
 export const NOTIFICATION_MESSAGES = {
-  FAILED_TO_SEND_STATUS_NOTIFICATION:
-    'Falha ao enviar notificação de status para OS',
-  FAILED_TO_SEND_BUDGET_NOTIFICATION:
-    'Falha ao enviar notificação de orçamento',
+  FAILED_TO_SEND_STATUS_NOTIFICATION: 'Falha ao enviar notificação de status para OS',
+  FAILED_TO_SEND_BUDGET_NOTIFICATION: 'Falha ao enviar notificação de orçamento',
   FAILED_TO_SEND_EMAIL: 'Falha ao enviar email',
   FAILED_TO_SEND_SMS: 'Falha ao enviar SMS',
 } as const;

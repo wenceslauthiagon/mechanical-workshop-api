@@ -39,10 +39,7 @@ export class CreateServiceDto {
     type: 'number',
     format: 'decimal',
   })
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: 'Preço deve ter até 2 casas decimais' },
-  )
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Preço deve ter até 2 casas decimais' })
   @IsNotEmpty()
   price!: number;
 

@@ -31,9 +31,7 @@ export class EmailService {
     }
   }
 
-  async sendStatusChangeNotification(
-    data: StatusChangeEmailData,
-  ): Promise<boolean> {
+  async sendStatusChangeNotification(data: StatusChangeEmailData): Promise<boolean> {
     const statusMessages: Record<string, string> = {
       RECEIVED: 'recebida e aguardando diagnóstico',
       IN_DIAGNOSIS: 'em diagnóstico',

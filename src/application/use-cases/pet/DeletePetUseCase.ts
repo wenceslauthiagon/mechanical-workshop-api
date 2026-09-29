@@ -6,7 +6,7 @@ export class DeletePetUseCase {
 
   async execute(id: string): Promise<void> {
     const pet = await this.petRepository.findById(id);
-    
+
     if (!pet) {
       throw new NotFoundError('Pet', id);
     }

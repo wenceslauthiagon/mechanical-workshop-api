@@ -99,36 +99,25 @@ describe('DefaultServiceOrderPolicy', () => {
     });
 
     it('TC0002 - Should return valid transitions for EM_DIAGNOSTICO status', () => {
-      const result = policy.getValidTransitions(
-        ServiceOrderStatus.IN_DIAGNOSIS,
-      );
+      const result = policy.getValidTransitions(ServiceOrderStatus.IN_DIAGNOSIS);
 
       expect(result).toEqual([ServiceOrderStatus.AWAITING_APPROVAL]);
     });
 
     it('TC0003 - Should return valid transitions for AGUARDANDO_APROVACAO status', () => {
-      const result = policy.getValidTransitions(
-        ServiceOrderStatus.AWAITING_APPROVAL,
-      );
+      const result = policy.getValidTransitions(ServiceOrderStatus.AWAITING_APPROVAL);
 
-      expect(result).toEqual([
-        ServiceOrderStatus.IN_EXECUTION,
-        ServiceOrderStatus.IN_DIAGNOSIS,
-      ]);
+      expect(result).toEqual([ServiceOrderStatus.IN_EXECUTION, ServiceOrderStatus.IN_DIAGNOSIS]);
     });
 
     it('TC0004 - Should return valid transitions for EM_EXECUCAO status', () => {
-      const result = policy.getValidTransitions(
-        ServiceOrderStatus.IN_EXECUTION,
-      );
+      const result = policy.getValidTransitions(ServiceOrderStatus.IN_EXECUTION);
 
       expect(result).toEqual([ServiceOrderStatus.FINISHED]);
     });
 
     it('TC0005 - Should return valid transitions for FINALIZADA status', () => {
-      const result = policy.getValidTransitions(
-        ServiceOrderStatus.FINISHED,
-      );
+      const result = policy.getValidTransitions(ServiceOrderStatus.FINISHED);
 
       expect(result).toEqual([ServiceOrderStatus.DELIVERED]);
     });

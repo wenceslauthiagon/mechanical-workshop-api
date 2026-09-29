@@ -85,9 +85,7 @@ describe('CreateOrderService', () => {
 
     it('TC0002 - Should throw error if email already exists', async () => {
       customerRepository.findByEmail.mockResolvedValue(mockCustomer);
-      await expect(service.create(createDto)).rejects.toThrow(
-        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
-      );
+      await expect(service.create(createDto)).rejects.toThrow(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     });
 
     it('TC0003 - Should throw error if document already exists', async () => {
@@ -102,9 +100,7 @@ describe('CreateOrderService', () => {
       customerRepository.findByEmail.mockResolvedValue(null);
       customerRepository.findByDocument.mockResolvedValue(null);
       customerRepository.create.mockRejectedValue(new Error('DB error'));
-      await expect(service.create(createDto)).rejects.toThrow(
-        ERROR_MESSAGES.CLIENT_CREATE_ERROR,
-      );
+      await expect(service.create(createDto)).rejects.toThrow(ERROR_MESSAGES.CLIENT_CREATE_ERROR);
       expect(errorHandler.generateException).toHaveBeenCalled();
     });
 

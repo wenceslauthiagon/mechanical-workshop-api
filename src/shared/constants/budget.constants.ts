@@ -16,14 +16,16 @@ export const BUDGET_CONSTANTS = {
   MESSAGES: {
     NOT_FOUND: 'Orçamento não encontrado',
     ONLY_SENT_CAN_BE_APPROVED: 'Apenas orçamentos enviados podem ser aprovados',
-    ONLY_SENT_CAN_BE_REJECTED:
-      'Apenas orçamentos enviados podem ser rejeitados',
+    ONLY_SENT_CAN_BE_REJECTED: 'Apenas orçamentos enviados podem ser rejeitados',
     ONLY_DRAFT_CAN_BE_SENT: 'Apenas orçamentos em rascunho podem ser enviados',
     EXPIRED_CANNOT_BE_APPROVED: 'Orçamento expirado não pode ser aprovado',
-    ALREADY_EXISTS_FOR_SERVICE_ORDER:
-      'Já existe um orçamento para esta ordem de serviço',
+    ALREADY_EXISTS_FOR_SERVICE_ORDER: 'Já existe um orçamento para esta ordem de serviço',
     ACTIVE_BUDGET_EXISTS_FOR_SERVICE_ORDER:
       'Já existe um orçamento ativo para esta ordem de serviço. Finalize o orçamento atual antes de criar um novo.',
+    ALREADY_EXISTS_FOR_PART_NUMBER: 'Já existe uma peça com este número',
+    ALREADY_EXISTS_FOR_DOCUMENT: 'Já existe um cliente com este documento',
+    ALREADY_EXISTS_FOR_LICENSE_PLATE: 'Já existe um veículo com esta placa',
+    ALREADY_EXISTS_FOR_USERNAME: 'Já existe um usuário com este nome de usuário',
     ITEMS_REQUIRED: 'Items do orçamento são obrigatórios',
     SERVICE_ORDER_NOT_FOUND: 'Ordem de serviço não encontrada',
     CUSTOMER_NOT_FOUND: 'Cliente não encontrado',
@@ -78,10 +80,8 @@ export const BUDGET_CONSTANTS = {
     TEMPLATE_BUDGET_REJECTED: 'budget-rejected',
   },
   SMS: {
-    NEW_BUDGET:
-      'Seu orçamento está pronto! Acesse o link para visualizar: {link}',
-    BUDGET_APPROVED:
-      'Orçamento aprovado! Iniciando o serviço. Acompanhe em: {link}',
+    NEW_BUDGET: 'Seu orçamento está pronto! Acesse o link para visualizar: {link}',
+    BUDGET_APPROVED: 'Orçamento aprovado! Iniciando o serviço. Acompanhe em: {link}',
     BUDGET_REJECTED: 'Orçamento rejeitado. Entre em contato para negociar.',
   },
   PDF: {

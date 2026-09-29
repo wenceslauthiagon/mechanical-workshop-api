@@ -172,10 +172,7 @@ class DependencyContainer {
   public loginUseCase = new LoginUseCase(this.authRepository, this.authService);
 
   // Controllers
-  public ownerController = new OwnerController(
-    this.registerOwnerUseCase,
-    this.getOwnerByIdUseCase,
-  );
+  public ownerController = new OwnerController(this.registerOwnerUseCase, this.getOwnerByIdUseCase);
 
   public petController = new PetController(
     this.registerPetUseCase,

@@ -36,34 +36,24 @@ export class BudgetService {
 
   async create(data: CreateBudgetData): Promise<Budget> {
     // Validate that service order exists
-    const serviceOrder = await this.serviceOrderRepository.findById(
-      data.serviceOrderId,
-    );
+    const serviceOrder = await this.serviceOrderRepository.findById(data.serviceOrderId);
     if (!serviceOrder) {
-      this.errorHandler.handleNotFoundError(
-        BUDGET_CONSTANTS.MESSAGES.SERVICE_ORDER_NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(BUDGET_CONSTANTS.MESSAGES.SERVICE_ORDER_NOT_FOUND);
     }
 
     // Validate that customer exists
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
-      this.errorHandler.handleNotFoundError(
-        BUDGET_CONSTANTS.MESSAGES.CUSTOMER_NOT_FOUND,
-      );
+      this.errorHandler.handleNotFoundError(BUDGET_CONSTANTS.MESSAGES.CUSTOMER_NOT_FOUND);
     }
 
     // Validate items
     if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
-      this.errorHandler.handleError(
-        new Error(BUDGET_CONSTANTS.MESSAGES.ITEMS_REQUIRED),
-      );
+      this.errorHandler.handleError(new Error(BUDGET_CONSTANTS.MESSAGES.ITEMS_REQUIRED));
     }
 
     // Check if budget already exists for this service order
-    const existingBudgets = await this.budgetRepository.findByServiceOrderId(
-      data.serviceOrderId,
-    );
+    const existingBudgets = await this.budgetRepository.findByServiceOrderId(data.serviceOrderId);
 
     // Only prevent creation if there's an active budget (not rejected or expired)
     const activeBudget = existingBudgets.find(
@@ -90,9 +80,7 @@ export class BudgetService {
     }
   }
 
-  async findAllPaginated(
-    paginationDto: PaginationDto,
-  ): Promise<PaginatedResponseDto<Budget>> {
+  async findAllPaginated(paginationDto: PaginationDto): Promise<PaginatedResponseDto<Budget>> {
     try {
       const [budgets, total] = await Promise.all([
         this.budgetRepository.findMany(paginationDto.skip, paginationDto.take),
@@ -114,9 +102,7 @@ export class BudgetService {
     try {
       const budget = await this.budgetRepository.findById(id);
       if (!budget) {
-        this.errorHandler.handleNotFoundError(
-          BUDGET_CONSTANTS.MESSAGES.NOT_FOUND,
-        );
+        this.errorHandler.handleNotFoundError(BUDGET_CONSTANTS.MESSAGES.NOT_FOUND);
       }
       return budget;
     } catch (error) {
@@ -146,20 +132,13 @@ export class BudgetService {
       const budget = await this.findById(id);
 
       if (budget.status !== BudgetStatus.DRAFT) {
-        this.errorHandler.handleError(
-          new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_DRAFT_CAN_BE_SENT),
-        );
+        this.errorHandler.handleError(new Error(BUDGET_CONSTANTS.MESSAGES.ONLY_DRAFT_CAN_BE_SENT));
       }
 
-      const updatedBudget = await this.budgetRepository.updateStatus(
-        id,
-        BudgetStatus.SENT,
-      );
+      const updatedBudget = await this.budgetRepository.updateStatus(id, BudgetStatus.SENT);
 
       // Send notification to customer
-      const customer = await this.customerRepository.findById(
-        budget.customerId,
-      );
+      const customer = await this.customerRepository.findById(budget.customerId);
       if (customer) {
         await this.notificationService.sendBudgetReadyNotification(
           updatedBudget,
@@ -193,10 +172,7 @@ export class BudgetService {
       }
 
       // Update budget status to approved
-      const approvedBudget = await this.budgetRepository.updateStatus(
-        id,
-        BudgetStatus.APPROVED,
-      );
+      const approvedBudget = await this.budgetRepository.updateStatus(id, BudgetStatus.APPROVED);
 
       // Update service order status and set approvedAt
       await this.serviceOrderRepository.updateStatus(budget.serviceOrderId, {
@@ -228,10 +204,7 @@ export class BudgetService {
         );
       }
 
-      return await this.budgetRepository.updateStatus(
-        id,
-        BudgetStatus.REJECTED,
-      );
+      return await this.budgetRepository.updateStatus(id, BudgetStatus.REJECTED);
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -259,10 +232,7 @@ export class BudgetService {
       const budget = await this.findById(id);
 
       // Only allow expiration for DRAFT and SENT status
-      if (
-        budget.status !== BudgetStatus.DRAFT &&
-        budget.status !== BudgetStatus.SENT
-      ) {
+      if (budget.status !== BudgetStatus.DRAFT && budget.status !== BudgetStatus.SENT) {
         this.errorHandler.handleError(
           new Error(BUDGET_CONSTANTS.MESSAGES.INVALID_STATUS_TRANSITION),
         );
@@ -291,9 +261,7 @@ export class BudgetService {
   }
 
   // Methods with data freshness for related entities
-  async findByIdWithRelations(
-    id: string,
-  ): Promise<BudgetWithRelationsResponseDto> {
+  async findByIdWithRelations(id: string): Promise<BudgetWithRelationsResponseDto> {
     try {
       const budget = await this.findById(id);
       return await this.mapToEnrichedResponseDto(budget);
@@ -305,9 +273,7 @@ export class BudgetService {
   async findAllWithRelations(): Promise<BudgetWithRelationsResponseDto[]> {
     try {
       const budgets = await this.budgetRepository.findAll();
-      return await Promise.all(
-        budgets.map((budget) => this.mapToEnrichedResponseDto(budget)),
-      );
+      return await Promise.all(budgets.map((budget) => this.mapToEnrichedResponseDto(budget)));
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -318,9 +284,7 @@ export class BudgetService {
   ): Promise<BudgetWithRelationsResponseDto[]> {
     try {
       const budgets = await this.budgetRepository.findByCustomerId(customerId);
-      return await Promise.all(
-        budgets.map((budget) => this.mapToEnrichedResponseDto(budget)),
-      );
+      return await Promise.all(budgets.map((budget) => this.mapToEnrichedResponseDto(budget)));
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -330,39 +294,26 @@ export class BudgetService {
     serviceOrderId: string,
   ): Promise<BudgetWithRelationsResponseDto[]> {
     try {
-      const budgets =
-        await this.budgetRepository.findByServiceOrderId(serviceOrderId);
-      return await Promise.all(
-        budgets.map((budget) => this.mapToEnrichedResponseDto(budget)),
-      );
+      const budgets = await this.budgetRepository.findByServiceOrderId(serviceOrderId);
+      return await Promise.all(budgets.map((budget) => this.mapToEnrichedResponseDto(budget)));
     } catch (error) {
       this.errorHandler.handleError(error);
     }
   }
 
-  private async mapToEnrichedResponseDto(
-    budget: Budget,
-  ): Promise<BudgetWithRelationsResponseDto> {
+  private async mapToEnrichedResponseDto(budget: Budget): Promise<BudgetWithRelationsResponseDto> {
     // Fetch fresh data for all related entities
     const customer = await this.customerRepository.findById(budget.customerId);
-    const serviceOrder = await this.serviceOrderRepository.findById(
-      budget.serviceOrderId,
-    );
+    const serviceOrder = await this.serviceOrderRepository.findById(budget.serviceOrderId);
 
     // Fetch fresh data for each budget item's related service/part
     const enrichedItems = await Promise.all(
       (budget.items || []).map(async (item) => {
-        let service:
-          | { name: string; description: string; category: string }
-          | undefined;
-        let part:
-          | { name: string; description: string; partNumber: string }
-          | undefined;
+        let service: { name: string; description: string; category: string } | undefined;
+        let part: { name: string; description: string; partNumber: string } | undefined;
 
         if (item.type === 'SERVICE' && item.serviceId) {
-          const serviceData = await this.serviceRepository.findById(
-            item.serviceId,
-          );
+          const serviceData = await this.serviceRepository.findById(item.serviceId);
           if (serviceData) {
             service = {
               name: serviceData.name,

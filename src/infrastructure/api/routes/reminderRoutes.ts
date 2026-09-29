@@ -90,10 +90,8 @@ export function createReminderRoutes(reminderController: ReminderController): Ro
    *       404:
    *         description: Vaccine not found or no next dose date
    */
-  router.post(
-    '/vaccine-reminder',
-    validateRequest(createVaccineReminderSchema),
-    (req, res) => reminderController.createVaccineReminder(req, res),
+  router.post('/vaccine-reminder', validateRequest(createVaccineReminderSchema), (req, res) =>
+    reminderController.createVaccineReminder(req, res),
   );
 
   /**
@@ -123,10 +121,8 @@ export function createReminderRoutes(reminderController: ReminderController): Ro
    *             schema:
    *               $ref: '#/components/schemas/Reminder'
    */
-  router.post(
-    '/medication-reminder',
-    validateRequest(createMedicationReminderSchema),
-    (req, res) => reminderController.createMedicationReminder(req, res),
+  router.post('/medication-reminder', validateRequest(createMedicationReminderSchema), (req, res) =>
+    reminderController.createMedicationReminder(req, res),
   );
 
   /**
@@ -186,10 +182,8 @@ export function createReminderRoutes(reminderController: ReminderController): Ro
    *               items:
    *                 $ref: '#/components/schemas/Reminder'
    */
-  router.post(
-    '/schedule-walks',
-    validateRequest(scheduleWalkRemindersSchema),
-    (req, res) => reminderController.scheduleWalkReminders(req, res),
+  router.post('/schedule-walks', validateRequest(scheduleWalkRemindersSchema), (req, res) =>
+    reminderController.scheduleWalkReminders(req, res),
   );
 
   /**

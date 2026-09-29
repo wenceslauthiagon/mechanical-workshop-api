@@ -134,9 +134,7 @@ describe('AuthController', () => {
         role: mockCreateUserDto.role,
       };
 
-      expect(userService.createFirstAdmin).toHaveBeenCalledWith(
-        expectedUserData,
-      );
+      expect(userService.createFirstAdmin).toHaveBeenCalledWith(expectedUserData);
       expect(result).toEqual(adminUser);
     });
 
@@ -144,9 +142,7 @@ describe('AuthController', () => {
       const mockError = new Error('Já existem usuários no sistema');
       userService.createFirstAdmin.mockRejectedValue(mockError);
 
-      await expect(
-        controller.createFirstAdmin(mockCreateUserDto),
-      ).rejects.toThrow(mockError);
+      await expect(controller.createFirstAdmin(mockCreateUserDto)).rejects.toThrow(mockError);
     });
   });
 
@@ -171,9 +167,7 @@ describe('AuthController', () => {
       const mockError = new Error('Usuário já existe');
       userService.create.mockRejectedValue(mockError);
 
-      await expect(controller.createUser(mockCreateUserDto)).rejects.toThrow(
-        mockError,
-      );
+      await expect(controller.createUser(mockCreateUserDto)).rejects.toThrow(mockError);
     });
   });
 

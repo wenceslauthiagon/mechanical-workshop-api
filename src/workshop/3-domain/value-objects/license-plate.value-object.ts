@@ -22,7 +22,7 @@ export class LicensePlate {
     const oldFormat = /^[A-Z]{3}[0-9]{4}$/;
     // Formato Mercosul: ABC1D23 (3 letras + 1 número + 1 letra + 2 números)
     const mercosulFormat = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
-    
+
     return oldFormat.test(plate) || mercosulFormat.test(plate);
   }
 

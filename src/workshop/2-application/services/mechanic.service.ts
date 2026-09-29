@@ -19,19 +19,13 @@ export class MechanicService {
 
   async create(data: CreateMechanicData): Promise<MechanicWithStats> {
     try {
-      const existingMechanic = await this.mechanicRepository.findByEmail(
-        data.email,
-      );
+      const existingMechanic = await this.mechanicRepository.findByEmail(data.email);
       if (existingMechanic) {
-        this.errorHandler.handleConflictError(
-          MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS);
       }
 
       const mechanic = await this.mechanicRepository.create(data);
-      return (await this.mechanicRepository.findById(
-        mechanic.id,
-      )) as MechanicWithStats;
+      return (await this.mechanicRepository.findById(mechanic.id)) as MechanicWithStats;
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -50,10 +44,7 @@ export class MechanicService {
   ): Promise<PaginatedResponseDto<MechanicWithStats>> {
     try {
       const [mechanics, total] = await Promise.all([
-        this.mechanicRepository.findMany(
-          paginationDto.skip,
-          paginationDto.take,
-        ),
+        this.mechanicRepository.findMany(paginationDto.skip, paginationDto.take),
         this.mechanicRepository.count(),
       ]);
 
@@ -72,9 +63,7 @@ export class MechanicService {
     try {
       const mechanic = await this.mechanicRepository.findById(id);
       if (!mechanic) {
-        this.errorHandler.handleNotFoundError(
-          MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND,
-        );
+        this.errorHandler.handleNotFoundError(MECHANIC_CONSTANTS.MESSAGES.NOT_FOUND);
       }
       return mechanic;
     } catch (error) {
@@ -107,28 +96,19 @@ export class MechanicService {
     }
   }
 
-  async update(
-    id: string,
-    data: UpdateMechanicData,
-  ): Promise<MechanicWithStats> {
+  async update(id: string, data: UpdateMechanicData): Promise<MechanicWithStats> {
     try {
       await this.findById(id);
 
       if (data.email) {
-        const existingMechanic = await this.mechanicRepository.findByEmail(
-          data.email,
-        );
+        const existingMechanic = await this.mechanicRepository.findByEmail(data.email);
         if (existingMechanic && existingMechanic.id !== id) {
-          this.errorHandler.handleConflictError(
-            MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS,
-          );
+          this.errorHandler.handleConflictError(MECHANIC_CONSTANTS.MESSAGES.EMAIL_ALREADY_EXISTS);
         }
       }
 
       const updatedMechanic = await this.mechanicRepository.update(id, data);
-      return (await this.mechanicRepository.findById(
-        updatedMechanic.id,
-      )) as MechanicWithStats;
+      return (await this.mechanicRepository.findById(updatedMechanic.id)) as MechanicWithStats;
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -138,11 +118,8 @@ export class MechanicService {
     try {
       await this.findById(id);
 
-      const updatedMechanic =
-        await this.mechanicRepository.toggleAvailability(id);
-      return (await this.mechanicRepository.findById(
-        updatedMechanic.id,
-      )) as MechanicWithStats;
+      const updatedMechanic = await this.mechanicRepository.toggleAvailability(id);
+      return (await this.mechanicRepository.findById(updatedMechanic.id)) as MechanicWithStats;
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -170,22 +147,14 @@ export class MechanicService {
     }
   }
 
-  async assignToServiceOrder(
-    mechanicId: string,
-    serviceOrderId: string,
-  ): Promise<void> {
+  async assignToServiceOrder(mechanicId: string, serviceOrderId: string): Promise<void> {
     try {
       const mechanic = await this.findById(mechanicId);
       if (!mechanic.isAvailable) {
-        this.errorHandler.handleConflictError(
-          MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE,
-        );
+        this.errorHandler.handleConflictError(MECHANIC_CONSTANTS.MESSAGES.NOT_AVAILABLE);
       }
 
-      await this.mechanicRepository.assignToServiceOrder(
-        mechanicId,
-        serviceOrderId,
-      );
+      await this.mechanicRepository.assignToServiceOrder(mechanicId, serviceOrderId);
     } catch (error) {
       this.errorHandler.handleError(error);
     }
@@ -218,9 +187,7 @@ export class MechanicService {
       const availableMechanics = allMechanics.filter(
         (mechanic) =>
           mechanic.isAvailable &&
-          requiredSpecialties.every((specialty) =>
-            mechanic.specialties.includes(specialty),
-          ),
+          requiredSpecialties.every((specialty) => mechanic.specialties.includes(specialty)),
       );
 
       if (availableMechanics.length === 0) {
@@ -230,8 +197,7 @@ export class MechanicService {
       const mechanicsWithWorkload = await Promise.all(
         availableMechanics.map(async (mechanic) => ({
           ...mechanic,
-          workload: (await this.mechanicRepository.getWorkload(mechanic.id))
-            .activeOrders,
+          workload: (await this.mechanicRepository.getWorkload(mechanic.id)).activeOrders,
         })),
       );
 

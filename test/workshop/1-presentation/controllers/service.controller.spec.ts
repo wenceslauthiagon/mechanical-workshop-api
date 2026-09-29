@@ -98,9 +98,7 @@ describe('ServiceController', () => {
       const mockError = new Error('Falha ao criar serviço');
       serviceService.create.mockRejectedValue(mockError);
 
-      await expect(
-        serviceController.create(mockCreateServiceDto),
-      ).rejects.toThrow(mockError);
+      await expect(serviceController.create(mockCreateServiceDto)).rejects.toThrow(mockError);
       expect(serviceService.create).toHaveBeenCalledWith(mockCreateServiceDto);
     });
 
@@ -108,9 +106,7 @@ describe('ServiceController', () => {
       const mockError = new Error('Serviço já cadastrado');
       serviceService.create.mockRejectedValue(mockError);
 
-      await expect(
-        serviceController.create(mockCreateServiceDto),
-      ).rejects.toThrow(mockError);
+      await expect(serviceController.create(mockCreateServiceDto)).rejects.toThrow(mockError);
       expect(serviceService.create).toHaveBeenCalledWith(mockCreateServiceDto);
     });
   });
@@ -136,13 +132,10 @@ describe('ServiceController', () => {
 
       const result = await serviceController.findAllPaginated(paginationDto);
 
-      expect(serviceService.findAllPaginated).toHaveBeenCalledWith(
-        paginationDto,
-        {
-          category: undefined,
-          active: undefined,
-        },
-      );
+      expect(serviceService.findAllPaginated).toHaveBeenCalledWith(paginationDto, {
+        category: undefined,
+        active: undefined,
+      });
       expect(result).toEqual(mockPaginatedResponse);
     });
 
@@ -204,9 +197,7 @@ describe('ServiceController', () => {
       const mockError = new Error('Serviço não encontrado');
       serviceService.findById.mockRejectedValue(mockError);
 
-      await expect(serviceController.findOne(mockServiceId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(serviceController.findOne(mockServiceId)).rejects.toThrow(mockError);
       expect(serviceService.findById).toHaveBeenCalledWith(mockServiceId);
     });
 
@@ -215,9 +206,7 @@ describe('ServiceController', () => {
       const mockError = new Error('ID inválido');
       serviceService.findById.mockRejectedValue(mockError);
 
-      await expect(serviceController.findOne(invalidId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(serviceController.findOne(invalidId)).rejects.toThrow(mockError);
       expect(serviceService.findById).toHaveBeenCalledWith(invalidId);
     });
   });
@@ -247,12 +236,8 @@ describe('ServiceController', () => {
       const mockError = new Error('Categoria não encontrada');
       serviceService.findByCategory.mockRejectedValue(mockError);
 
-      await expect(
-        serviceController.findByCategory(invalidCategory),
-      ).rejects.toThrow(mockError);
-      expect(serviceService.findByCategory).toHaveBeenCalledWith(
-        invalidCategory,
-      );
+      await expect(serviceController.findByCategory(invalidCategory)).rejects.toThrow(mockError);
+      expect(serviceService.findByCategory).toHaveBeenCalledWith(invalidCategory);
     });
   });
 
@@ -263,21 +248,13 @@ describe('ServiceController', () => {
         name: mockUpdateServiceDto.name || mockServiceData.name,
         description: mockUpdateServiceDto.description || null,
         price: mockUpdateServiceDto.price || mockServiceData.price,
-        estimatedMinutes:
-          mockUpdateServiceDto.estimatedMinutes ||
-          mockServiceData.estimatedMinutes,
+        estimatedMinutes: mockUpdateServiceDto.estimatedMinutes || mockServiceData.estimatedMinutes,
       };
       serviceService.update.mockResolvedValue(updatedService);
 
-      const result = await serviceController.update(
-        mockServiceId,
-        mockUpdateServiceDto,
-      );
+      const result = await serviceController.update(mockServiceId, mockUpdateServiceDto);
 
-      expect(serviceService.update).toHaveBeenCalledWith(
-        mockServiceId,
-        mockUpdateServiceDto,
-      );
+      expect(serviceService.update).toHaveBeenCalledWith(mockServiceId, mockUpdateServiceDto);
       expect(result).toEqual(updatedService);
     });
 
@@ -285,26 +262,20 @@ describe('ServiceController', () => {
       const mockError = new Error('Serviço não encontrado');
       serviceService.update.mockRejectedValue(mockError);
 
-      await expect(
-        serviceController.update(mockServiceId, mockUpdateServiceDto),
-      ).rejects.toThrow(mockError);
-      expect(serviceService.update).toHaveBeenCalledWith(
-        mockServiceId,
-        mockUpdateServiceDto,
+      await expect(serviceController.update(mockServiceId, mockUpdateServiceDto)).rejects.toThrow(
+        mockError,
       );
+      expect(serviceService.update).toHaveBeenCalledWith(mockServiceId, mockUpdateServiceDto);
     });
 
     it('TC0003 - Should handle duplicate service name error during update', async () => {
       const mockError = new Error('Nome do serviço já existe');
       serviceService.update.mockRejectedValue(mockError);
 
-      await expect(
-        serviceController.update(mockServiceId, mockUpdateServiceDto),
-      ).rejects.toThrow(mockError);
-      expect(serviceService.update).toHaveBeenCalledWith(
-        mockServiceId,
-        mockUpdateServiceDto,
+      await expect(serviceController.update(mockServiceId, mockUpdateServiceDto)).rejects.toThrow(
+        mockError,
       );
+      expect(serviceService.update).toHaveBeenCalledWith(mockServiceId, mockUpdateServiceDto);
     });
   });
 
@@ -323,9 +294,7 @@ describe('ServiceController', () => {
       const mockError = new Error('Serviço não encontrado');
       serviceService.remove.mockRejectedValue(mockError);
 
-      await expect(serviceController.remove(mockServiceId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(serviceController.remove(mockServiceId)).rejects.toThrow(mockError);
       expect(serviceService.remove).toHaveBeenCalledWith(mockServiceId);
     });
 
@@ -333,11 +302,8 @@ describe('ServiceController', () => {
       const mockError = new Error('Serviço já está inativo');
       serviceService.remove.mockRejectedValue(mockError);
 
-      await expect(serviceController.remove(mockServiceId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(serviceController.remove(mockServiceId)).rejects.toThrow(mockError);
       expect(serviceService.remove).toHaveBeenCalledWith(mockServiceId);
     });
   });
 });
-

@@ -198,9 +198,7 @@ describe('Service Order Integration Tests', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe(
-        'AWAITING_APPROVAL',
-      );
+      expect(response.body.status).toBe('AWAITING_APPROVAL');
     });
 
     it('TC0008 - Should approve service order budget', async () => {

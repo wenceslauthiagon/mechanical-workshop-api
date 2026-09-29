@@ -85,11 +85,7 @@ describe('NotificationService', () => {
     });
 
     it('TC0002 - Should send only email when phone is not provided', async () => {
-      await service.sendBudgetReadyNotification(
-        mockBudget,
-        customerEmail,
-        customerName,
-      );
+      await service.sendBudgetReadyNotification(mockBudget, customerEmail, customerName);
 
       expect(emailProvider.sendEmail).toHaveBeenCalled();
       expect(smsProvider.sendSms).not.toHaveBeenCalled();
@@ -124,11 +120,7 @@ describe('NotificationService', () => {
       emailProvider.sendEmail.mockRejectedValue(error);
 
       await expect(
-        service.sendBudgetReadyNotification(
-          mockBudget,
-          customerEmail,
-          customerName,
-        ),
+        service.sendBudgetReadyNotification(mockBudget, customerEmail, customerName),
       ).rejects.toThrow('Email service error');
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
@@ -144,18 +136,12 @@ describe('NotificationService', () => {
 
   describe('sendBudgetApprovedNotification', () => {
     it('TC0001 - Should send budget approved email successfully', async () => {
-      await service.sendBudgetApprovedNotification(
-        mockBudget,
-        customerEmail,
-        customerName,
-      );
+      await service.sendBudgetApprovedNotification(mockBudget, customerEmail, customerName);
 
       expect(emailProvider.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: customerEmail,
-          subject: expect.stringContaining(
-            NOTIFICATION_CONSTANTS.TEMPLATES.BUDGET_APPROVED,
-          ),
+          subject: expect.stringContaining(NOTIFICATION_CONSTANTS.TEMPLATES.BUDGET_APPROVED),
         }),
       );
       expect(Logger.prototype.log).toHaveBeenCalledWith(
@@ -172,11 +158,7 @@ describe('NotificationService', () => {
       emailProvider.sendEmail.mockRejectedValue(error);
 
       await expect(
-        service.sendBudgetApprovedNotification(
-          mockBudget,
-          customerEmail,
-          customerName,
-        ),
+        service.sendBudgetApprovedNotification(mockBudget, customerEmail, customerName),
       ).rejects.toThrow('Email service error');
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
@@ -192,18 +174,12 @@ describe('NotificationService', () => {
 
   describe('sendBudgetRejectedNotification', () => {
     it('TC0001 - Should send budget rejected email successfully', async () => {
-      await service.sendBudgetRejectedNotification(
-        mockBudget,
-        customerEmail,
-        customerName,
-      );
+      await service.sendBudgetRejectedNotification(mockBudget, customerEmail, customerName);
 
       expect(emailProvider.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: customerEmail,
-          subject: expect.stringContaining(
-            NOTIFICATION_CONSTANTS.TEMPLATES.BUDGET_REJECTED,
-          ),
+          subject: expect.stringContaining(NOTIFICATION_CONSTANTS.TEMPLATES.BUDGET_REJECTED),
         }),
       );
       expect(Logger.prototype.log).toHaveBeenCalledWith(
@@ -220,11 +196,7 @@ describe('NotificationService', () => {
       emailProvider.sendEmail.mockRejectedValue(error);
 
       await expect(
-        service.sendBudgetRejectedNotification(
-          mockBudget,
-          customerEmail,
-          customerName,
-        ),
+        service.sendBudgetRejectedNotification(mockBudget, customerEmail, customerName),
       ).rejects.toThrow('Email service error');
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(

@@ -15,17 +15,12 @@ export class BudgetRepository implements IBudgetRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateBudgetData): Promise<Budget> {
-    const validDays =
-      data.validDays || BUDGET_CONSTANTS.DEFAULT_VALUES.VALID_DAYS;
+    const validDays = data.validDays || BUDGET_CONSTANTS.DEFAULT_VALUES.VALID_DAYS;
     const validUntil = new Date();
     validUntil.setDate(validUntil.getDate() + validDays);
 
-    const subtotal = Number(
-      data.items.reduce((sum, item) => sum + item.total, 0).toFixed(2),
-    );
-    const taxes = Number(
-      (subtotal * BUDGET_CONSTANTS.DEFAULT_VALUES.TAX_RATE).toFixed(2),
-    );
+    const subtotal = Number(data.items.reduce((sum, item) => sum + item.total, 0).toFixed(2));
+    const taxes = Number((subtotal * BUDGET_CONSTANTS.DEFAULT_VALUES.TAX_RATE).toFixed(2));
     const total = Number((subtotal + taxes).toFixed(2));
 
     const budget = await this.prisma.budget.create({
@@ -127,12 +122,8 @@ export class BudgetRepository implements IBudgetRepository {
     const updateData: any = {};
 
     if (data.items) {
-      const subtotal = Number(
-        data.items.reduce((sum, item) => sum + item.total, 0).toFixed(2),
-      );
-      const taxes = Number(
-        (subtotal * BUDGET_CONSTANTS.DEFAULT_VALUES.TAX_RATE).toFixed(2),
-      );
+      const subtotal = Number(data.items.reduce((sum, item) => sum + item.total, 0).toFixed(2));
+      const taxes = Number((subtotal * BUDGET_CONSTANTS.DEFAULT_VALUES.TAX_RATE).toFixed(2));
       const discount = Number((data.discount || 0).toFixed(2));
       const total = Number((subtotal + taxes - discount).toFixed(2));
 
@@ -154,15 +145,13 @@ export class BudgetRepository implements IBudgetRepository {
           where: { id },
         });
         if (existingBudget) {
-          const subtotal = typeof existingBudget.subtotal === 'number' 
-            ? existingBudget.subtotal 
-            : existingBudget.subtotal;
-          const taxes = typeof existingBudget.taxes === 'number' 
-            ? existingBudget.taxes 
-            : existingBudget.taxes;
-          updateData.total = Number(
-            (subtotal + taxes - data.discount).toFixed(2),
-          );
+          const subtotal =
+            typeof existingBudget.subtotal === 'number'
+              ? existingBudget.subtotal
+              : existingBudget.subtotal;
+          const taxes =
+            typeof existingBudget.taxes === 'number' ? existingBudget.taxes : existingBudget.taxes;
+          updateData.total = Number((subtotal + taxes - data.discount).toFixed(2));
         }
       }
     }

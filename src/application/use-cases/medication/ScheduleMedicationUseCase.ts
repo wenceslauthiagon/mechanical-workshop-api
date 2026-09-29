@@ -1,5 +1,8 @@
 import { Medication } from '@domain/entities/Medication';
-import { IMedicationRepository, CreateMedicationData } from '@domain/repositories/IMedicationRepository';
+import {
+  IMedicationRepository,
+  CreateMedicationData,
+} from '@domain/repositories/IMedicationRepository';
 import { IPetRepository } from '@domain/repositories/IPetRepository';
 import { NotFoundError, ValidationError } from '@shared/errors/DomainError';
 import { ERROR_MESSAGES } from '@shared/constants/messages.constants';

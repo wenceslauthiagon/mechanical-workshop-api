@@ -11,19 +11,21 @@ export function mockDecimal(value: number): Prisma.Decimal {
 /**
  * Helper to create Part mock with correct types
  */
-export function mockPart(overrides: Partial<{
-  id: string;
-  partNumber: string;
-  name: string;
-  description: string;
-  supplier: string;
-  price: number;
-  stock: number;
-  minStock: number;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}> = {}) {
+export function mockPart(
+  overrides: Partial<{
+    id: string;
+    partNumber: string;
+    name: string;
+    description: string;
+    supplier: string;
+    price: number;
+    stock: number;
+    minStock: number;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }> = {},
+) {
   return {
     id: overrides.id || 'part-id',
     partNumber: overrides.partNumber || 'PART-001',
@@ -42,17 +44,19 @@ export function mockPart(overrides: Partial<{
 /**
  * Helper to create Service mock with correct types
  */
-export function mockService(overrides: Partial<{
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  estimatedMinutes: number;
-  category: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}> = {}) {
+export function mockService(
+  overrides: Partial<{
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    estimatedMinutes: number;
+    category: string;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }> = {},
+) {
   return {
     id: overrides.id || 'service-id',
     name: overrides.name || 'Test Service',
@@ -69,26 +73,28 @@ export function mockService(overrides: Partial<{
 /**
  * Helper to create ServiceOrder mock with correct types
  */
-export function mockServiceOrder(overrides: Partial<{
-  id: string;
-  orderNumber: string;
-  customerId: string;
-  vehicleId: string;
-  mechanicId: string | null;
-  status: any;
-  description: string;
-  totalServicePrice: number;
-  totalPartsPrice: number;
-  totalPrice: number;
-  estimatedTimeHours: number;
-  estimatedCompletionDate: Date;
-  startedAt: Date | null;
-  completedAt: Date | null;
-  deliveredAt: Date | null;
-  approvedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}> = {}) {
+export function mockServiceOrder(
+  overrides: Partial<{
+    id: string;
+    orderNumber: string;
+    customerId: string;
+    vehicleId: string;
+    mechanicId: string | null;
+    status: any;
+    description: string;
+    totalServicePrice: number;
+    totalPartsPrice: number;
+    totalPrice: number;
+    estimatedTimeHours: number;
+    estimatedCompletionDate: Date;
+    startedAt: Date | null;
+    completedAt: Date | null;
+    deliveredAt: Date | null;
+    approvedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }> = {},
+) {
   return {
     id: overrides.id || 'order-id',
     orderNumber: overrides.orderNumber || 'SO-001',

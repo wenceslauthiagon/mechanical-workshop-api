@@ -14,22 +14,16 @@ export class CreateOrderService {
   ) {}
 
   async create(createCustomerDto: CreateCustomerDto): Promise<Customer> {
-    const existingByEmail = await this.customerRepository.findByEmail(
-      createCustomerDto.email,
-    );
+    const existingByEmail = await this.customerRepository.findByEmail(createCustomerDto.email);
     if (existingByEmail) {
-      this.errorHandler.handleConflictError(
-        ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
-      );
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     const existingByDocument = await this.customerRepository.findByDocument(
       createCustomerDto.document,
     );
     if (existingByDocument) {
-      this.errorHandler.handleConflictError(
-        ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
-      );
+      this.errorHandler.handleConflictError(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
     }
 
     try {
@@ -58,40 +52,25 @@ export class CreateOrderService {
     return customer;
   }
 
-  async update(
-    id: string,
-    updateCustomerDto: UpdateCustomerDto,
-  ): Promise<Customer> {
+  async update(id: string, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
     const existingCustomer = await this.customerRepository.findById(id);
     if (!existingCustomer) {
       this.errorHandler.handleNotFoundError(ERROR_MESSAGES.CLIENT_NOT_FOUND);
     }
 
-    if (
-      updateCustomerDto.email &&
-      updateCustomerDto.email !== existingCustomer.email
-    ) {
-      const existingByEmail = await this.customerRepository.findByEmail(
-        updateCustomerDto.email,
-      );
+    if (updateCustomerDto.email && updateCustomerDto.email !== existingCustomer.email) {
+      const existingByEmail = await this.customerRepository.findByEmail(updateCustomerDto.email);
       if (existingByEmail) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
       }
     }
 
-    if (
-      updateCustomerDto.document &&
-      updateCustomerDto.document !== existingCustomer.document
-    ) {
+    if (updateCustomerDto.document && updateCustomerDto.document !== existingCustomer.document) {
       const existingByDocument = await this.customerRepository.findByDocument(
         updateCustomerDto.document,
       );
       if (existingByDocument) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.DOCUMENT_ALREADY_EXISTS);
       }
     }
 

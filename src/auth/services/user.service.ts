@@ -33,14 +33,10 @@ export class UserService {
 
     if (existingUser) {
       if (existingUser.username === data.username) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.USERNAME_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.USERNAME_ALREADY_EXISTS);
       }
       if (existingUser.email === data.email) {
-        this.errorHandler.handleConflictError(
-          ERROR_MESSAGES.EMAIL_USER_ALREADY_EXISTS,
-        );
+        this.errorHandler.handleConflictError(ERROR_MESSAGES.EMAIL_USER_ALREADY_EXISTS);
       }
     }
 
@@ -58,9 +54,7 @@ export class UserService {
     } catch (error: any) {
       if (error.code === 'P2002') {
         const field = error.meta?.target?.[0] || 'field';
-        this.errorHandler.handleConflictError(
-          `${field} ${ERROR_MESSAGES.FIELD_ALREADY_EXISTS}`,
-        );
+        this.errorHandler.handleConflictError(`${field} ${ERROR_MESSAGES.FIELD_ALREADY_EXISTS}`);
       }
       throw error;
     }

@@ -102,8 +102,7 @@ export class PartController {
   @Get('all')
   @ApiOperation({
     summary: 'Listar todas as peças (sem paginação)',
-    description:
-      'Listar todas as peças com filtros opcionais - use com cuidado em produção',
+    description: 'Listar todas as peças com filtros opcionais - use com cuidado em produção',
   })
   @ApiQuery({
     name: 'supplier',
@@ -166,9 +165,7 @@ export class PartController {
     description: 'Lista de peças do fornecedor',
     type: [PartResponseDto],
   })
-  async findBySupplier(
-    @Param('supplier') supplier: string,
-  ): Promise<PartResponseDto[]> {
+  async findBySupplier(@Param('supplier') supplier: string): Promise<PartResponseDto[]> {
     const parts = await this.partService.findBySupplier(supplier);
     return parts.map((part) => this.mapToResponseDto(part));
   }
@@ -185,9 +182,7 @@ export class PartController {
     type: PartResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Peça não encontrada' })
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<PartResponseDto> {
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<PartResponseDto> {
     const part = await this.partService.findById(id);
     return this.mapToResponseDto(part);
   }
@@ -204,9 +199,7 @@ export class PartController {
     type: PartResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Peça não encontrada' })
-  async findByPartNumber(
-    @Param('partNumber') partNumber: string,
-  ): Promise<PartResponseDto> {
+  async findByPartNumber(@Param('partNumber') partNumber: string): Promise<PartResponseDto> {
     const part = await this.partService.findByPartNumber(partNumber);
     return this.mapToResponseDto(part);
   }
@@ -236,8 +229,7 @@ export class PartController {
   @Patch(':id/stock')
   @ApiOperation({
     summary: 'Atualizar estoque',
-    description:
-      'Atualizar quantidade em estoque (positivo adiciona, negativo remove)',
+    description: 'Atualizar quantidade em estoque (positivo adiciona, negativo remove)',
   })
   @ApiParam({ name: 'id', description: 'ID da peça' })
   @ApiBody({
@@ -274,9 +266,7 @@ export class PartController {
   @ApiParam({ name: 'id', description: 'ID da peça' })
   @ApiResponse({ status: 200, description: 'Peça removida com sucesso' })
   @ApiResponse({ status: 404, description: 'Peça não encontrada' })
-  async remove(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<PartResponseDto> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<PartResponseDto> {
     const part = await this.partService.remove(id);
     return this.mapToResponseDto(part);
   }

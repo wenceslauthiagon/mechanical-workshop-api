@@ -166,10 +166,7 @@ export class NotificationService {
     }
   }
 
-  private prepareBudgetEmailData(
-    budget: Budget,
-    customerName: string,
-  ): BudgetEmailData {
+  private prepareBudgetEmailData(budget: Budget, customerName: string): BudgetEmailData {
     const baseUrl = NOTIFICATION_CONSTANTS.URLS.BASE;
 
     return {

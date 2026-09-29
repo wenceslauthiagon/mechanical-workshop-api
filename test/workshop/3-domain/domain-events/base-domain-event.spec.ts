@@ -34,12 +34,8 @@ describe('BaseDomainEvent', () => {
     const afterCreation = new Date();
 
     expect(event.occurredOn).toBeInstanceOf(Date);
-    expect(event.occurredOn.getTime()).toBeGreaterThanOrEqual(
-      beforeCreation.getTime(),
-    );
-    expect(event.occurredOn.getTime()).toBeLessThanOrEqual(
-      afterCreation.getTime(),
-    );
+    expect(event.occurredOn.getTime()).toBeGreaterThanOrEqual(beforeCreation.getTime());
+    expect(event.occurredOn.getTime()).toBeLessThanOrEqual(afterCreation.getTime());
   });
 
   it('TC0003 - Should create event with eventVersion set to 1', () => {

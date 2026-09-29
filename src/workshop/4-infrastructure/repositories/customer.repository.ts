@@ -7,9 +7,7 @@ import { ICustomerRepository } from '../../3-domain/repositories/customer-reposi
 export class CustomerRepository implements ICustomerRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Customer> {
+  async create(data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>): Promise<Customer> {
     return this.prisma.customer.create({
       data,
     });

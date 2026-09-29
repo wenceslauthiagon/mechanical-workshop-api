@@ -32,8 +32,7 @@ export class BudgetEntity {
 
     const validUntil = new Date();
     validUntil.setDate(
-      validUntil.getDate() +
-        (data.validDays || BUDGET_CONSTANTS.DEFAULT_VALUES.VALID_DAYS),
+      validUntil.getDate() + (data.validDays || BUDGET_CONSTANTS.DEFAULT_VALUES.VALID_DAYS),
     );
 
     return new BudgetEntity(

@@ -351,13 +351,9 @@ describe('BudgetService', () => {
     });
 
     it('TC0002 - Should handle error', async () => {
-      repositories.budget.findByServiceOrderId.mockRejectedValue(
-        new Error('DB error'),
-      );
+      repositories.budget.findByServiceOrderId.mockRejectedValue(new Error('DB error'));
 
-      await expect(
-        service.findByServiceOrderId(mockServiceOrder.id),
-      ).rejects.toThrow('DB error');
+      await expect(service.findByServiceOrderId(mockServiceOrder.id)).rejects.toThrow('DB error');
     });
   });
 
@@ -388,9 +384,7 @@ describe('BudgetService', () => {
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.budget.update.mockRejectedValue(new Error('DB error'));
 
-      await expect(service.update(mockBudget.id, updateDto)).rejects.toThrow(
-        'DB error',
-      );
+      await expect(service.update(mockBudget.id, updateDto)).rejects.toThrow('DB error');
     });
   });
 
@@ -404,9 +398,7 @@ describe('BudgetService', () => {
       const result = await service.sendBudget(mockBudget.id);
 
       expect(result).toEqual(sentBudget);
-      expect(
-        services.notification.sendBudgetReadyNotification,
-      ).toHaveBeenCalled();
+      expect(services.notification.sendBudgetReadyNotification).toHaveBeenCalled();
     });
 
     it('TC0002 - Should send budget without phone when customer has no phone', async () => {
@@ -419,9 +411,7 @@ describe('BudgetService', () => {
       const result = await service.sendBudget(mockBudget.id);
 
       expect(result).toEqual(sentBudget);
-      expect(
-        services.notification.sendBudgetReadyNotification,
-      ).toHaveBeenCalledWith(
+      expect(services.notification.sendBudgetReadyNotification).toHaveBeenCalledWith(
         sentBudget,
         customerWithoutPhone.email,
         customerWithoutPhone.name,
@@ -446,9 +436,7 @@ describe('BudgetService', () => {
       repositories.budget.findById.mockResolvedValue(mockBudget);
       repositories.budget.updateStatus.mockRejectedValue(error);
 
-      await expect(service.sendBudget(mockBudget.id)).rejects.toThrow(
-        'DB error',
-      );
+      await expect(service.sendBudget(mockBudget.id)).rejects.toThrow('DB error');
       expect(services.errorHandler.handleError).toHaveBeenCalledWith(error);
     });
 
@@ -461,9 +449,7 @@ describe('BudgetService', () => {
       const result = await service.sendBudget(mockBudget.id);
 
       expect(result).toEqual(sentBudget);
-      expect(
-        services.notification.sendBudgetReadyNotification,
-      ).not.toHaveBeenCalled();
+      expect(services.notification.sendBudgetReadyNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -484,7 +470,7 @@ describe('BudgetService', () => {
       expect(result.status).toBe(BudgetStatus.APPROVED);
       expect(repositories.budget.updateStatus).toHaveBeenCalledWith(
         mockBudget.id,
-        BudgetStatus.APPROVED
+        BudgetStatus.APPROVED,
       );
       expect(repositories.serviceOrder.updateStatus).toHaveBeenCalled();
       expect(repositories.serviceOrder.addStatusHistory).toHaveBeenCalled();
@@ -514,10 +500,10 @@ describe('BudgetService', () => {
     });
 
     it('TC0005 - Should throw error if budget is expired', async () => {
-      const expiredBudget = { 
-        ...mockBudget, 
+      const expiredBudget = {
+        ...mockBudget,
         status: BudgetStatus.SENT,
-        validUntil: faker.date.past()
+        validUntil: faker.date.past(),
       };
       repositories.budget.findById.mockResolvedValue(expiredBudget);
 
@@ -538,7 +524,7 @@ describe('BudgetService', () => {
       expect(result.status).toBe(BudgetStatus.REJECTED);
       expect(repositories.budget.updateStatus).toHaveBeenCalledWith(
         mockBudget.id,
-        BudgetStatus.REJECTED
+        BudgetStatus.REJECTED,
       );
     });
 
@@ -911,7 +897,9 @@ describe('BudgetService', () => {
       const error = new Error('Database error');
       repositories.budget.findByServiceOrderId.mockRejectedValue(error);
 
-      await expect(service.findByServiceOrderIdWithRelations(mockServiceOrder.id)).rejects.toThrow(error);
+      await expect(service.findByServiceOrderIdWithRelations(mockServiceOrder.id)).rejects.toThrow(
+        error,
+      );
       expect(services.errorHandler.handleError).toHaveBeenCalledWith(error);
     });
   });

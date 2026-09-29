@@ -15,10 +15,12 @@ const controller = new ServiceOrderController(
   new CreateServiceOrderUseCase(repo),
   new GetServiceOrderStatusUseCase(repo),
   new ApproveBudgetUseCase(repo),
-  new ListServiceOrdersUseCase(repo)
+  new ListServiceOrdersUseCase(repo),
 );
 
-router.post('/', validateRequest(createServiceOrderSchema), (req, res) => controller.create(req, res));
+router.post('/', validateRequest(createServiceOrderSchema), (req, res) =>
+  controller.create(req, res),
+);
 router.get('/:id/status', (req, res) => controller.status(req, res));
 router.post('/:id/approve', (req, res) => controller.approve(req, res));
 router.get('/', (req, res) => controller.list(req, res));

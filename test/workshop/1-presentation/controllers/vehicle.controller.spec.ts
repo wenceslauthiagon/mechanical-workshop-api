@@ -93,9 +93,7 @@ describe('VehicleController', () => {
       const mockError = new Error('Falha ao criar veículo');
       vehicleService.create.mockRejectedValue(mockError);
 
-      await expect(
-        vehicleController.create(mockCreateVehicleDto),
-      ).rejects.toThrow(mockError);
+      await expect(vehicleController.create(mockCreateVehicleDto)).rejects.toThrow(mockError);
       expect(vehicleService.create).toHaveBeenCalledWith(mockCreateVehicleDto);
     });
 
@@ -103,9 +101,7 @@ describe('VehicleController', () => {
       const mockError = new Error('Placa já cadastrada');
       vehicleService.create.mockRejectedValue(mockError);
 
-      await expect(
-        vehicleController.create(mockCreateVehicleDto),
-      ).rejects.toThrow(mockError);
+      await expect(vehicleController.create(mockCreateVehicleDto)).rejects.toThrow(mockError);
       expect(vehicleService.create).toHaveBeenCalledWith(mockCreateVehicleDto);
     });
   });
@@ -131,9 +127,7 @@ describe('VehicleController', () => {
 
       const result = await vehicleController.findAllPaginated(paginationDto);
 
-      expect(vehicleService.findAllPaginated).toHaveBeenCalledWith(
-        paginationDto,
-      );
+      expect(vehicleService.findAllPaginated).toHaveBeenCalledWith(paginationDto);
       expect(result).toEqual(mockPaginatedResponse);
     });
 
@@ -169,9 +163,7 @@ describe('VehicleController', () => {
       const mockError = new Error('Veículo não encontrado');
       vehicleService.findById.mockRejectedValue(mockError);
 
-      await expect(vehicleController.findOne(mockVehicleId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(vehicleController.findOne(mockVehicleId)).rejects.toThrow(mockError);
       expect(vehicleService.findById).toHaveBeenCalledWith(mockVehicleId);
     });
 
@@ -180,9 +172,7 @@ describe('VehicleController', () => {
       const mockError = new Error('ID inválido');
       vehicleService.findById.mockRejectedValue(mockError);
 
-      await expect(vehicleController.findOne(invalidId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(vehicleController.findOne(invalidId)).rejects.toThrow(mockError);
       expect(vehicleService.findById).toHaveBeenCalledWith(invalidId);
     });
   });
@@ -194,9 +184,7 @@ describe('VehicleController', () => {
 
       const result = await vehicleController.findByCustomer(mockCustomerId);
 
-      expect(vehicleService.findByCustomerId).toHaveBeenCalledWith(
-        mockCustomerId,
-      );
+      expect(vehicleService.findByCustomerId).toHaveBeenCalledWith(mockCustomerId);
       expect(result).toEqual(mockVehicles);
     });
 
@@ -205,9 +193,7 @@ describe('VehicleController', () => {
 
       const result = await vehicleController.findByCustomer(mockCustomerId);
 
-      expect(vehicleService.findByCustomerId).toHaveBeenCalledWith(
-        mockCustomerId,
-      );
+      expect(vehicleService.findByCustomerId).toHaveBeenCalledWith(mockCustomerId);
       expect(result).toEqual([]);
     });
 
@@ -215,12 +201,8 @@ describe('VehicleController', () => {
       const mockError = new Error('Cliente não encontrado');
       vehicleService.findByCustomerId.mockRejectedValue(mockError);
 
-      await expect(
-        vehicleController.findByCustomer(mockCustomerId),
-      ).rejects.toThrow(mockError);
-      expect(vehicleService.findByCustomerId).toHaveBeenCalledWith(
-        mockCustomerId,
-      );
+      await expect(vehicleController.findByCustomer(mockCustomerId)).rejects.toThrow(mockError);
+      expect(vehicleService.findByCustomerId).toHaveBeenCalledWith(mockCustomerId);
     });
   });
 
@@ -230,9 +212,7 @@ describe('VehicleController', () => {
 
       const result = await vehicleController.findByPlate(mockLicensePlate);
 
-      expect(vehicleService.findByLicensePlate).toHaveBeenCalledWith(
-        mockLicensePlate,
-      );
+      expect(vehicleService.findByLicensePlate).toHaveBeenCalledWith(mockLicensePlate);
       expect(result).toEqual(mockVehicleData);
     });
 
@@ -240,12 +220,8 @@ describe('VehicleController', () => {
       const mockError = new Error('Veículo não encontrado');
       vehicleService.findByLicensePlate.mockRejectedValue(mockError);
 
-      await expect(
-        vehicleController.findByPlate(mockLicensePlate),
-      ).rejects.toThrow(mockError);
-      expect(vehicleService.findByLicensePlate).toHaveBeenCalledWith(
-        mockLicensePlate,
-      );
+      await expect(vehicleController.findByPlate(mockLicensePlate)).rejects.toThrow(mockError);
+      expect(vehicleService.findByLicensePlate).toHaveBeenCalledWith(mockLicensePlate);
     });
 
     it('TC0003 - Should handle invalid license plate format', async () => {
@@ -253,12 +229,8 @@ describe('VehicleController', () => {
       const mockError = new Error('Placa inválida');
       vehicleService.findByLicensePlate.mockRejectedValue(mockError);
 
-      await expect(vehicleController.findByPlate(invalidPlate)).rejects.toThrow(
-        mockError,
-      );
-      expect(vehicleService.findByLicensePlate).toHaveBeenCalledWith(
-        invalidPlate,
-      );
+      await expect(vehicleController.findByPlate(invalidPlate)).rejects.toThrow(mockError);
+      expect(vehicleService.findByLicensePlate).toHaveBeenCalledWith(invalidPlate);
     });
   });
 
@@ -267,15 +239,9 @@ describe('VehicleController', () => {
       const updatedVehicle = { ...mockVehicleData, ...mockUpdateVehicleDto };
       vehicleService.update.mockResolvedValue(updatedVehicle);
 
-      const result = await vehicleController.update(
-        mockVehicleId,
-        mockUpdateVehicleDto,
-      );
+      const result = await vehicleController.update(mockVehicleId, mockUpdateVehicleDto);
 
-      expect(vehicleService.update).toHaveBeenCalledWith(
-        mockVehicleId,
-        mockUpdateVehicleDto,
-      );
+      expect(vehicleService.update).toHaveBeenCalledWith(mockVehicleId, mockUpdateVehicleDto);
       expect(result).toEqual(updatedVehicle);
     });
 
@@ -283,13 +249,10 @@ describe('VehicleController', () => {
       const mockError = new Error('Veículo não encontrado');
       vehicleService.update.mockRejectedValue(mockError);
 
-      await expect(
-        vehicleController.update(mockVehicleId, mockUpdateVehicleDto),
-      ).rejects.toThrow(mockError);
-      expect(vehicleService.update).toHaveBeenCalledWith(
-        mockVehicleId,
-        mockUpdateVehicleDto,
+      await expect(vehicleController.update(mockVehicleId, mockUpdateVehicleDto)).rejects.toThrow(
+        mockError,
       );
+      expect(vehicleService.update).toHaveBeenCalledWith(mockVehicleId, mockUpdateVehicleDto);
     });
 
     it('TC0003 - Should handle duplicate license plate error during update', async () => {
@@ -300,13 +263,10 @@ describe('VehicleController', () => {
       const mockError = new Error('Placa já cadastrada');
       vehicleService.update.mockRejectedValue(mockError);
 
-      await expect(
-        vehicleController.update(mockVehicleId, updateWithPlate),
-      ).rejects.toThrow(mockError);
-      expect(vehicleService.update).toHaveBeenCalledWith(
-        mockVehicleId,
-        updateWithPlate,
+      await expect(vehicleController.update(mockVehicleId, updateWithPlate)).rejects.toThrow(
+        mockError,
       );
+      expect(vehicleService.update).toHaveBeenCalledWith(mockVehicleId, updateWithPlate);
     });
   });
 
@@ -323,21 +283,15 @@ describe('VehicleController', () => {
       const mockError = new Error('Veículo não encontrado');
       vehicleService.remove.mockRejectedValue(mockError);
 
-      await expect(vehicleController.remove(mockVehicleId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(vehicleController.remove(mockVehicleId)).rejects.toThrow(mockError);
       expect(vehicleService.remove).toHaveBeenCalledWith(mockVehicleId);
     });
 
     it('TC0003 - Should handle conflict when vehicle has service orders', async () => {
-      const mockError = new Error(
-        'Veículo possui ordens de serviço vinculadas',
-      );
+      const mockError = new Error('Veículo possui ordens de serviço vinculadas');
       vehicleService.remove.mockRejectedValue(mockError);
 
-      await expect(vehicleController.remove(mockVehicleId)).rejects.toThrow(
-        mockError,
-      );
+      await expect(vehicleController.remove(mockVehicleId)).rejects.toThrow(mockError);
       expect(vehicleService.remove).toHaveBeenCalledWith(mockVehicleId);
     });
   });
